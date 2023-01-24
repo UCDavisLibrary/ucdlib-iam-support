@@ -1,0 +1,9 @@
+version: '3'
+services:
+  app:
+    image: gcr.io/digital-ucdavis-edu/itis-iam-support-app:sandbox
+    env_file:
+      - .env
+    ports:
+      - ${HOST_PORT:-3000}:3000
+    restart: always

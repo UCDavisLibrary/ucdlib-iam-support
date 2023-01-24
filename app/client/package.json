@@ -1,0 +1,23 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "watch": "webpack --config webpack-watch.config.js --watch",
+    "create-dev-bundle": "webpack --config webpack-watch.config.js",
+    "dist": "webpack --config webpack-dist.config.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lit": "^2.6.1"
+  },
+  "devDependencies": {
+    "@ucd-lib/cork-app-build": "^0.4.2",
+    "fs-extra": "^11.1.0",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
+  }
+}

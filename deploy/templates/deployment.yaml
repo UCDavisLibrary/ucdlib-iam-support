@@ -1,0 +1,9 @@
+version: '3'
+services:
+  app:
+    image: {{APP_IMAGE_NAME}}:{{REPO_TAG}}
+    env_file:
+      - .env
+    ports:
+      - ${UCDLIB_APP_HOST_PORT:-3000}:3000
+    restart: always
