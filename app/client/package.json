@@ -12,10 +12,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@ucd-lib/cork-app-state": "^2.0.0",
+    "@ucd-lib/cork-app-utils": "^5.1.0",
+    "@ucd-lib/theme-elements": "^1.2.1",
     "lit": "^2.6.1"
   },
   "devDependencies": {
     "@ucd-lib/cork-app-build": "^0.4.2",
+    "eslint-plugin-jsdoc": "^39.6.8",
     "fs-extra": "^11.1.0",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1"

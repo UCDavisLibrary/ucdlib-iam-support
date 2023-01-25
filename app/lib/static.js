@@ -4,6 +4,9 @@ const config = require('./config');
 
 module.exports = (app) => {
   let assetsDir = path.join(__dirname, '../client/public');
+  const bundle = `
+    <script src='/js/${config.env == 'dev' ? 'dev' : 'dist'}/ucdlib-iam-support.js'></script>
+  `;
 
   spaMiddleware({
     app, 
@@ -22,7 +25,10 @@ module.exports = (app) => {
     },
     
     template : (req, res, next) => {
-      next({title: config.title});
+      next({
+        title: config.title,
+        bundle
+      });
     }
   });
 

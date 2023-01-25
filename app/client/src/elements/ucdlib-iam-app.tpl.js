@@ -1,17 +1,9 @@
-import { html, css } from 'lit';
-
-export function styles() {
-  const elementStyles = css`
-    :host {
-      display: block;
-    }
-  `;
-
-  return [elementStyles];
-}
+import { html } from 'lit';
 
 export function render() { 
 return html`
-  <p>I am the main application</p>
+<ucdlib-pages selected=${this.page}>
+  <div id='loading'>hello there</div>
+</ucdlib-pages>
 
 `;}

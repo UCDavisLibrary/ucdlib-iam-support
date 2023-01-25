@@ -8,14 +8,24 @@ COPY package.json package.json
 COPY package-lock.json package-lock.json
 RUN npm install
 
+# client dependencies
+COPY client/package.json client/package.json
+COPY client/package-lock.json client/package-lock.json
+RUN cd client && npm install
+
 # client code
 COPY client/src client/src
 COPY client/public/index.html client/public/index.html
+COPY client/build-config.js client/build-config.js
+COPY client/webpack-dist.config.js client/webpack-dist.config.js
 
 # server code
 COPY index.js js
 COPY api api
 COPY lib lib
+
+# client build
+RUN cd client && npm run dist
 
 # build tags
 ARG APP_VERSION

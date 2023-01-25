@@ -1,21 +1,47 @@
 import { LitElement } from 'lit';
-import {render, styles} from "./ucdlib-iam-app.tpl.js";
+import {render} from "./ucdlib-iam-app.tpl.js";
 
-export default class UcdlibIamApp extends LitElement {
+// global event bus and model registry
+import "@ucd-lib/cork-app-utils";
+import "../models";
+
+/**
+ * @description The main custom element
+ * Handles application-level stuff, such as routing.
+ */
+export default class UcdlibIamApp extends window.Mixin(LitElement)
+  .with(window.LitCorkUtils) {
 
   static get properties() {
     return {
-      
-    }
-  }
-
-  static get styles() {
-    return styles();
+      page: {type: String}
+    };
   }
 
   constructor() {
     super();
     this.render = render.bind(this);
+    this.page = 'loading';
+    this._injectModel('AppStateModel');
+  }
+  
+
+  /**
+   * @description Disables the shadowdom
+   * @returns 
+   */
+  createRenderRoot() {
+    return this;
+  }
+
+  /**
+   * @method _onAppStateUpdate
+   * @description bound to AppStateModel app-state-update event
+   *
+   * @param {Object} e
+   */
+  async _onAppStateUpdate(e) {
+    console.log(e);
   }
 
 }

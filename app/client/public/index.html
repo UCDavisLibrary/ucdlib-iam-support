@@ -1,14 +1,19 @@
 <!doctype html>
 <html>
   <head>
-    <!-- template variable -->
     <title>{{title}}</title>
+    <link rel="icon" href="img/site-icon.png">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=no">
+    <meta name="robots" content="noindex, nofollow">
 
     {{config}}
+    <script src="https://brand.library.ucdavis.edu/ui/loader.js?flags=ignorePolyfills"></script>
+    {{bundle}}
   </head>
 
   <body>
-    <p>identity management is cool.</p>
+    <ucdlib-iam-app>
+
+    </ucdlib-iam-app>
   </body>
 </html>
