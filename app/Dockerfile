@@ -1,4 +1,5 @@
-FROM node:18
+ARG NODEJS_BASE
+FROM ${NODEJS_BASE}
 
 RUN mkdir /app
 WORKDIR /app
@@ -7,6 +8,7 @@ WORKDIR /app
 COPY package.json package.json
 COPY package-lock.json package-lock.json
 RUN npm install
+RUN npm link @ucd-lib/iam-support-lib
 
 # client dependencies
 COPY client/package.json client/package.json
@@ -20,7 +22,7 @@ COPY client/build-config.js client/build-config.js
 COPY client/webpack-dist.config.js client/webpack-dist.config.js
 
 # server code
-COPY index.js js
+COPY index.js .
 COPY api api
 COPY lib lib
 

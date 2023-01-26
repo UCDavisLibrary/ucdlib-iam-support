@@ -15,11 +15,18 @@ if [[ -z $CLOUD_BUILD ]]; then
   export DOCKER_BUILDKIT=1
 fi
 
-##
+# shared js code
+NODEJS_BASE=$LIB_IMAGE_NAME_TAG
+docker build \
+  -t $NODEJS_BASE \
+  --build-arg BUILDKIT_INLINE_CACHE=1 \
+  --cache-from=$LIB_IMAGE_NAME:$CONTAINER_CACHE_TAG \
+  $LIB_DIR
+
 # Application
-##
 docker build \
   -t $APP_IMAGE_NAME_TAG \
+  --build-arg NODEJS_BASE=${NODEJS_BASE} \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
   --cache-from=$APP_IMAGE_NAME:$CONTAINER_CACHE_TAG \
   --build-arg BUILD_NUM=${BUILD_NUM} \

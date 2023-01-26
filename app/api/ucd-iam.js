@@ -1,7 +1,14 @@
+const config = require('../lib/config.js');
 module.exports = (app) => {
 
+  app.get('/api/ucd-iam/people/search', async (req, res) => {
+    res.json({ 'hi': 'jere' }); 
+  });
+
   app.get('/api/ucd-iam/*', async (req, res) => {
-    res.json({ api: true });
+    const { ExampleModel } = await import('@ucd-lib/iam-support-lib/index.js');
+    ExampleModel.test();
+    res.json({ api: true, hi: 'there' });
     /**
     let url = process.env.IAM_BASE_URL + "/";
     if ( req.params[0] ){
@@ -26,4 +33,5 @@ module.exports = (app) => {
     res.send(JSON.stringify(data));
     */
   });
+
 }

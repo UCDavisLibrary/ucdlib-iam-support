@@ -9,5 +9,8 @@ services:
     environment:
       UCDLIB_APP_ENV: ${UCDLIB_APP_ENV:-dev}
     volumes:
-      - ../../app:/app
+      - ../../app/api:/app/api
+      - ../../app/client:/app/client
+      - ../../app/lib:/app/lib
+      - ../../lib:/iam-support-lib
     # command: bash -c "tail -f /dev/null"

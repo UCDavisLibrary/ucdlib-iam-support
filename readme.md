@@ -9,10 +9,15 @@ This is a monorepo that contains applications and utilities for managing the [IA
 
 ### Environmental Variables
 
+Most relevant env variables:
+
 | Name | Notes |
 | ---- | ----- |
 | `UCDLIB_APP_HOST_PORT` | |
 | `UCDLIB_APP_ENV` | 'prod' or 'dev'. By default, local development starts with 'dev' |
+| `UCD_IAM_API_KEY` | required for much functionality |
+
+For a complete list, see `config.js`.
 
 ### Local Development
 

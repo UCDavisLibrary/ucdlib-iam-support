@@ -1,0 +1,16 @@
+{
+  "name": "@ucd-lib/iam-support-lib",
+  "version": "1.0.0",
+  "description": "Any code shared by services of this project (app, cli, etc) should be placed here.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ucd-lib/cork-app-utils": "^5.1.0"
+  }
+}
