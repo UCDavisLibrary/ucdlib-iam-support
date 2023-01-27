@@ -1,37 +1,67 @@
 const config = require('../lib/config.js');
+
+/**
+ * @description Copies status code from UcdIamModel response to current Express response
+ * @param {*} res - Express Response
+ * @param {*} apiResponse - Response from UcdIamModel
+ */
+const setErrorStatusCode = (res, apiResponse) => {
+  if ( apiResponse.response && apiResponse.response.status ){
+    res.status(apiResponse.response.status);
+  } else {
+    res.status(500);
+  }
+}
+
 module.exports = (app) => {
 
-  app.get('/api/ucd-iam/people/search', async (req, res) => {
-    res.json({ 'hi': 'jere' }); 
+  // query for a person by name
+  // returns a set of records
+  app.get('/api/ucd-iam/person/search', async (req, res) => {
+    const firstName = req.query.firstName;
+    const lastName = req.query.lastName;
+    const middleName = req.query.middleName;
+    const source = req.query.useDirectory ? 'directory' : 'official';
+    const exactMatch = req.query.exactMatch ? true : false;
+
+    // limit the number of response returned
+    const queryLimit = 10;
   });
 
-  app.get('/api/ucd-iam/*', async (req, res) => {
-    const { ExampleModel } = await import('@ucd-lib/iam-support-lib/index.js');
-    ExampleModel.test();
-    res.json({ api: true, hi: 'there' });
-    /**
-    let url = process.env.IAM_BASE_URL + "/";
-    if ( req.params[0] ){
-      url += req.params[0];
+  // query for a person by a unique identifier
+  // returns a single record if successful
+  app.get('/api/ucd-iam/person/:id', async (req, res) => {
+    const { UcdIamModel } = await import('@ucd-lib/iam-support-lib/index.js');
+    UcdIamModel.init(config.ucdIamApi);
+    const idType = req.query.idType || 'userId';
+    let response;
+
+    if ( idType == 'iamId' ){
+      response = await UcdIamModel.getPersonByIamId(req.params.id);
+    } else if( idType == 'employeeId' ){
+      response = await UcdIamModel.getPersonByEmployeeId(req.params.id);
+    } else if( idType == 'studentId' ){
+      response = await UcdIamModel.getPersonByStudentId(req.params.id);
+    } else if( idType == 'email' ){
+      response = await UcdIamModel.getPersonByEmail(req.params.id);
+    } else {
+      response = await UcdIamModel.getPersonByUserId(req.params.id);
     }
-    let query = new URLSearchParams({
-      v: '1.0',
-      key: process.env.IAM_KEY,
-      ...req.query
-    });
-    let status = 502;
-    let data = {responseDetails: 'An unknown error has occurred'};
-    try {
-      const response = await fetch(`${url}?${query.toString()}`);
-      status = response.status;
-      data = await response.json();
-    } catch (error) {
-      
+
+    if ( response.error ){
+      setErrorStatusCode(res, response);
+    } else if ( 
+      UcdIamModel.getPersonSearchEndpoint(idType).id === 'people' &&
+      response.iamId
+       ) {
+      // do a second query to the better 'profile' endpoint
+      response = await UcdIamModel.getPersonByIamId(response.iamId)
+      if ( response.error ){
+        setErrorStatusCode(res, response);
+      }
     }
-  
-    res.status(status);
-    res.send(JSON.stringify(data));
-    */
+    res.json(response);
+    
   });
 
 }
