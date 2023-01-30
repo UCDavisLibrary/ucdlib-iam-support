@@ -18,14 +18,25 @@ module.exports = (app) => {
   // query for a person by name
   // returns a set of records
   app.get('/api/ucd-iam/person/search', async (req, res) => {
+    const { UcdIamModel } = await import('@ucd-lib/iam-support-lib/index.js');
+    UcdIamModel.init(config.ucdIamApi);
+
     const firstName = req.query.firstName;
     const lastName = req.query.lastName;
     const middleName = req.query.middleName;
-    const source = req.query.useDirectory ? 'directory' : 'official';
-    const exactMatch = req.query.exactMatch ? true : false;
+    const source = req.query.useDirectory ? true : false;
 
-    // limit the number of response returned
-    const queryLimit = 10;
+    let response = await UcdIamModel.getPersonByName(lastName, firstName, middleName, source, true);
+
+    if ( response.error ){
+      setErrorStatusCode(res, response);
+    } else if ( response.responseData && response.responseData.results ){
+      response = response.responseData.results;
+      const queryLimit = config.ucdIamApi.queryLimit;
+      if ( response.length > queryLimit ) response = response.slice(0, queryLimit);
+    }
+    res.json(response);
+    
   });
 
   // query for a person by a unique identifier
@@ -51,6 +62,7 @@ module.exports = (app) => {
     if ( response.error ){
       setErrorStatusCode(res, response);
     } else if ( 
+      UcdIamModel.getPersonSearchEndpoint(idType) &&
       UcdIamModel.getPersonSearchEndpoint(idType).id === 'people' &&
       response.iamId
        ) {

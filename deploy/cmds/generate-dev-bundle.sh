@@ -10,5 +10,7 @@ cd $ROOT_DIR/../..
 
 source ./deploy/config.sh
 
-cd app/client/
+cd lib && npm link
+cd ../app/client/
+$NPM link @ucd-lib/iam-support-lib
 $NPM run create-dev-bundle

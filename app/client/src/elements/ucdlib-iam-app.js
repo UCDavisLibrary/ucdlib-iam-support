@@ -5,6 +5,9 @@ import {render} from "./ucdlib-iam-app.tpl.js";
 import "@ucd-lib/cork-app-utils";
 import "../models";
 
+// components
+import "./components/ucdlib-iam-search";
+
 /**
  * @description The main custom element
  * Handles application-level stuff, such as routing.

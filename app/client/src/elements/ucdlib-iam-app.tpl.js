@@ -9,5 +9,6 @@ export function render() {
   <ucdlib-pages selected=${this.page}>
     <div id='loading'>hello there</div>
   </ucdlib-pages>
+  <ucdlib-iam-search></ucdlib-iam-search>
 
 `;}
