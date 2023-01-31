@@ -26,8 +26,9 @@ export function render() {
   </ol>
   
   <ucdlib-pages selected=${this.page}>
-    <div id='loading'>hello there</div>
+    <ucdlib-iam-load id='loading'></ucdlib-iam-load>
+    <ucdlib-iam-page-onboarding id='onboarding'></ucdlib-iam-page-onboarding>
+    <ucdlib-iam-page-home id='home'></ucdlib-iam-page-home>
+    <ucdlib-iam-page-separation id='separation'></ucdlib-iam-page-separation>
   </ucdlib-pages>
-  <ucdlib-iam-search></ucdlib-iam-search>
-
 `;}

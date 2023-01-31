@@ -61,7 +61,8 @@ export function styles() {
       overflow-y: scroll;
     }
     .selected-person {
-      background-color: rgba(var(--category-brand-rgb, var(--media-link-background)), 0.1)
+      background-color: rgba(var(--category-brand-rgb, var(--media-link-background)), 0.1);
+      border: 1px solid #ffbf00;
     }
   `;
 

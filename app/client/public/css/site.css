@@ -1,3 +1,19 @@
 [hidden] {
   display: none !important;
 }
+.u-align--auto {
+  margin: 0 auto !important;
+}
+.category-brand__background-light-gold {
+  background-color: #fff9e6;
+}
+.category-brand__background-light-blue {
+  background-color: #ebf3fa;
+}
+.border--gold {
+  border-color: #ffbf00;
+}
+.border {
+  border-width: 1px;
+  border-style: solid;
+}

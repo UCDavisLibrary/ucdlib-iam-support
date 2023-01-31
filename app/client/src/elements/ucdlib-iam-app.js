@@ -5,8 +5,11 @@ import {render} from "./ucdlib-iam-app.tpl.js";
 import "@ucd-lib/cork-app-utils";
 import "../models";
 
-// components
-import "./components/ucdlib-iam-search";
+// global components
+import "./components/ucdlib-iam-load";
+
+// pages
+import bundles from "./pages/bundles";
 
 /**
  * @description The main custom element
@@ -28,6 +31,7 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
   constructor() {
     super();
     this.render = render.bind(this);
+    this.loadedPages = {};
 
     this.page = 'loading';
     this.showPageTitle = false;
@@ -54,11 +58,48 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
+
+    // dynamically load code
+    if ( !this.loadedPages[this.page] ) {
+      this.showLoadingPage();
+      this.loadedPages[e.page] = this.loadPage(e.page);
+    }
+    await this.loadedPages[e.page];
+
+    // set page attributes
     this.showPageTitle = e.title.show;
     this.pageTitle = e.title.text;
     this.showBreadcrumbs = e.breadcrumbs.show;
     this.breadcrumbs = e.breadcrumbs.breadcrumbs;
+    this.page = e.page;
     console.log(e);
+  }
+
+  /**
+   * @description Shows the loading page
+   */
+  showLoadingPage() {
+    this.page = 'loading';
+    this.showPageTitle = false;
+    this.pageTitle = '';
+    this.showBreadcrumbs = false;
+    this.breadcrumbs = [];
+  }
+
+  /**
+   * @method loadPage
+   * @description code splitting done here.  dynamic import a page based on route
+   *
+   * @param {String} page page to load
+   * 
+   * @returns {Promise}
+   */
+  loadPage(page) {
+    if( bundles.all.includes(page) ) {
+      return import(/* webpackChunkName: "pages" */ "./pages/bundles/all");
+    }
+    console.warn('No code chunk loaded for this page');
+    return false;
   }
 
 }
