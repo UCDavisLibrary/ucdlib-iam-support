@@ -12,6 +12,10 @@ import alertStyles from "@ucd-lib/theme-sass/4_component/_messaging-alert.css.js
 import breadcrumbStyles from "@ucd-lib/theme-sass/4_component/_nav-breadcrumbs.css.js";
 import mediaLinkStyles from "@ucd-lib/theme-sass/4_component/_wysiwyg-media-link.css.js";
 
+/**
+ * @description shadow styles
+ * @returns 
+ */
 export function styles() {
   const elementStyles = css`
     :host {
@@ -77,8 +81,12 @@ export function styles() {
   ];
 }
 
+/**
+ * @description Primary render function
+ * @returns {TemplateResult}
+ */
 export function render() { 
-return html`
+  return html`
   <div class='header'>
     <h2 class='heading--underline' ?hidden=${!this.widgetTitle}>${this.widgetTitle}</h2>
   </div>
@@ -130,6 +138,9 @@ return html`
                 ${person.iamId ? html`
                   <div><strong>IAM Id: </strong><span>${person.iamId}</span></div>
                 ` : html``}
+                ${person.userID ? html`
+                  <div><strong>Kerberos: </strong><span>${person.userID}</span></div>
+                ` : html``}
               </div>
             </a>
           `)}
@@ -141,6 +152,10 @@ return html`
   </ucdlib-pages>
 `;}
 
+/**
+ * @description Renders form for querying by kerberos id
+ * @returns {TemplateResult}
+ */
 export function renderUserIdForm(){
   const view = this.searchParamsByKey.userId;
   return html`
@@ -157,9 +172,13 @@ export function renderUserIdForm(){
         
       </div>
     </div>
-  `
+  `;
 }
 
+/**
+ * @description Renders form for querying by employee id
+ * @returns {TemplateResult}
+ */
 export function renderEmployeeIdForm(){
   const view = this.searchParamsByKey.employeeId;
   return html`
@@ -176,9 +195,13 @@ export function renderEmployeeIdForm(){
         </div>
       </div>
     </div>
-  `
+  `;
 }
 
+/**
+ * @description Renders form for querying by student id
+ * @returns {TemplateResult}
+ */
 export function renderStudentIdForm(){
   const view = this.searchParamsByKey.studentId;
   return html`
@@ -195,9 +218,13 @@ export function renderStudentIdForm(){
         </div>
       </div>
     </div>
-  `
+  `;
 }
 
+/**
+ * @description Renders form for querying by email
+ * @returns {TemplateResult}
+ */
 export function renderEmailForm(){
   const view = this.searchParamsByKey.email;
   return html`
@@ -213,8 +240,13 @@ export function renderEmailForm(){
         </div>
       </div>
     </div>
-  `
+  `;
 }
+
+/**
+ * @description Renders form for querying by name
+ * @returns {TemplateResult}
+ */
 export function renderNameForm(){
   const view = this.searchParamsByKey.name;
   return html`
@@ -258,5 +290,5 @@ export function renderNameForm(){
         <label for="inp-isDName">Query Online Directory</label>
       </div>
     </div>
-  `
+  `;
 }

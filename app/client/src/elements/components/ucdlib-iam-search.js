@@ -1,13 +1,15 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-search.tpl.js";
 
+/**
+ * @description Component element for querying the UC Davis IAM API
+ */
 export default class UcdlibIamSearch extends window.Mixin(LitElement)
   .with(window.LitCorkUtils) {
 
   static get properties() {
     return {
       searchParam: {type: String, attribute: 'search-param'},
-      exactSearch: {type: Boolean, attribute: 'exact-search'},
       widgetTitle: {type: String, attribute: 'widget-title'},
       hideNav: {type: Boolean, attribute: 'hide-nav'},
       hideNavOptions: {type: String, attribute: 'hide-nav-options'},
@@ -112,40 +114,63 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
     this.email = '';
   }
 
+  /**
+   * @description Lit lifecycle hook
+   * @param {Map} props - Changed properties
+   */
   willUpdate(props) {
+
+    // validates attribute for loading element with a specified search form
     if ( props.has('searchParam') ){
       if ( 
         !this.searchParam ||
         !this.searchParams.map(x => x.attribute).includes(this.searchParam)
-        ) {
-          console.warn(`${this.searchParam} is not a recognized search parameter`);
-          this.searchParam = 'name';
-        }
+      ) {
+        console.warn(`${this.searchParam} is not a recognized search parameter`);
+        this.searchParam = 'name';
+      }
     }
+
+    // determines what search methods a user can choose
     if ( props.has('hideNavOptions') || props.has('searchParams') ){
       const hideOptions = this.hideNavOptions ? this.hideNavOptions.split(' ') : [];
       this.navItems = this.searchParams.filter(p => !hideOptions.includes(p.attribute));
     }
-    this.disableSearch = this._getDisableSearch();
+
+    this._setDisableSearch();
   }
 
-  _getDisableSearch(){
+  /**
+   * @description Disables form submit if actively fetching or missing required inputs
+   * @returns {Boolean}
+   */
+  _setDisableSearch(){
     if ( this.isFetching ) return true;
     const activeForm = this.activeForm();
     for (const prop of activeForm.requiredProps) {
-      if ( this[prop] ) return false;
+      if ( this[prop] ) {
+        this.disableSearch = false;
+        return false;
+      }
     }
+    this.disableSearch = true;
     return true;
   }
 
+  /**
+   * @description Returns the 'searchParams' object for the active search form
+   * @returns {Object}
+   */
   activeForm(){
     return this.searchParams.find(({ attribute }) => attribute === this.searchParam);
   }
 
+  /**
+   * @description Attached to submit event on element form
+   * @param {*} e - Submit event
+   */
   async _onSubmit(e){
     e.preventDefault();
-    this.wasError = false;
-    this.selectedPersonId = '';
 
     const selectedParam = this.searchParams.find(({ attribute }) => attribute === this.searchParam);
     if ( selectedParam.key === 'name' ){
@@ -156,6 +181,10 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
     
   }
 
+  /**
+   * @description Attached to PersonModel SELECT_UPDATE event
+   * @param {Object} e SELECT_UPDATE event state
+   */
   _onSelectUpdate(e){
     this.wasError = false;
     if( e.state === this.PersonModel.store.STATE.LOADING ) {
@@ -169,6 +198,10 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
     }
   }
 
+  /**
+   * @description Attached to PersonModel SEARCH_UPDATE event
+   * @param {Object} e SEARCH_UPDATE event state
+   */
   _onSearchUpdate(e){
     this.wasError = false;
     if( e.state === this.PersonModel.store.STATE.LOADING ) {
@@ -192,11 +225,16 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
     }
   }
 
+  /**
+   * @description Attached to click listeners on results page
+   * @param {Number} id - IAM ID
+   * @returns 
+   */
   async _onPersonClick(id){
-    if ( this.isFetching ) return;
-    this.selectedPersonId = id;
-    this.PersonModel.getPersonById(id, 'iamId', 'select');
-
+    if ( !this.isFetching ) {
+      this.selectedPersonId = id;
+      this.PersonModel.getPersonById(id, 'iamId', 'select');
+    }
   }
 
 }
