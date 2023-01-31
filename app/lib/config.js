@@ -4,7 +4,7 @@ class AppConfig {
     
     this.env = env.UCDLIB_APP_ENV == 'dev' ? 'dev' : 'prod';
     this.version = env.APP_VERSION;
-    this.routes = ['foo', 'bar'];
+    this.routes = ['onboarding', 'separation'];
     this.title = 'UC Davis Library Identity and Access Management';
 
     this.ucdIamApi = {

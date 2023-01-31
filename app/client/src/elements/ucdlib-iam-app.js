@@ -17,14 +17,24 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
 
   static get properties() {
     return {
-      page: {type: String}
+      page: {type: String},
+      showPageTitle: {type: Boolean},
+      pageTitle: {type: String},
+      showBreadcrumbs: {type: Boolean},
+      breadcrumbs: {type: Array}
     };
   }
 
   constructor() {
     super();
     this.render = render.bind(this);
+
     this.page = 'loading';
+    this.showPageTitle = false;
+    this.pageTitle = '';
+    this.showBreadcrumbs = false;
+    this.breadcrumbs = [];
+
     this._injectModel('AppStateModel');
   }
   
@@ -44,6 +54,10 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
+    this.showPageTitle = e.title.show;
+    this.pageTitle = e.title.text;
+    this.showBreadcrumbs = e.breadcrumbs.show;
+    this.breadcrumbs = e.breadcrumbs.breadcrumbs;
     console.log(e);
   }
 

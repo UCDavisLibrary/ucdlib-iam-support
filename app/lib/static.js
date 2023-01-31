@@ -5,7 +5,8 @@ const config = require('./config');
 module.exports = (app) => {
   let assetsDir = path.join(__dirname, '../client/public');
   const bundle = `
-    <script src='/js/${config.env == 'dev' ? 'dev' : 'dist'}/ucdlib-iam-support.js'></script>
+    <link rel="stylesheet" href="/css/site.css?v=${config.version}">
+    <script src='/js/${config.env == 'dev' ? 'dev' : 'dist'}/ucdlib-iam-support.js?v=${config.version}'></script>
   `;
 
   spaMiddleware({
