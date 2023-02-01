@@ -14,6 +14,7 @@ RUN npm link @ucd-lib/iam-support-lib
 COPY client/package.json client/package.json
 COPY client/package-lock.json client/package-lock.json
 RUN cd client && npm install
+RUN cd client && npm link @ucd-lib/iam-support-lib
 
 # client code
 COPY client/src client/src

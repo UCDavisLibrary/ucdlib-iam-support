@@ -33,3 +33,14 @@ docker build \
   --build-arg BUILD_TIME=${BUILD_TIME} \
   --build-arg APP_VERSION=${APP_VERSION} \
   $APP_DIR
+
+# CLI
+docker build \
+  -t $CLI_IMAGE_NAME_TAG \
+  --build-arg NODEJS_BASE=${NODEJS_BASE} \
+  --build-arg BUILDKIT_INLINE_CACHE=1 \
+  --cache-from=$CLI_IMAGE_NAME:$CONTAINER_CACHE_TAG \
+  --build-arg BUILD_NUM=${BUILD_NUM} \
+  --build-arg BUILD_TIME=${BUILD_TIME} \
+  --build-arg APP_VERSION=${APP_VERSION} \
+  $CLI_DIR

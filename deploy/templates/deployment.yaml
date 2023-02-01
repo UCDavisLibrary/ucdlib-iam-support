@@ -7,3 +7,8 @@ services:
     ports:
       - ${UCDLIB_APP_HOST_PORT:-3000}:3000
     restart: always
+  cli:
+    image: {{CLI_IMAGE_NAME}}:{{REPO_TAG}}
+    env_file:
+      - .env
+    restart: always

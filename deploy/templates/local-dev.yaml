@@ -14,3 +14,11 @@ services:
       - ../../app/lib:/app/lib
       - ../../lib:/iam-support-lib
     # command: bash -c "tail -f /dev/null"
+  cli:
+    image: {{CLI_IMAGE_NAME}}:{{REPO_TAG}}
+    env_file:
+      - .env
+    environment:
+      UCDLIB_APP_ENV: ${UCDLIB_APP_ENV:-dev}
+    volumes:
+      - ../../cli/bin:/cli/bin

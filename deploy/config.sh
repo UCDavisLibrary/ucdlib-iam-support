@@ -24,6 +24,7 @@ DEPLOY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ROOT_DIR="$( cd $DEPLOY_DIR/.. && pwd )"
 APP_DIR=$ROOT_DIR/app
 LIB_DIR=$ROOT_DIR/lib
+CLI_DIR=$ROOT_DIR/cli
 
 ##
 # Container
