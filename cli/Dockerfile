@@ -11,6 +11,10 @@ RUN npm install
 RUN npm link @ucd-lib/iam-support-lib
 
 COPY bin bin
+COPY lib lib
+
+# make available as global cli command
+RUN npm link
 
 # build tags
 ARG APP_VERSION

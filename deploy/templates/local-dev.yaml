@@ -22,3 +22,5 @@ services:
       UCDLIB_APP_ENV: ${UCDLIB_APP_ENV:-dev}
     volumes:
       - ../../cli/bin:/cli/bin
+      - ../../cli/lib:/cli/lib
+      - ../../lib:/iam-support-lib
