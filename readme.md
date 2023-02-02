@@ -1,9 +1,17 @@
 # Identity and Access Management (IAM) Support
 This is a monorepo that contains applications and utilities for managing the [IAM system](https://github.com/UCDavisLibrary/keycloak-deployment) at the UC Davis Library.
 
+Technical documentation can be found in this [Google Doc](https://docs.google.com/document/d/129KuqatZVwj7Fl_am4E3eTJgq6Fj1MNjo66MbI5mMok/edit?usp=sharing).
+
 ## Application
+The application (in `/app`) is designed to be used by 
+1. HR for initiating onboarding and separation processes
+2. Supervisors to request access to systems for their employees when onboarded.
+
+The application does not assign permissions, but creates, routes, and tracks system provisioning tickets via the [Request Tracker (RT)](https://rt.lib.ucdavis.edu/) API. 
 
 ## CLI
+The command line interface (in `/cli`) is designed to be used by ITIS to perform adminstrative actions, such as loading a user into Keycloak and assigning permissions.
 
 ## Deployment
 
