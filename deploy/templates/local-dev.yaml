@@ -13,7 +13,7 @@ services:
       - ../../app/client:/app/client
       - ../../app/lib:/app/lib
       - ../../lib:/iam-support-lib
-    # command: bash -c "tail -f /dev/null"
+    command: bash -c "tail -f /dev/null"
   cli:
     image: {{CLI_IMAGE_NAME}}:{{REPO_TAG}}
     env_file:
@@ -24,3 +24,17 @@ services:
       - ../../cli/bin:/cli/bin
       - ../../cli/lib:/cli/lib
       - ../../lib:/iam-support-lib
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: localhost
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ../../deploy/utils/db-entrypoint:/docker-entrypoint-initdb.d
+
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+volumes:
+  db-data:

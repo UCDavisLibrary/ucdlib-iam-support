@@ -39,7 +39,13 @@ class AppStateModelImpl extends AppStateModel {
       !update.location.path[0]
     ) {
       update.page = this.defaultPage;
-    } else {
+    } else if(
+      update.location.path[0] == 'onboarding' &&
+      update.location.path.length > 1 &&
+      update.location.path[1] == 'new'
+    ) {
+      update.page = 'onboarding-new';
+    }else {
       update.page = update.location.path[0];
     }
 
@@ -60,6 +66,9 @@ class AppStateModelImpl extends AppStateModel {
     } else if ( update.page === 'separation' ){
       title.show = true;
       title.text = 'Separation';
+    } else if ( update.page === 'onboarding-new' ){
+      title.show = true;
+      title.text = 'New Onboarding Request';
     }
 
     update.title = title;
@@ -76,9 +85,12 @@ class AppStateModelImpl extends AppStateModel {
       breadcrumbs: [homeCrumb]
     };
 
-    if ( update.page === 'onboarding' ){
+    if ( update.page === 'onboarding' || update.page === 'onboarding-new'){
       breadcrumbs.show = true;
-      breadcrumbs.breadcrumbs.push({text: 'Onboarding', link: `/${update.page}`});
+      breadcrumbs.breadcrumbs.push({text: 'Onboarding', link: `/onboarding`});
+      if ( update.page === 'onboarding-new' ) {
+        breadcrumbs.breadcrumbs.push({text: 'New Request', link: `/onboarding/new`});
+      }
     } else if ( update.page === 'separation' ){
       breadcrumbs.show = true;
       breadcrumbs.breadcrumbs.push({text: 'Separation', link: `/${update.page}`});
