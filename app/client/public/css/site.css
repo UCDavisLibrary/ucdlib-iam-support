@@ -17,3 +17,7 @@
   border-width: 1px;
   border-style: solid;
 }
+.form-single-col {
+  max-width: 500px;
+  margin: auto;
+}

@@ -64,6 +64,11 @@ export function styles() {
       background-color: rgba(var(--category-brand-rgb, var(--media-link-background)), 0.1);
       border: 1px solid #ffbf00;
     }
+    .results-label {
+      margin-top: 0;
+      margin-bottom: .5rem;
+      font-weight: 700;
+    }
   `;
 
   return [
@@ -126,6 +131,7 @@ export function render() {
       </ol>
       ${this.results.length ? html`
         <div class='results-list'>
+          <p class='results-label'>Select an Employee:</p>
           ${this.results.map(person => html`
             <a @click=${() => this._onPersonClick(person.iamId)} class="media-link link ${this.selectedPersonId == person.iamId ? 'selected-person' : ''}">
               <div class='media-link__body'>

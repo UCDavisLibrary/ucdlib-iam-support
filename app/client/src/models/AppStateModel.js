@@ -90,6 +90,14 @@ class AppStateModelImpl extends AppStateModel {
       breadcrumbs.breadcrumbs.push({text: 'Onboarding', link: `/onboarding`});
       if ( update.page === 'onboarding-new' ) {
         breadcrumbs.breadcrumbs.push({text: 'New Request', link: `/onboarding/new`});
+
+        if ( update.location.hash === 'lookup'){
+          breadcrumbs.breadcrumbs.push({text: 'Lookup Employee', link: `/onboarding/new#lookup`});
+        } else if ( update.location.hash === 'manual' ) {
+          breadcrumbs.breadcrumbs.push({text: 'Manual Entry', link: `/onboarding/new#manual`});
+        } else if ( update.location.hash === 'submission' ) {
+          breadcrumbs.breadcrumbs.push({text: 'Submission', link: `/onboarding/new#submission`});
+        }
       }
     } else if ( update.page === 'separation' ){
       breadcrumbs.show = true;

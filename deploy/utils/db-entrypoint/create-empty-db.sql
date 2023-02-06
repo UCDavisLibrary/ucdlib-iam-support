@@ -14,6 +14,7 @@ CREATE TABLE onboarding_requests (
     supervisor_id varchar(20),
     notes text,
     additional_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+    skip_supervisor boolean,
     submitted_by varchar(20),
     submitted timestamp NOT NULL DEFAULT NOW(),
     modified_by varchar(20),
@@ -24,7 +25,8 @@ CREATE TABLE onboarding_supervisor_responses (
     request_id integer REFERENCES onboarding_requests (id),
     permissions jsonb,
     notes text,
-    submitted timestamp DEFAULT NOW()
+    submitted timestamp DEFAULT NOW(),
+    submitted_by varchar(20)
 );
 CREATE TABLE separation_requests (
     id SERIAL PRIMARY KEY,
