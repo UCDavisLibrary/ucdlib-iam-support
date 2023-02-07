@@ -1,7 +1,7 @@
 CREATE TABLE status_codes (
     id SERIAL PRIMARY KEY,
     name varchar(100),
-    archived boolean
+    archived boolean NOT NULL DEFAULT FALSE
 );
 CREATE TABLE onboarding_requests (
     id SERIAL PRIMARY KEY,
@@ -14,7 +14,7 @@ CREATE TABLE onboarding_requests (
     supervisor_id varchar(20),
     notes text,
     additional_data jsonb NOT NULL DEFAULT '{}'::jsonb,
-    skip_supervisor boolean,
+    skip_supervisor boolean NOT NULL DEFAULT FALSE,
     submitted_by varchar(20),
     submitted timestamp NOT NULL DEFAULT NOW(),
     modified_by varchar(20),
@@ -48,7 +48,7 @@ CREATE TABLE employees (
     middle_name text,
     suffix text,
     supervisor_id varchar(20),
-    is_faculty boolean,
+    is_faculty boolean NOT NULL DEFAULT FALSE,
     ucd_dept_code varchar(10),
     primary_association jsonb NOT NULL DEFAULT '{}'::jsonb,
     additional_data jsonb NOT NULL DEFAULT '{}'::jsonb,
@@ -58,21 +58,23 @@ CREATE TABLE employees (
 CREATE TABLE group_types (
     id SERIAL PRIMARY KEY,
     name text,
-    part_of_org boolean,
-    archived boolean
+    part_of_org boolean  NOT NULL DEFAULT FALSE,
+    archived boolean NOT NULL DEFAULT FALSE
 );
 CREATE TABLE groups (
     id SERIAL PRIMARY KEY,
-    type integer REFERENCES group_types (id),
+    type integer NOT NULL REFERENCES group_types (id),
     name text,
+    name_short varchar(40),
     parent_id integer REFERENCES groups (id),
     site_id integer,
-    archived boolean
+    archived boolean NOT NULL DEFAULT FALSE
 );
 CREATE TABLE group_membership (
     id SERIAL PRIMARY KEY,
-    employee_id integer REFERENCES employees (id),
-    group_id integer REFERENCES groups (id)
+    employee_key integer REFERENCES employees (id),
+    group_id integer REFERENCES groups (id),
+    is_head boolean NOT NULL DEFAULT FALSE
 );
 CREATE TABLE config (
     id SERIAL PRIMARY KEY,

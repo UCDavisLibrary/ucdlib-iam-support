@@ -44,7 +44,7 @@ export function render() {
             <div class="panel panel--icon panel--icon-custom o-box panel--icon-double-decker">
               <h2 class="panel__title"><span class="panel__custom-icon fas fa-exclamation-circle"></span>Appointment</h2>
               <section>
-                <p class='double-decker'>This employee has more than one appointment. Please select their primary appointment:</p>
+                <p class='double-decker'>This employee has more than one appointment. Please select a primary appointment:</p>
                 <div class="field-container">
                   <label for="appointments">Appointment</label>
                   <select id="appointments" required @input=${(e) => this._onAppointmentSelect(e.target.value)}>
@@ -60,6 +60,10 @@ export function render() {
             <div class="panel panel--icon panel--icon-custom o-box panel--icon-quad">
               <h2 class="panel__title"><span class="panel__custom-icon fas fa-briefcase"></span>Library Position</h2>
               <section>
+                <div class="field-container">
+                  <label for="title">Position Title <abbr title="Required">*</abbr></label>
+                  <input id='title' type="text" required>
+                </div>
                 <div class="field-container">
                   <label for="start-date">Start Date <abbr title="Required">*</abbr></label>
                   <input id='start-date' type="date" required .value=${this.startDate} @input=${(e) => {this.startDate = e.target.value}}>
