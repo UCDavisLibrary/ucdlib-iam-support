@@ -8,7 +8,7 @@ export function render() {
   return html`
   <div class='l-container u-space-pb'>
     <ucdlib-pages selected=${this.page}>
-      <div id='home'>
+      <div id='obn-home'>
         <div class="priority-links">
           <div class="priority-links__item">
             <a href="#lookup" class="vertical-link vertical-link--circle category-brand--tahoe">
@@ -32,13 +32,13 @@ export function render() {
           </div>
         </div>
       </div>
-      <div id='lookup'>
+      <div id='obn-lookup'>
         <ucdlib-iam-search search-param='employee-id' class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'></ucdlib-iam-search>
       </div>
-      <div id='manual'>
+      <div id='obn-manual'>
         <p>form to enter employee info will go here</p>
       </div>
-      <div id='submission'>
+      <div id='obn-submission'>
         <form class='form-single-col' @submit=${this._onSubmit}>
           <div ?hidden=${!this.hasMultipleAppointments}>
             <div class="panel panel--icon panel--icon-custom o-box panel--icon-double-decker">
@@ -46,8 +46,8 @@ export function render() {
               <section>
                 <p class='double-decker'>This employee has more than one appointment. Please select a primary appointment:</p>
                 <div class="field-container">
-                  <label for="appointments">Appointment</label>
-                  <select id="appointments" required @input=${(e) => this._onAppointmentSelect(e.target.value)}>
+                  <label for="obn-appointments">Appointment</label>
+                  <select id="obn-appointments" required @input=${(e) => this._onAppointmentSelect(e.target.value)}>
                     ${this.appointments.map((appt, i) => html`
                       <option .value=${i}>${appt.titleDisplayName} - ${appt.apptDeptOfficialName}</option>
                     `)}
@@ -61,12 +61,12 @@ export function render() {
               <h2 class="panel__title"><span class="panel__custom-icon fas fa-briefcase"></span>Library Position</h2>
               <section>
                 <div class="field-container">
-                  <label for="title">Position Title <abbr title="Required">*</abbr></label>
-                  <input id='title' type="text" required>
+                  <label for="obn-title">Position Title <abbr title="Required">*</abbr></label>
+                  <input id='obn-title' type="text" required>
                 </div>
                 <div class="field-container">
-                  <label for="start-date">Start Date <abbr title="Required">*</abbr></label>
-                  <input id='start-date' type="date" required .value=${this.startDate} @input=${(e) => {this.startDate = e.target.value}}>
+                  <label for="obn-start-date">Start Date <abbr title="Required">*</abbr></label>
+                  <input id='obn-start-date' type="date" required .value=${this.startDate} @input=${(e) => {this.startDate = e.target.value}}>
                 </div>
               </section>
             </div>
@@ -77,6 +77,7 @@ export function render() {
               <section>
                 employee data
               </section>
+              <a class='pointer icon icon--circle-arrow-right' @click=${this.openEmployeeInfoModal} .hidden=${this.userEnteredData}>View Entire Employee Record</a>
             </div>
           </div>
           <button 
@@ -86,7 +87,9 @@ export function render() {
         </form>
       </div>
     </ucdlib-pages>
-
+    <ucdlib-iam-modal id='obn-employee-modal' dismiss-text='Close' content-title='Employee Record'>
+      ${!this.userEnteredData ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.iamRecord, null, "  ")}</pre>` : html``}
+    </ucdlib-iam-modal>
   </div>
 
 `;}

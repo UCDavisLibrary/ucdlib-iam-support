@@ -2,6 +2,7 @@ import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-onboarding-new.tpl.js";
 
 import "../components/ucdlib-iam-search";
+import "../components/ucdlib-iam-modal";
 
 /**
  * @description Displays onboarding request form
@@ -68,6 +69,11 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     return this;
   }
 
+  openEmployeeInfoModal(){
+    const ele = this.renderRoot.querySelector('#obn-employee-modal');
+    if ( ele ) ele.show();
+  }
+
   /**
    * @method _onAppStateUpdate
    * @description bound to AppStateModel app-state-update event
@@ -85,7 +91,6 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
   _onAppointmentSelect(i){
     i = parseInt(i);
     this.appointmentIndex = i;
-    console.log(i);
     const appt = this.appointments[i];
     this.startDate = appt.assocStartDate.split(' ')[0];
 
@@ -111,9 +116,9 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
   _setPage(e){
     if (e.page != this.id ) return;
     if ( ['submission', 'manual', 'lookup'].includes(e.location.hash) ){
-      this.page = e.location.hash;
+      this.page = 'obn-' + e.location.hash;
     } else {
-      this.page = 'home';
+      this.page = 'obn-home';
     }
     this._validatePage();
   }
@@ -132,7 +137,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    * @returns 
    */
   _validatePage(){
-    if ( this.page === 'submission' ){
+    if ( this.page === 'obn-submission' ){
       if ( !this.userEnteredData && (!this.iamRecord || !Object.keys(this.iamRecord).length) ){
         console.warn('missing iam record');
         this.AppStateModel.setLocation('#home');
