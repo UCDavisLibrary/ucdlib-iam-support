@@ -65,6 +65,24 @@ export function render() {
                   <input id='obn-title' type="text" required>
                 </div>
                 <div class="field-container">
+                  <label for="obn-departments">Department <abbr title="Required">*</abbr></label>
+                  <select id="obn-departments" required @input=${(e) => this.departmentId = e.target.value}>
+                    ${this.groups.filter(g => g.part_of_org).map(g => html`
+                      <option .value=${g.id}>${g.name}</option>
+                    `)}
+                  </select>
+                </div>
+                <div class="field-container">
+                  <label>Groups</label>
+                  <ucd-theme-slim-select @change=${(e) => this.groupIds = e.detail.map(g => g.value)}>
+                    <select multiple>
+                      ${this.groups.filter(g => !g.part_of_org).map(g => html`
+                        <option .value=${g.id}>${g.name}</option>
+                      `)}
+                    </select>
+                  </ucd-theme-slim-select>
+                </div>
+                <div class="field-container">
                   <label for="obn-start-date">Start Date <abbr title="Required">*</abbr></label>
                   <input id='obn-start-date' type="date" required .value=${this.startDate} @input=${(e) => {this.startDate = e.target.value}}>
                 </div>
@@ -86,6 +104,7 @@ export function render() {
           </form>
         </form>
       </div>
+      <ucdlib-iam-state id='obn-not-loaded' state=${this.state}></ucdlib-iam-state>
     </ucdlib-pages>
     <ucdlib-iam-modal id='obn-employee-modal' dismiss-text='Close' content-title='Employee Record'>
       ${!this.userEnteredData ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.iamRecord, null, "  ")}</pre>` : html``}

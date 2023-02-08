@@ -20,14 +20,20 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
       appointments: {state: true},
       appointmentIndex: {state: true},
       startDate: {state: true},
-      hasSupervisor: {state: true}
+      hasSupervisor: {state: true},
+      departmentId: {state: true},
+      groupIds: {state: true},
+      groups: {state: true},
+      state: {state: true}
     };
   }
 
   constructor() {
     super();
     this.render = render.bind(this);
+    this.page = 'obn-home';
 
+    this.state = 'loaded';
     this.iamRecord = {};
     this.userEnteredData = false;
     this.hasSupervisor = false;
@@ -35,9 +41,12 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.hasMultipleAppointments = false;
     this.appointments = [];
     this.appointmentIndex = 0;
+    this.departmentId = 0;
     this.startDate = '';
+    this.groups = [];
+    this.groupIds = [];
 
-    this._injectModel('AppStateModel', 'PersonModel');
+    this._injectModel('AppStateModel', 'PersonModel', 'GroupModel');
     this._setPage({location: this.AppStateModel.location, page: this.id});
   }
 
@@ -69,6 +78,9 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     return this;
   }
 
+  /**
+   * @description Opens the employee info modal
+   */
   openEmployeeInfoModal(){
     const ele = this.renderRoot.querySelector('#obn-employee-modal');
     if ( ele ) ele.show();
@@ -110,11 +122,28 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
   }
 
   /**
-   * @description Sets page based on location hash
+   * @description Attached to GroupModel GROUPS_FETCHED event
    * @param {Object} e 
    */
-  _setPage(e){
+  _onGroupsFetched(e){
+    if ( e.state === this.GroupModel.store.STATE.LOADED ){
+      this.groups = e.payload;
+    } else if ( e.state === this.GroupModel.store.STATE.ERROR ) {
+      console.error('Cannot display page. Groups not loaded!');
+      this.page = 'obn-not-loaded';
+      this.state = 'error';
+    }
+  }
+
+  /**
+   * @description Sets subpage based on location hash
+   * @param {Object} e 
+   */
+  async _setPage(e){
     if (e.page != this.id ) return;
+    this.page = 'obn-not-loaded';
+    await this._getRequiredPageData(e.location.hash);
+
     if ( ['submission', 'manual', 'lookup'].includes(e.location.hash) ){
       this.page = 'obn-' + e.location.hash;
     } else {
@@ -133,7 +162,20 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
   }
 
   /**
-   * @description Reroutes to home if something with the page state is wrong
+   * @description Do data retrieval required to display a subpage
+   * @param {String} hash - url hash representing the subpage
+   */
+  async _getRequiredPageData(hash){
+    const promises = [];
+    if ( hash === 'submission' ){
+      promises.push(this.GroupModel.getAll());
+    }
+    await Promise.all(promises);
+
+  }
+
+  /**
+   * @description Displays error or reroutes to home if something with the page state is wrong
    * @returns 
    */
   _validatePage(){
@@ -143,7 +185,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
         this.AppStateModel.setLocation('#home');
         return;
       }
-    }
+    } 
   }
 
 }

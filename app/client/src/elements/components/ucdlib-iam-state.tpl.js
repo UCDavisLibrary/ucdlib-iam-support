@@ -2,11 +2,17 @@ import { html, css, svg } from 'lit';
 import headingStyles from "@ucd-lib/theme-sass/1_base_html/_headings.css";
 import headingClassesStyles from "@ucd-lib/theme-sass/2_base_class/_headings.css";
 
-
+/**
+ * @description Element styles
+ * @returns 
+ */
 export function styles() {
   const elementStyles = css`
     :host {
       display: block;
+    }
+    [hidden] {
+      display: none !important;
     }
     .main {
       display: flex;
@@ -18,6 +24,11 @@ export function styles() {
     .logo {
       width: 30%;
       max-width: 150px;
+    }
+    .logo-error {
+      color: #c10230;
+    }
+    .lib-logo {
       transform: scale(2.0);
       animation-name: swell;
       animation-duration: 2.0s;
@@ -29,6 +40,9 @@ export function styles() {
 
     .text {
       margin-top: .5rem;
+    }
+    .error .text {
+      text-align: center;
     }
 
     @keyframes swell {
@@ -70,13 +84,27 @@ function renderLogo() {
   `;
 }
 
+function renderErrorLogo(){
+  return svg`
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"/></svg>
+  `;
+}
+
+/**
+ * @description main render function
+ * @returns 
+ */
 export function render() { 
-return html`
-  <div class='main'>
-    <div class='logo'>${renderLogo()}</div>
+  return html`
+  <div class='loading main' ?hidden=${this.state != 'loading'}>
+    <div class='logo lib-logo'>${renderLogo()}</div>
     <h1 class='text heading--highlight'>
       <span>Loading</span><span class="loading-dots"><span class="dot one">.</span><span class="dot two">.</span><span class="dot three">.</span></span>
     </h1>
+  </div>
+  <div class='error main' ?hidden=${this.state != 'error'}>
+    <div class='logo logo-error'>${renderErrorLogo()}</div>
+    <h1 class='text heading--highlight'>An error has occurred!</h1>
   </div>
   
 

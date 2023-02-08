@@ -6,7 +6,7 @@ import "@ucd-lib/cork-app-utils";
 import "../models";
 
 // global components
-import "./components/ucdlib-iam-load";
+import "./components/ucdlib-iam-state";
 
 // pages
 import bundles from "./pages/bundles";
