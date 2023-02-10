@@ -1,8 +1,9 @@
 import { LitElement } from 'lit';
-import {render} from "./ucdlib-iam-page-onboarding-new.tpl.js";
+import * as Templates from "./ucdlib-iam-page-onboarding-new.tpl.js";
 
 import "../components/ucdlib-iam-search";
 import "../components/ucdlib-iam-modal";
+import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform";
 
 /**
  * @description Displays onboarding request form
@@ -20,34 +21,66 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
       appointments: {state: true},
       appointmentIndex: {state: true},
       startDate: {state: true},
-      hasSupervisor: {state: true},
+      supervisor: {state: true},
+      supervisorEmail: {state: true},
       departmentId: {state: true},
+      positionTitle: {state: true},
       groupIds: {state: true},
       groups: {state: true},
-      state: {state: true}
+      isDeptHead: {state: true},
+      firstName: {state: true},
+      lastName: {state: true},
+      email: {state: true},
+      employeeId: {state: true},
+      userId: {state: true},
+      state: {state: true},
+      manualFormDisabled: {state: true},
+      skipSupervisor: {state: true},
+      notes: {state: true}
     };
   }
 
   constructor() {
     super();
-    this.render = render.bind(this);
+    this.render = Templates.render.bind(this);
+    this.renderHome = Templates.renderHome.bind(this);
+    this.renderSubmissionForm = Templates.renderSubmissionForm.bind(this);
+    this.renderEmployeeForm = Templates.renderEmployeeForm.bind(this);
+    this.renderManualEntryForm = Templates.renderManualEntryForm.bind(this);
+    
     this.page = 'obn-home';
-
     this.state = 'loaded';
-    this.iamRecord = {};
+    this.groups = [];
+    this._resetEmployeeStateProps();
+
+    this._injectModel('AppStateModel', 'PersonModel', 'GroupModel');
+    this._setPage({location: this.AppStateModel.location, page: this.id});
+  }
+
+  /**
+   * @description Resets onboarding form values
+   */
+  _resetEmployeeStateProps(){
+    this.iamRecord = new IamPersonTransform({});
     this.userEnteredData = false;
-    this.hasSupervisor = false;
+    this.supervisor = new IamPersonTransform({});
     this.hasAppointment = false;
     this.hasMultipleAppointments = false;
     this.appointments = [];
     this.appointmentIndex = 0;
     this.departmentId = 0;
     this.startDate = '';
-    this.groups = [];
     this.groupIds = [];
-
-    this._injectModel('AppStateModel', 'PersonModel', 'GroupModel');
-    this._setPage({location: this.AppStateModel.location, page: this.id});
+    this.isDeptHead = false;
+    this.positionTitle = '';
+    this.firstName = '';
+    this.lastName = '';
+    this.email = '';
+    this.employeeId = '';
+    this.userId = '';
+    this.skipSupervisor = false;
+    this.supervisorEmail = '';
+    this.notes = '';
   }
 
   /**
@@ -56,18 +89,40 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    */
   willUpdate(props){
 
-    // set state properties from iam record
-    if ( 
-      props.has('iamRecord') && 
-      this.iamRecord &&
-      Object.keys(this.iamRecord).length &&
-      !this.userEnteredData){
-      const r = this.iamRecord;
-      this.hasAppointment = r.ppsAssociations && r.ppsAssociations.length;
-      this.appointments = this.hasAppointment ? r.ppsAssociations : [];
-      this.hasMultipleAppointments = r.ppsAssociations && r.ppsAssociations.length > 1;
-      this.startDate = this.hasAppointment ? r.ppsAssociations[0].assocStartDate.split(' ')[0]: '';
+    if ( props.has('iamRecord') && !this.iamRecord.isEmpty && !this.userEnteredData ){
+      this._setStatePropertiesFromIamRecord(this.iamRecord);
     }
+    this._setManualFormDisabled(props);
+  }
+
+  /**
+   * @description - Disables manual form submission if missing certain form values
+   * @param {*} props - Changed properties
+   */
+  _setManualFormDisabled(props){
+    let needUpdate = false;
+    let canSubmit = false;
+    const employeePropsToCheck = ['firstName', 'lastName', 'email', 'employeeId', 'userId'];
+    for (const p of employeePropsToCheck) {
+      if ( props.has(p) ) {
+        needUpdate = true;
+      }
+      if ( this[p] ) canSubmit = true;
+    }
+    if ( !needUpdate && props.has('supervisor') ) needUpdate = true;
+    if ( this.supervisor.isEmpty ) canSubmit = false;
+
+    if ( needUpdate ){
+      this.manualFormDisabled = !canSubmit;
+    }
+  }
+
+  /**
+   * @description Attached to manual form submit button click
+   */
+  _onManualFormSubmit(){
+    this.userEnteredData = true;
+    this.AppStateModel.setLocation('#submission');
   }
 
   /**
@@ -87,6 +142,22 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
   }
 
   /**
+   * @description Sets state properties from IAM person record class
+   * @param {*} record 
+   */
+  _setStatePropertiesFromIamRecord(record){
+    this.hasAppointment = record.hasAppointment();
+    this.appointments = record.appointments();
+    this.hasMultipleAppointments = this.appointments.length > 1;
+    this.startDate = record.startDate();
+    this.firstName = record.firstName();
+    this.lastName = record.lastName();
+    this.email = record.email();
+    this.employeeId = record.employeeId();
+    this.userId = record.userId();
+  }
+
+  /**
    * @method _onAppStateUpdate
    * @description bound to AppStateModel app-state-update event
    *
@@ -94,6 +165,43 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    */
   async _onAppStateUpdate(e) {
     this._setPage(e);
+  }
+
+  /**
+   * @description displays error page
+   */
+  showErrorPage(){
+    this.status = 'error';
+    this.page = 'obn-not-loaded';
+  }
+
+  /**
+   * @description Attached to ucd person lookup element for employee being onboarded
+   * @param {Object} response 
+   */
+  _onEmployeeSelect(response){
+    if( response.state === this.PersonModel.store.STATE.LOADED ) {
+      this.iamRecord = new IamPersonTransform(response.payload);
+      this.userEnteredData = false;
+      this.AppStateModel.setLocation('#submission');
+    } else if (response.state === this.PersonModel.store.STATE.ERROR) {
+      console.error(response);
+      this.showErrorPage();
+    }
+  }
+
+  /**
+   * @description Attached to ucd person lookup element for employee supervisor
+   * @param {Object} response 
+   */
+  _onSupervisorSelect(response){
+    if( response.state === this.PersonModel.store.STATE.LOADED ) {
+      this.supervisor = new IamPersonTransform(response.payload);
+      this.supervisorEmail = this.supervisor.email();
+    } else if (response.state === this.PersonModel.store.STATE.ERROR) {
+      console.error(response);
+      this.showErrorPage();
+    }
   }
 
   /**
@@ -106,19 +214,6 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     const appt = this.appointments[i];
     this.startDate = appt.assocStartDate.split(' ')[0];
 
-  }
-
-  /**
-   * @description Attached to PersonModel SELECT_UPDATE event
-   * @param {Object} e SELECT_UPDATE event state
-   */
-  _onSelectUpdate(e){
-    this.wasError = false;
-    if( e.state === this.PersonModel.store.STATE.LOADED ) {
-      this.iamRecord = e.payload;
-      this.userEnteredData = false;
-      this.AppStateModel.setLocation('#submission');
-    }
   }
 
   /**
@@ -180,7 +275,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    */
   _validatePage(){
     if ( this.page === 'obn-submission' ){
-      if ( !this.userEnteredData && (!this.iamRecord || !Object.keys(this.iamRecord).length) ){
+      if ( !this.userEnteredData && this.iamRecord.isEmpty ){
         console.warn('missing iam record');
         this.AppStateModel.setLocation('#home');
         return;

@@ -72,6 +72,7 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
     this.showBreadcrumbs = e.breadcrumbs.show;
     this.breadcrumbs = e.breadcrumbs.breadcrumbs;
     this.page = e.page;
+    window.scroll(0,0);
     console.log(e);
   }
 

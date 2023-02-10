@@ -24,3 +24,10 @@
 .pointer {
   cursor: pointer;
 }
+input[disabled] {
+  background-color: #f3f0f0;
+  color: #545454;
+}
+.fw-light {
+  font-weight: 400;
+}
