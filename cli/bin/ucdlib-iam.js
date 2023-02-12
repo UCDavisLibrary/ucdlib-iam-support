@@ -7,5 +7,6 @@ program
   .name('ucdlib-iam')
   .version(config.version)
   .command('person', 'commands for interacting with people records')
+  .command('groups', 'queries the pg database and displays all groups')
 
 program.parse(process.argv);
