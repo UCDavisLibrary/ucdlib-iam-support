@@ -53,7 +53,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.groups = [];
     this._resetEmployeeStateProps();
 
-    this._injectModel('AppStateModel', 'PersonModel', 'GroupModel');
+    this._injectModel('AppStateModel', 'PersonModel', 'GroupModel', 'OnboardingModel');
     this._setPage({location: this.AppStateModel.location, page: this.id});
   }
 
@@ -62,8 +62,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    */
   _resetEmployeeStateProps(){
     this.iamRecord = new IamPersonTransform({});
-    this.userEnteredData = false;
     this.supervisor = new IamPersonTransform({});
+    this.userEnteredData = false;
     this.hasAppointment = false;
     this.hasMultipleAppointments = false;
     this.appointments = [];
@@ -253,6 +253,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    */
   _onSubmit(e){
     e.preventDefault();
+    this.OnboardingModel.newSubmission({hi: 'there'});
     console.log('submit!');
   }
 
