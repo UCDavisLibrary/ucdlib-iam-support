@@ -1,6 +1,8 @@
 CREATE TABLE status_codes (
     id SERIAL PRIMARY KEY,
-    name varchar(100),
+    name varchar(100) NOT NULL,
+    request_type text[],
+    is_open boolean NOT NULL DEFAULT TRUE,
     archived boolean NOT NULL DEFAULT FALSE
 );
 CREATE TABLE onboarding_requests (

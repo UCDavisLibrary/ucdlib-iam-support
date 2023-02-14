@@ -89,7 +89,7 @@ export function renderSubmissionForm(){
           <section>
             <div class="field-container">
               <label for="obn-title">Position Title <abbr title="Required">*</abbr></label>
-              <input id='obn-title' type="text" required>
+              <input id='obn-title' type="text" required @input=${e => this.positionTitle = e.target.value}>
             </div>
             <div class="field-container">
               <label for="obn-departments">Department <abbr title="Required">*</abbr></label>
@@ -102,7 +102,7 @@ export function renderSubmissionForm(){
             <div class="checkbox">
               <ul class="list--reset">
                 <li>
-                  <input id="obn-is-dept-head" type="checkbox" @input=${() => this.isDeptHead != this.isDeptHead} ?checked=${this.isDeptHead}>
+                  <input id="obn-is-dept-head" type="checkbox" @input=${() => this.isDeptHead = !this.isDeptHead} ?checked=${this.isDeptHead}>
                   <label for="obn-is-dept-head">Is Department Head</label>
                 </li>
               </ul>
@@ -136,7 +136,7 @@ export function renderSubmissionForm(){
         <section>
           <div class="field-container">
             <label for="obn-supervisor">Supervisor</label>
-            <input id='obn-supervisor' type="text" .value=${this.supervisor.fullName()} disabled >
+            <input id='obn-supervisor' type="text" .value=${this.supervisor.fullName} disabled >
           </div>
           <div class="checkbox">
             <ul class="list--reset">

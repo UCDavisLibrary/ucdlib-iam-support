@@ -15,3 +15,7 @@ INSERT INTO "groups" ("type", "name")
 VALUES ('2', 'Executive Council');
 INSERT INTO "groups" ("type", "name")
 VALUES ('2', 'Management Council');
+
+-- Request Statuses
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Submitted', '{"onboarding", "separation"}');

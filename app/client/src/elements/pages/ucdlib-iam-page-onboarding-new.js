@@ -146,15 +146,15 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    * @param {*} record 
    */
   _setStatePropertiesFromIamRecord(record){
-    this.hasAppointment = record.hasAppointment();
-    this.appointments = record.appointments();
+    this.hasAppointment = record.hasAppointment;
+    this.appointments = record.appointments;
     this.hasMultipleAppointments = this.appointments.length > 1;
-    this.startDate = record.startDate();
-    this.firstName = record.firstName();
-    this.lastName = record.lastName();
-    this.email = record.email();
-    this.employeeId = record.employeeId();
-    this.userId = record.userId();
+    this.startDate = record.startDate;
+    this.firstName = record.firstName;
+    this.lastName = record.lastName;
+    this.email = record.email;
+    this.employeeId = record.employeeId;
+    this.userId = record.userId;
   }
 
   /**
@@ -197,7 +197,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
   _onSupervisorSelect(response){
     if( response.state === this.PersonModel.store.STATE.LOADED ) {
       this.supervisor = new IamPersonTransform(response.payload);
-      this.supervisorEmail = this.supervisor.email();
+      this.supervisorEmail = this.supervisor.email;
     } else if (response.state === this.PersonModel.store.STATE.ERROR) {
       console.error(response);
       this.showErrorPage();
@@ -253,7 +253,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    */
   _onSubmit(e){
     e.preventDefault();
-    this.OnboardingModel.newSubmission({hi: 'there'});
+    this.OnboardingModel.newSubmission(this.payload());
     console.log('submit!');
   }
 
@@ -267,7 +267,34 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
       promises.push(this.GroupModel.getAll());
     }
     await Promise.all(promises);
+  }
 
+  /**
+   * @description Makes payload for POST call when submitting a new request
+   * @returns {Object}
+   */
+  payload(){
+    const payload = {};
+    const additionalData = {};
+    if ( this.userEnteredData ){
+
+    } else {
+      payload.iamId = this.iamRecord.id;
+    }
+
+    payload.startDate = this.startDate;
+    payload.libraryTitle = this.positionTitle;
+    payload.groupIds = [this.departmentId, ...this.groupIds];
+    payload.supervisorId = this.supervisor.id;
+    payload.notes = this.notes;
+    payload.skipSupervisor = this.skipSupervisor;
+
+    additionalData.appointmentIndex = this.appointmentIndex;
+    additionalData.isDeptHead = this.isDeptHead;
+    additionalData.employeeEmail = this.email;
+    additionalData.supervisorEmail = this.supervisorEmail;
+    payload.additionalData = additionalData;
+    return payload;
   }
 
   /**
