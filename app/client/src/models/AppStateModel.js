@@ -45,6 +45,11 @@ class AppStateModelImpl extends AppStateModel {
       update.location.path[1] == 'new'
     ) {
       update.page = 'onboarding-new';
+    } else if(
+      update.location.path[0] == 'onboarding' &&
+      update.location.path.length > 1
+    ) {
+      update.page = 'onboarding-single';
     }else {
       update.page = update.location.path[0];
     }
@@ -105,6 +110,34 @@ class AppStateModelImpl extends AppStateModel {
     }
 
     update.breadcrumbs = breadcrumbs;
+  }
+
+  /**
+   * @description Show the app's loading page
+   * @param {String} returnPage The page to set when loading is complete and showLoaded method is called
+   */
+  showLoading(returnPage){
+    if ( returnPage ) {
+      this.store.lastPage = returnPage;
+    }
+    this.store.emit('app-status-change', {status: 'loading'});
+  }
+
+  /**
+   * @description Show the app's error page
+   * @param {String} msg Error message to show
+   */
+  showError(msg=''){
+    this.store.emit('app-status-change', {status: 'error', errorMessage: msg});
+  }
+
+  /**
+   * @description Return app to a non-error/non-loading status
+   * @param {String} page - Optional. The page to show.
+   */
+  showLoaded(page){
+    page = page || this.store.lastPage;
+    this.store.emit('app-status-change', {status: 'loaded', page});
   }
 }
   

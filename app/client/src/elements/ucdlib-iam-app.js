@@ -24,7 +24,9 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
       showPageTitle: {type: Boolean},
       pageTitle: {type: String},
       showBreadcrumbs: {type: Boolean},
-      breadcrumbs: {type: Array}
+      breadcrumbs: {type: Array},
+      status: {type: String},
+      errorMessage: {type: String, attribute: 'error-message'}
     };
   }
 
@@ -61,19 +63,37 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
 
     // dynamically load code
     if ( !this.loadedPages[this.page] ) {
-      this.showLoadingPage();
+      this.AppStateModel.showLoading(e.page);
       this.loadedPages[e.page] = this.loadPage(e.page);
     }
     await this.loadedPages[e.page];
+    this.AppStateModel.showLoaded(e.page);
 
     // set page attributes
     this.showPageTitle = e.title.show;
     this.pageTitle = e.title.text;
     this.showBreadcrumbs = e.breadcrumbs.show;
     this.breadcrumbs = e.breadcrumbs.breadcrumbs;
-    this.page = e.page;
+    //this.page = e.page;
     window.scroll(0,0);
     console.log(e);
+  }
+
+  /**
+   * @method _onAppStatusChange
+   * @description Attached to AppStateModel app-status-change event
+   * Controls showing loading/error page, which are not controlled by url location changes
+   * @param {Object} status
+   */
+  _onAppStatusChange(status){
+    console.log('status change', status);
+    this.status = status.status;
+    if ( status.page ) {
+      this.page = status.page;
+    } else {
+      this.page = 'loading';
+    }
+    if (status.hasOwnProperty('errorMessage')) this.errorMessage = status.errorMessage;
   }
 
   /**
@@ -81,10 +101,7 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
    */
   showLoadingPage() {
     this.page = 'loading';
-    this.showPageTitle = false;
-    this.pageTitle = '';
-    this.showBreadcrumbs = false;
-    this.breadcrumbs = [];
+
   }
 
   /**

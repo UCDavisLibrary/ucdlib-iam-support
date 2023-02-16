@@ -14,10 +14,10 @@ export function render() {
     </ucd-theme-primary-nav>
   </ucd-theme-header>
 
-  <section .hidden=${!this.showPageTitle}>
+  <section .hidden=${this.page == 'loading' || !this.showPageTitle}>
     <h1 class="page-title">${this.pageTitle}</h1>
   </section>
-  <ol class="breadcrumbs" ?hidden=${!this.showBreadcrumbs}>
+  <ol class="breadcrumbs" ?hidden=${this.page == 'loading' || !this.showBreadcrumbs}>
     ${this.breadcrumbs.map((b, i) => html`
       <li>
       ${i == this.breadcrumbs.length - 1 ? html`<span>${b.text}</span>` : html`<a href=${b.link}>${b.text}</a>`}
@@ -26,9 +26,10 @@ export function render() {
   </ol>
   
   <ucdlib-pages selected=${this.page}>
-    <ucdlib-iam-state id='loading'></ucdlib-iam-state>
+    <ucdlib-iam-state id='loading' state=${this.status} error-message=${this.errorMessage}></ucdlib-iam-state>
     <ucdlib-iam-page-onboarding id='onboarding'></ucdlib-iam-page-onboarding>
     <ucdlib-iam-page-onboarding-new id='onboarding-new'></ucdlib-iam-page-onboarding-new>
+    <ucdlib-iam-page-onboarding-single id='onboarding-single'></ucdlib-iam-page-onboarding-single>
     <ucdlib-iam-page-home id='home'></ucdlib-iam-page-home>
     <ucdlib-iam-page-separation id='separation'></ucdlib-iam-page-separation>
   </ucdlib-pages>

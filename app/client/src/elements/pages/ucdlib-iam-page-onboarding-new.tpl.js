@@ -18,7 +18,6 @@ export function render() {
           class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
         </ucdlib-iam-search>
       </div>
-      <ucdlib-iam-state id='obn-not-loaded' state=${this.state}></ucdlib-iam-state>
     </ucdlib-pages>
     <ucdlib-iam-modal id='obn-employee-modal' dismiss-text='Close' content-title='Employee Record'>
       ${!this.userEnteredData ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.iamRecord.data, null, "  ")}</pre>` : html``}
@@ -220,6 +219,7 @@ export function renderEmployeeForm(){
       <label for="obn-last-name">Last Name</label>
       <input id='obn-last-name' type="text" .value=${this.lastName} ?disabled=${disabled} @input=${e => this.lastName = e.target.value}>
     </div>
+    <div ?hidden=${isSub} class='double-decker u-space-mt--large u-space-mb--small'>At least one of the following identifier fields is required:</div>
     <div class="field-container">
       <label for="obn-employee-id">Employee Id</label>
       <input id='obn-employee-id' type="text" .value=${this.employeeId} ?disabled=${disabled} @input=${e => this.employeeId = e.target.value}>

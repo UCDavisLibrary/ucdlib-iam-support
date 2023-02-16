@@ -33,7 +33,6 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
       email: {state: true},
       employeeId: {state: true},
       userId: {state: true},
-      state: {state: true},
       manualFormDisabled: {state: true},
       skipSupervisor: {state: true},
       notes: {state: true}
@@ -49,12 +48,11 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.renderManualEntryForm = Templates.renderManualEntryForm.bind(this);
     
     this.page = 'obn-home';
-    this.state = 'loaded';
     this.groups = [];
     this._resetEmployeeStateProps();
 
     this._injectModel('AppStateModel', 'PersonModel', 'GroupModel', 'OnboardingModel');
-    this._setPage({location: this.AppStateModel.location, page: this.id});
+    //this._setPage({location: this.AppStateModel.location, page: this.id}, false);
   }
 
   /**
@@ -97,12 +95,13 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
 
   /**
    * @description - Disables manual form submission if missing certain form values
+   * We need a supervisor, and at least one unambiguous person identifier
    * @param {*} props - Changed properties
    */
   _setManualFormDisabled(props){
     let needUpdate = false;
     let canSubmit = false;
-    const employeePropsToCheck = ['firstName', 'lastName', 'email', 'employeeId', 'userId'];
+    const employeePropsToCheck = ['email', 'employeeId', 'userId'];
     for (const p of employeePropsToCheck) {
       if ( props.has(p) ) {
         needUpdate = true;
@@ -168,14 +167,6 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
   }
 
   /**
-   * @description displays error page
-   */
-  showErrorPage(){
-    this.status = 'error';
-    this.page = 'obn-not-loaded';
-  }
-
-  /**
    * @description Attached to ucd person lookup element for employee being onboarded
    * @param {Object} response 
    */
@@ -186,7 +177,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
       this.AppStateModel.setLocation('#submission');
     } else if (response.state === this.PersonModel.store.STATE.ERROR) {
       console.error(response);
-      this.showErrorPage();
+      this.AppStateModel.showError();
     }
   }
 
@@ -200,7 +191,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
       this.supervisorEmail = this.supervisor.email;
     } else if (response.state === this.PersonModel.store.STATE.ERROR) {
       console.error(response);
-      this.showErrorPage();
+      this.AppStateModel.showError();
     }
   }
 
@@ -225,8 +216,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
       this.groups = e.payload;
     } else if ( e.state === this.GroupModel.store.STATE.ERROR ) {
       console.error('Cannot display page. Groups not loaded!');
-      this.page = 'obn-not-loaded';
-      this.state = 'error';
+      this.AppStateModel.showError('Unable to load department list.');
     }
   }
 
@@ -236,9 +226,10 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    */
   async _setPage(e){
     if (e.page != this.id ) return;
-    this.page = 'obn-not-loaded';
+  
+    this.AppStateModel.showLoading('onboarding-new');
     await this._getRequiredPageData(e.location.hash);
-
+    this.AppStateModel.showLoaded();
     if ( ['submission', 'manual', 'lookup'].includes(e.location.hash) ){
       this.page = 'obn-' + e.location.hash;
     } else {
@@ -254,7 +245,28 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
   _onSubmit(e){
     e.preventDefault();
     this.OnboardingModel.newSubmission(this.payload());
-    console.log('submit!');
+  }
+
+  /**
+   * @description Attached to Onboarding Model NEW_ONBOARDING_SUBMISSION event
+   * @param {Object} e 
+   */
+  _onNewOnboardingSubmission(e){
+    if ( e.state === this.OnboardingModel.store.STATE.LOADING ){
+      this.AppStateModel.showLoading(this.id);
+    } else if ( e.state === this.OnboardingModel.store.STATE.LOADED ){
+      this._resetEmployeeStateProps();
+      const submissionId = e.responsePayload.id;
+      this.AppStateModel.setLocation(`/onboarding/${submissionId}`);
+    } else if ( e.state === this.OnboardingModel.store.STATE.ERROR ) {
+      this._resetEmployeeStateProps();
+      console.error(e);
+      let msg = '';
+      if ( e.error.details && e.error.details.message ){
+        msg =  e.error.details.message;
+      }
+      this.AppStateModel.showError(msg);
+    }
   }
 
   /**
@@ -277,14 +289,17 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     const payload = {};
     const additionalData = {};
     if ( this.userEnteredData ){
-
+      additionalData.employeeFirstName = this.firstName;
+      additionalData.employeeLastName = this.lastName;
+      additionalData.employeeId = this.employeeId;
+      additionalData.employeeUserId = this.userId;
     } else {
       payload.iamId = this.iamRecord.id;
     }
 
     payload.startDate = this.startDate;
     payload.libraryTitle = this.positionTitle;
-    payload.groupIds = [this.departmentId, ...this.groupIds];
+    payload.groupIds = [this.departmentId, ...this.groupIds].map(g => parseInt(g));
     payload.supervisorId = this.supervisor.id;
     payload.notes = this.notes;
     payload.skipSupervisor = this.skipSupervisor;
