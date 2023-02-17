@@ -88,20 +88,20 @@ export function renderSubmissionForm(){
           <section>
             <div class="field-container">
               <label for="obn-title">Position Title <abbr title="Required">*</abbr></label>
-              <input id='obn-title' type="text" required @input=${e => this.positionTitle = e.target.value}>
+              <input id='obn-title' type="text" .value=${this.positionTitle} required @input=${e => this.positionTitle = e.target.value}>
             </div>
             <div class="field-container">
               <label for="obn-departments">Department <abbr title="Required">*</abbr></label>
-              <select id="obn-departments" required @input=${(e) => this.departmentId = e.target.value}>
-                ${this.groups.filter(g => g.part_of_org).map(g => html`
-                  <option .value=${g.id}>${g.name}</option>
+              <select id="obn-departments" required @input=${(e) => this.departmentId = e.target.value} .value=${this.departmentId}>
+                ${this.groups.filter(g => g.partOfOrg).map(g => html`
+                  <option .value=${g.id} ?selected=${this.departmentId == g.id}>${g.name}</option>
                 `)}
               </select>
             </div>
             <div class="checkbox">
               <ul class="list--reset">
                 <li>
-                  <input id="obn-is-dept-head" type="checkbox" @input=${() => this.isDeptHead = !this.isDeptHead} ?checked=${this.isDeptHead}>
+                  <input id="obn-is-dept-head" type="checkbox" @input=${() => this.isDeptHead = !this.isDeptHead} .checked=${this.isDeptHead}>
                   <label for="obn-is-dept-head">Is Department Head</label>
                 </li>
               </ul>
@@ -110,8 +110,8 @@ export function renderSubmissionForm(){
               <label>Groups</label>
               <ucd-theme-slim-select @change=${(e) => this.groupIds = e.detail.map(g => g.value)}>
                 <select multiple>
-                  ${this.groups.filter(g => !g.part_of_org).map(g => html`
-                    <option .value=${g.id}>${g.name}</option>
+                  ${this.groups.filter(g => !g.partOfOrg).map(g => html`
+                    <option .value=${g.id} ?selected=${this.groupIds.includes(`${g.id}`)}>${g.name}</option>
                   `)}
                 </select>
               </ucd-theme-slim-select>
@@ -140,7 +140,7 @@ export function renderSubmissionForm(){
           <div class="checkbox">
             <ul class="list--reset">
               <li>
-                <input id="obn-skip-supervisor" type="checkbox" @input=${() => this.skipSupervisor = !this.skipSupervisor} ?checked=${this.skipSupervisor}>
+                <input id="obn-skip-supervisor" type="checkbox" @input=${() => this.skipSupervisor = !this.skipSupervisor} .checked=${this.skipSupervisor}>
                 <label for="obn-skip-supervisor">Do not notify supervisor</label>
               </li>
             </ul>

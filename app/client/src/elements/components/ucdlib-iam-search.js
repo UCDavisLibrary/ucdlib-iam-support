@@ -88,13 +88,6 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
     this.searchParams.forEach(o => {
       this.searchParamsByKey[o.key] = o;
     });
-    this.isFetching = false;
-    this.wasError = false;
-    this.page = 'form';
-    this.hideResults = false;
-    this.results = [];
-    this.selectedPersonId = '';
-    this.selectedPersonProfile = {};
 
     this.searchParam = 'name';
     
@@ -103,15 +96,7 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
     this.hideNavOptions = '';
     this.widgetTitle = 'UC Davis Employee Search';
 
-    // user inputs
-    this.firstName = '';
-    this.lastName = '';
-    this.middleName = '';
-    this.isDName = false;
-    this.studentId = '';
-    this.employeeId = '';
-    this.userId = '';
-    this.email = '';
+    this.reset();
   }
 
   /**
@@ -163,6 +148,28 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
    */
   activeForm(){
     return this.searchParams.find(({ attribute }) => attribute === this.searchParam);
+  }
+
+  /**
+   * @description Resets element
+   */
+  reset(){
+    this.firstName = '';
+    this.lastName = '';
+    this.middleName = '';
+    this.isDName = false;
+    this.studentId = '';
+    this.employeeId = '';
+    this.userId = '';
+    this.email = '';
+
+    this.isFetching = false;
+    this.wasError = false;
+    this.page = 'form';
+    this.hideResults = false;
+    this.results = [];
+    this.selectedPersonId = '';
+    this.selectedPersonProfile = {};
   }
 
   /**

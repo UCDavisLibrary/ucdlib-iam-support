@@ -92,3 +92,9 @@ CREATE TABLE cache (
     data jsonb,
     created timestamp DEFAULT NOW()
 );
+
+-- Request Statuses
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Submitted', '{"onboarding", "separation"}');
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Awaiting Supervisor Response', '{"onboarding", "separation"}');

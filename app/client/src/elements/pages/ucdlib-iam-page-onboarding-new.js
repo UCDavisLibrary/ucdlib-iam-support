@@ -59,6 +59,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    * @description Resets onboarding form values
    */
   _resetEmployeeStateProps(){
+    console.log('reseting props');
     this.iamRecord = new IamPersonTransform({});
     this.supervisor = new IamPersonTransform({});
     this.userEnteredData = false;
@@ -208,6 +209,15 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
   }
 
   /**
+   * @description Resets the ucd-iam lookup forms
+   */
+  _resetLookupForms(){
+    this.renderRoot.querySelector('#obn-lookup ucdlib-iam-search' ).reset();
+    this.renderRoot.querySelector('#obn-manual ucdlib-iam-search' ).reset();
+    
+  }
+
+  /**
    * @description Attached to GroupModel GROUPS_FETCHED event
    * @param {Object} e 
    */
@@ -256,10 +266,12 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
       this.AppStateModel.showLoading(this.id);
     } else if ( e.state === this.OnboardingModel.store.STATE.LOADED ){
       this._resetEmployeeStateProps();
+      this._resetLookupForms();
       const submissionId = e.responsePayload.id;
       this.AppStateModel.setLocation(`/onboarding/${submissionId}`);
     } else if ( e.state === this.OnboardingModel.store.STATE.ERROR ) {
       this._resetEmployeeStateProps();
+      this._resetLookupForms();
       console.error(e);
       let msg = '';
       if ( e.error.details && e.error.details.message ){
@@ -289,8 +301,6 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     const payload = {};
     const additionalData = {};
     if ( this.userEnteredData ){
-      additionalData.employeeFirstName = this.firstName;
-      additionalData.employeeLastName = this.lastName;
       additionalData.employeeId = this.employeeId;
       additionalData.employeeUserId = this.userId;
     } else {
@@ -308,6 +318,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     additionalData.isDeptHead = this.isDeptHead;
     additionalData.employeeEmail = this.email;
     additionalData.supervisorEmail = this.supervisorEmail;
+    additionalData.employeeFirstName = this.firstName;
+    additionalData.employeeLastName = this.lastName;
     payload.additionalData = additionalData;
     return payload;
   }

@@ -172,6 +172,7 @@ export function renderUserIdForm(){
         <div class='text-input-container'>
           <input 
             @input=${(e) => this.userId = e.target.value}
+            .value=${this.userId}
             id=${'inp-'+ view.attribute} 
             type="text" 
             placeholder="Enter a UC Davis computing account...">
@@ -196,6 +197,7 @@ export function renderEmployeeIdForm(){
           <input 
             @input=${(e) => this.employeeId = e.target.value}
             id=${'inp-'+ view.attribute} 
+            .value=${this.employeeId}
             type="number" 
             pattern="[0-9]*" 
             placeholder="Enter a UC Path ID number...">
@@ -218,6 +220,7 @@ export function renderStudentIdForm(){
         <div class='text-input-container'>
           <input 
             @input=${(e) => this.studentId = e.target.value}
+            .value=${this.studentId}
             id=${'inp-'+ view.attribute} 
             type="number" 
             pattern="[0-9]*" 
@@ -241,6 +244,7 @@ export function renderEmailForm(){
         <div class='text-input-container'>
           <input 
             @input=${(e) => this.email = e.target.value}
+            .value=${this.email}
             id=${'inp-'+ view.attribute} 
             type="email" 
             placeholder="Enter an email address">
@@ -263,6 +267,7 @@ export function renderNameForm(){
         <div class='text-input-container'>
           <input 
             @input=${e => this.firstName = e.target.value}
+            .value=${this.firstName}
             id='inp-first-name' 
             type="text" 
             placeholder="Enter a first name">
@@ -273,6 +278,7 @@ export function renderNameForm(){
         <div class='text-input-container'>
           <input 
             @input=${e => this.middleName = e.target.value}
+            .value=${this.middleName}
             id='inp-middle-name' 
             type="text" 
             placeholder="Enter a middle name">
@@ -283,6 +289,7 @@ export function renderNameForm(){
         <div class='text-input-container'>
           <input 
             @input=${e => this.lastName = e.target.value}
+            .value=${this.lastName}
             id='inp-last-name' 
             type="text" 
             placeholder="Enter a last name">
@@ -293,7 +300,7 @@ export function renderNameForm(){
           @input=${() => this.isDName = !this.isDName} 
           id="inp-isDName" 
           type="checkbox" 
-          ?checked=${this.isDName}>
+          .checked=${this.isDName}>
         <label for="inp-isDName">Query Online Directory</label>
       </div>
     </div>

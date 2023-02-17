@@ -21,8 +21,8 @@ class AppStateModelImpl extends AppStateModel {
   set(update) {
     
     this.setPage(update);
-    this.setTitle(update);
-    this.setBreadcrumbs(update);
+    this.setTitle(false, update);
+    this.setBreadcrumbs(false, update);
     
     let res = super.set(update);
 
@@ -58,58 +58,66 @@ class AppStateModelImpl extends AppStateModel {
 
   /**
    * @description Sets title of page
-   * @param {Object} update 
+   * @param {Object} titleUpdate Manually set page title: {show: bool, text: str}
+   * @param {Object} update From app-state-update
    */
-  setTitle(update){
+  setTitle(titleUpdate, update){
+    if ( titleUpdate ){
+      this.store.emit('app-header-update', {title: titleUpdate});
+      return;
+    }
     const title = {
       show: false,
       text: ''
     };
     if ( update.page === 'onboarding' ){
-      title.show = true;
-      title.text = 'Onboarding';
+      title.show = this.store.pageTitles.onboarding ? true : false;
+      title.text = this.store.pageTitles.onboarding;
     } else if ( update.page === 'separation' ){
-      title.show = true;
-      title.text = 'Separation';
+      title.show = this.store.pageTitles.separation ? true : false;
+      title.text = this.store.pageTitles.separation;
     } else if ( update.page === 'onboarding-new' ){
-      title.show = true;
-      title.text = 'New Onboarding Request';
+      title.show = this.store.pageTitles.onboardingNew ? true : false;
+      title.text = this.store.pageTitles.onboardingNew;
     }
 
-    update.title = title;
+    this.store.emit('app-header-update', {title});
   }
 
   /**
-   * @description Sets breadcrumbs for route
-   * @param {Object} update 
+   * @description Sets breadcrumbs
+   * @param {Object} breadcrumbUpdate Manually set breadcrumbs: {show: bool, breadcrumbs: [{text, link}]}
+   * @param {Object} update From app-state-update
    */
-  setBreadcrumbs(update){
-    const homeCrumb = {text: 'Home', link: '/'};
+  setBreadcrumbs(breadcrumbUpdate, update){
+    if ( breadcrumbUpdate ) {
+      this.store.emit('app-header-update', {breadcrumbs: breadcrumbUpdate});
+      return;
+    }
     const breadcrumbs = {
       show: false,
-      breadcrumbs: [homeCrumb]
+      breadcrumbs: [this.store.breadcrumbs.home]
     };
 
     if ( update.page === 'onboarding' || update.page === 'onboarding-new'){
       breadcrumbs.show = true;
-      breadcrumbs.breadcrumbs.push({text: 'Onboarding', link: `/onboarding`});
+      breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboarding);
       if ( update.page === 'onboarding-new' ) {
-        breadcrumbs.breadcrumbs.push({text: 'New Request', link: `/onboarding/new`});
-
+        breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboardingNew);
         if ( update.location.hash === 'lookup'){
-          breadcrumbs.breadcrumbs.push({text: 'Lookup Employee', link: `/onboarding/new#lookup`});
+          breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboardingNewLookup);
         } else if ( update.location.hash === 'manual' ) {
-          breadcrumbs.breadcrumbs.push({text: 'Manual Entry', link: `/onboarding/new#manual`});
+          breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboardingNewManual);
         } else if ( update.location.hash === 'submission' ) {
-          breadcrumbs.breadcrumbs.push({text: 'Submission', link: `/onboarding/new#submission`});
+          breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboardingNewSubmission);
         }
       }
     } else if ( update.page === 'separation' ){
       breadcrumbs.show = true;
-      breadcrumbs.breadcrumbs.push({text: 'Separation', link: `/${update.page}`});
+      breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.separation);
     }
 
-    update.breadcrumbs = breadcrumbs;
+    this.store.emit('app-header-update', {breadcrumbs});
   }
 
   /**

@@ -33,7 +33,7 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
   constructor() {
     super();
     this.render = render.bind(this);
-    this.loadedPages = {};
+    this.loadedBundles = {};
 
     this.page = 'loading';
     this.showPageTitle = false;
@@ -61,22 +61,43 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
    */
   async _onAppStateUpdate(e) {
 
+    const bundle = this._getBundleName(e.page);
+    let bundleAlreadyLoaded = true;
+
     // dynamically load code
-    if ( !this.loadedPages[this.page] ) {
+    if ( !this.loadedBundles[bundle] ) {
+      bundleAlreadyLoaded = false;
       this.AppStateModel.showLoading(e.page);
-      this.loadedPages[e.page] = this.loadPage(e.page);
+      this.loadedBundles[bundle] = this.loadBundle(bundle);
+
     }
-    await this.loadedPages[e.page];
+    await this.loadedBundles[bundle];
     this.AppStateModel.showLoaded(e.page);
 
-    // set page attributes
-    this.showPageTitle = e.title.show;
-    this.pageTitle = e.title.text;
-    this.showBreadcrumbs = e.breadcrumbs.show;
-    this.breadcrumbs = e.breadcrumbs.breadcrumbs;
+    // requested page element might be listening to app-state-update event
+    // so need to fire again
+    if ( !bundleAlreadyLoaded ){
+      this.AppStateModel.store.emit('app-state-update', e);
+    } 
+
     //this.page = e.page;
     window.scroll(0,0);
     console.log(e);
+  }
+
+  /**
+   * @description bound to AppStateModel app-header-update event
+   * @param {Object} e 
+   */
+  _onAppHeaderUpdate(e){
+    if ( e.breadcrumbs ) {
+      this.showBreadcrumbs = e.breadcrumbs.show;
+      this.breadcrumbs = e.breadcrumbs.breadcrumbs;
+    }
+    if ( e.title ){
+      this.showPageTitle = e.title.show;
+      this.pageTitle = e.title.text;
+    }
   }
 
   /**
@@ -93,7 +114,7 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
     } else {
       this.page = 'loading';
     }
-    if (status.hasOwnProperty('errorMessage')) this.errorMessage = status.errorMessage;
+    if (Object.prototype.hasOwnProperty.call(status, 'errorMessage')) this.errorMessage = status.errorMessage;
   }
 
   /**
@@ -105,19 +126,33 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
   }
 
   /**
-   * @method loadPage
-   * @description code splitting done here.  dynamic import a page based on route
+   * @description code splitting done here
    *
-   * @param {String} page page to load
+   * @param {String} bundle bundle to load
    * 
    * @returns {Promise}
    */
-  loadPage(page) {
-    if( bundles.all.includes(page) ) {
+  loadBundle(bundle) {
+    
+    if( bundle == 'all' ) {
       return import(/* webpackChunkName: "pages" */ "./pages/bundles/all");
     }
     console.warn('No code chunk loaded for this page');
     return false;
+  }
+
+  /**
+   * @description Get name of bundle a page element is in
+   * @param {*} page 
+   * @returns {String}
+   */
+  _getBundleName(page){
+    for (const bundle in bundles) {
+      if ( bundles[bundle].includes(page) ){
+        return bundle;
+      }
+    }
+    return '';
   }
 
 }

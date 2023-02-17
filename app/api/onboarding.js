@@ -19,4 +19,23 @@ module.exports = (app) => {
     return res.json(output);
 
   });
+
+  app.get('/api/onboarding/:id', async (req, res) => {
+    const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
+    const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js')
+
+    const r = await UcdlibOnboarding.getById(req.params.id);
+    if ( r.err ) {
+      console.error(r.err);
+      res.json({error: true, message: 'Unable to retrieve onboarding request'});
+      return;
+    }
+    if ( !r.res.rows.length ){
+      console.error(r.err);
+      res.json({error: true, message: 'Request does not exist!'});
+      return;
+    }
+    return res.json(TextUtils.camelCaseObject(r.res.rows[0]));
+
+  });
   }
