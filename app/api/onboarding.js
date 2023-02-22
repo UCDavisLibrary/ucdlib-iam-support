@@ -45,7 +45,10 @@ module.exports = (app) => {
 
     const q = {
       statusId: req.query.statusId,
-      isOpen: req.query.isOpen
+      isOpen: req.query.isOpen,
+      iamId: req.query.iamId,
+      rtTicketId: req.query.rtTicketId,
+      supervisorId: req.query.supervisorId
     };
 
     const r = await UcdlibOnboarding.query(q);

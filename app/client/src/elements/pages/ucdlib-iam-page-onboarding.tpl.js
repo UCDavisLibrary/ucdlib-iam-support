@@ -18,9 +18,11 @@ export function render() {
       </a>
     </div>
     <div class="l-content">
-      <section class="brand-textbox category-brand__background u-space-mb">
-        TODO: If HR or Admin, list of active onboarding requests will go here!
-      </section>
+      <ucdlib-iam-onboarding-list
+        panel-title='Active Onboarding Requests'
+        panel-icon='fa-folder-open'
+        brand-color='arboretum'
+      ></ucdlib-iam-onboarding-list>
       <section class="brand-textbox category-brand__background category-brand--pinot">
         TODO: If supervisor, history of onboarding requests will go here!
       </section>
