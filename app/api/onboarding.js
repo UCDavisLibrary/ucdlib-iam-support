@@ -38,4 +38,23 @@ module.exports = (app) => {
     return res.json(TextUtils.camelCaseObject(r.res.rows[0]));
 
   });
+
+  app.get('/api/onboarding', async (req, res) => {
+    const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
+    const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
+
+    const q = {
+      statusId: req.query.statusId,
+      isOpen: req.query.isOpen
+    };
+
+    const r = await UcdlibOnboarding.query(q);
+    if ( r.err ) {
+      console.error(r.err);
+      res.json({error: true, message: 'Unable to retrieve onboarding requests'});
+      return;
+    }
+    const output = r.res.rows.map(x => TextUtils.camelCaseObject(x));
+    return res.json(output);
+  });
   }
