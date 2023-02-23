@@ -31,3 +31,32 @@ input[disabled] {
 .fw-light {
   font-weight: 400;
 }
+ucdlib-iam-onboarding-list .ob-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed #cce0f3;
+}
+ucdlib-iam-onboarding-list .ob-row:first-child {
+  padding-top: 0;
+}
+ucdlib-iam-onboarding-list .ob-name {
+  flex-grow: 1;
+}
+ucdlib-iam-onboarding-list .ob-status {
+  font-weight: 700;
+  color: #022851;
+  text-align: right;
+}
+@media (max-width: 600px){
+  ucdlib-iam-onboarding-list .ob-name {
+    width: 100%;
+  }
+  ucdlib-iam-onboarding-list .ob-row {
+    flex-wrap: wrap;
+  }
+}
+ucdlib-iam-onboarding-list .no-results {
+  display: flex;
+  align-items: center;
+}

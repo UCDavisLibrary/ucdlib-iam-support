@@ -223,7 +223,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    */
   _onGroupsFetched(e){
     if ( e.state === this.GroupModel.store.STATE.LOADED ){
-      this.groups = e.payload;
+      this.groups = e.payload.filter(g => !g.archived);
+      this.departmentId = this.groups.length ? this.groups[0].id : 0;
     } else if ( e.state === this.GroupModel.store.STATE.ERROR ) {
       console.error('Cannot display page. Groups not loaded!');
       this.AppStateModel.showError('Unable to load department list.');
@@ -267,8 +268,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     } else if ( e.state === this.OnboardingModel.store.STATE.LOADED ){
       this._resetEmployeeStateProps();
       this._resetLookupForms();
-      const submissionId = e.responsePayload.id;
-      this.AppStateModel.setLocation(`/onboarding/${submissionId}`);
+      this.OnboardingModel.clearQueryCache();
+      this.AppStateModel.setLocation(`/onboarding`);
     } else if ( e.state === this.OnboardingModel.store.STATE.ERROR ) {
       this._resetEmployeeStateProps();
       this._resetLookupForms();

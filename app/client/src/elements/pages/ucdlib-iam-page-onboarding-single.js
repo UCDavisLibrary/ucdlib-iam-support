@@ -50,7 +50,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       await this._setStateProperties(data.payload);
       this.AppStateModel.setTitle({show: true, text: this.pageTitle()});
       this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs: this.breadcrumbs()});
-      this.AppStateModel.showLoaded('onboarding-single');
+      this.AppStateModel.showLoaded(this.id);
     } else if ( data.state == 'error' ){
       let msg = 'Unable to display onboarding request';
       if ( data.error.details && data.error.details.message ) msg = data.error.details.message;

@@ -13,16 +13,20 @@ export function render() {
           <i class="fas fa-user-plus fa-2x"></i>
         </div>
         <div class="focal-link__body">
-          <strong>Make New Request</strong>
+          <strong>Make a New Request</strong>
         </div>
       </a>
     </div>
     <div class="l-content">
       <ucdlib-iam-onboarding-list
-        panel-title='Active Onboarding Requests'
+        id=${this.activeId}
+        panel-title='All Active Requests'
         panel-icon='fa-folder-open'
         brand-color='arboretum'
-      ></ucdlib-iam-onboarding-list>
+        open-status='open'
+        no-results-message='There are no active onboarding requests at this time.'
+      >
+    </ucdlib-iam-onboarding-list>
       <section class="brand-textbox category-brand__background category-brand--pinot">
         TODO: If supervisor, history of onboarding requests will go here!
       </section>

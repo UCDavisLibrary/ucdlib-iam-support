@@ -92,9 +92,9 @@ export function renderSubmissionForm(){
             </div>
             <div class="field-container">
               <label for="obn-departments">Department <abbr title="Required">*</abbr></label>
-              <select id="obn-departments" required @input=${(e) => this.departmentId = e.target.value} .value=${this.departmentId}>
+              <select id="obn-departments" required @input=${(e) => this.departmentId = e.target.value} .value=${this.departmentId || ''}>
                 ${this.groups.filter(g => g.partOfOrg).map(g => html`
-                  <option .value=${g.id} ?selected=${this.departmentId == g.id}>${g.name}</option>
+                  <option value=${g.id} ?selected=${this.departmentId == g.id}>${g.name}</option>
                 `)}
               </select>
             </div>

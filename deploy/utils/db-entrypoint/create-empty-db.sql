@@ -17,6 +17,7 @@ CREATE TABLE onboarding_requests (
     notes text,
     additional_data jsonb NOT NULL DEFAULT '{}'::jsonb,
     skip_supervisor boolean NOT NULL DEFAULT FALSE,
+    is_existing_employee boolean NOT NULL DEFAULT FALSE,
     submitted_by varchar(20),
     submitted timestamp NOT NULL DEFAULT NOW(),
     modified_by varchar(20),
@@ -94,7 +95,25 @@ CREATE TABLE cache (
 );
 
 -- Request Statuses
+--1
 INSERT INTO "status_codes" ("name", "request_type")
 VALUES ('Submitted', '{"onboarding", "separation"}');
+--2
 INSERT INTO "status_codes" ("name", "request_type")
 VALUES ('Awaiting Supervisor Response', '{"onboarding", "separation"}');
+--3
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Awaiting UCD IAM Record', '{"onboarding"}');
+--4
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Awaiting User ID Provisioning', '{"onboarding"}');
+--5
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Provisioning Access', '{"onboarding"}');
+--6
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Resolving', '{"onboarding", "separation"}');
+--7
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Resolved', '{"onboarding", "separation"}');
+
