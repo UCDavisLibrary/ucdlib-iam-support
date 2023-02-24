@@ -13,6 +13,7 @@ export function render() {
       <a href='/separation'>Separation</a>
     </ucd-theme-primary-nav>
   </ucd-theme-header>
+  <ucdlib-iam-alert></ucdlib-iam-alert>
 
   <section .hidden=${this.page == 'loading' || !this.showPageTitle}>
     <h1 class="page-title">${this.pageTitle}</h1>

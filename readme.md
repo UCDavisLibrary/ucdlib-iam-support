@@ -24,6 +24,7 @@ Most relevant env variables:
 | `UCDLIB_APP_HOST_PORT` | |
 | `UCDLIB_APP_ENV` | 'prod' or 'dev'. By default, local development starts with 'dev' |
 | `UCD_IAM_API_KEY` | required for much functionality |
+| `UCDLIB_RT_KEY` | Required for interacting with RT |
 
 For a complete list, see `config.js`.
 

@@ -121,6 +121,20 @@ class AppStateModelImpl extends AppStateModel {
   }
 
   /**
+   * @description Show dismissable alert banner at top of page. Will disappear on next app-state-update event
+   * @param {Object|String} options Alert message if string, config if object:
+   * {message: 'alert!'
+   * brandColor: 'double-decker'
+   * }
+   */
+  showAlertBanner(options){
+    if ( typeof options === 'string' ){
+      options = {message: options};
+    }
+    this.store.emit('alert-banner-update', options);
+  }
+
+  /**
    * @description Show the app's loading page
    * @param {String} returnPage The page to set when loading is complete and showLoaded method is called
    */

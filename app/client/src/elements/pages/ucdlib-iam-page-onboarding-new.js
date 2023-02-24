@@ -59,7 +59,6 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    * @description Resets onboarding form values
    */
   _resetEmployeeStateProps(){
-    console.log('reseting props');
     this.iamRecord = new IamPersonTransform({});
     this.supervisor = new IamPersonTransform({});
     this.userEnteredData = false;
@@ -171,9 +170,25 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    * @description Attached to ucd person lookup element for employee being onboarded
    * @param {Object} response 
    */
-  _onEmployeeSelect(response){
+  async _onEmployeeSelect(response){
     if( response.state === this.PersonModel.store.STATE.LOADED ) {
       this.iamRecord = new IamPersonTransform(response.payload);
+
+      // get supervisor(s) record
+      try {
+        this.iamRecord.allSupervisorEmployeeIds.forEach( async empId => {
+          let emp = await this.PersonModel.getPersonById(empId, 'employeeId', false);
+          emp = new IamPersonTransform(emp.payload);
+          if ( emp.employeeId == this.iamRecord.supervisorEmployeeId ){
+            this.supervisor = emp;
+            this.supervisorEmail = this.supervisor.email;
+          }
+        });
+      } catch (error) {
+        this.AppStateModel.showError('Unable to load supervisor!');
+        return;
+      }
+
       this.userEnteredData = false;
       this.AppStateModel.setLocation('#submission');
     } else if (response.state === this.PersonModel.store.STATE.ERROR) {
@@ -183,7 +198,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
   }
 
   /**
-   * @description Attached to ucd person lookup element for employee supervisor
+   * @description Attached to ucd person lookup element for employee supervisor on manual entry form
    * @param {Object} response 
    */
   _onSupervisorSelect(response){
@@ -200,12 +215,19 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    * @description attached to appointment select element
    * @param {Number} i - index of appointment in iam ppsassociations array
    */
-  _onAppointmentSelect(i){
+  async _onAppointmentSelect(i){
     i = parseInt(i);
     this.appointmentIndex = i;
     const appt = this.appointments[i];
     this.startDate = appt.assocStartDate.split(' ')[0];
 
+    // set supervisor, if different.
+    // personModel object should already be cached
+    if ( appt.reportsToEmplID ){
+      let emp = await this.PersonModel.getPersonById(appt.reportsToEmplID, 'employeeId', false);
+      this.supervisor = new IamPersonTransform(emp.payload);
+      this.supervisorEmail = this.supervisor.email;
+    }
   }
 
   /**
@@ -270,6 +292,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
       this._resetLookupForms();
       this.OnboardingModel.clearQueryCache();
       this.AppStateModel.setLocation(`/onboarding`);
+      this.AppStateModel.showAlertBanner({message: 'Onboarding request created', brandColor: 'farmers-market'});
     } else if ( e.state === this.OnboardingModel.store.STATE.ERROR ) {
       this._resetEmployeeStateProps();
       this._resetLookupForms();

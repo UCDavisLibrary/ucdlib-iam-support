@@ -28,6 +28,7 @@ class AppStateStoreImpl extends AppStateStore {
 
     this.events.APP_STATUS_CHANGE = 'app-status-change';
     this.events.APP_HEADER_UPDATE = 'app-header-update';
+    this.events.ALERT_BANNER_UPDATE = 'alert-banner-update';
   }
 }
 

@@ -7,6 +7,7 @@ import "../models";
 
 // global components
 import "./components/ucdlib-iam-state";
+import "./components/ucdlib-iam-alert";
 
 // pages
 import bundles from "./pages/bundles";
@@ -82,7 +83,6 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
 
     //this.page = e.page;
     window.scroll(0,0);
-    console.log(e);
   }
 
   /**
@@ -107,7 +107,6 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
    * @param {Object} status
    */
   _onAppStatusChange(status){
-    console.log('status change', status);
     this.status = status.status;
     if ( status.page ) {
       this.page = status.page;
