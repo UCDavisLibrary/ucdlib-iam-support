@@ -324,12 +324,9 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
   payload(){
     const payload = {};
     const additionalData = {};
-    if ( this.userEnteredData ){
-      additionalData.employeeId = this.employeeId;
-      additionalData.employeeUserId = this.userId;
-    } else {
+    if ( !this.userEnteredData && this.iamRecord.id){
       payload.iamId = this.iamRecord.id;
-    }
+    } 
 
     payload.startDate = this.startDate;
     payload.libraryTitle = this.positionTitle;
@@ -342,9 +339,14 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     additionalData.isDeptHead = this.isDeptHead;
     additionalData.employeeEmail = this.email;
     additionalData.supervisorEmail = this.supervisorEmail;
+    additionalData.supervisorFirstName = this.supervisor.firstName;
+    additionalData.supervisorLastName = this.supervisor.lastName;
     additionalData.employeeFirstName = this.firstName;
     additionalData.employeeLastName = this.lastName;
+    additionalData.employeeId = this.employeeId;
+    additionalData.employeeUserId = this.userId;
     payload.additionalData = additionalData;
+    
     return payload;
   }
 

@@ -6,6 +6,7 @@ class AppConfig {
     this.version = env.APP_VERSION;
     this.routes = ['onboarding', 'separation'];
     this.title = 'UC Davis Library Identity and Access Management';
+    this.baseUrl = env.UCDLIB_BASE_URL || 'http://localhost:3000' //update me;
 
     this.ucdIamApi = {
       key: env.UCD_IAM_API_KEY,
@@ -18,7 +19,7 @@ class AppConfig {
       key: env.UCDLIB_RT_KEY,
       forbidWrite: env.UCDLIB_RT_FORBID_WRITE || false,
       url: env.UCDLIB_RT_URL || 'https://rt.lib.ucdavis.edu',
-      queue: env.UCDLIB_RT_QUEUE || 'webdev'
+      queue: env.UCDLIB_RT_QUEUE || 'test' //update when create new queue, and set local-dev env
     }
   }
 }

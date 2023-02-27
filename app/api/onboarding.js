@@ -1,6 +1,11 @@
+const { rt } = require('../lib/config.js');
+
 module.exports = (app) => {
   app.post('/api/onboarding/new', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
+    const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
+    const { default: config } = await import('../lib/config.js');
+    const { UcdlibRt, UcdlibRtTicket } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
     const payload = req.body;
 
     // TODO: set submittedBy and modifiedBy properties
@@ -14,8 +19,45 @@ module.exports = (app) => {
     }
     const output = r.res.rows[0];
 
-    // create rt
-    // update submission if successful, delete if not
+    // create rt ticket
+    const ad = payload.additionalData || {};
+    let department =  await UcdlibGroups.getDepartmentsById(payload.groupIds || []);
+    department = department.res && department.res.rows.length ? department.res.rows[0].name : '';
+    const employeeName = `${ad.employeeLastName}, ${ad.employeeFirstName}`;
+    const rtClient = new UcdlibRt(config.rt);
+    const ticket = new UcdlibRtTicket();
+
+    ticket.addContent();
+    ticket.addContent(`<h4>Employee</h4>`);
+    ticket.addContent({
+      'Name': employeeName,
+      'Email': ad.employeeEmail || '????',
+      'Employee Id': ad.employeeId || '????',
+      'User Id (kerberos)': ad.employeeUserId || '????',
+      'UCD IAM ID': payload.iamId
+    }, false);
+    ticket.addContent(`<h4>Position</h4>`);
+    ticket.addContent({
+      'Title': payload.libraryTitle,
+      'Department': department,
+      'Start Date': payload.startDate,
+      'Supervisor': `${ad.supervisorLastName}, ${ad.supervisorFirstName}`
+    }, false);
+    if ( payload.notes ){
+      ticket.addContent(`<h4>Notes</h4>`);
+      ticket.addContent(payload.notes);
+    }
+    ticket.addContent(`<a href='${config.baseUrl}/onboarding/${output.id}'>View entire onboarding record.</a>`)
+
+    ticket.addSubject(`Onboarding: ${employeeName}`);
+    const rtResponse = await rtClient.createTicket(ticket);
+    if ( rtResponse.err || !rtResponse.res.id )  {
+      console.error(rtResponse);
+      await UcdlibOnboarding.delete(output.id);
+      res.json({error: true, message: 'Unable to create an RT ticket for this request.'});
+      return;
+    }
+    await UcdlibOnboarding.update(output.id, {rtTicketId: rtResponse.res.id});
     return res.json(output);
 
   });
@@ -63,7 +105,7 @@ module.exports = (app) => {
     }
     let groups = await UcdlibGroups.getAll();
     if ( groups.err ){
-      console.error(r.err);
+      console.error(groups.err);
       res.json({error: true, message: errorMsg});
       return;
     }
