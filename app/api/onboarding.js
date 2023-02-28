@@ -19,14 +19,24 @@ module.exports = (app) => {
     }
     const output = r.res.rows[0];
 
-    // create rt ticket
+    // needed variables
     const ad = payload.additionalData || {};
+    const notifySupervisor = ad.supervisorEmail && !ad.skipSupervisor;
     let department =  await UcdlibGroups.getDepartmentsById(payload.groupIds || []);
     department = department.res && department.res.rows.length ? department.res.rows[0].name : '';
     const employeeName = `${ad.employeeLastName}, ${ad.employeeFirstName}`;
+
+    // create rt ticket
     const rtClient = new UcdlibRt(config.rt);
     const ticket = new UcdlibRtTicket();
 
+    ticket.addSubject(`Onboarding: ${employeeName}`);
+
+    // TODO: uncomment when closer to release
+    // if ( notifySupervisor ) ticket.addCc( ad.supervisorEmail );
+    // if ( ad.employeeEmail ) ticket.addCc( ad.employeeEmail );
+
+    // ticket content
     ticket.addContent();
     ticket.addContent(`<h4>Employee</h4>`);
     ticket.addContent({
@@ -34,7 +44,7 @@ module.exports = (app) => {
       'Email': ad.employeeEmail || '????',
       'Employee Id': ad.employeeId || '????',
       'User Id (kerberos)': ad.employeeUserId || '????',
-      'UCD IAM ID': payload.iamId
+      'UCD IAM ID': payload.iamId || '????'
     }, false);
     ticket.addContent(`<h4>Position</h4>`);
     ticket.addContent({
@@ -45,11 +55,12 @@ module.exports = (app) => {
     }, false);
     if ( payload.notes ){
       ticket.addContent(`<h4>Notes</h4>`);
-      ticket.addContent(payload.notes);
+      ticket.addContent(payload.notes, false);
     }
+    ticket.addContent('');
     ticket.addContent(`<a href='${config.baseUrl}/onboarding/${output.id}'>View entire onboarding record.</a>`)
 
-    ticket.addSubject(`Onboarding: ${employeeName}`);
+    // send ticket to RT for creation
     const rtResponse = await rtClient.createTicket(ticket);
     if ( rtResponse.err || !rtResponse.res.id )  {
       console.error(rtResponse);
@@ -57,6 +68,27 @@ module.exports = (app) => {
       res.json({error: true, message: 'Unable to create an RT ticket for this request.'});
       return;
     }
+
+    // send correspondence to supervisor
+    if ( notifySupervisor ){
+      const supervisorName = ad.supervisorFirstName && ad.supervisorLastName ? `${ad.supervisorFirstName} ${ad.supervisorLastName}` : 'Supervisor';
+      const supervisorLink = `${config.baseUrl}/permissions/${output.id}`;
+      const reply = ticket.createReply();
+      reply.addSubject(`Supervisor Action Required!`);
+      reply.addContent(`Hi ${supervisorName},`);
+      reply.addContent('');
+      reply.addContent(`To proceed with your employee's onboarding, please describe the accounts and permissions required to perform their essential job duties using the following form:`);
+      reply.addContent('');
+      reply.addContent(`<a href='${supervisorLink}'>${supervisorLink}</a>`);
+      const replyResponse = await rtClient.sendCorrespondence(reply);
+      if ( replyResponse.err )  {
+        console.error(rtResponse);
+        await UcdlibOnboarding.delete(output.id);
+        res.json({error: true, message: 'Unable to send RT request to supervisor.'});
+        return;
+      }
+    }
+
     await UcdlibOnboarding.update(output.id, {rtTicketId: rtResponse.res.id});
     return res.json(output);
 
