@@ -12,6 +12,7 @@ services:
       UCDLIB_APP_ENV: ${UCDLIB_APP_ENV:-dev}
       UCDLIB_RT_QUEUE: ${UCDLIB_RT_QUEUE:-test}
       UCDLIB_BASE_URL: ${UCDLIB_BASE_URL:-http://localhost:3000}
+      UCDLIB_RT_FORBID_WRITE: ${UCDLIB_RT_FORBID_WRITE:-true}
       PGUSER: 'postgres'
       PGHOST: 'db'
       PGDATABASE: 'postgres'

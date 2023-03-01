@@ -21,7 +21,8 @@ module.exports = (app) => {
 
     getConfig : async (req, res, next) => {
       next({
-        appRoutes : config.routes
+        appRoutes : config.routes,
+        keycloak: config.keycloak
       });
     },
     

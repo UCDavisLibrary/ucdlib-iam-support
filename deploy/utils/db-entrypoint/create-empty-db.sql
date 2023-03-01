@@ -25,10 +25,11 @@ CREATE TABLE onboarding_requests (
 );
 CREATE TABLE onboarding_supervisor_responses (
     id SERIAL PRIMARY KEY,
-    request_id integer REFERENCES onboarding_requests (id),
-    permissions jsonb,
+    request_id integer NOT NULL REFERENCES onboarding_requests (id),
+    revision integer NOT NULL DEFAULT 0, 
+    permissions jsonb NOT NULL DEFAULT '{}'::jsonb,,
     notes text,
-    submitted timestamp DEFAULT NOW(),
+    submitted timestamp NOT NULL DEFAULT NOW(),
     submitted_by varchar(20)
 );
 CREATE TABLE separation_requests (

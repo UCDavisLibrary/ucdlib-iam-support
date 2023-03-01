@@ -1,4 +1,4 @@
-const {AppStateStore} = require('@ucd-lib/cork-app-state');
+import { AppStateStore } from "@ucd-lib/cork-app-state";
 
 /**
  * @description Implementation of AppStateStore
@@ -26,10 +26,13 @@ class AppStateStoreImpl extends AppStateStore {
       onboardingNew: 'New Onboarding Request'
     };
 
+    this.userProfile = {};
+
     this.events.APP_STATUS_CHANGE = 'app-status-change';
     this.events.APP_HEADER_UPDATE = 'app-header-update';
     this.events.ALERT_BANNER_UPDATE = 'alert-banner-update';
   }
 }
 
-module.exports = new AppStateStoreImpl();
+const store = new AppStateStoreImpl();
+export default store;

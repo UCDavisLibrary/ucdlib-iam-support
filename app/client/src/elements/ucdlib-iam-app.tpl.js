@@ -7,7 +7,9 @@ import { html } from 'lit';
 export function render() { 
   return html`
   <ucd-theme-header>
-    <ucdlib-branding-bar slogan='Identity and Access Management'></ucdlib-branding-bar>
+    <ucdlib-branding-bar slogan='Identity and Access Management'>
+      <a href='/logout'>Logout</a>
+    </ucdlib-branding-bar>
     <ucd-theme-primary-nav>
       <a href='/onboarding'>Onboarding</a>
       <a href='/separation'>Separation</a>

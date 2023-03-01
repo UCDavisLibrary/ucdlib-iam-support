@@ -1,5 +1,6 @@
-const {AppStateModel} = require('@ucd-lib/cork-app-state');
-const AppStateStore = require('../stores/AppStateStore');
+import {AppStateModel} from '@ucd-lib/cork-app-state';
+import AppStateStore from '../stores/AppStateStore';
+import Keycloak from 'keycloak-js';
 
 /**
  * @description Model for handling generic app state, such as routing
@@ -18,7 +19,13 @@ class AppStateModelImpl extends AppStateModel {
    * @param {Object} update - Route state - Returned in AppStateUpdate
    * @returns 
    */
-  set(update) {
+  async set(update) {
+    if ( !window.Keycloak ){
+      await this.initKeycloak();
+    }
+    if ( update.location.path.length && update.location.path[0] == 'logout' ){
+      this.logout();
+    }
     
     this.setPage(update);
     this.setTitle(false, update);
@@ -161,7 +168,60 @@ class AppStateModelImpl extends AppStateModel {
     page = page || this.store.lastPage;
     this.store.emit('app-status-change', {status: 'loaded', page});
   }
+
+  /**
+   * @description Initialize auth
+   */
+  async initKeycloak(){
+    window.Keycloak = new Keycloak({...window.APP_CONFIG.keycloak, checkLoginIframe: true});
+    const kc = window.Keycloak;
+
+    // cant get this to work as i would expect it to.
+    //kc.onAuthLogout = () => {this._onAuthLogout();};
+    
+    kc.onAuthRefreshError = () => {this._onAuthRefreshError();};
+    await kc.init({
+      onLoad: 'check-sso',
+      silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
+    });
+    if ( !kc.authenticated) {
+      await kc.login();
+      this.store.userProfile = await kc.loadUserProfile();
+    }
+
+    // log out user if their session expires
+    // i thought onAuthLogout cb would do this automatically
+    // but maybe this wont work, since it resets the idle clock
+    setInterval(async () => {
+      try {
+        await window.Keycloak.updateToken();
+        this.store.userProfile = await window.Keycloak.loadUserProfile();
+      } catch (error) {
+        this.logout();
+      }
+    }, 10 * 60 * 1000);
+  }
+
+  /**
+   * @description Logs user out of application
+   */
+  logout(){
+    const redirectUri = window.location.origin + '/logged-out.html';
+    if ( window.Keycloak && window.Keycloak.authenticated ){
+      window.Keycloak.logout({redirectUri});
+    } else {
+      window.location = redirectUri;
+    }
+  }
+
+  /**
+   * @description Logs user out if access token fails to refresh (their session expired)
+   */
+  _onAuthRefreshError(){
+    this.logout();
+  }
 }
-  
-module.exports = new AppStateModelImpl();
+
+const model = new AppStateModelImpl();
+export default model;
 

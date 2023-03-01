@@ -4,7 +4,7 @@ class AppConfig {
     
     this.env = env.UCDLIB_APP_ENV == 'dev' ? 'dev' : 'prod';
     this.version = env.APP_VERSION;
-    this.routes = ['onboarding', 'separation'];
+    this.routes = ['onboarding', 'separation', 'logout'];
     this.title = 'UC Davis Library Identity and Access Management';
     this.baseUrl = env.UCDLIB_BASE_URL || 'http://localhost:3000' //update me;
 
@@ -17,9 +17,15 @@ class AppConfig {
 
     this.rt = {
       key: env.UCDLIB_RT_KEY,
-      forbidWrite: env.UCDLIB_RT_FORBID_WRITE || false,
+      forbidWrite: env.UCDLIB_RT_FORBID_WRITE != 'false' || false,
       url: env.UCDLIB_RT_URL || 'https://rt.lib.ucdavis.edu',
       queue: env.UCDLIB_RT_QUEUE || 'test' //update when create new queue, and set local-dev env
+    }
+
+    this.keycloak = {
+      url: env.UCDLIB_KEYCLOAK_URL || 'https://sandbox.auth.library.ucdavis.edu',
+      realm: env.UCDLIB_KEYCLOAK_REALM || 'internal',
+      clientId: env.UCDLIB_KEYCLOAK_CLIENT_ID || 'iam-client'
     }
   }
 }

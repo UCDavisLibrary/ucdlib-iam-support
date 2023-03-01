@@ -114,6 +114,7 @@ module.exports = (app) => {
   });
 
   app.get('/api/onboarding', async (req, res) => {
+    console.log(req.headers.authorization);
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
     const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
     const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
