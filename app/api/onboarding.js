@@ -1,7 +1,7 @@
 const { rt } = require('../lib/config.js');
 
-module.exports = (app) => {
-  app.post('/api/onboarding/new', async (req, res) => {
+module.exports = (api) => {
+  api.post('/onboarding/new', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
     const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
     const { default: config } = await import('../lib/config.js');
@@ -94,7 +94,7 @@ module.exports = (app) => {
 
   });
 
-  app.get('/api/onboarding/:id', async (req, res) => {
+  api.get('/onboarding/:id', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
     const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js')
 
@@ -113,12 +113,13 @@ module.exports = (app) => {
 
   });
 
-  app.get('/api/onboarding', async (req, res) => {
-    console.log(req.headers.authorization);
+  api.get('/onboarding', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
     const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
     const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
     const { default: Pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
+
+    console.log(req.auth);
 
 
     const errorMsg = 'Unable to retrieve onboarding requests';

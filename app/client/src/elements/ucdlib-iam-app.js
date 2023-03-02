@@ -1,6 +1,9 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-app.tpl.js";
 
+// auth
+import Keycloak from 'keycloak-js';
+
 // global event bus and model registry
 import "@ucd-lib/cork-app-utils";
 import "../models";
@@ -43,6 +46,8 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
     this.breadcrumbs = [];
 
     this._injectModel('AppStateModel');
+    this.AppStateModel.initKeycloak();
+    this.AppStateModel.refresh();
   }
   
 
@@ -52,6 +57,15 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
    */
   createRenderRoot() {
     return this;
+  }
+
+  /**
+   * @description Custom element lifecyle event
+   */
+  connectedCallback(){
+    super.connectedCallback();
+    this.style.display = 'block';
+    document.querySelector('#whole-screen-load').style.display = 'none';
   }
 
   /**
@@ -156,4 +170,24 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
 
 }
 
-customElements.define('ucdlib-iam-app', UcdlibIamApp);
+(async () => {
+  // instantiate keycloak instance
+  window.keycloak = new Keycloak({...window.APP_CONFIG.keycloak, checkLoginIframe: true});
+  const kc = window.keycloak;
+  const logoutUrl = window.location.origin + '/logged-out.html';
+  const silentCheckSsoRedirectUri = window.location.origin + '/silent-check-sso.html';
+
+  // set up listeners to load app upon auth success
+  kc.onAuthRefreshError = () => {window.location = logoutUrl;};
+  kc.onAuthSuccess = () => {customElements.define('ucdlib-iam-app', UcdlibIamApp);};
+
+  // initialize auth
+  await kc.init({
+    onLoad: 'check-sso',
+    silentCheckSsoRedirectUri
+  });
+  if ( !kc.authenticated) {
+    await kc.login();
+  }
+
+})();

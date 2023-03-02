@@ -18,9 +18,9 @@ CREATE TABLE onboarding_requests (
     additional_data jsonb NOT NULL DEFAULT '{}'::jsonb,
     skip_supervisor boolean NOT NULL DEFAULT FALSE,
     is_existing_employee boolean NOT NULL DEFAULT FALSE,
-    submitted_by varchar(20),
+    submitted_by varchar(100),
     submitted timestamp NOT NULL DEFAULT NOW(),
-    modified_by varchar(20),
+    modified_by varchar(100),
     modified timestamp NOT NULL DEFAULT NOW()
 );
 CREATE TABLE onboarding_supervisor_responses (
@@ -30,7 +30,7 @@ CREATE TABLE onboarding_supervisor_responses (
     permissions jsonb NOT NULL DEFAULT '{}'::jsonb,,
     notes text,
     submitted timestamp NOT NULL DEFAULT NOW(),
-    submitted_by varchar(20)
+    submitted_by varchar(100)
 );
 CREATE TABLE separation_requests (
     id SERIAL PRIMARY KEY,
@@ -39,7 +39,9 @@ CREATE TABLE separation_requests (
     separation_date timestamp,
     supervisor_id varchar(20),
     notes text,
-    additional_data jsonb NOT NULL DEFAULT '{}'::jsonb
+    additional_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+    submitted timestamp NOT NULL DEFAULT NOW(),
+    submitted_by varchar(100)
 );
 CREATE TABLE employees (
     id SERIAL PRIMARY KEY,

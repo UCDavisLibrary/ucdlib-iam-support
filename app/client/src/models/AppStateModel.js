@@ -1,6 +1,5 @@
 import {AppStateModel} from '@ucd-lib/cork-app-state';
 import AppStateStore from '../stores/AppStateStore';
-import Keycloak from 'keycloak-js';
 
 /**
  * @description Model for handling generic app state, such as routing
@@ -19,10 +18,7 @@ class AppStateModelImpl extends AppStateModel {
    * @param {Object} update - Route state - Returned in AppStateUpdate
    * @returns 
    */
-  async set(update) {
-    if ( !window.Keycloak ){
-      await this.initKeycloak();
-    }
+  set(update) {
     if ( update.location.path.length && update.location.path[0] == 'logout' ){
       this.logout();
     }
@@ -34,6 +30,16 @@ class AppStateModelImpl extends AppStateModel {
     let res = super.set(update);
 
     return res;
+  }
+
+  /**
+   * @description Fire an app-state-update event for the current location
+   */
+  refresh(){
+    const location = this.store.data;
+    this.setTitle(false, location);
+    this.setBreadcrumbs(false, location);
+    this.store.emit(this.store.events.APP_STATE_UPDATE, location);
   }
 
   /**
@@ -169,37 +175,24 @@ class AppStateModelImpl extends AppStateModel {
     this.store.emit('app-status-change', {status: 'loaded', page});
   }
 
-  /**
-   * @description Initialize auth
-   */
-  async initKeycloak(){
-    window.Keycloak = new Keycloak({...window.APP_CONFIG.keycloak, checkLoginIframe: true});
-    const kc = window.Keycloak;
+  initKeycloak(){
+    if ( this._initKeycloak ) return;
 
-    // cant get this to work as i would expect it to.
-    //kc.onAuthLogout = () => {this._onAuthLogout();};
-    
-    kc.onAuthRefreshError = () => {this._onAuthRefreshError();};
-    await kc.init({
-      onLoad: 'check-sso',
-      silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
-    });
-    if ( !kc.authenticated) {
-      await kc.login();
-      this.store.userProfile = await kc.loadUserProfile();
-    }
-
-    // log out user if their session expires
-    // i thought onAuthLogout cb would do this automatically
-    // but maybe this wont work, since it resets the idle clock
+    this._initKeycloak = true;
+    this.setUserProfile();
     setInterval(async () => {
       try {
-        await window.Keycloak.updateToken();
-        this.store.userProfile = await window.Keycloak.loadUserProfile();
+        await this.setUserProfile();
       } catch (error) {
         this.logout();
       }
     }, 10 * 60 * 1000);
+
+  }
+
+  async setUserProfile(){
+    await window.keycloak.updateToken();
+    this.store.userProfile = await window.keycloak.loadUserProfile();
   }
 
   /**
@@ -207,8 +200,8 @@ class AppStateModelImpl extends AppStateModel {
    */
   logout(){
     const redirectUri = window.location.origin + '/logged-out.html';
-    if ( window.Keycloak && window.Keycloak.authenticated ){
-      window.Keycloak.logout({redirectUri});
+    if ( window.keycloak && window.keycloak.authenticated ){
+      window.keycloak.logout({redirectUri});
     } else {
       window.location = redirectUri;
     }

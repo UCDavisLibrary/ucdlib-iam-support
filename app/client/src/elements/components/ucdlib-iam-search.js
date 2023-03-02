@@ -200,6 +200,7 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
       }
     } else if( r.state === this.PersonModel.store.STATE.ERROR ) {
       this.isFetching = false;
+      this.wasError = true;
       if ( r.error.payload && r.error.payload.response && r.error.payload.response.status == 404) {
         this.results = [];
         if ( !this.hideResults ){
