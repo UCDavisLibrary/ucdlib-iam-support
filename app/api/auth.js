@@ -3,6 +3,8 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 
 module.exports = (api) => {
   api.use(async (req, res, next) => {
+    const { default: AccessToken } = await import('@ucd-lib/iam-support-lib/src/utils/accessToken.js');
+    const { default: config } = await import('../lib/config.js');
 
     let token, oidcConfig, userInfo;
     // check for access token
@@ -61,6 +63,15 @@ module.exports = (api) => {
       return;
     }
 
+    // check if user has base privileges
+    token = new AccessToken(token, config.keycloak.clientId);
+    if ( !token.hasAccess ) {
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
     req.auth = {
       token,
       userInfo

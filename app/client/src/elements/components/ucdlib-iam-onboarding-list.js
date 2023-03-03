@@ -88,19 +88,26 @@ export default class UcdlibIamOnboardingList extends window.Mixin(LitElement)
   /**
    * @description Retrieves onboarding requesting based on element attributes, updates view.
    * @param {Boolean} ignoreCache - Will not use cache if it exists.
+   * @param {query} query - Manually set query instead of doing 
    */
-  async doQuery(ignoreCache){
-    const q = {};
-    this._queryProps.forEach(p => {
-      if ( p != 'openStatus' && this[p] ) q[p] = this[p];
-    });
-    if ( this.openStatus ){
-      q['isOpen'] = this.openStatus == 'open';
+  async doQuery(ignoreCache, query){
+    let q = {};
+    if ( query ) {
+      q = query;
+    } else {
+      this._queryProps.forEach(p => {
+        if ( p != 'openStatus' && this[p] ) q[p] = this[p];
+      });
+      if ( this.openStatus ){
+        q['isOpen'] = this.openStatus == 'open';
+      }
     }
     this._query = q;
+
     if ( ignoreCache ){
       this.OnboardingModel.clearQueryCache(q);
     }
+    console.log(q);
     return await this.OnboardingModel.query(q);
   }
 

@@ -10,7 +10,8 @@ export default class UcdlibIamPageOnboarding extends window.Mixin(LitElement)
   .with(window.LitCorkUtils) {
   static get properties() {
     return {
-      
+      canViewActiveList: {state: true},
+      userIamId: {state: true}
     };
   }
 
@@ -18,9 +19,12 @@ export default class UcdlibIamPageOnboarding extends window.Mixin(LitElement)
     super();
     this.render = render.bind(this);
 
-    this._injectModel('AppStateModel', 'OnboardingModel');
+    this._injectModel('AppStateModel', 'OnboardingModel', 'AuthModel');
 
     this.activeId = 'ob-list-active';
+    this.supervisorId = 'ob-list-supervisor';
+    this.canViewActiveList = false;
+    this.userIamId = '';
   }
 
   /**
@@ -59,17 +63,29 @@ export default class UcdlibIamPageOnboarding extends window.Mixin(LitElement)
   }
 
   /**
+   * @method _onTokenRefreshed
+   * @description bound to AuthModel token-refreshed event
+   * @param {AccessToken} token 
+   */
+  _onTokenRefreshed(token){
+    this.canViewActiveList = token.hasAdminAccess || token.hasHrAccess;
+    this.userIamId = token.iamId;
+    if ( this.AppStateModel.currentPage == this.id ) this. _getRequiredPageData();
+  }
+
+  /**
    * @description Do data retrieval required to display a subpage
    */
   async _getRequiredPageData(){
     const activeListEle = this.querySelector(`#${this.activeId}`);
-    if ( !activeListEle ){
+    const supervisorEle = this.querySelector(`#${this.supervisorId}`);
+    if ( !activeListEle || !supervisorEle ){
       return; // page not fully loaded yet. wait for next app-state-update.
     }
-    const promises = [
-      activeListEle.doQuery()
-    ];
-    await Promise.all(promises);
+    const promises = [];
+    if ( this.canViewActiveList ) promises.push(activeListEle.doQuery());
+    if ( this.userIamId ) promises.push(supervisorEle.doQuery(false, {supervisorId: this.userIamId}));
+    await new Promise(resolve => {requestAnimationFrame(resolve);});
   }
 
 }

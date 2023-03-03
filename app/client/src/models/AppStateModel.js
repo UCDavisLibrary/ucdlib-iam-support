@@ -10,6 +10,7 @@ class AppStateModelImpl extends AppStateModel {
     super();
 
     this.defaultPage = 'home';
+    this.currentPage = this.defaultPage;
     this.store = AppStateStore;
   }
 
@@ -47,25 +48,28 @@ class AppStateModelImpl extends AppStateModel {
    * @param {Object} update 
    */
   setPage(update){
+    let p;
     if( 
       !update.location.path.length ||
       !update.location.path[0]
     ) {
-      update.page = this.defaultPage;
+      p = this.defaultPage;
     } else if(
       update.location.path[0] == 'onboarding' &&
       update.location.path.length > 1 &&
       update.location.path[1] == 'new'
     ) {
-      update.page = 'onboarding-new';
+      p = 'onboarding-new';
     } else if(
       update.location.path[0] == 'onboarding' &&
       update.location.path.length > 1
     ) {
-      update.page = 'onboarding-single';
+      p = 'onboarding-single';
     }else {
-      update.page = update.location.path[0];
+      p = update.location.path[0];
     }
+    update.page = p;
+    this.currentPage = p;
 
   }
 
@@ -175,44 +179,6 @@ class AppStateModelImpl extends AppStateModel {
     this.store.emit('app-status-change', {status: 'loaded', page});
   }
 
-  initKeycloak(){
-    if ( this._initKeycloak ) return;
-
-    this._initKeycloak = true;
-    this.setUserProfile();
-    setInterval(async () => {
-      try {
-        await this.setUserProfile();
-      } catch (error) {
-        this.logout();
-      }
-    }, 10 * 60 * 1000);
-
-  }
-
-  async setUserProfile(){
-    await window.keycloak.updateToken();
-    this.store.userProfile = await window.keycloak.loadUserProfile();
-  }
-
-  /**
-   * @description Logs user out of application
-   */
-  logout(){
-    const redirectUri = window.location.origin + '/logged-out.html';
-    if ( window.keycloak && window.keycloak.authenticated ){
-      window.keycloak.logout({redirectUri});
-    } else {
-      window.location = redirectUri;
-    }
-  }
-
-  /**
-   * @description Logs user out if access token fails to refresh (their session expired)
-   */
-  _onAuthRefreshError(){
-    this.logout();
-  }
 }
 
 const model = new AppStateModelImpl();

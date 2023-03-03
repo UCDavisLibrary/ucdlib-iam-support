@@ -2,14 +2,21 @@ const { rt } = require('../lib/config.js');
 
 module.exports = (api) => {
   api.post('/onboarding/new', async (req, res) => {
+    if ( !req.auth.token.hasAdminAccess && !req.auth.token.hasHrAccess ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
     const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
     const { default: config } = await import('../lib/config.js');
     const { UcdlibRt, UcdlibRtTicket } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
     const payload = req.body;
 
-    // TODO: set submittedBy and modifiedBy properties
-
+    payload.submittedBy = req.auth.token.id;
+    payload.modifiedBy = req.auth.token.id;
 
     const r = await UcdlibOnboarding.create(payload);
     if ( r.err ) {
@@ -96,7 +103,9 @@ module.exports = (api) => {
 
   api.get('/onboarding/:id', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
-    const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js')
+    const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
+
+    // TODO: move auth here. change query to be by supervisorId as well for non hr/admin request
 
     const r = await UcdlibOnboarding.getById(req.params.id);
     if ( r.err ) {
@@ -109,7 +118,18 @@ module.exports = (api) => {
       res.json({error: true, message: 'Request does not exist!'});
       return;
     }
-    return res.json(TextUtils.camelCaseObject(r.res.rows[0]));
+    const obReq = TextUtils.camelCaseObject(r.res.rows[0]);
+    if ( 
+      !req.auth.token.hasAdminAccess && 
+      !req.auth.token.hasHrAccess && 
+      req.auth.token.iamId != obReq.supervisorId ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
+    return res.json(obReq);
 
   });
 
@@ -119,8 +139,16 @@ module.exports = (api) => {
     const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
     const { default: Pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
 
-    console.log(req.auth);
-
+    if ( 
+      !req.auth.token.hasAdminAccess && 
+      !req.auth.token.hasHrAccess && 
+      req.auth.token.iamId != req.query.supervisorId ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
 
     const errorMsg = 'Unable to retrieve onboarding requests';
     const q = {

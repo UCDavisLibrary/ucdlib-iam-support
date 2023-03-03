@@ -6,7 +6,7 @@ import Keycloak from 'keycloak-js';
 
 // global event bus and model registry
 import "@ucd-lib/cork-app-utils";
-import "../models";
+import {AuthModel} from "../models";
 
 // global components
 import "./components/ucdlib-iam-state";
@@ -46,7 +46,6 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
     this.breadcrumbs = [];
 
     this._injectModel('AppStateModel');
-    this.AppStateModel.initKeycloak();
     this.AppStateModel.refresh();
   }
   
@@ -89,10 +88,11 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
     await this.loadedBundles[bundle];
     this.AppStateModel.showLoaded(e.page);
 
-    // requested page element might be listening to app-state-update event
-    // so need to fire again
+    // requested page element might be listening app events
+    // so need to fire certain ones again
     if ( !bundleAlreadyLoaded ){
       this.AppStateModel.store.emit('app-state-update', e);
+      AuthModel._onAuthRefreshSuccess();
     } 
 
     //this.page = e.page;
@@ -174,17 +174,22 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
   // instantiate keycloak instance
   window.keycloak = new Keycloak({...window.APP_CONFIG.keycloak, checkLoginIframe: true});
   const kc = window.keycloak;
-  const logoutUrl = window.location.origin + '/logged-out.html';
   const silentCheckSsoRedirectUri = window.location.origin + '/silent-check-sso.html';
 
-  // set up listeners to load app upon auth success
-  kc.onAuthRefreshError = () => {window.location = logoutUrl;};
-  kc.onAuthSuccess = () => {customElements.define('ucdlib-iam-app', UcdlibIamApp);};
+  // set up listeners keycloak listeners
+  kc.onAuthRefreshError = () => {AuthModel.logout();};
+  kc.onAuthSuccess = () => {
+    customElements.define('ucdlib-iam-app', UcdlibIamApp);
+    AuthModel.init();
+    AuthModel._onAuthRefreshSuccess();
+  };
+  kc.onAuthRefreshSuccess = () => {AuthModel._onAuthRefreshSuccess();};
 
   // initialize auth
   await kc.init({
     onLoad: 'check-sso',
-    silentCheckSsoRedirectUri
+    silentCheckSsoRedirectUri,
+    scope: 'profile roles ucd-ids'
   });
   if ( !kc.authenticated) {
     await kc.login();
