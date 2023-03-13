@@ -107,7 +107,6 @@ export default class UcdlibIamOnboardingList extends window.Mixin(LitElement)
     if ( ignoreCache ){
       this.OnboardingModel.clearQueryCache(q);
     }
-    console.log(q);
     return await this.OnboardingModel.query(q);
   }
 

@@ -7,6 +7,7 @@ import Keycloak from 'keycloak-js';
 // global event bus and model registry
 import "@ucd-lib/cork-app-utils";
 import {AuthModel} from "../models";
+import AppConfig from "@ucd-lib/iam-support-lib/src/config";
 
 // global components
 import "./components/ucdlib-iam-state";
@@ -172,8 +173,8 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
 
 (async () => {
   // instantiate keycloak instance
-  window.keycloak = new Keycloak({...window.APP_CONFIG.keycloak, checkLoginIframe: true});
-  const kc = window.keycloak;
+  AppConfig.keycloakClient = new Keycloak({...AppConfig.keycloak, checkLoginIframe: true});
+  const kc = AppConfig.keycloakClient;
   const silentCheckSsoRedirectUri = window.location.origin + '/silent-check-sso.html';
 
   // set up listeners keycloak listeners

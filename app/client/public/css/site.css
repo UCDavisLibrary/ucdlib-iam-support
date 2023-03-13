@@ -60,3 +60,8 @@ ucdlib-iam-onboarding-list .no-results {
   display: flex;
   align-items: center;
 }
+.focal-link__icon--xs {
+  width: 1rem;
+  font-size: .5rem;
+  height: 1rem;
+}
