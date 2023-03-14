@@ -1,13 +1,15 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-app.tpl.js";
 
+// app config
+import AppConfig from "@ucd-lib/iam-support-lib/src/config";
+
 // auth
 import Keycloak from 'keycloak-js';
 
 // global event bus and model registry
 import "@ucd-lib/cork-app-utils";
 import {AuthModel} from "../models";
-import AppConfig from "@ucd-lib/iam-support-lib/src/config";
 
 // global components
 import "./components/ucdlib-iam-state";

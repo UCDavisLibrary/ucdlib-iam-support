@@ -79,7 +79,7 @@ module.exports = (api) => {
     // send correspondence to supervisor
     if ( notifySupervisor ){
       const supervisorName = ad.supervisorFirstName && ad.supervisorLastName ? `${ad.supervisorFirstName} ${ad.supervisorLastName}` : 'Supervisor';
-      const supervisorLink = `${config.baseUrl}/permissions/${output.id}`;
+      const supervisorLink = `${config.baseUrl}/permissions/onboarding/${output.id}`;
       const reply = ticket.createReply();
       reply.addSubject(`Supervisor Action Required!`);
       reply.addContent(`Hi ${supervisorName},`);

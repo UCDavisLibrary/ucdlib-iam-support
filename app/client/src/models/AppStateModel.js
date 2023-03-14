@@ -65,6 +65,11 @@ class AppStateModelImpl extends AppStateModel {
       update.location.path.length > 1
     ) {
       p = 'onboarding-single';
+    } else if(
+      update.location.path[0] == 'permissions' &&
+      update.location.path.length > 1
+    ) {
+      p = 'permissions-single';
     }else {
       p = update.location.path[0];
     }

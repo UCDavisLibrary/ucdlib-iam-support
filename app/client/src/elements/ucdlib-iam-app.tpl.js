@@ -35,5 +35,6 @@ export function render() {
     <ucdlib-iam-page-onboarding-single id='onboarding-single'></ucdlib-iam-page-onboarding-single>
     <ucdlib-iam-page-home id='home'></ucdlib-iam-page-home>
     <ucdlib-iam-page-separation id='separation'></ucdlib-iam-page-separation>
+    <ucdlib-iam-page-permissions-single id='permissions-single'></ucdlib-iam-page-permissions-single>
   </ucdlib-pages>
 `;}
