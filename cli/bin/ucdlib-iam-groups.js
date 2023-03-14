@@ -4,12 +4,13 @@ const program = new Command();
 
 program
   .command('list')
-  .description('produce list of pg database')
-  .option('-act, --active', 'Only Active Directories', false)
+  .description('list of library departments/groups')
+  .option('-act, --active', 'Active Groups', false)
   .option('-arc, --archived', 'Only Archived Directories', false)
-  .option('-g, --group_name <char>|@<file>')
+  .option('-g, --group_type <type>',  'group type by id')
+  .option('-n, --type_name <char>',  'group by character name')
   .option('-o, --org', 'Part of Organization', false)
-  .option('-pg, --parent_group <char>|@<file>')
+  .option('-pg, --parent_group <type>', 'parent group by id')
   .option('-p, --parent', 'A parent table', false)
   .option('-c, --child', 'A child table', false)
   .option('-f, --file <char>|@<file>','file name', 'default.json')

@@ -10,7 +10,10 @@ class GroupsCli {
     const all = await UcdlibGroups.getAll(true);
     const allActive = await UcdlibGroups.getAll();
     const allArchive = await UcdlibGroups.getArchived();
-    const parents = await UcdlibGroups.getParents();
+    const parents = await UcdlibGroups.getParents(true);
+    const parents_groups = await UcdlibGroups.getParentsGroups(options.parent_group);
+    const group_type = await UcdlibGroups.getGroupType(options.group_type);
+    const type_name = await UcdlibGroups.getTypeName(options.type_name);
     const child = await UcdlibGroups.getParents(false);
     const orgs = await UcdlibGroups.getOrgGroups();
 
@@ -26,32 +29,11 @@ class GroupsCli {
     }else if(options.child){
       group = child.res.rows;
     }else if(options.parent_group){
-      let op = options.parent_group;
-      let pg_all = all.res.rows;
-      let obj = pg_all.find(o => o.name === op);      
-      const file = [
-        { 
-          parent_id: obj.id
-        }
-      ];
-      const aFilt = pg_all.filter(({ parent_id }) =>
-        file.findIndex((f) => f.parent_id === parent_id) > -1
-      )
-
-      group = aFilt;
-    }else if(options.group_name){
-      let op = options.group_name;
-      let gn_all = all.res.rows;
-      const file = [
-        { 
-          type_name: op
-        }
-      ];
-      const aFilt = gn_all.filter(({ type_name }) =>
-        file.findIndex((f) => f.type_name === type_name) > -1
-      )
-
-      group = aFilt;
+      group = parents_groups.res.rows;
+    }else if(options.group_type){
+      group = group_type.res.rows;
+    }else if(options.type_name){
+      group = type_name.res.rows;
     }else {
       group = all.res.rows;
     }
