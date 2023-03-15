@@ -89,7 +89,6 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
 
     }
     await this.loadedBundles[bundle];
-    this.AppStateModel.showLoaded(e.page);
 
     // requested page element might be listening app events
     // so need to fire certain ones again

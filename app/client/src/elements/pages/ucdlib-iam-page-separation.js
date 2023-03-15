@@ -6,7 +6,6 @@ export default class UcdlibIamPageSeparation extends window.Mixin(LitElement)
 
   static get properties() {
     return {
-      
     };
   }
 
@@ -23,6 +22,17 @@ export default class UcdlibIamPageSeparation extends window.Mixin(LitElement)
    */
   createRenderRoot() {
     return this;
+  }
+
+  /**
+   * @method _onAppStateUpdate
+   * @description bound to AppStateModel app-state-update event
+   *
+   * @param {Object} e
+   */
+  async _onAppStateUpdate(e) {
+    if ( e.page != this.id ) return;
+    this.AppStateModel.showLoaded(this.id);
   }
 
 }

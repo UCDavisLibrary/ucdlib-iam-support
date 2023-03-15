@@ -15,7 +15,7 @@ export default class UcdlibIamPageHome extends window.Mixin(LitElement)
     this.render = render.bind(this);
     this.colors = {
       hr: 'arboretum',
-      supervisors: 'merlot',
+      supervisors: 'redwood',
       employees: 'redbud'
     };
 
@@ -28,6 +28,17 @@ export default class UcdlibIamPageHome extends window.Mixin(LitElement)
    */
   createRenderRoot() {
     return this;
+  }
+
+  /**
+   * @method _onAppStateUpdate
+   * @description bound to AppStateModel app-state-update event
+   *
+   * @param {Object} e
+   */
+  async _onAppStateUpdate(e) {
+    if ( e.page != this.id ) return;
+    this.AppStateModel.showLoaded(this.id);
   }
 
 }

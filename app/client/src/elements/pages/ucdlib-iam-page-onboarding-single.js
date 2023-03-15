@@ -12,7 +12,8 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       requestId: {state: true},
       request: {state: true},
       firstName: {state: true},
-      lastName: {state: true}
+      lastName: {state: true},
+      rtTransactions: {state: true}
     };
   }
 
@@ -23,8 +24,9 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.request = {};
     this.firstName = '';
     this.lastName = '';
+    this.rtTransactions = [];
 
-    this._injectModel('AppStateModel', 'OnboardingModel');
+    this._injectModel('AppStateModel', 'OnboardingModel', 'RtModel');
   }
 
   /**
@@ -48,13 +50,20 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     const data = await this.OnboardingModel.getById(this.requestId);
     if ( data.state == 'loaded'){
       await this._setStateProperties(data.payload);
+      const rtHistory = await this.RtModel.getHistory(this.rtTicketId);
+      if ( rtHistory.state === 'loaded' ) {
+        this.rtTransactions = this.RtModel.formatHistory(rtHistory.payload.items);
+        console.log(this.rtTransactions);
+      } else {
+        this.rtTransactions = [];
+      }
       this.AppStateModel.setTitle({show: true, text: this.pageTitle()});
       this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs: this.breadcrumbs()});
-      this.AppStateModel.showLoaded(this.id);
+      requestAnimationFrame(() => this.AppStateModel.showLoaded(this.id));
     } else if ( data.state == 'error' ){
       let msg = 'Unable to display onboarding request';
       if ( data.error && data.error.payload && data.error.payload.message ) msg = data.error.payload.message;
-      this.AppStateModel.showError(msg);
+      requestAnimationFrame(() => this.AppStateModel.showError(msg));
     }
   }
 
@@ -66,6 +75,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.request = payload;
     this.firstName = payload.additionalData.employeeFirstName || '';
     this.lastName = payload.additionalData.employeeLastName || '';
+    this.rtTicketId = payload.rtTicketId;
   }
 
   /**

@@ -28,6 +28,7 @@ Most relevant env variables:
 | `UCDLIB_APP_ENV` | 'prod' or 'dev'. By default, local development starts with 'dev' |
 | `UCD_IAM_API_KEY` | required for much functionality |
 | `UCDLIB_RT_KEY` | Required for interacting with RT |
+| `UCDLIB_RT_FORBID_WRITE` | Will not create or edit RT tickets |
 
 For a complete list, see `config.js`.
 

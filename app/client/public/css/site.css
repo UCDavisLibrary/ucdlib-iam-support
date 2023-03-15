@@ -10,6 +10,9 @@
 .category-brand__background-light-blue {
   background-color: #ebf3fa;
 }
+.background-transparent {
+  background-color: transparent !important;
+}
 .border--gold {
   border-color: #ffbf00;
 }
@@ -64,4 +67,16 @@ ucdlib-iam-onboarding-list .no-results {
   width: 1rem;
   font-size: .5rem;
   height: 1rem;
+  margin-right: .5rem;
+}
+.rt-history-created {
+  font-size: .75rem;
+}
+.rt-history-text {
+  font-weight: 700;
+  font-size: .9rem;
+  color: #022851;
+}
+.panel--icon .icon::before {
+  color: var(--panel-icon-color, #73abdd);
 }

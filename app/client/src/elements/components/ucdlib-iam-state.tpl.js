@@ -14,6 +14,17 @@ export function styles() {
     [hidden] {
       display: none !important;
     }
+    .container {
+      transition-property: opacity;
+      transition-duration: 300ms;
+      transition-delay: 150ms;
+    }
+    .is-visible {
+      opacity: 1;
+    }
+    .not-visible {
+      opacity: 0
+    }
     .main {
       display: flex;
       align-items: center;
@@ -96,16 +107,18 @@ function renderErrorLogo(){
  */
 export function render() { 
   return html`
-  <div class='loading main' ?hidden=${this.state != 'loading'}>
-    <div class='logo lib-logo'>${renderLogo()}</div>
-    <h1 class='text heading--highlight'>
-      <span>Loading</span><span class="loading-dots"><span class="dot one">.</span><span class="dot two">.</span><span class="dot three">.</span></span>
-    </h1>
-  </div>
-  <div class='error main' ?hidden=${this.state != 'error'}>
-    <div class='logo logo-error'>${renderErrorLogo()}</div>
-    <h1 class='text heading--highlight'> An ${this.errorMessage ? '' : 'unknown'} error has occurred!</h1>
-    <h1 class='text heading--highlight' .hidden=${this.errorMessage ? false : true}>${this.errorMessage}</h1>
+  <div class='container ${this.isVisible ? "is-visible" : "not-visible"}'>
+    <div class='loading main' ?hidden=${this.state != 'loading'}>
+      <div class='logo lib-logo'>${renderLogo()}</div>
+      <h1 class='text heading--highlight'>
+        <span>Loading</span><span class="loading-dots"><span class="dot one">.</span><span class="dot two">.</span><span class="dot three">.</span></span>
+      </h1>
+    </div>
+    <div class='error main' ?hidden=${this.state != 'error'}>
+      <div class='logo logo-error'>${renderErrorLogo()}</div>
+      <h1 class='text heading--highlight'> An ${this.errorMessage ? '' : 'unknown'} error has occurred!</h1>
+      <h1 class='text heading--highlight' .hidden=${this.errorMessage ? false : true}>${this.errorMessage}</h1>
+    </div>
   </div>
   
 
