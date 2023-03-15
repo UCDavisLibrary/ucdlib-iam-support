@@ -7,6 +7,8 @@ class GroupsCli {
   async groupsUcd(options){
     let group;
     const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
+    const a = await UcdlibGroups.queryTest(options);
+
     const all = await UcdlibGroups.getAll(true);
     const allActive = await UcdlibGroups.getAll();
     const allArchive = await UcdlibGroups.getArchived();
