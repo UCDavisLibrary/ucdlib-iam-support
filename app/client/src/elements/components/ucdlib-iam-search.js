@@ -88,13 +88,6 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
     this.searchParams.forEach(o => {
       this.searchParamsByKey[o.key] = o;
     });
-    this.isFetching = false;
-    this.wasError = false;
-    this.page = 'form';
-    this.hideResults = false;
-    this.results = [];
-    this.selectedPersonId = '';
-    this.selectedPersonProfile = {};
 
     this.searchParam = 'name';
     
@@ -103,15 +96,7 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
     this.hideNavOptions = '';
     this.widgetTitle = 'UC Davis Employee Search';
 
-    // user inputs
-    this.firstName = '';
-    this.lastName = '';
-    this.middleName = '';
-    this.isDName = false;
-    this.studentId = '';
-    this.employeeId = '';
-    this.userId = '';
-    this.email = '';
+    this.reset();
   }
 
   /**
@@ -166,55 +151,56 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
   }
 
   /**
+   * @description Resets element
+   */
+  reset(){
+    this.firstName = '';
+    this.lastName = '';
+    this.middleName = '';
+    this.isDName = false;
+    this.studentId = '';
+    this.employeeId = '';
+    this.userId = '';
+    this.email = '';
+
+    this.isFetching = false;
+    this.wasError = false;
+    this.page = 'form';
+    this.hideResults = false;
+    this.results = [];
+    this.selectedPersonId = '';
+    this.selectedPersonProfile = {};
+  }
+
+  /**
    * @description Attached to submit event on element form
    * @param {*} e - Submit event
    */
   async _onSubmit(e){
     e.preventDefault();
+    if ( this.isFetching ) return;
+
+    // reset state
+    this.wasError = false;
+    this.isFetching = true;
 
     const selectedParam = this.searchParams.find(({ attribute }) => attribute === this.searchParam);
+    let r;
     if ( selectedParam.key === 'name' ){
-      this.PersonModel.getPersonByName(this.lastName, this.firstName, this.middleName, this.isDName);
+      r = await this.PersonModel.getPersonByName(this.lastName, this.firstName, this.middleName, this.isDName);
     } else {
-      this.PersonModel.getPersonById(this[selectedParam.key], selectedParam.key);
+      r = await this.PersonModel.getPersonById(this[selectedParam.key], selectedParam.key);
     }
-    
-  }
 
-  /**
-   * @description Attached to PersonModel SELECT_UPDATE event
-   * @param {Object} e SELECT_UPDATE event state
-   */
-  _onSelectUpdate(e){
-    this.wasError = false;
-    if( e.state === this.PersonModel.store.STATE.LOADING ) {
-      this.isFetching = true;
-    } else if( e.state === this.PersonModel.store.STATE.LOADED ) {
+    if ( r.state === this.PersonModel.store.STATE.LOADED ) {
       this.isFetching = false;
-      this.selectedPersonProfile = e.payload;
-    } else if( e.state === this.PersonModel.store.STATE.ERROR ) {
-      this.isFetching = false;
-      this.wasError = true;
-    }
-  }
-
-  /**
-   * @description Attached to PersonModel SEARCH_UPDATE event
-   * @param {Object} e SEARCH_UPDATE event state
-   */
-  _onSearchUpdate(e){
-    this.wasError = false;
-    if( e.state === this.PersonModel.store.STATE.LOADING ) {
-      this.isFetching = true;
-    } else if( e.state === this.PersonModel.store.STATE.LOADED ) {
-      this.isFetching = false;
-      this.results = Array.isArray(e.payload) ? e.payload : [e.payload];
+      this.results = Array.isArray(r.payload) ? r.payload : [r.payload];
       if ( !this.hideResults ){
         this.page = 'results';
       }
-    } else if( e.state === this.PersonModel.store.STATE.ERROR ) {
+    } else if( r.state === this.PersonModel.store.STATE.ERROR ) {
       this.isFetching = false;
-      if ( e.error.payload && e.error.payload.response && e.error.payload.response.status == 404) {
+      if ( r.error.payload && r.error.payload.response && r.error.payload.response.status == 404) {
         this.results = [];
         if ( !this.hideResults ){
           this.page = 'results';
@@ -222,7 +208,10 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
       } else {
         this.wasError = true;
       }
-    }
+    } 
+
+    this.dispatchEvent(new CustomEvent('search', {detail: {status: r}}));
+    
   }
 
   /**
@@ -231,10 +220,23 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
    * @returns 
    */
   async _onPersonClick(id){
-    if ( !this.isFetching ) {
-      this.selectedPersonId = id;
-      this.PersonModel.getPersonById(id, 'iamId', 'select');
+    if ( this.isFetching ) return;
+
+    this.wasError = false;
+    this.isFetching = true;
+
+    this.selectedPersonId = id;
+    const r = await this.PersonModel.getPersonById(id, 'iamId', 'select');
+    if( r.state === this.PersonModel.store.STATE.LOADED ) {
+      this.isFetching = false;
+      this.selectedPersonProfile = r.payload;
+    } else if( r.state === this.PersonModel.store.STATE.ERROR ) {
+      this.isFetching = false;
+      this.wasError = true;
     }
+
+    this.dispatchEvent(new CustomEvent('select', {detail: {status: r}}));
+
   }
 
 }

@@ -8,7 +8,8 @@ export default class UcdlibIamState extends LitElement {
 
   static get properties() {
     return {
-      state: {type: String}
+      state: {type: String},
+      errorMessage: {type: String, attribute: 'error-message'}
     };
   }
 
@@ -20,6 +21,7 @@ export default class UcdlibIamState extends LitElement {
     super();
     this.render = render.bind(this);
     this.state = 'loading';
+    this.errorMessage = '';
   }
 
   /**

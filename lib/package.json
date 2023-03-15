@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@ucd-lib/cork-app-utils": "^5.1.0",
+    "@ucd-lib/rt-api": "^1.1.0",
     "pg": "^8.9.0"
   }
 }

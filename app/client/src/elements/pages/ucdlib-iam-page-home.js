@@ -13,6 +13,11 @@ export default class UcdlibIamPageHome extends window.Mixin(LitElement)
   constructor() {
     super();
     this.render = render.bind(this);
+    this.colors = {
+      hr: 'arboretum',
+      supervisors: 'merlot',
+      employees: 'redbud'
+    };
 
     this._injectModel('AppStateModel');
   }

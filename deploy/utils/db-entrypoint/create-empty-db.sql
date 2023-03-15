@@ -1,6 +1,8 @@
 CREATE TABLE status_codes (
     id SERIAL PRIMARY KEY,
-    name varchar(100),
+    name varchar(100) NOT NULL,
+    request_type text[],
+    is_open boolean NOT NULL DEFAULT TRUE,
     archived boolean NOT NULL DEFAULT FALSE
 );
 CREATE TABLE onboarding_requests (
@@ -15,18 +17,20 @@ CREATE TABLE onboarding_requests (
     notes text,
     additional_data jsonb NOT NULL DEFAULT '{}'::jsonb,
     skip_supervisor boolean NOT NULL DEFAULT FALSE,
-    submitted_by varchar(20),
+    is_existing_employee boolean NOT NULL DEFAULT FALSE,
+    submitted_by varchar(100),
     submitted timestamp NOT NULL DEFAULT NOW(),
-    modified_by varchar(20),
+    modified_by varchar(100),
     modified timestamp NOT NULL DEFAULT NOW()
 );
 CREATE TABLE onboarding_supervisor_responses (
     id SERIAL PRIMARY KEY,
-    request_id integer REFERENCES onboarding_requests (id),
-    permissions jsonb,
+    request_id integer NOT NULL REFERENCES onboarding_requests (id),
+    revision integer NOT NULL DEFAULT 0, 
+    permissions jsonb NOT NULL DEFAULT '{}'::jsonb,,
     notes text,
-    submitted timestamp DEFAULT NOW(),
-    submitted_by varchar(20)
+    submitted timestamp NOT NULL DEFAULT NOW(),
+    submitted_by varchar(100)
 );
 CREATE TABLE separation_requests (
     id SERIAL PRIMARY KEY,
@@ -35,7 +39,9 @@ CREATE TABLE separation_requests (
     separation_date timestamp,
     supervisor_id varchar(20),
     notes text,
-    additional_data jsonb NOT NULL DEFAULT '{}'::jsonb
+    additional_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+    submitted timestamp NOT NULL DEFAULT NOW(),
+    submitted_by varchar(100)
 );
 CREATE TABLE employees (
     id SERIAL PRIMARY KEY,
@@ -90,3 +96,27 @@ CREATE TABLE cache (
     data jsonb,
     created timestamp DEFAULT NOW()
 );
+
+-- Request Statuses
+--1
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Submitted', '{"onboarding", "separation"}');
+--2
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Awaiting Supervisor Response', '{"onboarding", "separation"}');
+--3
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Awaiting UCD IAM Record', '{"onboarding"}');
+--4
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Awaiting User ID Provisioning', '{"onboarding"}');
+--5
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Provisioning Access', '{"onboarding"}');
+--6
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Resolving', '{"onboarding", "separation"}');
+--7
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Resolved', '{"onboarding", "separation"}');
+

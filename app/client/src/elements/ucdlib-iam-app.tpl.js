@@ -7,17 +7,20 @@ import { html } from 'lit';
 export function render() { 
   return html`
   <ucd-theme-header>
-    <ucdlib-branding-bar slogan='Identity and Access Management'></ucdlib-branding-bar>
+    <ucdlib-branding-bar slogan='Identity and Access Management'>
+      <a href='/logout'>Logout</a>
+    </ucdlib-branding-bar>
     <ucd-theme-primary-nav>
       <a href='/onboarding'>Onboarding</a>
       <a href='/separation'>Separation</a>
     </ucd-theme-primary-nav>
   </ucd-theme-header>
+  <ucdlib-iam-alert></ucdlib-iam-alert>
 
-  <section .hidden=${!this.showPageTitle}>
+  <section .hidden=${this.page == 'loading' || !this.showPageTitle}>
     <h1 class="page-title">${this.pageTitle}</h1>
   </section>
-  <ol class="breadcrumbs" ?hidden=${!this.showBreadcrumbs}>
+  <ol class="breadcrumbs" ?hidden=${this.page == 'loading' || !this.showBreadcrumbs}>
     ${this.breadcrumbs.map((b, i) => html`
       <li>
       ${i == this.breadcrumbs.length - 1 ? html`<span>${b.text}</span>` : html`<a href=${b.link}>${b.text}</a>`}
@@ -26,10 +29,12 @@ export function render() {
   </ol>
   
   <ucdlib-pages selected=${this.page}>
-    <ucdlib-iam-state id='loading'></ucdlib-iam-state>
+    <ucdlib-iam-state id='loading' state=${this.status} error-message=${this.errorMessage}></ucdlib-iam-state>
     <ucdlib-iam-page-onboarding id='onboarding'></ucdlib-iam-page-onboarding>
     <ucdlib-iam-page-onboarding-new id='onboarding-new'></ucdlib-iam-page-onboarding-new>
+    <ucdlib-iam-page-onboarding-single id='onboarding-single'></ucdlib-iam-page-onboarding-single>
     <ucdlib-iam-page-home id='home'></ucdlib-iam-page-home>
     <ucdlib-iam-page-separation id='separation'></ucdlib-iam-page-separation>
+    <ucdlib-iam-page-permissions-single id='permissions-single'></ucdlib-iam-page-permissions-single>
   </ucdlib-pages>
 `;}

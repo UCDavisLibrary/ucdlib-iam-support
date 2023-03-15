@@ -104,7 +104,8 @@ export function render() {
   </div>
   <div class='error main' ?hidden=${this.state != 'error'}>
     <div class='logo logo-error'>${renderErrorLogo()}</div>
-    <h1 class='text heading--highlight'>An error has occurred!</h1>
+    <h1 class='text heading--highlight'> An ${this.errorMessage ? '' : 'unknown'} error has occurred!</h1>
+    <h1 class='text heading--highlight' .hidden=${this.errorMessage ? false : true}>${this.errorMessage}</h1>
   </div>
   
 

@@ -1,12 +1,19 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-app.tpl.js";
 
+// app config
+import AppConfig from "@ucd-lib/iam-support-lib/src/config";
+
+// auth
+import Keycloak from 'keycloak-js';
+
 // global event bus and model registry
 import "@ucd-lib/cork-app-utils";
-import "../models";
+import {AuthModel} from "../models";
 
 // global components
 import "./components/ucdlib-iam-state";
+import "./components/ucdlib-iam-alert";
 
 // pages
 import bundles from "./pages/bundles";
@@ -24,14 +31,16 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
       showPageTitle: {type: Boolean},
       pageTitle: {type: String},
       showBreadcrumbs: {type: Boolean},
-      breadcrumbs: {type: Array}
+      breadcrumbs: {type: Array},
+      status: {type: String},
+      errorMessage: {type: String, attribute: 'error-message'}
     };
   }
 
   constructor() {
     super();
     this.render = render.bind(this);
-    this.loadedPages = {};
+    this.loadedBundles = {};
 
     this.page = 'loading';
     this.showPageTitle = false;
@@ -40,6 +49,7 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
     this.breadcrumbs = [];
 
     this._injectModel('AppStateModel');
+    this.AppStateModel.refresh();
   }
   
 
@@ -52,6 +62,15 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
   }
 
   /**
+   * @description Custom element lifecyle event
+   */
+  connectedCallback(){
+    super.connectedCallback();
+    this.style.display = 'block';
+    document.querySelector('#whole-screen-load').style.display = 'none';
+  }
+
+  /**
    * @method _onAppStateUpdate
    * @description bound to AppStateModel app-state-update event
    *
@@ -59,20 +78,59 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
    */
   async _onAppStateUpdate(e) {
 
-    // dynamically load code
-    if ( !this.loadedPages[this.page] ) {
-      this.showLoadingPage();
-      this.loadedPages[e.page] = this.loadPage(e.page);
-    }
-    await this.loadedPages[e.page];
+    const bundle = this._getBundleName(e.page);
+    let bundleAlreadyLoaded = true;
 
-    // set page attributes
-    this.showPageTitle = e.title.show;
-    this.pageTitle = e.title.text;
-    this.showBreadcrumbs = e.breadcrumbs.show;
-    this.breadcrumbs = e.breadcrumbs.breadcrumbs;
-    this.page = e.page;
-    console.log(e);
+    // dynamically load code
+    if ( !this.loadedBundles[bundle] ) {
+      bundleAlreadyLoaded = false;
+      this.AppStateModel.showLoading(e.page);
+      this.loadedBundles[bundle] = this.loadBundle(bundle);
+
+    }
+    await this.loadedBundles[bundle];
+    this.AppStateModel.showLoaded(e.page);
+
+    // requested page element might be listening app events
+    // so need to fire certain ones again
+    if ( !bundleAlreadyLoaded ){
+      this.AppStateModel.store.emit('app-state-update', e);
+      AuthModel._onAuthRefreshSuccess();
+    } 
+
+    //this.page = e.page;
+    window.scroll(0,0);
+  }
+
+  /**
+   * @description bound to AppStateModel app-header-update event
+   * @param {Object} e 
+   */
+  _onAppHeaderUpdate(e){
+    if ( e.breadcrumbs ) {
+      this.showBreadcrumbs = e.breadcrumbs.show;
+      this.breadcrumbs = e.breadcrumbs.breadcrumbs;
+    }
+    if ( e.title ){
+      this.showPageTitle = e.title.show;
+      this.pageTitle = e.title.text;
+    }
+  }
+
+  /**
+   * @method _onAppStatusChange
+   * @description Attached to AppStateModel app-status-change event
+   * Controls showing loading/error page, which are not controlled by url location changes
+   * @param {Object} status
+   */
+  _onAppStatusChange(status){
+    this.status = status.status;
+    if ( status.page ) {
+      this.page = status.page;
+    } else {
+      this.page = 'loading';
+    }
+    if (Object.prototype.hasOwnProperty.call(status, 'errorMessage')) this.errorMessage = status.errorMessage;
   }
 
   /**
@@ -80,28 +138,64 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
    */
   showLoadingPage() {
     this.page = 'loading';
-    this.showPageTitle = false;
-    this.pageTitle = '';
-    this.showBreadcrumbs = false;
-    this.breadcrumbs = [];
+
   }
 
   /**
-   * @method loadPage
-   * @description code splitting done here.  dynamic import a page based on route
+   * @description code splitting done here
    *
-   * @param {String} page page to load
+   * @param {String} bundle bundle to load
    * 
    * @returns {Promise}
    */
-  loadPage(page) {
-    if( bundles.all.includes(page) ) {
+  loadBundle(bundle) {
+    
+    if( bundle == 'all' ) {
       return import(/* webpackChunkName: "pages" */ "./pages/bundles/all");
     }
     console.warn('No code chunk loaded for this page');
     return false;
   }
 
+  /**
+   * @description Get name of bundle a page element is in
+   * @param {*} page 
+   * @returns {String}
+   */
+  _getBundleName(page){
+    for (const bundle in bundles) {
+      if ( bundles[bundle].includes(page) ){
+        return bundle;
+      }
+    }
+    return '';
+  }
+
 }
 
-customElements.define('ucdlib-iam-app', UcdlibIamApp);
+(async () => {
+  // instantiate keycloak instance
+  AppConfig.keycloakClient = new Keycloak({...AppConfig.keycloak, checkLoginIframe: true});
+  const kc = AppConfig.keycloakClient;
+  const silentCheckSsoRedirectUri = window.location.origin + '/silent-check-sso.html';
+
+  // set up listeners keycloak listeners
+  kc.onAuthRefreshError = () => {AuthModel.logout();};
+  kc.onAuthSuccess = () => {
+    customElements.define('ucdlib-iam-app', UcdlibIamApp);
+    AuthModel.init();
+    AuthModel._onAuthRefreshSuccess();
+  };
+  kc.onAuthRefreshSuccess = () => {AuthModel._onAuthRefreshSuccess();};
+
+  // initialize auth
+  await kc.init({
+    onLoad: 'check-sso',
+    silentCheckSsoRedirectUri,
+    scope: 'profile roles ucd-ids'
+  });
+  if ( !kc.authenticated) {
+    await kc.login();
+  }
+
+})();

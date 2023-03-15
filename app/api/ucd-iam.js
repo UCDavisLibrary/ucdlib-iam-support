@@ -13,11 +13,19 @@ const setErrorStatusCode = (res, apiResponse) => {
   }
 }
 
-module.exports = (app) => {
+module.exports = (api) => {
 
   // query for a person by name
   // returns a set of records
-  app.get('/api/ucd-iam/person/search', async (req, res) => {
+  api.get('/ucd-iam/person/search', async (req, res) => {
+    if ( !req.auth.token.hasAdminAccess && !req.auth.token.hasHrAccess ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
+
     const { UcdIamModel } = await import('@ucd-lib/iam-support-lib/index.js');
     UcdIamModel.init(config.ucdIamApi);
 
@@ -41,7 +49,14 @@ module.exports = (app) => {
 
   // query for a person by a unique identifier
   // returns a single record if successful
-  app.get('/api/ucd-iam/person/:id', async (req, res) => {
+  api.get('/ucd-iam/person/:id', async (req, res) => {
+    if ( !req.auth.token.hasAdminAccess && !req.auth.token.hasHrAccess ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
     const { UcdIamModel } = await import('@ucd-lib/iam-support-lib/index.js');
     UcdIamModel.init(config.ucdIamApi);
     const idType = req.query.idType || 'userId';

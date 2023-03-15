@@ -13,6 +13,9 @@ The application does not assign permissions, but creates, routes, and tracks sys
 ## CLI
 The command line interface (in `/cli`) is designed to be used by ITIS to perform adminstrative actions, such as loading a user into Keycloak and assigning permissions.
 
+## Shared Code
+Any code shared by the application and cli should be placed in the `/lib` directory. Both the app and cli docker images use the same base image that npm links this shared code as the `@ucd-lib/iam-support-lib` package.
+
 ## Deployment
 
 ### Environmental Variables
@@ -24,6 +27,7 @@ Most relevant env variables:
 | `UCDLIB_APP_HOST_PORT` | |
 | `UCDLIB_APP_ENV` | 'prod' or 'dev'. By default, local development starts with 'dev' |
 | `UCD_IAM_API_KEY` | required for much functionality |
+| `UCDLIB_RT_KEY` | Required for interacting with RT |
 
 For a complete list, see `config.js`.
 
