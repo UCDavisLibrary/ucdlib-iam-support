@@ -12,6 +12,9 @@ class GroupsCli {
     
     console.log(group);
     
+    if(options.file){
+      //Write to file if necessary not build
+    }
   }
 }
 
