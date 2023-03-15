@@ -47,10 +47,9 @@ export default class UcdlibIamState extends LitElement {
    * Delays showing loading screen, so we don't get a jarring flash of content for quick loads
    */
   _onChildListMutation(){
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       this.isVisible = this.style.display != 'none';
-    });
-    
+    }, 10);
   }
 
 }

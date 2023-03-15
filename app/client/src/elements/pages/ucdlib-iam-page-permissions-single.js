@@ -9,7 +9,8 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
 
   static get properties() {
     return {
-      formType: {type: String}
+      formType: {state: true},
+      associatedObjectId: {state: true}
     };
   }
 
@@ -21,8 +22,9 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       'onboarding': {title: 'Permissions for New Employee'}
     };
     this.formType = 'onboarding';
+    this.associatedObjectId = 0;
 
-    this._injectModel('AppStateModel');
+    this._injectModel('AppStateModel', 'OnboardingModel');
   }
 
   /**
@@ -46,8 +48,24 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       return;
     }
     this.formType = e.location.path[1];
-    console.log(this.formTypes[this.formType].title);
+    this.associatedObjectId = e.location.path[2];
     this.AppStateModel.setTitle({text: this.formTypes[this.formType].title, show: true});
+    this.AppStateModel.showLoaded(this.id);
+  }
+
+  /**
+   * @description Do data retrieval required to display this page
+   */
+  async getRequiredPageData(){
+    const promises = [];
+    if ( this.formType == 'onboarding' ){
+      promises.push(this.OnboardingModel.getById(this.associatedObjectId));
+    }
+    await Promise.all(promises);
+  }
+
+  _onOnboardingSubmissionRequest(e){
+    console.log(e);
   }
 
 }

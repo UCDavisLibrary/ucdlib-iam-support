@@ -53,7 +53,6 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       const rtHistory = await this.RtModel.getHistory(this.rtTicketId);
       if ( rtHistory.state === 'loaded' ) {
         this.rtTransactions = this.RtModel.formatHistory(rtHistory.payload.items);
-        console.log(this.rtTransactions);
       } else {
         this.rtTransactions = [];
       }

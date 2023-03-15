@@ -12,6 +12,14 @@ export function render() {
         <p>TODO: onboarding request deets go here</p>
       </div>
       <div class="l-sidebar-second">
+        <a href="/permissions/onboarding/${this.requestId}" class="focal-link category-brand--poppy u-space-mb">
+          <div class="focal-link__figure focal-link__icon">
+            <i class="fas fa-lock fa-2x"></i>
+          </div>
+          <div class="focal-link__body">
+            <strong>Request Permissions</strong>
+          </div>
+        </a>
         <div class='category-brand__background-light-gold o-box u-space-mb'>
         <div class="panel panel--icon panel--icon-custom panel--icon-redbud o-box background-transparent">
           <h2 class="panel__title u-space-mb"><span class="panel__custom-icon fas fa-comment"></span>RT Ticket</h2>
