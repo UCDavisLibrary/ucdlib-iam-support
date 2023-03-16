@@ -17,6 +17,7 @@ class AppConfig {
 
     this.rt = {
       key: env.UCDLIB_RT_KEY,
+      user: env.UCDLIB_RT_USER || 'pmanager',
       forbidWrite: env.UCDLIB_RT_FORBID_WRITE != 'false' || false,
       url: env.UCDLIB_RT_URL || 'https://rt.lib.ucdavis.edu',
       queue: env.UCDLIB_RT_QUEUE || 'test' //TODO: update when create new queue, and set local-dev env

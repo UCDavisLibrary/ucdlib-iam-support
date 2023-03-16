@@ -1,5 +1,3 @@
-const { rt } = require('../lib/config.js');
-
 module.exports = (api) => {
   api.post('/onboarding/new', async (req, res) => {
     if ( !req.auth.token.hasAdminAccess && !req.auth.token.hasHrAccess ){
@@ -38,6 +36,7 @@ module.exports = (api) => {
     const ticket = new UcdlibRtTicket();
 
     ticket.addSubject(`Onboarding: ${employeeName}`);
+    ticket.addOwner(config.rt.user);
 
     // TODO: uncomment when closer to release
     // if ( notifySupervisor ) ticket.addCc( ad.supervisorEmail );

@@ -14,7 +14,7 @@ export function render() {
       <div class="l-sidebar-second">
         <a href="/permissions/onboarding/${this.requestId}" class="focal-link category-brand--poppy u-space-mb">
           <div class="focal-link__figure focal-link__icon">
-            <i class="fas fa-lock fa-2x"></i>
+            <i class="fas fa-lock-open fa-2x"></i>
           </div>
           <div class="focal-link__body">
             <strong>Request Permissions</strong>

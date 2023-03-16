@@ -23,11 +23,15 @@ CREATE TABLE onboarding_requests (
     modified_by varchar(100),
     modified timestamp NOT NULL DEFAULT NOW()
 );
-CREATE TABLE onboarding_supervisor_responses (
+CREATE TABLE permissions_requests (
     id SERIAL PRIMARY KEY,
-    request_id integer NOT NULL REFERENCES onboarding_requests (id),
+    onboarding_request_id integer REFERENCES onboarding_requests (id),
+    iam_id varchar(20),
+    rt_ticket_id varchar(20),
+    needs_supervisor_approval boolean NOT NULL DEFAULT FALSE,
+    has_supervisor_approval boolean NOT NULL DEFAULT FALSE,
     revision integer NOT NULL DEFAULT 0, 
-    permissions jsonb NOT NULL DEFAULT '{}'::jsonb,,
+    permissions jsonb NOT NULL DEFAULT '{}'::jsonb,
     notes text,
     submitted timestamp NOT NULL DEFAULT NOW(),
     submitted_by varchar(100)

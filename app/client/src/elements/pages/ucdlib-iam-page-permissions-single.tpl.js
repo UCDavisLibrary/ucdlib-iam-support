@@ -9,7 +9,18 @@ export function render() {
   <div class='l-container u-space-pb'>
     <div class='l-basic--flipped'>
       <div class="l-content">
-        <p>permissions request</p>
+        <form @submit=${this._onSubmit}>
+          <div class="field-container">
+            <label>Main Website</label>
+            <ucd-theme-slim-select @change=${(e) => this.pMainWebsiteRoles = e.detail.map(g => g.value)}>
+              <select multiple>
+                ${this.pMainWebsiteRolesList.map(r => html`
+                  <option .value=${r.slug} ?selected=${this.pMainWebsiteRoles.includes(r.slug)}>${r.label}</option>
+                `)}
+              </select>
+            </ucd-theme-slim-select>
+          </div>
+        </form>
       </div>
       <div class="l-sidebar-second">
         <a href="/onboarding/${this.associatedObjectId}" class="focal-link category-brand--poppy u-space-mb" ?hidden=${this.formType != 'onboarding'}>
