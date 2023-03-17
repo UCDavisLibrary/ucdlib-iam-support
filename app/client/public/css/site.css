@@ -4,6 +4,10 @@
 .u-align--auto {
   margin: 0 auto !important;
 }
+.flex-justify-center {
+  display: flex;
+  justify-content: center;
+}
 .category-brand__background-light-gold {
   background-color: #fff9e6;
 }
@@ -79,4 +83,25 @@ ucdlib-iam-onboarding-list .no-results {
 }
 .panel--icon .icon::before {
   color: var(--panel-icon-color, #73abdd);
+}
+.field-row {
+  border-bottom: 1px dotted #ffbf00;
+  padding: 1rem 0;
+}
+.field-row > .l-first {
+  align-items: center;
+  display: flex;
+}
+.field-row > .l-first > div:first-child {
+  display: flex;
+  align-items: center;
+}
+.field-row > .l-first label {
+  font-size: 1.2rem;
+  padding-bottom: 0;
+  margin-right: .25rem;
+}
+.field-row > .l-first .help-icon {
+  cursor: pointer;
+  color: #022851;
 }

@@ -1,5 +1,7 @@
 import { LitElement } from 'lit';
-import {render} from "./ucdlib-iam-page-permissions-single.tpl.js";
+import * as Templates from "./ucdlib-iam-page-permissions-single.tpl.js";
+
+import "../components/ucdlib-iam-modal";
 
 /**
  * @classdesc Page for displaying a single permissions request form
@@ -13,16 +15,23 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       associatedObjectId: {state: true},
       associatedObject: {state: true},
       isActive: {state: true},
+      submitting: {state: true},
       isAnEdit: {state: true},
       firstName: {state: true},
       lastName: {state: true},
-      pMainWebsiteRoles: {state: true}
+      iamId: {state: true},
+      rtTicketId: {state: true},
+      helpModal: {state: true},
+      notes: {state: true},
+      pMainWebsiteRoles: {state: true},
+      pMainWebsiteNotes: {state: true}
     };
   }
 
   constructor() {
     super();
-    this.render = render.bind(this);
+    this.render = Templates.render.bind(this);
+    this.renderHelpModal = Templates.renderHelpModal.bind(this);
 
     this.formTypes = {
       'onboarding': {title: 'Permissions for :name'}
@@ -30,25 +39,52 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     this.formType = 'onboarding';
     this.associatedObjectId = 0;
     this.associatedObject = {};
+    this.rtTicketId = '';
+    this.iamId = '';
     this.isActive = false;
     this.isAnEdit = false;
+    this.helpModal = '';
+    this.submitting = false;
 
     this.firstName = '';
     this.lastName = '';
 
     // permissions
     this.pMainWebsiteRolesList = [
-      {slug: 'subscriber', label: 'Subscriber'},
-      {slug: 'author', label: 'Author'},
-      {slug: 'editor', label: 'Editor'},
-      {slug: 'student_employee', label: 'Student Employee'},
-      {slug: 'directory_manager', label: 'Directory Manager'},
-      {slug: 'exhibit_manager', label: 'Exhibit Manager'},
-      {slug: 'collection_manager', label: 'Special Collection Manager'}
+      {
+        slug: 'subscriber', 
+        label: 'Subscriber',
+        description: 'User can log in, but has no real capabilities.'
+      },
+      {
+        slug: 'author', 
+        label: 'Author',
+        description: `The default role. User can create pages, exhibits, and news posts, but cannot edit other's pages/posts`
+      },
+      {
+        slug: 'editor', 
+        label: 'Editor',
+        description: 'User can create and edit all pages, exhibits, and news posts on the site.'
+      },
+      {
+        slug: 'directory_manager', 
+        label: 'Directory Manager',
+        description: 'Can create and edit person profiles, and update staff directory display settings.'
+      },
+      {
+        slug: 'exhibit_manager', 
+        label: 'Exhibit Manager',
+        description: 'Can manage exhibit terms (locations, curating orgs, etc).'
+      },
+      {
+        slug: 'collection_manager', 
+        label: 'Special Collection Manager',
+        description: 'Can create and edit manuscripts/univeristy archives entries.'
+      }
     ];
-    this.setDefaultPermissions();
+    this.setDefaultForm();
 
-    this._injectModel('AppStateModel', 'OnboardingModel');
+    this._injectModel('AppStateModel', 'OnboardingModel', 'PermissionsModel');
   }
 
   /**
@@ -104,7 +140,8 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       this.associatedObject = e.payload;
       this.firstName = e.payload.additionalData.employeeFirstName || '';
       this.lastName = e.payload.additionalData.employeeLastName || '';
-      this.rtTicketId = e.payload.rtTicketId;
+      this.rtTicketId = e.payload.rtTicketId || '';
+      this.iamId = e.payload.iamId || '';
       const title = this.formTypes[this.formType].title.replace(':name', `${this.firstName} ${this.lastName}`);
       this.AppStateModel.setTitle({text: title, show: true});
       this.setBreadcrumbs();
@@ -134,8 +171,22 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
   /**
    * @description Resets form to default state
    */
-  setDefaultPermissions(){
-    this.pMainWebsiteRoles = ['author'];
+  setDefaultForm(){
+    this.pMainWebsiteRoles = [];
+    this.pMainWebsiteNotes = '';
+    this.notes = '';
+  }
+
+  /**
+   * @description Show help modal
+   * @param {String} modalType - Slug for content that should be displayed
+   */
+  showHelpModal(modalType){
+    if ( modalType ) {
+      this.helpModal = modalType;
+      const ele = this.renderRoot.querySelector('#perm-help-modal');
+      if ( ele ) ele.show();
+    }
   }
 
   /**
@@ -144,7 +195,62 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
    */
   _onSubmit(e){
     e.preventDefault();
-    console.log('submit!');
+    if ( this.submitting ) return;
+    this.PermissionsModel.newSubmission(this.payload());
+  }
+
+  /**
+   * @description Attached PermissionsModel PERMISSIONS_SUBMISSION event
+   * @param {Object} e - cork-app-utils event
+   */
+  _onPermissionsSubmission(e){
+    if ( e.state == 'loading' ){
+      this.submitting = true;
+      this.AppStateModel.showLoading();
+    } else if ( e.state == 'loaded' ){
+      this.submitting = false;
+      if ( this.formType === 'onboarding' ){
+        this.OnboardingModel.clearIdCache(this.associatedObjectId);
+        this.AppStateModel.setLocation(`/onboarding/${this.associatedObjectId}`);
+      }
+      this.AppStateModel.showAlertBanner({message: 'Permissions request submitted', brandColor: 'farmers-market'});
+      this.setDefaultForm();
+
+    } else if ( e.state == 'error' ){
+      this.submitting = false;
+      console.error(e);
+      let msg = '';
+      if ( e.error.details && e.error.details.message ){
+        msg =  e.error.details.message;
+      }
+      this.AppStateModel.showError(msg);
+    }
+  }
+
+  /**
+   * @description Construct payload for submission POST
+   * @returns {Object} payload
+   */
+  payload(){
+    const payload = {};
+    const permissions = {};
+    payload.action = this.formType;
+    if ( this.formType === 'onboarding' && this.associatedObjectId ){
+      payload.onboardingRequestId = this.associatedObjectId;
+    }
+    if ( this.iamId ){
+      payload.iamId = this.iamId;
+    }
+    if ( this.notes ){
+      payload.notes = this.notes;
+    }
+    permissions.mainWebsite = {
+      roles: this.pMainWebsiteRoles,
+      notes: this.pMainWebsiteNotes
+    };
+
+    payload.permissions = permissions;
+    return payload;
   }
 
 }

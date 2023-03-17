@@ -48,7 +48,7 @@ export function styles() {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 30px 0 30px;
+      padding: 1rem 1.5rem 0;
     }
     .close-icon {
       color: #000;
@@ -58,7 +58,7 @@ export function styles() {
       color: #008eaa;
     }
     .body-content {
-      margin: 15px 30px;
+      margin: 1rem 1.5rem;
       max-height: calc(100vh - 300px);
       overflow: scroll;
     }
