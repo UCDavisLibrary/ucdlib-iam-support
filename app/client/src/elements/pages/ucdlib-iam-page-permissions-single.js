@@ -1,6 +1,8 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-permissions-single.tpl.js";
 
+import DtUtils from "@ucd-lib/iam-support-lib/src/utils/dtUtils.js";
+
 import "../components/ucdlib-iam-modal";
 
 /**
@@ -12,6 +14,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
   static get properties() {
     return {
       formType: {state: true},
+      record: {state: true},
       associatedObjectId: {state: true},
       associatedObject: {state: true},
       isActive: {state: true},
@@ -21,6 +24,8 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       lastName: {state: true},
       iamId: {state: true},
       rtTicketId: {state: true},
+      submitted: {state: true},
+      submittedBy: {state: true},
       helpModal: {state: true},
       notes: {state: true},
       pMainWebsiteRoles: {state: true},
@@ -39,8 +44,11 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     this.formType = 'onboarding';
     this.associatedObjectId = 0;
     this.associatedObject = {};
+    this.record = {};
     this.rtTicketId = '';
     this.iamId = '';
+    this.submitted = '';
+    this.submittedBy = '';
     this.isActive = false;
     this.isAnEdit = false;
     this.helpModal = '';
@@ -84,7 +92,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     ];
     this.setDefaultForm();
 
-    this._injectModel('AppStateModel', 'OnboardingModel', 'PermissionsModel');
+    this._injectModel('AppStateModel', 'OnboardingModel', 'PermissionsModel', 'RtModel');
   }
 
   /**
@@ -124,8 +132,42 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     const promises = [];
     if ( this.formType == 'onboarding' ){
       promises.push(this.OnboardingModel.getById(this.associatedObjectId));
+      promises.push(this.PermissionsModel.getById(this.associatedObjectId, 'onboarding'));
     }
     await Promise.all(promises);
+  }
+
+  /**
+   * @description Attached to PermissionsModel PERMISSIONS_RECORD_REQUEST
+   * Fires when permissions record is retrieved, even if cached
+   * @param {*} e - cork-app-utils event
+   */
+  _onPermissionsRecordRequest(e){
+    if ( !this.isActive ) return;
+    if ( e.state === 'loaded' ){
+      const p = e.payload;
+      this.record = p;
+      this.isAnEdit = true;
+      this.submitted = DtUtils.fmtDatetime(p.submitted);
+      this.submittedBy = p.submittedBy;
+      this.notes = p.notes || '';
+      if ( p.permissions.mainWebsite ){
+        this.pMainWebsiteRoles = p.permissions.mainWebsite.roles || [];
+        this.pMainWebsiteNotes = p.permissions.mainWebsite.notes || '';
+      }
+    }
+    else if (e.state === 'error' ){
+      if ( e.error && e.error.response && e.error.response.status == 404){
+        this.isAnEdit = false;
+      } else {
+        let msg = 'Unable to retrieve permissions request';
+        if ( e.error && e.error.payload && e.error.payload.message ) msg = e.error.payload.message;
+        setTimeout(() => {
+          this.AppStateModel.showError(msg);
+        }, 10);
+      }
+    }
+    console.log(e);
   }
 
   /**
@@ -146,7 +188,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       this.AppStateModel.setTitle({text: title, show: true});
       this.setBreadcrumbs();
     } else if (e.state === 'error' ){
-      let msg = 'Unable to display onboarding request';
+      let msg = 'Unable to retrieve onboarding request';
       if ( e.error && e.error.payload && e.error.payload.message ) msg = e.error.payload.message;
       setTimeout(() => {
         this.AppStateModel.showError(msg);
@@ -211,6 +253,8 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       this.submitting = false;
       if ( this.formType === 'onboarding' ){
         this.OnboardingModel.clearIdCache(this.associatedObjectId);
+        this.PermissionsModel.clearIdCache(this.associatedObjectId, 'onboarding');
+        if ( this.rtTicketId ) this.RtModel.clearHistoryCache(this.rtTicketId);
         this.AppStateModel.setLocation(`/onboarding/${this.associatedObjectId}`);
       }
       this.AppStateModel.showAlertBanner({message: 'Permissions request submitted', brandColor: 'farmers-market'});

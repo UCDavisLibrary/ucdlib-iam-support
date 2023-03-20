@@ -28,7 +28,7 @@ export function render() {
     `)}
   </ol>
   
-  <ucdlib-pages selected=${this.page}>
+  <ucdlib-pages id='main-pages' selected=${this.page}>
     <ucdlib-iam-state id='loading' state=${this.status} error-message=${this.errorMessage}></ucdlib-iam-state>
     <ucdlib-iam-page-onboarding id='onboarding'></ucdlib-iam-page-onboarding>
     <ucdlib-iam-page-onboarding-new id='onboarding-new'></ucdlib-iam-page-onboarding-new>

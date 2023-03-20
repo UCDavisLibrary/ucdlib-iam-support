@@ -50,12 +50,20 @@ export function render() {
             <button 
               ?disabled=${this.submitting}
               type='submit' 
-              class="btn btn--alt btn--search">Submit
+              class="btn btn--alt btn--search">${this.isAnEdit ? 'Update' : 'Submit'}
             </button>
           </div>
         </form>
       </div>
       <div class="l-sidebar-second">
+        <div class='category-brand__background-light-gold o-box u-space-mb' ?hidden=${!this.isAnEdit}>
+          <div class="panel panel--icon panel--icon-custom panel--icon-quad o-box background-transparent">
+            <h2 class="panel__title u-space-mb"><span class="panel__custom-icon fas fa-check-circle"></span>Submitted</h2>
+            <div><label class='u-inline'>On:</label> ${this.submitted}</div>
+            <div><label class='u-inline'>By:</label> ${this.submittedBy}</div>
+          </div>
+
+        </div>
         <a href="/onboarding/${this.associatedObjectId}" class="focal-link category-brand--poppy u-space-mb" ?hidden=${this.formType != 'onboarding'}>
           <div class="focal-link__figure focal-link__icon">
             <i class="fas fa-door-open fa-2x"></i>

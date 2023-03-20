@@ -88,7 +88,7 @@ module.exports = (api) => {
       reply.addContent(`<a href='${supervisorLink}'>${supervisorLink}</a>`);
       const replyResponse = await rtClient.sendCorrespondence(reply);
       if ( replyResponse.err )  {
-        console.error(rtResponse);
+        console.error(replyResponse);
         await UcdlibOnboarding.delete(output.id);
         res.json({error: true, message: 'Unable to send RT request to supervisor.'});
         return;
