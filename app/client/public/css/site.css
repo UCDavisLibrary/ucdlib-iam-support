@@ -85,8 +85,7 @@ ucdlib-iam-onboarding-list .no-results {
   color: var(--panel-icon-color, #73abdd);
 }
 .field-row {
-  border-bottom: 1px dotted #ffbf00;
-  padding: 1rem 0;
+  border-bottom: 1px dotted #ffd24c;
 }
 .field-row > .l-first {
   align-items: center;
@@ -104,4 +103,7 @@ ucdlib-iam-onboarding-list .no-results {
 .field-row > .l-first .help-icon {
   cursor: pointer;
   color: #022851;
+}
+.field-row > div {
+  padding: .75rem 0;
 }

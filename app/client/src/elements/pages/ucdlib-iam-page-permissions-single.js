@@ -28,6 +28,13 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       submittedBy: {state: true},
       helpModal: {state: true},
       notes: {state: true},
+      workLocation: {state: true},
+      computerEquipment: {state: true},
+      specialEquipment: {state: true},
+      officePhone: {state: true},
+      equipmentNotes: {state: true},
+      pLibguides: {state: true},
+      pLibcal: {state: true},
       pMainWebsiteRoles: {state: true},
       pMainWebsiteNotes: {state: true}
     };
@@ -57,7 +64,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     this.firstName = '';
     this.lastName = '';
 
-    // permissions
+    // form properties
     this.pMainWebsiteRolesList = [
       {
         slug: 'subscriber', 
@@ -88,6 +95,39 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
         slug: 'collection_manager', 
         label: 'Special Collection Manager',
         description: 'Can create and edit manuscripts/univeristy archives entries.'
+      }
+    ];
+    this.computerEquipmentOptions = [
+      {value: 'workstation', label: 'Workstation'},
+      {value: 'laptop', label: 'Laptop'}
+    ];
+    this.libguidesRoles = [
+      {
+        value: 'regular', 
+        label: 'Regular',
+        description: 'Create guides and content but not edit system-level settings.'
+      },
+      {
+        value: 'editor', 
+        label: 'Editor',
+        description: 'Cannot create guides, but can be assigned to edit guides or courses created by others.'
+      },
+      {
+        value: 'admin', 
+        label: 'Admin',
+        description: 'Full access to all areas of the system.'
+      }
+    ];
+    this.libcalRoles = [
+      {
+        value: 'regular', 
+        label: 'Regular',
+        description: 'Can create and manage their own events, and manage space & equipment bookings.'
+      },
+      {
+        value: 'admin', 
+        label: 'Admin',
+        description: 'In addition to Regular permissions, can also create and manage calendars, library & department hours, and manage all system settings.'
       }
     ];
     this.setDefaultForm();
@@ -216,6 +256,13 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     this.pMainWebsiteRoles = [];
     this.pMainWebsiteNotes = '';
     this.notes = '';
+    this.workLocation = '';
+    this.computerEquipment = '';
+    this.specialEquipment = '';
+    this.officePhone = false;
+    this.equipmentNotes = '';
+    this.pLibcal = '';
+    this.pLibguides = '';
   }
 
   /**
@@ -252,6 +299,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       this.submitting = false;
       if ( this.formType === 'onboarding' ){
         this.OnboardingModel.clearIdCache(this.associatedObjectId);
+        this.OnboardingModel.clearQueryCache();
         this.PermissionsModel.clearIdCache(this.associatedObjectId, 'onboarding');
         if ( this.rtTicketId ) this.RtModel.clearHistoryCache(this.rtTicketId);
         this.AppStateModel.setLocation(`/onboarding/${this.associatedObjectId}`);

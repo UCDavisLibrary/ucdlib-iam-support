@@ -39,7 +39,7 @@ module.exports = (api) => {
     ticket.addOwner(config.rt.user);
 
     // TODO: uncomment when closer to release
-    if ( notifySupervisor ) ticket.addCc( ad.supervisorEmail );
+    // if ( notifySupervisor ) ticket.addCc( ad.supervisorEmail );
     // if ( ad.employeeEmail ) ticket.addCc( ad.employeeEmail );
 
     // ticket content
