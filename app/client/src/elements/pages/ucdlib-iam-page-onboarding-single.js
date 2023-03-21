@@ -1,5 +1,6 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-onboarding-single.tpl.js";
+import dtUtls from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
 
 /**
  * @description Page element for displaying a single onboarding request
@@ -13,7 +14,15 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       request: {state: true},
       firstName: {state: true},
       lastName: {state: true},
-      rtTransactions: {state: true}
+      rtTransactions: {state: true},
+      isActiveStatus: {state: true},
+      status: {state: true},
+      libraryTitle: {state: true},
+      department: {state: true},
+      startDate: {state: true},
+      supervisorName: {state: true},
+      supervisorId: {state: true},
+      notes: {state: true}
     };
   }
 
@@ -25,6 +34,14 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.firstName = '';
     this.lastName = '';
     this.rtTransactions = [];
+    this.isActiveStatus = false;
+    this.status = '';
+    this.libraryTitle = '';
+    this.department = '';
+    this.startDate = '';
+    this.supervisorId = '';
+    this.supervisorName = '';
+    this.notes = '';
 
     this._injectModel('AppStateModel', 'OnboardingModel', 'RtModel');
   }
@@ -71,10 +88,19 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
    * @param {Object} payload from /api/onboarding/id:
    */
   async _setStateProperties(payload){
+    const ad = payload.additionalData;
     this.request = payload;
-    this.firstName = payload.additionalData.employeeFirstName || '';
-    this.lastName = payload.additionalData.employeeLastName || '';
-    this.rtTicketId = payload.rtTicketId;
+    this.firstName = ad.employeeFirstName || '';
+    this.lastName = ad.employeeLastName || '';
+    this.rtTicketId = payload.rtTicketId || '';
+    this.isActiveStatus = payload.isActiveStatus;
+    this.status = payload.statusName || '';
+    this.libraryTitle = payload.libraryTitle || '';
+    this.department = payload.departmentName || '';
+    this.startDate = dtUtls.fmtDatetime(payload.startDate, true, true);
+    this.supervisorId = payload.supervisorId || '';
+    this.supervisorName = `${ad.supervisorFirstName || ''} ${ad.supervisorLastName || ''}`;
+    this.notes = payload.notes || '';
   }
 
   /**

@@ -62,7 +62,6 @@ export function render() {
             <div><label class='u-inline'>On:</label> ${this.submitted}</div>
             <div><label class='u-inline'>By:</label> ${this.submittedBy}</div>
           </div>
-
         </div>
         <a href="/onboarding/${this.associatedObjectId}" class="focal-link category-brand--poppy u-space-mb" ?hidden=${this.formType != 'onboarding'}>
           <div class="focal-link__figure focal-link__icon">

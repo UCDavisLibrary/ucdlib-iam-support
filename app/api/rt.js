@@ -24,7 +24,7 @@ module.exports = (api) => {
 
     // fetch
     const params = {
-      fields: 'Type,OldValue,NewValue,Field,Created,Creator',
+      fields: 'Type,OldValue,NewValue,Field,Created,Creator,Data',
       'fields[Creator]': 'Name,id,RealName',
       per_page: 100
     }

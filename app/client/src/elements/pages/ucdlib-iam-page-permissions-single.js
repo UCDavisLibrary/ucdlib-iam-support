@@ -167,7 +167,6 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
         }, 10);
       }
     }
-    console.log(e);
   }
 
   /**

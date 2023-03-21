@@ -39,7 +39,7 @@ module.exports = (api) => {
     ticket.addOwner(config.rt.user);
 
     // TODO: uncomment when closer to release
-    // if ( notifySupervisor ) ticket.addCc( ad.supervisorEmail );
+    if ( notifySupervisor ) ticket.addCc( ad.supervisorEmail );
     // if ( ad.employeeEmail ) ticket.addCc( ad.employeeEmail );
 
     // ticket content
@@ -103,6 +103,8 @@ module.exports = (api) => {
   api.get('/onboarding/:id', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
     const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
+    const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
+    const { default: Pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
 
     // TODO: move auth here. change query to be by supervisorId as well for non hr/admin request
 
@@ -128,6 +130,21 @@ module.exports = (api) => {
       });
       return;
     }
+
+    // Get department name
+    let groups = await UcdlibGroups.getAll();
+    if ( groups.err ){
+      console.error(groups.err);
+      res.json({error: true, message: errorMsg});
+      return;
+    }
+    groups = Pg.recordsById(groups.res.rows);
+    obReq.departmentName = '';
+    obReq.groupIds.forEach(gid => {
+      if ( groups[gid] && groups[gid].part_of_org ){
+        obReq.departmentName = groups[gid].name;
+      }
+    });
     return res.json(obReq);
 
   });
