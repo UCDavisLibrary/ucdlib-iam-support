@@ -2,6 +2,7 @@ import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-permissions-single.tpl.js";
 
 import DtUtils from "@ucd-lib/iam-support-lib/src/utils/dtUtils.js";
+import selectOptions from "../../utils/permissionsOptions.js";
 
 import "../components/ucdlib-iam-modal";
 
@@ -36,7 +37,18 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       pLibguides: {state: true},
       pLibcal: {state: true},
       pMainWebsiteRoles: {state: true},
-      pMainWebsiteNotes: {state: true}
+      pMainWebsiteNotes: {state: true},
+      pIntranetRoles: {state: true},
+      facilitiesErgonmic: {state: true},
+      facilitiesKeys: {state: true},
+      facilitiesAlarmCodes: {state: true},
+      facilitiesDetails: {state: true},
+      pSlack: {state: true},
+      pBigsysPatron: {state: true},
+      pBigsysTravel: {state: true},
+      pBigsysOpenAccess: {state: true},
+      pBigsysCheckProcessing: {state: true},
+      pBigsysOther: {state: true}
     };
   }
 
@@ -44,6 +56,9 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     super();
     this.render = Templates.render.bind(this);
     this.renderHelpModal = Templates.renderHelpModal.bind(this);
+    this.renderCheckbox = Templates.renderCheckbox.bind(this);
+    this.renderTextArea = Templates.renderTextArea.bind(this);
+    this.renderGroupLabel = Templates.renderGroupLabel.bind(this);
 
     this.formTypes = {
       'onboarding': {title: 'Permissions for :name'}
@@ -64,72 +79,10 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     this.firstName = '';
     this.lastName = '';
 
-    // form properties
-    this.pMainWebsiteRolesList = [
-      {
-        slug: 'subscriber', 
-        label: 'Subscriber',
-        description: 'User can log in, but has no real capabilities.'
-      },
-      {
-        slug: 'author', 
-        label: 'Author',
-        description: `The default role. User can create pages, exhibits, and news posts, but cannot edit other's pages/posts`
-      },
-      {
-        slug: 'editor', 
-        label: 'Editor',
-        description: 'User can create and edit all pages, exhibits, and news posts on the site.'
-      },
-      {
-        slug: 'directory_manager', 
-        label: 'Directory Manager',
-        description: 'Can create and edit person profiles, and update staff directory display settings.'
-      },
-      {
-        slug: 'exhibit_manager', 
-        label: 'Exhibit Manager',
-        description: 'Can manage exhibit terms (locations, curating orgs, etc).'
-      },
-      {
-        slug: 'collection_manager', 
-        label: 'Special Collection Manager',
-        description: 'Can create and edit manuscripts/univeristy archives entries.'
-      }
-    ];
-    this.computerEquipmentOptions = [
-      {value: 'workstation', label: 'Workstation'},
-      {value: 'laptop', label: 'Laptop'}
-    ];
-    this.libguidesRoles = [
-      {
-        value: 'regular', 
-        label: 'Regular',
-        description: 'Create guides and content but not edit system-level settings.'
-      },
-      {
-        value: 'editor', 
-        label: 'Editor',
-        description: 'Cannot create guides, but can be assigned to edit guides or courses created by others.'
-      },
-      {
-        value: 'admin', 
-        label: 'Admin',
-        description: 'Full access to all areas of the system.'
-      }
-    ];
-    this.libcalRoles = [
-      {
-        value: 'regular', 
-        label: 'Regular',
-        description: 'Can create and manage their own events, and manage space & equipment bookings.'
-      },
-      {
-        value: 'admin', 
-        label: 'Admin',
-        description: 'In addition to Regular permissions, can also create and manage calendars, library & department hours, and manage all system settings.'
-      }
-    ];
+    for (const option of selectOptions ) {
+      this[option.k] = option.v;
+    }
+
     this.setDefaultForm();
 
     this._injectModel('AppStateModel', 'OnboardingModel', 'PermissionsModel', 'RtModel');
@@ -255,6 +208,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
   setDefaultForm(){
     this.pMainWebsiteRoles = [];
     this.pMainWebsiteNotes = '';
+    this.pIntranetRoles = [];
     this.notes = '';
     this.workLocation = '';
     this.computerEquipment = '';
@@ -263,6 +217,16 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     this.equipmentNotes = '';
     this.pLibcal = '';
     this.pLibguides = '';
+    this.facilitiesErgonmic = false;
+    this.facilitiesKeys = false;
+    this.facilitiesAlarmCodes = false;
+    this.facilitiesDetails = '';
+    this.pSlack = false;
+    this.pBigsysPatron = false;
+    this.pBigsysTravel = false;
+    this.pBigsysOpenAccess = false;
+    this.pBigsysCheckProcessing = false;
+    this.pBigsysOther = '';
   }
 
   /**
@@ -338,6 +302,38 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     permissions.mainWebsite = {
       roles: this.pMainWebsiteRoles,
       notes: this.pMainWebsiteNotes
+    };
+    permissions.techEquipment = {
+      location: this.workLocation,
+      computer: this.computerEquipment,
+      officePhone: this.officePhone,
+      specialEquipment: this.specialEquipment,
+      notes: this.equipmentNotes
+    };
+    permissions.facilities = {
+      ergonomic: this.facilitiesErgonmic,
+      keys: this.facilitiesKeys,
+      codes: this.facilitiesAlarmCodes,
+      details: this.facilitiesDetails
+    };
+    permissions.intranet = {
+      roles: this.pIntranetRoles
+    };
+    permissions.libguides = {
+      role: this.pLibguides
+    };
+    permissions.libcal = {
+      role: this.pLibcal
+    };
+    permissions.slack = {
+      create: this.pSlack
+    };
+    permissions.bigsys = {
+      patron: this.pBigsysPatron,
+      travel: this.pBigsysTravel,
+      openAccess: this.pBigsysOpenAccess,
+      checkProcessing: this.pBigsysCheckProcessing,
+      other: this.pBigsysOther
     };
 
     payload.permissions = permissions;

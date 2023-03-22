@@ -180,6 +180,7 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
 
   // set up listeners keycloak listeners
   kc.onAuthRefreshError = () => {AuthModel.logout();};
+  kc.onAuthError = () => {AuthModel.redirectUnauthorized();};
   kc.onAuthSuccess = () => {
     customElements.define('ucdlib-iam-app', UcdlibIamApp);
     AuthModel.init();
