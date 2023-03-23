@@ -25,9 +25,9 @@ export function render() {
                 <div class="field-container">
                   <label for="computer-equipment">Computer Equipment</label>
                   <select id="computer-equipment" @input=${(e) => this.computerEquipment = e.target.value}>
-                    <option .value='' ?selected=${!this.computerEquipment}>-- Select an option --</option>
+                    <option value='none' ?selected=${!this.computerEquipment}>-- Select an option --</option>
                     ${this.computerEquipmentOptions.map(e => html`
-                      <option .value=${e.value} ?selected=${e.value == this.computerEquipment}>${e.label}</option>
+                      <option value=${e.value} ?selected=${e.value == this.computerEquipment}>${e.label}</option>
                     `)}
                   </select>
                 </div>
@@ -92,9 +92,9 @@ export function render() {
               <div class="field-container">
                 <label>Roles</label>
                 <select @input=${(e) => this.pLibguides = e.target.value}>
-                  <option .value='' ?selected=${!this.pLibguides}>-- Select an option --</option>
+                  <option value='none' ?selected=${!this.pLibguides}>-- Select an option --</option>
                   ${this.libguidesRoles.map(e => html`
-                    <option .value=${e.value} ?selected=${e.value == this.pLibguides}>${e.label}</option>
+                    <option value=${e.value} ?selected=${e.value == this.pLibguides}>${e.label}</option>
                   `)}
                 </select>
               </div>
@@ -108,9 +108,9 @@ export function render() {
               <div class="field-container">
                 <label>Roles</label>
                 <select @input=${(e) => this.pLibcal = e.target.value}>
-                  <option .value='' ?selected=${!this.pLibcal}>-- Select an option --</option>
+                  <option value='none' ?selected=${!this.pLibcal}>-- Select an option --</option>
                   ${this.libcalRoles.map(e => html`
-                    <option .value=${e.value} ?selected=${e.value == this.pLibcal}>${e.label}</option>
+                    <option value=${e.value} ?selected=${e.value == this.pLibcal}>${e.label}</option>
                   `)}
                 </select>
               </div>
@@ -132,7 +132,7 @@ export function render() {
               <label>Access to:</label>
               ${this.renderCheckbox('pBigsysPatron', 'Patron Lookup Tool')}
               ${this.renderCheckbox('pBigsysTravel', 'Travel Forms and Expenses')}
-              ${this.renderCheckbox('pBigsysOpenAcess', 'Open Access Funds Management')}
+              ${this.renderCheckbox('pBigsysOpenAccess', 'Open Access Funds Management')}
               ${this.renderCheckbox('pBigsysCheckProcessing', 'Alma-KFS Integration Application')}
               ${this.renderTextArea('pBigsysOther', 'Other:')}
             </div>

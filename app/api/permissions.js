@@ -83,13 +83,29 @@ module.exports = (api) => {
 
     // send rt
     const rtClient = new UcdlibRt(config.rt);
+    const permissions = [
+      {name: 'Tech Equipment', value: data.permissions.techEquipment},
+      {name: 'Main Website', value: data.permissions.mainWebsite},
+      {name: 'Bigsys', value: data.permissions.bigsys},
+      {name: 'Facilities', value: data.permissions.facilities},
+      {name: 'Staff Intranet', value: data.permissions.intranet},
+      {name: 'Libcal', value: data.permissions.libcal},
+      {name: 'Libguides', value: data.permissions.libguides},
+      {name: 'Slack', value: data.permissions.slack}
+    ];
+
+    // TODO: send facilities RT if first onboarding request, and facilities is checked
 
     if ( action === 'onboarding' && data.rtTicketId ){
       const ticket = new UcdlibRtTicket(false, {id: data.rtTicketId});
       const reply = ticket.createReply();
       reply.addSubject(`Permissions Request${data.revision > 0 ? ' (Update)': ''}`);
-      reply.addContent('<h4>Main Website</h4>');
-      reply.addContent(data.permissions.mainWebsite, false);
+
+      // loop permissions and add to reply
+      permissions.forEach(p => {
+        reply.addContent(`<h4>${p.name}</h4>`);
+        reply.addContent(p.value, false);
+      });
 
       if ( data.notes ){
         reply.addContent('<h4>Additional Notes</h4>');

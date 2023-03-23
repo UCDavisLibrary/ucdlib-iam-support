@@ -63,21 +63,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     this.formTypes = {
       'onboarding': {title: 'Permissions for :name'}
     };
-    this.formType = 'onboarding';
-    this.associatedObjectId = 0;
-    this.associatedObject = {};
-    this.record = {};
-    this.rtTicketId = '';
-    this.iamId = '';
-    this.submitted = '';
-    this.submittedBy = '';
-    this.isActive = false;
-    this.isAnEdit = false;
-    this.helpModal = '';
-    this.submitting = false;
-
-    this.firstName = '';
-    this.lastName = '';
+    this.resetState();
 
     for (const option of selectOptions ) {
       this[option.k] = option.v;
@@ -138,16 +124,14 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
   _onPermissionsRecordRequest(e){
     if ( !this.isActive ) return;
     if ( e.state === 'loaded' ){
+      this.setDefaultForm();
       const p = e.payload;
       this.record = p;
+      this.payload = p;
       this.isAnEdit = true;
       this.submitted = DtUtils.fmtDatetime(p.submitted);
       this.submittedBy = p.submittedBy;
-      this.notes = p.notes || '';
-      if ( p.permissions.mainWebsite ){
-        this.pMainWebsiteRoles = p.permissions.mainWebsite.roles || [];
-        this.pMainWebsiteNotes = p.permissions.mainWebsite.notes || '';
-      }
+      this._setPayloadOrElement('element');
     }
     else if (e.state === 'error' ){
       if ( e.error && e.error.response && e.error.response.status == 404){
@@ -203,6 +187,28 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
   }
 
   /**
+   * @description Resets page to default state
+   */
+  resetState(){
+    this.formType = 'onboarding';
+    this.associatedObjectId = 0;
+    this.associatedObject = {};
+    this.payload = {};
+    this.record = {};
+    this.rtTicketId = '';
+    this.iamId = '';
+    this.submitted = '';
+    this.submittedBy = '';
+    this.isActive = false;
+    this.isAnEdit = false;
+    this.helpModal = '';
+    this.submitting = false;
+
+    this.firstName = '';
+    this.lastName = '';
+  }
+
+  /**
    * @description Resets form to default state
    */
   setDefaultForm(){
@@ -211,12 +217,12 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     this.pIntranetRoles = [];
     this.notes = '';
     this.workLocation = '';
-    this.computerEquipment = '';
+    this.computerEquipment = 'none';
     this.specialEquipment = '';
     this.officePhone = false;
     this.equipmentNotes = '';
-    this.pLibcal = '';
-    this.pLibguides = '';
+    this.pLibcal = 'none';
+    this.pLibguides = 'none';
     this.facilitiesErgonmic = false;
     this.facilitiesKeys = false;
     this.facilitiesAlarmCodes = false;
@@ -248,7 +254,8 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
   _onSubmit(e){
     e.preventDefault();
     if ( this.submitting ) return;
-    this.PermissionsModel.newSubmission(this.payload());
+    this._setPayloadOrElement('payload');
+    this.PermissionsModel.newSubmission(this.payload);
   }
 
   /**
@@ -286,58 +293,134 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
    * @description Construct payload for submission POST
    * @returns {Object} payload
    */
-  payload(){
-    const payload = {};
-    const permissions = {};
-    payload.action = this.formType;
+  setPayload(){
+    this.payload = {};
+    this.payload.action = this.formType;
     if ( this.formType === 'onboarding' && this.associatedObjectId ){
-      payload.onboardingRequestId = this.associatedObjectId;
+      this.payload.onboardingRequestId = this.associatedObjectId;
     }
-    if ( this.iamId ){
-      payload.iamId = this.iamId;
-    }
-    if ( this.notes ){
-      payload.notes = this.notes;
-    }
-    permissions.mainWebsite = {
-      roles: this.pMainWebsiteRoles,
-      notes: this.pMainWebsiteNotes
-    };
-    permissions.techEquipment = {
-      location: this.workLocation,
-      computer: this.computerEquipment,
-      officePhone: this.officePhone,
-      specialEquipment: this.specialEquipment,
-      notes: this.equipmentNotes
-    };
-    permissions.facilities = {
-      ergonomic: this.facilitiesErgonmic,
-      keys: this.facilitiesKeys,
-      codes: this.facilitiesAlarmCodes,
-      details: this.facilitiesDetails
-    };
-    permissions.intranet = {
-      roles: this.pIntranetRoles
-    };
-    permissions.libguides = {
-      role: this.pLibguides
-    };
-    permissions.libcal = {
-      role: this.pLibcal
-    };
-    permissions.slack = {
-      create: this.pSlack
-    };
-    permissions.bigsys = {
-      patron: this.pBigsysPatron,
-      travel: this.pBigsysTravel,
-      openAccess: this.pBigsysOpenAccess,
-      checkProcessing: this.pBigsysCheckProcessing,
-      other: this.pBigsysOther
-    };
+    this._setPayloadOrElement('payload');
+  }
 
-    payload.permissions = permissions;
-    return payload;
+  /**
+   * @description Sets payload properties based on element properties or vice versa
+   * @param {String} toSet - 'payload' or 'element'
+   * @returns 
+   */
+  _setPayloadOrElement(toSet){
+    if ( !toSet ) return;
+    const map = [
+      {
+        prop: 'iamId',
+        payload: 'iamId'
+      },
+      {
+        prop: 'pMainWebsiteRoles',
+        payload: 'permissions.mainWebsite.roles'
+      },
+      {
+        prop: 'pMainWebsiteNotes',
+        payload: 'permissions.mainWebsite.notes'
+      },
+      {
+        prop: 'pIntranetRoles',
+        payload: 'permissions.intranet.roles'
+      },
+      {
+        prop: 'notes',
+        payload: 'notes'
+      },
+      {
+        prop: 'workLocation',
+        payload: 'permissions.techEquipment.location'
+      },
+      {
+        prop: 'computerEquipment',
+        payload: 'permissions.techEquipment.computer'
+      },
+      {
+        prop: 'specialEquipment',
+        payload: 'permissions.techEquipment.specialEquipment'
+      },
+      {
+        prop: 'officePhone',
+        payload: 'permissions.techEquipment.officePhone'
+      },
+      {
+        prop: 'equipmentNotes',
+        payload: 'permissions.techEquipment.notes'
+      },
+      {
+        prop: 'pLibcal',
+        payload: 'permissions.libcal.role'
+      },
+      {
+        prop: 'pLibguides',
+        payload: 'permissions.libguides.role'
+      },
+      {
+        prop: 'facilitiesErgonmic',
+        payload: 'permissions.facilities.ergonomic'
+      },
+      {
+        prop: 'facilitiesKeys',
+        payload: 'permissions.facilities.keys'
+      },
+      {
+        prop: 'facilitiesAlarmCodes',
+        payload: 'permissions.facilities.codes'
+      },
+      {
+        prop: 'facilitiesDetails',
+        payload: 'permissions.facilities.details'
+      },
+      {
+        prop: 'pSlack',
+        payload: 'permissions.slack.create'
+      },
+      {
+        prop: 'pBigsysPatron',
+        payload: 'permissions.bigsys.patron'
+      },
+      {
+        prop: 'pBigsysTravel',
+        payload: 'permissions.bigsys.travel'
+      },
+      {
+        prop: 'pBigsysOpenAccess',
+        payload: 'permissions.bigsys.openAccess'
+      },
+      {
+        prop: 'pBigsysCheckProcessing',
+        payload: 'permissions.bigsys.checkProcessing'
+      },
+      {
+        prop: 'pBigsysOther',
+        payload: 'permissions.bigsys.other'
+      }
+    ];
+
+    map.forEach((item) => {
+      if ( toSet === 'payload' ){
+        const payloadArr = item.payload.split('.');
+        payloadArr.forEach((prop, i) => {
+          const payloadPath = payloadArr.slice(0, i+1).join('.');
+          const isLast = i === payloadArr.length - 1;
+          if ( isLast ){
+            eval(`this.payload.${payloadPath} = this.${item.prop}`);
+          } else if ( typeof eval(`this.payload.${payloadPath}`) === 'undefined' ){
+            eval(`this.payload.${payloadPath} = {}`);
+          } 
+        });
+      } else if ( toSet === 'element' ){
+        try {
+          const v = eval(`this.payload.${item.payload}`);
+          if ( typeof v !== 'undefined' ){
+            this[item.prop] = v;
+          }
+        } catch (error) {}
+      }
+    });
   }
 
 }
