@@ -2,7 +2,8 @@ import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-permissions-single.tpl.js";
 
 import DtUtils from "@ucd-lib/iam-support-lib/src/utils/dtUtils.js";
-import selectOptions from "../../utils/permissionsOptions.js";
+import selectOptions from "../../utils/permissionsFormOptions.js";
+import formProperties from '../../utils/permissionsFormProperties.js';
 
 import "../components/ucdlib-iam-modal";
 
@@ -13,7 +14,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
   .with(window.LitCorkUtils) {
 
   static get properties() {
-    return {
+    const elementState = {
       formType: {state: true},
       record: {state: true},
       associatedObjectId: {state: true},
@@ -28,27 +29,14 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       submitted: {state: true},
       submittedBy: {state: true},
       helpModal: {state: true},
-      notes: {state: true},
-      workLocation: {state: true},
-      computerEquipment: {state: true},
-      specialEquipment: {state: true},
-      officePhone: {state: true},
-      equipmentNotes: {state: true},
-      pLibguides: {state: true},
-      pLibcal: {state: true},
-      pMainWebsiteRoles: {state: true},
-      pMainWebsiteNotes: {state: true},
-      pIntranetRoles: {state: true},
-      facilitiesErgonmic: {state: true},
-      facilitiesKeys: {state: true},
-      facilitiesAlarmCodes: {state: true},
-      facilitiesDetails: {state: true},
-      pSlack: {state: true},
-      pBigsysPatron: {state: true},
-      pBigsysTravel: {state: true},
-      pBigsysOpenAccess: {state: true},
-      pBigsysCheckProcessing: {state: true},
-      pBigsysOther: {state: true}
+    };
+    const formState = {};
+    for (const prop of formProperties) {
+      formState[prop.prop] = {state: true};
+    }
+    return {
+      ...elementState,
+      ...formState
     };
   }
 
@@ -212,27 +200,9 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
    * @description Resets form to default state
    */
   setDefaultForm(){
-    this.pMainWebsiteRoles = [];
-    this.pMainWebsiteNotes = '';
-    this.pIntranetRoles = [];
-    this.notes = '';
-    this.workLocation = '';
-    this.computerEquipment = 'none';
-    this.specialEquipment = '';
-    this.officePhone = false;
-    this.equipmentNotes = '';
-    this.pLibcal = 'none';
-    this.pLibguides = 'none';
-    this.facilitiesErgonmic = false;
-    this.facilitiesKeys = false;
-    this.facilitiesAlarmCodes = false;
-    this.facilitiesDetails = '';
-    this.pSlack = false;
-    this.pBigsysPatron = false;
-    this.pBigsysTravel = false;
-    this.pBigsysOpenAccess = false;
-    this.pBigsysCheckProcessing = false;
-    this.pBigsysOther = '';
+    formProperties.forEach(p => {
+      this[p.prop] = p.default;
+    });
   }
 
   /**
@@ -309,98 +279,8 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
    */
   _setPayloadOrElement(toSet){
     if ( !toSet ) return;
-    const map = [
-      {
-        prop: 'iamId',
-        payload: 'iamId'
-      },
-      {
-        prop: 'pMainWebsiteRoles',
-        payload: 'permissions.mainWebsite.roles'
-      },
-      {
-        prop: 'pMainWebsiteNotes',
-        payload: 'permissions.mainWebsite.notes'
-      },
-      {
-        prop: 'pIntranetRoles',
-        payload: 'permissions.intranet.roles'
-      },
-      {
-        prop: 'notes',
-        payload: 'notes'
-      },
-      {
-        prop: 'workLocation',
-        payload: 'permissions.techEquipment.location'
-      },
-      {
-        prop: 'computerEquipment',
-        payload: 'permissions.techEquipment.computer'
-      },
-      {
-        prop: 'specialEquipment',
-        payload: 'permissions.techEquipment.specialEquipment'
-      },
-      {
-        prop: 'officePhone',
-        payload: 'permissions.techEquipment.officePhone'
-      },
-      {
-        prop: 'equipmentNotes',
-        payload: 'permissions.techEquipment.notes'
-      },
-      {
-        prop: 'pLibcal',
-        payload: 'permissions.libcal.role'
-      },
-      {
-        prop: 'pLibguides',
-        payload: 'permissions.libguides.role'
-      },
-      {
-        prop: 'facilitiesErgonmic',
-        payload: 'permissions.facilities.ergonomic'
-      },
-      {
-        prop: 'facilitiesKeys',
-        payload: 'permissions.facilities.keys'
-      },
-      {
-        prop: 'facilitiesAlarmCodes',
-        payload: 'permissions.facilities.codes'
-      },
-      {
-        prop: 'facilitiesDetails',
-        payload: 'permissions.facilities.details'
-      },
-      {
-        prop: 'pSlack',
-        payload: 'permissions.slack.create'
-      },
-      {
-        prop: 'pBigsysPatron',
-        payload: 'permissions.bigsys.patron'
-      },
-      {
-        prop: 'pBigsysTravel',
-        payload: 'permissions.bigsys.travel'
-      },
-      {
-        prop: 'pBigsysOpenAccess',
-        payload: 'permissions.bigsys.openAccess'
-      },
-      {
-        prop: 'pBigsysCheckProcessing',
-        payload: 'permissions.bigsys.checkProcessing'
-      },
-      {
-        prop: 'pBigsysOther',
-        payload: 'permissions.bigsys.other'
-      }
-    ];
 
-    map.forEach((item) => {
+    formProperties.forEach((item) => {
       if ( toSet === 'payload' ){
         const payloadArr = item.payload.split('.');
         payloadArr.forEach((prop, i) => {
