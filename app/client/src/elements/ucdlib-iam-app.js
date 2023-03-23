@@ -1,6 +1,17 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-app.tpl.js";
 
+// brand components
+import '@ucd-lib/theme-elements/brand/ucd-theme-primary-nav/ucd-theme-primary-nav.js';
+import '@ucd-lib/theme-elements/ucdlib/ucdlib-branding-bar/ucdlib-branding-bar.js';
+import '@ucd-lib/theme-elements/brand/ucd-theme-header/ucd-theme-header.js';
+import '@ucd-lib/theme-elements/ucdlib/ucdlib-pages/ucdlib-pages.js';
+import '@ucd-lib/theme-elements/brand/ucd-theme-slim-select/ucd-theme-slim-select.js';
+
+// import font awesome
+import '@fortawesome/fontawesome-free/js/all.js';
+
+
 // app config
 import AppConfig from "@ucd-lib/iam-support-lib/src/config";
 

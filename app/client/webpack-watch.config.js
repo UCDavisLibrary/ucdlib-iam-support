@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const buildConfig = require('./build-config');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 let preview = `${buildConfig.publicDir}/js/dev`;
 let previewFolder = path.join(__dirname, preview);
@@ -22,7 +23,24 @@ let config = require('@ucd-lib/cork-app-build').watch({
 if( !Array.isArray(config) ) config = [config];
 
 config.forEach(conf => {
-  
+
+  // make stylesheet
+  if( !Array.isArray(conf.entry) ) conf.entry = [conf.entry]; 
+  conf.entry.push(path.join(__dirname, './scss/style.scss'));
+  conf.module.rules.push({
+    test: /\.s[ac]ss$/i,
+    use: [
+      { loader: MiniCssExtractPlugin.loader},
+      buildConfig.loaderOptions.css,
+      buildConfig.loaderOptions.scss,
+    ]
+  });
+
+  conf.plugins = [
+    new MiniCssExtractPlugin({
+      filename: '../../css/site.css'
+    })
+  ];
 });
 
 
