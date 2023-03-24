@@ -98,7 +98,8 @@ CREATE TABLE cache (
     type varchar(100),
     query text NOT NULL,
     data jsonb,
-    created timestamp DEFAULT NOW()
+    created timestamp DEFAULT NOW(),
+    UNIQUE (type, query)
 );
 
 -- Request Statuses
@@ -124,3 +125,8 @@ VALUES ('Resolving', '{"onboarding", "separation"}', FALSE);
 INSERT INTO "status_codes" ("name", "request_type", "is_open")
 VALUES ('Resolved', '{"onboarding", "separation"}', FALSE);
 
+-- Group Types
+INSERT INTO "group_types" ("name", "part_of_org")
+VALUES ('Department', '1');
+INSERT INTO "group_types" ("name", "part_of_org")
+VALUES ('Council', '0');

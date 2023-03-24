@@ -1,0 +1,20 @@
+{
+  "name": "migration",
+  "version": "1.0.0",
+  "description": "Runs the initial data migration from old hr/directory systems into this system",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate": "PGUSER=postgres PGHOST=localhost PGDATABASE=postgres PGPASSWORD=localhost PGPORT=5432 node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^16.0.3"
+  }
+}
