@@ -58,7 +58,7 @@ CREATE TABLE employees (
     middle_name text,
     suffix text,
     supervisor_id varchar(20),
-    is_faculty boolean NOT NULL DEFAULT FALSE,
+    types jsonb NOT NULL DEFAULT '{}'::jsonb,
     ucd_dept_code varchar(10),
     primary_association jsonb NOT NULL DEFAULT '{}'::jsonb,
     additional_data jsonb NOT NULL DEFAULT '{}'::jsonb,
@@ -84,7 +84,8 @@ CREATE TABLE group_membership (
     id SERIAL PRIMARY KEY,
     employee_key integer REFERENCES employees (id),
     group_id integer REFERENCES groups (id),
-    is_head boolean NOT NULL DEFAULT FALSE
+    is_head boolean NOT NULL DEFAULT FALSE,
+    UNIQUE (employee_key, group_id)
 );
 CREATE TABLE config (
     id SERIAL PRIMARY KEY,

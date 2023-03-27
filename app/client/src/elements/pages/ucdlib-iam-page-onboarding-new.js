@@ -336,6 +336,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     payload.skipSupervisor = this.skipSupervisor;
 
     additionalData.appointmentIndex = this.appointmentIndex;
+    additionalData.primaryAssociation = {deptCode: this.iamRecord.deptCode, titleCode: this.iamRecord.titleCode};
     additionalData.isDeptHead = this.isDeptHead;
     additionalData.employeeEmail = this.email;
     additionalData.supervisorEmail = this.supervisorEmail;

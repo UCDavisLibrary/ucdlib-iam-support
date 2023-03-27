@@ -14,9 +14,7 @@ if ( await groupMigration.groupsExist() ) {
   console.log("groups imported");
 }
 
-const r = await personMigration.getIamRecord(employees[0].iamId);
-console.log(r);
-
-
-// check for multiple departments - throw error if not specified
-// check if does not have library appointment, and throw error if no reportsTo (unless mac)
+// import people
+console.log("Importing people");
+await personMigration.importPeople(employees);
+console.log("people imported");
