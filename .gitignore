@@ -5,3 +5,5 @@ app/client/public/js/dev
 app/client/public/js/dist
 app/client/public/css
 migration/data
+gc-itis-iam-writer-key.json
+gc-itis-iam-reader-key.json
