@@ -25,7 +25,7 @@ services:
       - ../../lib:/iam-support-lib
     command: bash -c "tail -f /dev/null"
   cli:
-    image: {{CLI_IMAGE_NAME}}:{{REPO_TAG}}
+    image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
     env_file:
       - .env
     depends_on:
@@ -37,9 +37,10 @@ services:
       PGDATABASE: 'postgres'
       PGPASSWORD: 'localhost'
       PGPORT: 5432
+    command: /cli/cli.sh
     volumes:
-      - ../../cli/bin:/cli/bin
-      - ../../cli/lib:/cli/lib
+      - ../../utils/cli/bin:/cli/bin
+      - ../../utils/cli/lib:/cli/lib
       - ../../lib:/iam-support-lib
   db:
     image: postgres

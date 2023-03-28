@@ -18,3 +18,5 @@ if ( await groupMigration.groupsExist() ) {
 console.log("Importing people");
 await personMigration.importPeople(employees);
 console.log("people imported");
+
+console.log("Done");

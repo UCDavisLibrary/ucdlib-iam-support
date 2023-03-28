@@ -18,6 +18,7 @@ RUN cd client && npm link @ucd-lib/iam-support-lib
 
 # client code
 COPY client/src client/src
+COPY client/scss client/scss
 COPY client/public/index.html client/public/index.html
 COPY client/build-config.js client/build-config.js
 COPY client/webpack-dist.config.js client/webpack-dist.config.js
