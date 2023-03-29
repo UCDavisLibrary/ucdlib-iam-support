@@ -28,6 +28,16 @@ RUN chmod 0644 /etc/cron.d/backup
 RUN mkdir /utils-data/init
 COPY init /init
 
+# Maintenance scripts
+RUN mkdir /maintenance
+WORKDIR /maintenance
+COPY maintenance/entrypoint.sh entrypoint.sh
+COPY maintenance/package.json package.json
+COPY maintenance/package-lock.json package-lock.json
+RUN npm install
+RUN npm link @ucd-lib/iam-support-lib
+COPY maintenance/src src
+
 # CLI
 RUN mkdir /cli
 WORKDIR /cli

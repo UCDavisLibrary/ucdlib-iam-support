@@ -58,6 +58,7 @@ CREATE TABLE employees (
     middle_name text,
     suffix text,
     supervisor_id varchar(20),
+    custom_supervisor boolean NOT NULL DEFAULT FALSE,
     types jsonb NOT NULL DEFAULT '{}'::jsonb,
     ucd_dept_code varchar(10),
     primary_association jsonb NOT NULL DEFAULT '{}'::jsonb,
@@ -101,6 +102,13 @@ CREATE TABLE cache (
     data jsonb,
     created timestamp DEFAULT NOW(),
     UNIQUE (type, query)
+);
+CREATE TABLE outdated_records (
+    id SERIAL PRIMARY KEY,
+    reason varchar(100),
+    iam_id varchar(20),
+    fixed boolean NOT NULL DEFAULT FALSE,
+    created timestamp DEFAULT NOW()
 );
 
 -- Request Statuses

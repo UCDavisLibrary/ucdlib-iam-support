@@ -85,6 +85,22 @@ services:
     volumes:
       - ../../utils/init:/init
       - ../../gc-itis-iam-reader-key.json:/etc/service-account.json
+  maintenance:
+    image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
+    env_file:
+      - .env
+    depends_on:
+      - db
+    environment:
+      PGUSER: 'postgres'
+      PGHOST: 'db'
+      PGDATABASE: 'postgres'
+      PGPASSWORD: 'localhost'
+      PGPORT: 5432
+    command: /cli/cli.sh
+    volumes:
+      - ../../utils/maintenance/src:/maintenance/src
+      - ../../lib:/iam-support-lib
   db:
     image: postgres
     environment:

@@ -40,6 +40,7 @@ class PersonMigration {
 
       if ( person.hasOwnProperty('reportsTo') ) {
         personToWrite.supervisorId = person.reportsTo;
+        personToWrite.customSupervisor = true;
       } else {
         const supervisor = await this.getIamRecord(iamRecord.supervisorEmployeeId, 'employeeId');
         personToWrite.supervisorId = supervisor.id;
