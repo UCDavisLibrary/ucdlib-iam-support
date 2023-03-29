@@ -57,10 +57,34 @@ services:
       PGPASSWORD: 'localhost'
       PGPORT: 5432
       GOOGLE_APPLICATION_CREDENTIALS: /etc/service-account.json
+      GOOGLE_CLOUD_BUCKET: 'itis-iam'
+      SQL_FILE_NAME: 'itis-iam.sql.gz'
     command: /backup/entrypoint.sh
     volumes:
       - ../../utils/backup:/backup
       - ../../gc-itis-iam-writer-key.json:/etc/service-account.json
+  init:
+    image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
+    env_file:
+      - .env
+    depends_on:
+      - db
+    environment:
+      UCDLIB_APP_ENV: ${UCDLIB_APP_ENV:-dev}
+      RUN_INIT: true
+      DATA_ENV: 'localhost'
+      PGUSER: 'postgres'
+      PGHOST: 'db'
+      PGDATABASE: 'postgres'
+      PGPASSWORD: 'localhost'
+      PGPORT: 5432
+      GOOGLE_APPLICATION_CREDENTIALS: /etc/service-account.json
+      GOOGLE_CLOUD_BUCKET: 'itis-iam'
+      SQL_FILE_NAME: 'itis-iam.sql.gz'
+    command: /init/init.sh
+    volumes:
+      - ../../utils/init:/init
+      - ../../gc-itis-iam-reader-key.json:/etc/service-account.json
   db:
     image: postgres
     environment:
@@ -69,7 +93,7 @@ services:
       - 5432:5432
     volumes:
       - db-data:/var/lib/postgresql/data
-      - ../../deploy/utils/db-entrypoint:/docker-entrypoint-initdb.d
+      #- ../../deploy/utils/db-entrypoint:/docker-entrypoint-initdb.d
 
   adminer:
     image: adminer

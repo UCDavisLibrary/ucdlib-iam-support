@@ -24,6 +24,10 @@ COPY backup /backup
 COPY backup/cron /etc/cron.d/backup
 RUN chmod 0644 /etc/cron.d/backup
 
+# Init
+RUN mkdir /utils-data/init
+COPY init /init
+
 # CLI
 RUN mkdir /cli
 WORKDIR /cli

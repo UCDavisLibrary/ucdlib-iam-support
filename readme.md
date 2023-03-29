@@ -15,6 +15,14 @@ The command line interface (in `/utils/cli`) is designed to be used by ITIS to p
 
 ## Backup Utility
 
+Located in `utils/backup`, this container will automatically back up the database to the `itis-iam` Google Cloud Storage bucket if `NIGHTLY_BACKUPS` and `BACKUP_ENV` env variables are set.
+
+TODO: write script for retrieving writer/reader SA keys.
+
+## Init Utility
+
+Located in `utils/init`, this container will automatically hydrate the database upon `docker compose up` if local db is empty. Requires `RUN_INIT` and `DATA_ENV` env variables to be set.
+
 ## Node Cron Utility
 
 ## Shared Code
@@ -30,9 +38,13 @@ Most relevant env variables:
 | ---- | ----- |
 | `UCDLIB_APP_HOST_PORT` | |
 | `UCDLIB_APP_ENV` | 'prod' or 'dev'. By default, local development starts with 'dev' |
-| `UCD_IAM_API_KEY` | required for much functionality |
-| `UCDLIB_RT_KEY` | Required for interacting with RT |
+| `UCD_IAM_API_KEY` | API key for `https://iet-ws.ucdavis.edu/api/iam`. Required for much functionality |
+| `UCDLIB_RT_KEY` | Access token required for interacting with RT. By default, associated RT user is set to `pmanager`. |
 | `UCDLIB_RT_FORBID_WRITE` | Will not create or edit RT tickets |
+| `NIGHTLY_BACKUPS` | If set to `true`, database will be backed up nightly to `BACKUP_ENV` GC bucket |
+| `RUN_INIT` | If set, init container will run its process |
+| `DATA_ENV` | Data init container will pull if local db is empty |
+
 
 For a complete list, see `config.js`.
 
