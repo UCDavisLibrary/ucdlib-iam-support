@@ -1,3 +1,11 @@
 import slack from './slack.js';
+import { run as syncEmployees } from './iam-employee.js';
 
-slack.sendErrorNotification('Sending this from Node land! :partyparrot:');
+try {
+  await syncEmployees();  
+} catch (error) {
+  console.error(error.message);
+  console.error(error.error);
+  slack.sendErrorNotification(error.message, error.error);
+}
+
