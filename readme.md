@@ -15,7 +15,16 @@ The command line interface (in `/utils/cli`) is designed to be used by ITIS to p
 
 ## Backup Utility
 
-## Node Cron Utility
+Located in `utils/backup`, this container will automatically back up the database to the `itis-iam` Google Cloud Storage bucket if `NIGHTLY_BACKUPS` and `BACKUP_ENV` env variables are set.
+
+TODO: write script for retrieving writer/reader SA keys.
+
+## Init Utility
+
+Located in `utils/init`, this container will automatically hydrate the database upon `docker compose up` if local db is empty. Requires `RUN_INIT` and `DATA_ENV` env variables to be set.
+
+## Maintenance Utility
+Located in `utils/maintenance`, this container runs a node cron service for performing needed maintenance tasks, such as keeping employee records in sync with campus data stores. `ENABLE_MAINTENANCE` must be set to true.
 
 ## Shared Code
 Any code shared by the application and cli should be placed in the `/lib` directory. Both the app and cli docker images use the same base image that npm links this shared code as the `@ucd-lib/iam-support-lib` package.
@@ -30,9 +39,15 @@ Most relevant env variables:
 | ---- | ----- |
 | `UCDLIB_APP_HOST_PORT` | |
 | `UCDLIB_APP_ENV` | 'prod' or 'dev'. By default, local development starts with 'dev' |
-| `UCD_IAM_API_KEY` | required for much functionality |
-| `UCDLIB_RT_KEY` | Required for interacting with RT |
+| `UCD_IAM_API_KEY` | API key for `https://iet-ws.ucdavis.edu/api/iam`. Required for much functionality |
+| `UCDLIB_RT_KEY` | Access token required for interacting with RT. By default, associated RT user is set to `pmanager`. |
 | `UCDLIB_RT_FORBID_WRITE` | Will not create or edit RT tickets |
+| `NIGHTLY_BACKUPS` | If set to `true`, database will be backed up nightly to `BACKUP_ENV` GC bucket |
+| `RUN_INIT` | If set, init container will run its process |
+| `DATA_ENV` | Data init container will pull if local db is empty |
+| `ENABLE_MAINTENANCE` | Maintenance container will do its regularly scheduled work |
+| `SLACK_WEBHOOK_URL_FOR_ERRORS` | If you want to write to the `itis-error-notifications` slack channel | 
+
 
 For a complete list, see `config.js`.
 
