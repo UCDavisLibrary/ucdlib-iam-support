@@ -3,6 +3,7 @@ import UcdlibCache from '@ucd-lib/iam-support-lib/src/utils/cache.js';
 import { UcdIamModel } from "@ucd-lib/iam-support-lib/index.js";
 import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js";
 import config from "./config.js";
+import assert from 'node:assert/strict';
 
 export class IamEmployees {
   constructor(){
@@ -22,7 +23,7 @@ export class IamEmployees {
     if ( employees.err ){
       throw employees.err;
     }
-    this.employees = employees.res.rows.slice(0, 10); // TODO remove slice
+    this.employees = employees.res.rows;
   }
 
   // get iam records for employees and supervisors in employees table
@@ -32,21 +33,7 @@ export class IamEmployees {
     for ( let employee of this.employees ){
       for ( let iamId of [employee.iam_id, employee.supervisor_id]){
         if ( !iamId ) continue;
-        if ( this.iamResponses.byId[iamId] ) continue;
-        const cache = await UcdlibCache.get('iamId', iamId, config.ucdIamApi.cacheExpiration);
-        if ( cache.res && cache.res.rowCount ) {
-          this.iamResponses.byId[iamId] = cache.res.rows[0].data;
-          continue;
-        }
-        const response = await this.iam.getPersonByIamId(iamId);
-        if ( response.error && !this.iam.noEmployeeFound(response) ){
-          response.error.message = 'Unable to connect to the UCD IAM API';
-          throw response.error;
-        }
-        if ( !response.error ) {
-          await UcdlibCache.set('iamId', iamId, response);
-        }
-        this.iamResponses.byId[iamId] = response;
+        await this._getIamRecord(iamId);
       }
     }
     
@@ -59,8 +46,60 @@ export class IamEmployees {
     }
   }
 
-  // compare records in the employees table with the iam records
-  // check for updates and badness discrepancies
+  async _getIamRecord(id, idType='iamId') {
+
+    // use iam id if we have it
+    if ( idType === 'employeeId' && this.employeeIdToIamId[id] ) {
+      idType = 'iamId';
+      id = this.employeeIdToIamId[id];
+    }
+
+    // check class cache
+    if ( idType === 'iamId' && this.iamResponses.byId[id] ) {
+      return this.iamResponses.byId[id];
+    } else if ( idType === 'employeeId' && this.iamResponses.byEmployeeId[id] ) {
+      return this.iamResponses.byEmployeeId[id];
+    }
+
+    // check database cache
+    const cache = await UcdlibCache.get(idType, id, config.ucdIamApi.cacheExpiration);
+    if ( cache.res && cache.res.rowCount ) {
+      const d = cache.res.rows[0].data;
+      if ( idType === 'iamId' ) this.iamResponses.byId[id] = d;
+      if ( idType === 'employeeId' ) this.iamResponses.byEmployeeId[id] = d;
+      return d;
+    }
+
+    // query iam api
+    let response;
+    if ( idType === 'iamId' ) {
+      response = await this.iam.getPersonByIamId(id);
+    } else if ( idType === 'employeeId' ) {
+      response = await this.iam.getPersonByEmployeeId(id);
+    }
+
+    if ( response.error && !this.iam.noEmployeeFound(response) ){
+      response.error.message = 'Unable to connect to the UCD IAM API';
+      throw response.error;
+    }
+    if ( !response.error ) {
+      await UcdlibCache.set(idType, id, response);
+    }
+    if ( idType === 'iamId' ) {
+      this.iamResponses.byId[id] = response;
+      return response;
+    }
+    if ( idType === 'employeeId' ) {
+      this.iamResponses.byEmployeeId[id] = response;
+      this.employeeIdToIamId[id] = response.iamId;
+      return await this._getIamRecord(response.iamId);
+    }
+    this.iamResponses.byId[iamId] = response;
+
+  }
+
+  // compare records in the employees table with the ucd iam records
+  // check for updates that can be applied automatically, and those that require manual intervention
   async compareRecords(){
     const discrepancyTypes = UcdlibEmployees.outdatedReasons;
     for ( let employee of this.employees ){
@@ -70,13 +109,21 @@ export class IamEmployees {
       if ( this.iam.noEmployeeFound(iamRecord) ){
         this.discrepancies.push({
           iam_id: employee.iam_id,
-          reason: discrepancyTypes.noIamRecord
+          reason: discrepancyTypes.noIamRecord.slug
         });
-        // most other tests depend on iam record so skip
         continue;
       }
 
       iamRecord = new IamPersonTransform(iamRecord);
+
+      // check that employee has an appointment
+      if ( !iamRecord.hasAppointment ) {
+        this.discrepancies.push({
+          iam_id: employee.iam_id,
+          reason: discrepancyTypes.noAppointment.slug
+        });
+        continue;
+      }
 
       // check that appointment is specified if there are multiple
       if ( iamRecord.appointments.length > 1 ) {
@@ -86,6 +133,7 @@ export class IamEmployees {
             iam_id: employee.iam_id,
             reason: discrepancyTypes.multipleAppointments.slug
           });
+          continue;
         }
       }
 
@@ -97,9 +145,129 @@ export class IamEmployees {
             iam_id: employee.iam_id,
             reason: discrepancyTypes.deptCodeNotFound.slug
           });
+          continue;
         }
       }
 
+      // since TES employees do not have a library appointment, check that TES employees appointments are still active
+      if ( !UcdlibEmployees.libDeptCodes.includes(employee.ucd_dept_code)) {
+        let libApptStart = new Date(employee.created);
+        libApptStart.setDate(libApptStart.getDate()-5); // grace period of 5 days
+        const iamAppStart = new Date(iamRecord.primaryAssociation.assocStartDate);
+        if ( libApptStart < iamAppStart ) {
+          this.discrepancies.push({
+            iam_id: employee.iam_id,
+            reason: discrepancyTypes.appointmentDateAnomaly.slug
+          });
+          continue;
+        }
+      }
+
+      // check for user id
+      if ( !iamRecord.userId ){
+        this.discrepancies.push({
+          iam_id: employee.iam_id,
+          reason: discrepancyTypes.missingUserId.slug
+        });
+        continue;
+      }
+
+      // compare existing employee record with iam record
+      const existingEmployeeRecord = {
+        iamId: employee.iam_id,
+        employeeId: employee.employee_id,
+        userId: employee.user_id,
+        email: employee.email,
+        firstName: employee.first_name,
+        lastName: employee.last_name,
+        middleName: employee.middle_name,
+        suffix: employee.suffix,
+        types: employee.types
+      };
+      const newEmployeeRecord = {
+        iamId: iamRecord.id,
+        employeeId: iamRecord.employeeId,
+        userId: iamRecord.userId,
+        email: iamRecord.email,
+        firstName: iamRecord.firstName,
+        lastName: iamRecord.lastName,
+        middleName: iamRecord.middleName,
+        suffix: iamRecord.suffix,
+        types: iamRecord.types,
+      };
+      if ( !employee.custom_supervisor ){
+        existingEmployeeRecord.supervisorId = employee.supervisor_id;
+
+        const supervisorEmployeeId = iamRecord.supervisorEmployeeId;
+        if ( supervisorEmployeeId ) {
+          let supervisorIamId = this.employeeIdToIamId[supervisorEmployeeId];
+          if ( supervisorIamId ) {
+            newEmployeeRecord.supervisorId = supervisorIamId;
+          } else {
+            const supervisorIamRecord = await this._getIamRecord(supervisorEmployeeId, 'employeeId');
+            newEmployeeRecord.supervisorId = supervisorIamRecord.iamId;
+          }
+        } else {
+          newEmployeeRecord.supervisorId = null;
+        }
+      }
+      try {
+        assert.deepStrictEqual(existingEmployeeRecord, newEmployeeRecord);
+      } catch (error) {
+        this.updates.push(newEmployeeRecord);
+      }
+
+    }
+  }
+
+  // updates the employees table with the latest iam records
+  async updateEmployees(){
+    if ( !this.updates.length ) return;
+    for ( let update of this.updates ){
+      const r = await UcdlibEmployees.update(update.iamId, update, 'iamId');
+      if ( r.err ) {
+        throw r.err;
+      }
+    }
+    await this.getEmployees();
+  }
+
+  async validateSupervisorIds(){
+    const libEmployees = new Set(this.employees.map(e => e.iam_id));
+    for (const employee of this.employees) {
+      if ( employee.custom_supervisor && !employee.supervisor_id ) continue;
+      
+      if ( !libEmployees.has(employee.supervisor_id) ) {
+        this.discrepancies.push({
+          iam_id: employee.iam_id,
+          reason: UcdlibEmployees.outdatedReasons.supervisorNotLibraryEmployee.slug
+        });
+      }
+
+      if ( !employee.supervisor_id ){
+        this.discrepancies.push({
+          iam_id: employee.iam_id,
+          reason: UcdlibEmployees.outdatedReasons.noSupervisorIamRecord.slug
+        });
+      }
+
+      const supervisorIamRecord = await this._getIamRecord(employee.supervisor_id, 'iamId');
+      if ( this.iam.noEmployeeFound(supervisorIamRecord) ){
+        this.discrepancies.push({
+          iam_id: employee.iam_id,
+          reason: UcdlibEmployees.outdatedReasons.noSupervisorIamRecord.slug
+        });
+      }
+    }
+  }
+
+  async writeDiscrepancies(){
+    if ( !this.discrepancies.length ) return;
+    for (const d of this.discrepancies) {
+      const r = await UcdlibEmployees.createRecordDiscrepancyNotification(d.iam_id, d.reason);
+      if ( r.err ) {
+        throw r.err;
+      }
     }
   }
 }
@@ -124,15 +292,20 @@ export const run = async () => {
     console.log('Comparing records');
     await iamEmployees.compareRecords();
 
+    await iamEmployees.updateEmployees();
+    console.log(`${iamEmployees.updates.length} employees were updated${iamEmployees.updates.length ? ':' : ''}`);
+    for (const update of iamEmployees.updates) {
+      console.log(update);
+    }
+
+    await iamEmployees.validateSupervisorIds();
+    await iamEmployees.writeDiscrepancies();
     console.log(`Found ${iamEmployees.discrepancies.length} discrepancies${iamEmployees.discrepancies.length ? ':' : ''}`);
     for (const discrepancy of iamEmployees.discrepancies) {
       console.log(discrepancy);
     }
 
-    console.log(`${iamEmployees.updates.length} employees were updated${iamEmployees.updates.length ? ':' : ''}`);
-    for (const update of iamEmployees.updates) {
-      console.log(update);
-    }
+
   } catch (error) {
     throw new IamEmployeesError(error);
   }

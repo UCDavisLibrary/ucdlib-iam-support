@@ -34,6 +34,16 @@ class Slack {
       await this.webhook.send(payload);
     }
   }
+
+  async send(text){
+    if (this.webhook) {
+      const payload = {
+        text,
+        mrkdwn: true
+      }
+      await this.webhook.send(payload);
+    }
+  }
 }
 
 export default new Slack();

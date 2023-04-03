@@ -108,7 +108,8 @@ CREATE TABLE outdated_records (
     reason varchar(100),
     iam_id varchar(20),
     fixed boolean NOT NULL DEFAULT FALSE,
-    created timestamp DEFAULT NOW()
+    created timestamp DEFAULT NOW(),
+    UNIQUE (reason, iam_id)
 );
 
 -- Request Statuses
