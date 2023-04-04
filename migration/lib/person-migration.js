@@ -33,6 +33,7 @@ class PersonMigration {
         lastName: iamRecord.lastName,
         middleName: iamRecord.middleName,
         suffix: iamRecord.suffix,
+        title: person.title,
         ucdDeptCode: iamRecord.primaryAssociation.deptCode,
         types: iamRecord.types,
         primaryAssociation: person.appointment || {},

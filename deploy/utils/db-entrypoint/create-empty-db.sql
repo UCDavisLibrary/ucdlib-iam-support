@@ -57,6 +57,7 @@ CREATE TABLE employees (
     last_name text,
     middle_name text,
     suffix text,
+    title varchar(200),
     supervisor_id varchar(20),
     custom_supervisor boolean NOT NULL DEFAULT FALSE,
     types jsonb NOT NULL DEFAULT '{}'::jsonb,

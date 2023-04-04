@@ -97,7 +97,7 @@ services:
       PGDATABASE: 'postgres'
       PGPASSWORD: 'localhost'
       PGPORT: 5432
-    command: /cli/cli.sh
+    command: /maintenance/entrypoint.sh
     volumes:
       - ../../utils/maintenance/src:/maintenance/src
       - ../../lib:/iam-support-lib
