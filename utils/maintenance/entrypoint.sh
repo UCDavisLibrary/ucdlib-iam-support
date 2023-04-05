@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# start the monitoring agent
+# start the maintenance scripts
 if [[ $ENABLE_MAINTENANCE == 'true' ]]; then
   node /maintenance/src/sync-iam.js &
   node /maintenance/src/discrepancy-notification.js

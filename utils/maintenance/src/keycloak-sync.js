@@ -6,15 +6,19 @@ function KeycloakSyncError(error) {
   this.message = "Error when syncing employees with keycloak.";
   }
 
+// you need to be on staff vpn or on itis network to run this script 
 export const run = async () => {
   try {
-    keycloakClient.init(config.keycloakAdmin);
-    keycloakClient.resetState();
-    keycloakClient.logInRealTime = true;
-    await keycloakClient.syncAll();
+    keycloakClient.resetState(); // does cron job remember state between runs?
+    keycloakClient.init({...config.keycloakAdmin, refreshInterval: 58000});
+    //keycloakClient.logInRealTime = true;
+    //await keycloakClient.syncAll();
+    await keycloakClient.syncGroups();
     keycloakClient.printLogSummary();
     keycloakClient.printLogs(true);
+    keycloakClient.resetState();
   } catch (error) {
+    console.log(error); // todo: remove when done testing
     throw new KeycloakSyncError(error);
   }
 }
