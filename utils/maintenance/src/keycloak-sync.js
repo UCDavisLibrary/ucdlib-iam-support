@@ -13,9 +13,10 @@ export const run = async () => {
     keycloakClient.init({...config.keycloakAdmin, refreshInterval: 58000});
     //keycloakClient.logInRealTime = true;
     //await keycloakClient.syncAll();
-    await keycloakClient.syncGroups();
-    keycloakClient.printLogSummary();
+    await keycloakClient.syncGroups(true);
+    await keycloakClient.syncGroupStructure();
     keycloakClient.printLogs(true);
+    keycloakClient.printLogSummary();
     keycloakClient.resetState();
   } catch (error) {
     console.log(error); // todo: remove when done testing

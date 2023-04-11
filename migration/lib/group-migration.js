@@ -16,6 +16,9 @@ class GroupMigration {
       if ( group.siteId ){
         g.siteId = group.siteId;
       }
+      if ( group.nameShort ) {
+        g.nameShort = group.nameShort;
+      }
       if ( group.parent ){
         try {
           g.parentId = this.groupBySlug[group.parent].id;
