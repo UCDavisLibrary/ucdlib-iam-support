@@ -2,6 +2,7 @@ import slack from './slack.js';
 import { CronJob } from 'cron';
 import config from "./config.js";
 import { run as syncEmployees } from './iam-employee.js';
+import { run as syncKeycloak } from './keycloak-sync.js';
 
 new CronJob(
 	config.cron.iamSync, 
@@ -13,10 +14,19 @@ new CronJob(
 
 async function run() {
   try {
-    await syncEmployees();  
+    console.log('Syncing employee data with UCD IAM...');
+    await syncEmployees();
+    console.log('Syncing employee data with keycloak...');
+    await syncKeycloak();
   } catch (error) {
     console.error(error.message);
     console.error(error.error);
-    slack.sendErrorNotification(error.message, error.error);
+    try {
+      slack.sendErrorNotification(error.message, error.error);
+    } catch (error) {
+      console.error('Error sending slack notification');
+      console.error(error);
+    }
+    
   }
 }

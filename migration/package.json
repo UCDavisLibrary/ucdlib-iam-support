@@ -9,7 +9,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "PGUSER=postgres PGHOST=localhost PGDATABASE=postgres PGPASSWORD=localhost PGPORT=5432 node index.js",
-    "alma": "PGUSER=postgres PGHOST=localhost PGDATABASE=postgres PGPASSWORD=localhost PGPORT=5432 node lib/alma-compare.js"
+    "alma": "PGUSER=postgres PGHOST=localhost PGDATABASE=postgres PGPASSWORD=localhost PGPORT=5432 node lib/alma-compare.js",
+    "keycloak":  "PGUSER=postgres PGHOST=localhost PGDATABASE=postgres PGPASSWORD=localhost PGPORT=5432 node lib/keycloak-sync.js"
   },
   "keywords": [],
   "author": "",

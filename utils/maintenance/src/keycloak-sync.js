@@ -11,17 +11,16 @@ export const run = async () => {
   try {
     keycloakClient.resetState(); // does cron job remember state between runs?
     keycloakClient.init({...config.keycloakAdmin, refreshInterval: 58000});
-    //keycloakClient.logInRealTime = true;
-    //await keycloakClient.syncAll();
-    await keycloakClient.syncGroups(true);
-    await keycloakClient.syncGroupStructure();
-    keycloakClient.printLogs(true);
+    await keycloakClient.syncAll({
+      createUsers: false,
+      removeGroups: false,
+    });
+
+  } catch (error) {
+    throw new KeycloakSyncError(error);
+  } finally {
+    keycloakClient.printLogs();
     keycloakClient.printLogSummary();
     keycloakClient.resetState();
-  } catch (error) {
-    console.log(error); // todo: remove when done testing
-    throw new KeycloakSyncError(error);
   }
 }
-
-run();
