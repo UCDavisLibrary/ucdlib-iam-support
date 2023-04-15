@@ -13,6 +13,8 @@
   "dependencies": {
     "@ucd-lib/cork-app-utils": "^5.1.0",
     "@ucd-lib/rt-api": "^1.2.2",
-    "pg": "^8.9.0"
+    "pg": "^8.9.0",
+    "xml-js": "^1.6.11",
+    "xml2json": "^0.12.0"
   }
 }
