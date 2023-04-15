@@ -4,7 +4,7 @@
   "description": "Package for performing maintenance tasks on a regular basis via cron.",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "sync-iam": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

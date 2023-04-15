@@ -47,6 +47,7 @@ Most relevant env variables:
 | `DATA_ENV` | Data init container will pull if local db is empty |
 | `ENABLE_MAINTENANCE` | Maintenance container will do its regularly scheduled work |
 | `SLACK_WEBHOOK_URL_FOR_ERRORS` | If you want to write to the `itis-error-notifications` slack channel | 
+| `KEYCLOAK_ADMIN_PASSWORD` | Required to manipulate keycloak data - user lists, groups, etc |
 
 
 For a complete list, see `config.js`.

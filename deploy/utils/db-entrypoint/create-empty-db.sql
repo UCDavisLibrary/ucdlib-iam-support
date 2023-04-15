@@ -57,6 +57,7 @@ CREATE TABLE employees (
     last_name text,
     middle_name text,
     suffix text,
+    title varchar(200),
     supervisor_id varchar(20),
     custom_supervisor boolean NOT NULL DEFAULT FALSE,
     types jsonb NOT NULL DEFAULT '{}'::jsonb,
@@ -108,7 +109,8 @@ CREATE TABLE outdated_records (
     reason varchar(100),
     iam_id varchar(20),
     fixed boolean NOT NULL DEFAULT FALSE,
-    created timestamp DEFAULT NOW()
+    created timestamp DEFAULT NOW(),
+    UNIQUE (reason, iam_id)
 );
 
 -- Request Statuses
