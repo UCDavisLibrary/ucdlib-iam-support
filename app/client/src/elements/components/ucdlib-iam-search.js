@@ -20,6 +20,7 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
       studentId: {type: String, attribute: 'student-id'},
       employeeId: {type: String, attribute: 'employee-id'},
       userId: {type: String, attribute: 'user-id'},
+      iamId: {type: String, attribute: 'iam-id'},
       email: {type: String, attribute: 'email'},
       hideResults: {type: Boolean, attribute: 'hide-results'},
       searchParams: {state: true},
@@ -43,6 +44,7 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
 
     // bind templates
     this.render = Templates.render.bind(this);
+    this.renderIamIdForm = Templates.renderIamIdForm.bind(this);
     this.renderUserIdForm = Templates.renderUserIdForm.bind(this);
     this.renderEmployeeIdForm = Templates.renderEmployeeIdForm.bind(this);
     this.renderStudentIdForm = Templates.renderStudentIdForm.bind(this);
@@ -76,6 +78,12 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
         key: 'userId',
         label: 'Kerberos',
         requiredProps: ['userId']
+      },
+      {
+        attribute: 'iam-id',
+        key: 'iamId',
+        label: 'IAM ID',
+        requiredProps: ['iamId']
       },
       {
         attribute: 'email',
@@ -162,6 +170,7 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
     this.employeeId = '';
     this.userId = '';
     this.email = '';
+    this.iamId = '';
 
     this.isFetching = false;
     this.wasError = false;

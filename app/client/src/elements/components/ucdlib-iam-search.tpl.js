@@ -112,6 +112,7 @@ export function render() {
       </nav>
       <form @submit=${this._onSubmit} aria-label='Search for a UC Davis person'>
         <ucdlib-pages selected=${this.searchParam}>
+          ${this.renderIamIdForm()}
           ${this.renderUserIdForm()}
           ${this.renderEmployeeIdForm()}
           ${this.renderStudentIdForm()}
@@ -158,6 +159,30 @@ export function render() {
     </div>
   </ucdlib-pages>
 `;}
+
+/**
+ * @description Renders form for querying by iam id
+ * @returns {TemplateResult}
+ */
+ export function renderIamIdForm(){
+  const view = this.searchParamsByKey.iamId;
+  return html`
+    <div id=${view.attribute}>
+      <div class="field-container">
+        <label ?hidden=${!this.hideNav} for=${'inp-'+ view.attribute}>${view.label}</label>
+        <div class='text-input-container'>
+          <input 
+            @input=${(e) => this.iamId = e.target.value}
+            .value=${this.iamId}
+            id=${'inp-'+ view.attribute} 
+            type="text" 
+            placeholder="Enter a IAM account...">
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 
 /**
  * @description Renders form for querying by kerberos id

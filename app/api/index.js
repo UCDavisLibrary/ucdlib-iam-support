@@ -7,6 +7,7 @@ const onboarding = require('./onboarding');
 const permissions = require('./permissions');
 const rt = require('./rt');
 const auth = require('./auth');
+const alma = require('./alma');
 
 // middleware
 auth(router);
@@ -17,6 +18,7 @@ groups(router);
 onboarding(router);
 permissions(router);
 rt(router);
+alma(router);
 
 module.exports = (app) => {
   app.use('/api', router);
