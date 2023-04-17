@@ -2,6 +2,7 @@ import { html, css } from 'lit';
 
 import normalizeStyles from "@ucd-lib/theme-sass/normalize.css.js";
 import headingStyles from "@ucd-lib/theme-sass/1_base_html/_headings.css";
+import linkStyles from "@ucd-lib/theme-sass/1_base_html/_links.css.js";
 import headingClassesStyles from "@ucd-lib/theme-sass/2_base_class/_headings.css";
 import buttonStyles from "@ucd-lib/theme-sass/2_base_class/_buttons.css";
 import formStyles from "@ucd-lib/theme-sass/1_base_html/_forms.css.js";
@@ -72,11 +73,19 @@ export function styles() {
       margin-bottom: .5rem;
       font-weight: 700;
     }
+    .copy-text {
+      margin-top: 1rem;
+      display: block;
+      cursor: pointer;
+      font-weight: 700;
+      text-decoration: none;
+    }
   `;
 
   return [
     normalizeStyles,
     headingStyles,
+    linkStyles,
     headingClassesStyles,
     buttonStyles,
     formStyles,
@@ -96,74 +105,81 @@ export function styles() {
  */
 export function render() { 
   return html`
-  ${this.isLookUp ?
+  <div class="field-container">
+    <label >Search for Roles</label>
+    <ucd-theme-slim-select  @change=${(e) => this.user_roles = e.detail.map(g => g.value)}>
+      <select multiple>
+        ${this.roles.map(r => html`
+            <option .value=${r.code["_text"]} ?selected=${this.user_roles.includes(r.code["_text"])}> ${r.description["_text"]} - Code ${r.code["_text"]}</option>
+        `)}
+      </select>
+    </ucd-theme-slim-select>
+    <a class='copy-text' @click=${this.openUserSearchModal}>Or copy roles from an existing Alma user.</a> 
+  </div>
+  <ucdlib-iam-modal id='user-search-modal' dismiss-text='Close' content-title='Alma User Search'>
+    ${this.isLookUp ?
     html`
-      <div class='header'>
-        <h2 class='heading--underline' ?hidden=${!this.widgetTitle}>${this.widgetTitle}</h2>
-      </div>
-      <ucdlib-pages selected=${this.page}>
-        <div id='form'>
-          ${this.wasError ? html`
-            <div class="alert alert--error">An error occurred while querying the UC Davis Alma API!</div>
-          ` : html``}
-          <nav ?hidden=${this.hideNav}>
-            <label>Search by: </label>
-            <select id='search-param' @input=${e => this.searchParam = e.target.value}>
-              ${this.navItems.map(item => html`
-                <option value=${item.attribute} ?selected=${item.attribute == this.searchParam}>${item.label}</option>
-              </li>
-              `)}
-            </select>
-          </nav>
-          <br />
+        <ucdlib-pages selected=${this.page}>
+          <div id='form'>
+            ${this.wasError ? html`
+              <div class="alert alert--error">An error occurred while querying the UC Davis Alma API!</div>
+            ` : html``}
+            <nav ?hidden=${this.hideNav}>
+              <label>Search by: </label>
+              <select id='search-param' @input=${e => this.searchParam = e.target.value}>
+                ${this.navItems.map(item => html`
+                  <option value=${item.attribute} ?selected=${item.attribute == this.searchParam}>${item.label}</option>
+                </li>
+                `)}
+              </select>
+            </nav>
+            <br />
 
-          <form @submit=${this._onSubmit} aria-label='Search for a person in Alma'>
-            <ucdlib-pages selected=${this.searchParam}>
-              ${this.renderAlmaIdForm()}
-              ${this.renderNameForm()}
-            </ucdlib-pages>
-            <button 
-              ?disabled=${this.disableSearch} 
-              type='submit' 
-              class="btn btn--block btn--alt btn--search">Search${this.isFetching ? html`<span>ing</span>` : html``}</button>
-          </form>
-        </div>
-        <div id='results'>
-          <ol class='breadcrumbs'>
-            <li><a class='link' @click=${() => this.page = 'form'}>Search Form</a></li>
-            <li>Results</li>
-          </ol>
-          ${this.results.length ? html`
-            <div class='results-list'>
-              <p class='results-label'>Select an Alma Entry:</p>
-              ${this.results.map(user => html`
-
-                <a @click=${() => this._onUserClick(user.primary_id['_text'])} class="media-link link ${this.selectedAlmaId == user.primary_id ? 'selected-user' : ''}">
-                  <div class='media-link__body'>
-                    <h3 class="heading--highlight">${user.first_name['_text']} ${user.last_name['_text']}</h3>
-                    ${user.primary_id['_text'] ? html`
-                      <div><strong>Alma ID: </strong><span>${user.primary_id['_text']}</span></div>
-                    ` : html``}
-                    ${user.status ? html`
-                      <div><strong>Status: </strong><span>${user.status['_text']}</span></div>
-                    ` : html``}
-                  </div>
-                </a>
-              `)}
+            <form @submit=${this._onSubmit} aria-label='Search for a person in Alma'>
+              <ucdlib-pages selected=${this.searchParam}>
+                ${this.renderAlmaIdForm()}
+                ${this.renderNameForm()}
+              </ucdlib-pages>
+              <button 
+                ?disabled=${this.disableSearch} 
+                type='submit' 
+                class="btn btn--block btn--alt btn--search">Search${this.isFetching ? html`<span>ing</span>` : html``}</button>
+            </form>
           </div>
-          ` : html`
-            <div class="alert">No people matched your search.</div>
-          `}
-        </div>
-      </ucdlib-pages>
-    `: 
-    html`
-     <div class='header'>
-        <h2 class='heading--underline' ?hidden=${!this.widgetTitle}>${this.widgetTitle}</h2>
-      </div>
-          ${this.renderAlmaEntrySelectionForm()}
-      
-    `}
+          <div id='results'>
+            <ol class='breadcrumbs'>
+              <li><a class='link' @click=${() => this.page = 'form'}>Search Form</a></li>
+              <li>Results</li>
+            </ol>
+            ${this.results.length ? html`
+              <div class='results-list'>
+                <p class='results-label'>Select an Alma Entry:</p>
+                ${this.results.map(user => html`
+
+                  <a @click=${() => this._onUserClick(user.primary_id['_text'])} class="media-link link ${this.selectedAlmaId == user.primary_id ? 'selected-user' : ''}">
+                    <div class='media-link__body'>
+                      <h3 class="heading--highlight">${user.first_name['_text']} ${user.last_name['_text']}</h3>
+                      ${user.primary_id['_text'] ? html`
+                        <div><strong>Alma ID: </strong><span>${user.primary_id['_text']}</span></div>
+                      ` : html``}
+                      ${user.status ? html`
+                        <div><strong>Status: </strong><span>${user.status['_text']}</span></div>
+                      ` : html``}
+                    </div>
+                  </a>
+                `)}
+            </div>
+            ` : html`
+              <div class="alert">No people matched your search.</div>
+            `}
+          </div>
+        </ucdlib-pages>
+      `: 
+      html`
+        ${this.renderAlmaEntrySelectionForm()}
+        
+      `}
+    </ucdlib-iam-modal>
 
 `;}
 

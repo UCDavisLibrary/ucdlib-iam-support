@@ -6,6 +6,7 @@ import selectOptions from "../../utils/permissionsFormOptions.js";
 import formProperties from '../../utils/permissionsFormProperties.js';
 
 import "../components/ucdlib-iam-modal";
+import "../components/ucdlib-iam-alma";
 
 /**
  * @classdesc Page for displaying a single permissions request form
@@ -59,7 +60,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
 
     this.setDefaultForm();
 
-    this._injectModel('AppStateModel', 'OnboardingModel', 'PermissionsModel', 'RtModel');
+    this._injectModel('AppStateModel', 'OnboardingModel', 'PermissionsModel', 'RtModel', 'AlmaUserModel');
   }
 
   /**
@@ -97,6 +98,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
    */
   async getRequiredPageData(){
     const promises = [];
+    promises.push(this.AlmaUserModel.getAlmaUserRoleType());
     if ( this.formType == 'onboarding' ){
       promises.push(this.OnboardingModel.getById(this.associatedObjectId));
       promises.push(this.PermissionsModel.getById(this.associatedObjectId, 'onboarding'));

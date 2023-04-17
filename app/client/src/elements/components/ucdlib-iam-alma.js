@@ -22,13 +22,12 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
   static get properties() {
     return {
       searchParam: {type: String, attribute: 'search-param'},
-      widgetTitle: {type: String, attribute: 'widget-title'},
       hideNav: {type: Boolean, attribute: 'hide-nav'},
       hideNavOptions: {type: String, attribute: 'hide-nav-options'},
       firstName: {type: String, attribute: 'first-name'},
       lastName: {type: String, attribute: 'last-name'},
       almaId: {type: String, attribute: 'alma-id'},
-      roles: {type: String, attribute: 'roles'},
+      roles: {type: Array, attribute: 'roles'},
       hideResults: {type: Boolean, attribute: 'hide-results'},
       searchParams: {state: true},
       navItems: {state: true},
@@ -44,6 +43,7 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
       userId: {state: true},
       userEnteredData: {state: true},
       isLookUp: {state: true},
+      user_roles: {type: Array, attribute: 'user-roles'},
     };
   }
 
@@ -61,6 +61,7 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     this.renderAlmaEntrySelectionForm = Templates.renderAlmaEntrySelectionForm.bind(this);
     
     this._injectModel('AppStateModel', 'AlmaUserModel');
+    this.roles = [];
     this.page = 'alma-home';
     this.isLookUp = true;
     this.navItems = [];
@@ -90,7 +91,6 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     // display options
     this.hideNav = false;
     this.hideNavOptions = '';
-    this.widgetTitle = 'UC Davis Alma Search';
     this._resetEmployeeStateProps();
 
     this.reset();
@@ -108,9 +108,17 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     this.account_type = '';
     this.campus_code = '';
     this.contact_info = {};
-    this.user_roles = {};
+    this.user_roles = [];
     this.status = '';
     this.userId = '';
+  }
+
+  /**
+   * @description Opens the modal with the user search form
+   */
+  openUserSearchModal(){
+    const ele = this.renderRoot.querySelector('#user-search-modal');
+    if ( ele ) ele.show();
   }
 
   /**
@@ -136,15 +144,6 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
   _onAlmaFormSubmit(){
     this.userEnteredData = true;
     this.AppStateModel.setLocation('#submission');
-  }
-
-
-  /**
-   * @description Disables the shadowdom
-   * @returns 
-   */
-  createRenderRoot() {
-    return this;
   }
 
 
@@ -176,6 +175,10 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     }
 
     this._setDisableSearch();
+
+    if (props.has('user_roles')) {
+      this.dispatchEvent(new CustomEvent('role-select', {detail: {roles: this.user_roles || []}}));
+    }
 
   }
 
@@ -293,6 +296,12 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
 
     this.dispatchEvent(new CustomEvent('search', {detail: {status: r}}));
 
+  }
+
+  _onRoletypeUpdate(e){
+    if ( e.state == 'loaded'){
+      this.roles = e.payload.code_table.rows.row;
+    } 
   }
   
   /**

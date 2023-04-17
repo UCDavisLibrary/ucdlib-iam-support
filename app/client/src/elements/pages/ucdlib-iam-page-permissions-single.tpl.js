@@ -86,6 +86,14 @@ export function render() {
           </div>
           <div class="l-2col l-2col--33-67 field-row">
             <div class='l-first'>
+              ${this.renderGroupLabel('Alma', 'alma')}
+            </div>
+            <div class='l-second'>
+              <ucdlib-iam-alma @role-select=${e => console.log(e.detail)} .user_roles=${this.pAlmaRoles}></ucdlib-iam-alma>
+            </div>
+          </div>
+          <div class="l-2col l-2col--33-67 field-row">
+            <div class='l-first'>
               ${this.renderGroupLabel('Libguides', 'libguides')}
             </div>
             <div class='l-second'>
@@ -244,6 +252,11 @@ export function renderHelpModal(){
         <ul class='list--arrow'>
           ${this.pIntranetRolesList.map(r => html`<li><b>${r.label}</b> <br /> ${r.description}</li>`)}
         </ul>
+    `;
+  } else if ( this.helpModal === 'alma' ){
+    title = 'Alma';
+    content = html`
+      <div>Alma is the Integrated Library System (ILS) used by the University of California</div>
     `;
   } else if ( this.helpModal === 'equipment' ){
     title = 'Tech Equipment';

@@ -20,6 +20,11 @@ export default [
     default: []
   },
   {
+    prop: 'pAlmaRoles',
+    payload: 'permissions.alma.roles',
+    default: []
+  },
+  {
     prop: 'notes',
     payload: 'notes',
     default: ''

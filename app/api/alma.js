@@ -10,7 +10,7 @@ module.exports = (api) => {
       });
       return;
     }
-    const { AlmaModel } = await import('@ucd-lib/iam-support-lib/index.js');
+    const { default: AlmaModel } = await import('@ucd-lib/iam-support-lib/src/models/AlmaModel.js');
     AlmaModel.init(config.alma);
 
     let response = await AlmaModel.getUsers(config.alma.key);
@@ -26,7 +26,7 @@ module.exports = (api) => {
       });
       return;
     }
-    const { AlmaModel } = await import('@ucd-lib/iam-support-lib/index.js');
+    const { default: AlmaModel } = await import('@ucd-lib/iam-support-lib/src/models/AlmaModel.js');
     AlmaModel.init(config.alma);
 
     const firstName = req.query.firstName;
@@ -47,7 +47,7 @@ module.exports = (api) => {
       });
       return;
     }
-    const { AlmaModel } = await import('@ucd-lib/iam-support-lib/index.js');
+    const { default: AlmaModel } = await import('@ucd-lib/iam-support-lib/src/models/AlmaModel.js');
     AlmaModel.init(config.alma);
     let response;
 
@@ -64,7 +64,7 @@ module.exports = (api) => {
           });
           return;
       }
-      const { AlmaModel } = await import('@ucd-lib/iam-support-lib/index.js');
+      const { default: AlmaModel } = await import('@ucd-lib/iam-support-lib/src/models/AlmaModel.js');
       AlmaModel.init(config.alma);
 
       let response = await AlmaModel.getRoles(config.alma.key);
