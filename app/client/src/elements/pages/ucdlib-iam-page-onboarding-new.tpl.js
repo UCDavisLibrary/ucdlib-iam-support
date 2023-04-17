@@ -32,7 +32,7 @@ export function render() {
 export function renderHome(){
   return html`
   <div id='obn-home'>
-    <div class="priority-links">
+    <div class="priority-links">   
       <div class="priority-links__item">
         <a href="#lookup" class="vertical-link vertical-link--circle category-brand--tahoe">
           <div class="vertical-link__figure">
@@ -54,7 +54,6 @@ export function renderHome(){
         </a>
       </div>
     </div>
-  </div>
   `;
 }
 

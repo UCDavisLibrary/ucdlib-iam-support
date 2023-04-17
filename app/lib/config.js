@@ -14,7 +14,11 @@ class AppConfig {
       version: env.UCD_IAM_API_VERSION || '1.0',
       queryLimit: env.UCD_IAM_API_LIMIT || 20
     }
-
+    this.alma = {
+      url: env.UCD_ALMA_API_URL || 'https://api-na.hosted.exlibrisgroup.com/almaws/v1/',
+      key: env.UCD_ALMA_API_KEY,
+      version: env.UCD_ALMA_API_VERSION || '1.0',
+    }
     this.rt = {
       key: env.UCDLIB_RT_KEY,
       user: env.UCDLIB_RT_USER || 'pmanager',

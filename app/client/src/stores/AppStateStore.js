@@ -16,6 +16,9 @@ class AppStateStoreImpl extends AppStateStore {
       onboardingNewLookup: {text: 'Lookup Employee', link: `/onboarding/new#lookup`},
       onboardingNewManual: {text: 'Manual Entry', link: `/onboarding/new#manual`},
       onboardingNewSubmission: {text: 'Submission', link: `/onboarding/new#submission`},
+      usersSearch: {text: 'New Request', link: `/users/search`},
+      // // usersSearchManual: {text: 'Manual Entry', link: `/users/search#manual`},
+      // usersSearchAlma: {text: 'Alma Form', link: `/users/search#almaForm`},    
       separation: {text: 'Separation', link: 'separation'}
     };
 
@@ -23,7 +26,8 @@ class AppStateStoreImpl extends AppStateStore {
     this.pageTitles = {
       onboarding: 'Onboarding',
       separation: 'Separation',
-      onboardingNew: 'New Onboarding Request'
+      onboardingNew: 'New Onboarding Request',
+      usersSearch: 'Alma Users Search'
     };
 
     this.userProfile = {};

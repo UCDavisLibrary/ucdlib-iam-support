@@ -2,6 +2,7 @@ import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-onboarding-new.tpl.js";
 
 import "../components/ucdlib-iam-search";
+import "../components/ucdlib-iam-alma";
 import "../components/ucdlib-iam-modal";
 import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform";
 
