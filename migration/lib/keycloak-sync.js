@@ -2,7 +2,7 @@ import keycloakClient from "@ucd-lib/iam-support-lib/src/utils/keycloakAdmin.js"
 import config from "./config.js";
 
 const run = async () => {
-  keycloakClient.init({...config.keycloakAdmin, refreshInterval: 58000});
+  await keycloakClient.init({...config.keycloakAdmin, refreshInterval: 58000});
   await keycloakClient.syncAll({
     createUsers: true,
     removeGroups: true,

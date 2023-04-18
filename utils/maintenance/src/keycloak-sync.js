@@ -10,7 +10,7 @@ function KeycloakSyncError(error) {
 export const run = async () => {
   try {
     keycloakClient.resetState(); // does cron job remember state between runs?
-    keycloakClient.init({...config.keycloakAdmin, refreshInterval: 58000});
+    await keycloakClient.init({...config.keycloakAdmin, refreshInterval: 58000});
     await keycloakClient.syncAll({
       createUsers: false,
       removeGroups: false,
