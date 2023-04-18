@@ -68,6 +68,19 @@ class employeesCli {
     console.log(`Employee adopted with id ${result.employeeId}.`);
     await pg.client.end();
   }
+
+  async dismissRecordDiscrepancyNotifications(iamId){
+
+    const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
+    const { default: pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
+    const r = await UcdlibEmployees.dismissRecordDiscrepancyNotifications(iamId);
+    await pg.client.end();
+    if ( r.err) {
+      console.error(`Error dismissing record discrepancy notifications\n${r.err.message}`);
+      return;
+    }
+    console.log(`Dismissed ${r.res.rowCount} record discrepancy notifications`);
+  }
 }
 
 module.exports = new employeesCli();

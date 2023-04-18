@@ -11,6 +11,16 @@ program
   .option('--no-rt', 'do not send a request tracker ticket for the adoption')
   .action((onboardingId, options) => {
     employees.adopt(onboardingId, options);
-  });
+  }
+);
+
+program
+  .command('dismiss-notifications')
+  .description('Dismiss all record discrepancy notifications for an employee')
+  .argument('<iamId>', 'Employee IAM id')
+  .action((iamId) => {
+    employees.dismissRecordDiscrepancyNotifications(iamId);
+  }
+);
 
   program.parse(process.argv);
