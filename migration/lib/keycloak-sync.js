@@ -9,6 +9,7 @@ const run = async () => {
   });
   keycloakClient.printLogs(true);
   keycloakClient.printLogSummary();
+  keycloakClient.resetState();
 }
 
 run();

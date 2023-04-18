@@ -2,8 +2,13 @@ const config = require('./cli-config');
 
 class employeesCli {
 
+  /**
+   * @description Adopt an employee into the Library IAM database
+   * @param {String} onboardingId - Onboarding record id
+   * @param {Object} options - Options object from commander
+   */
   async adopt(onboardingId, options){
-    console.log('Adopting employee', onboardingId, options);
+    console.log(`Adopting employee from onboarding record ${onboardingId} with options:`, options);
     
     const { default: iamAdmin } = await import('@ucd-lib/iam-support-lib/src/utils/admin.js');
     const { default: pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
@@ -30,9 +35,15 @@ class employeesCli {
     }
 
     if ( options.provision ) {
-      const kcResult = await iamAdmin.provisionKcAccount(result.employeeId);
+      const kcParams = {
+        keycloakConfig: {...config.keycloakAdmin, refreshInterval: 58000},
+        printLogs: true
+      };
+      const kcResult = await iamAdmin.provisionKcAccount(result.employeeId, kcParams);
       if ( kcResult.error ) {
-        // if failure, remove employee from iam db
+        await iamAdmin.deleteEmployee(result.employeeId);
+        let msg = `Error provisioning keycloak account!\n${kcResult.message}.`;
+        console.error(msg);
         pg.client.end();
         return;
       }
@@ -55,7 +66,7 @@ class employeesCli {
 
     console.log(result.message);
     console.log(`Employee adopted with id ${result.employeeId}.`);
-    pg.client.end();
+    await pg.client.end();
   }
 }
 
