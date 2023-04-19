@@ -1,6 +1,6 @@
 module.exports = (api) => {
   api.post('/onboarding/new', async (req, res) => {
-    if ( !req.auth.token.hasAdminAccess && !req.auth.token.hasHrAccess ){
+    if ( !req.auth.token.canCreateRequests ){
       res.status(403).json({
         error: true,
         message: 'Not authorized to access this resource.'

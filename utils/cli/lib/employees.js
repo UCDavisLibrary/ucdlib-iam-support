@@ -1,4 +1,4 @@
-const config = require('./cli-config');
+const config = require('./cli-config.js');
 
 class employeesCli {
 
@@ -69,8 +69,11 @@ class employeesCli {
     await pg.client.end();
   }
 
+  /**
+   * @description Dismiss all record discrepancy notifications for an employee
+   * @param {String} iamId - Employee IAM id
+   */
   async dismissRecordDiscrepancyNotifications(iamId){
-
     const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
     const { default: pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
     const r = await UcdlibEmployees.dismissRecordDiscrepancyNotifications(iamId);
@@ -80,6 +83,14 @@ class employeesCli {
       return;
     }
     console.log(`Dismissed ${r.res.rowCount} record discrepancy notifications`);
+  }
+
+  async updateCreationDate(id, idtype){
+    const { default: iamAdmin } = await import('@ucd-lib/iam-support-lib/src/utils/admin.js');
+    const { default: pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
+    const r = await iamAdmin.updateEmployeeCreationDate(id, idtype);
+    console.log(`${r.error ? 'Error:' : 'Success:'} ${r.message}`);
+    await pg.client.end();
   }
 }
 

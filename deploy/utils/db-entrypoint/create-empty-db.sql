@@ -130,8 +130,8 @@ VALUES ('Awaiting User ID Provisioning', '{"onboarding"}');
 INSERT INTO "status_codes" ("name", "request_type")
 VALUES ('Provisioning Access', '{"onboarding"}');
 --6
-INSERT INTO "status_codes" ("name", "request_type", "is_open")
-VALUES ('Resolving', '{"onboarding", "separation"}', FALSE);
+INSERT INTO "status_codes" ("name", "request_type")
+VALUES ('Resolving', '{"onboarding", "separation"}');
 --7
 INSERT INTO "status_codes" ("name", "request_type", "is_open")
 VALUES ('Resolved', '{"onboarding", "separation"}', FALSE);

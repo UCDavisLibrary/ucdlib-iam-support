@@ -1,6 +1,8 @@
-const {Command} = require('commander');
+const {Command, Option} = require('commander');
 const employees = require('../lib/employees');
 const program = new Command();
+
+const idChoices = ['iamId', 'employeeId', 'userId', 'email', 'id'];
 
 program
   .command('adopt')
@@ -20,6 +22,16 @@ program
   .argument('<iamId>', 'Employee IAM id')
   .action((iamId) => {
     employees.dismissRecordDiscrepancyNotifications(iamId);
+  }
+);
+
+program
+  .command('update-creation-date')
+  .description('Update the creation date of an employee record to now. This is useful for fixing appt-date-anomaly errors')
+  .argument('<id>', 'an Employee unique indentifier')
+  .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(idChoices).default('iamId'))
+  .action((id, options) => {
+    employees.updateCreationDate(id, options.idtype);
   }
 );
 
