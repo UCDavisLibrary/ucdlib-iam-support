@@ -53,6 +53,17 @@ export function renderHome(){
           </div>
         </a>
       </div>
+
+
+
+      <div class="l-container">
+        <div class="panel o-box" style="border: 1px solid #ffbf00;">
+          <ucdlib-iam-alma
+              search-param='name' 
+              class='u-space-px--medium u-space-py--medium u-align--auto'>
+            </ucdlib-iam-alma>
+        </div>
+      </div>
     </div>
   `;
 }
