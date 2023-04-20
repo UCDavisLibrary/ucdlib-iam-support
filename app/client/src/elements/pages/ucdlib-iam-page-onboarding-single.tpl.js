@@ -37,7 +37,8 @@ export function render() {
         <div class='category-brand__background-light-gold o-box u-space-mb'>
           <div class="panel panel--icon panel--icon-custom ${this.isActiveStatus ? 'panel--icon-secondary' : 'panel--icon-quad'} o-box background-transparent">
             <h2 class="panel__title u-space-mb"><span class="panel__custom-icon fas ${this.isActiveStatus ? 'fa-check-circle' : 'fa-spinner'}"></span>Status</h2>
-            <div class='primary'>${this.status}</div>
+            <div class='primary fw-bold'>${this.status}</div>
+            <div class='primary'>${this.statusDescription}</div>
           </div>
         </div>
         <div class='category-brand__background-light-gold o-box u-space-mb'>

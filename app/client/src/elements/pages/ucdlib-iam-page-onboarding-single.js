@@ -17,6 +17,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       rtTransactions: {state: true},
       isActiveStatus: {state: true},
       status: {state: true},
+      statusDescription: {state: true},
       libraryTitle: {state: true},
       department: {state: true},
       startDate: {state: true},
@@ -42,6 +43,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.supervisorId = '';
     this.supervisorName = '';
     this.notes = '';
+    this.statusDescription = '';
 
     this._injectModel('AppStateModel', 'OnboardingModel', 'RtModel');
   }
@@ -95,6 +97,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.rtTicketId = payload.rtTicketId || '';
     this.isActiveStatus = payload.isActiveStatus;
     this.status = payload.statusName || '';
+    this.statusDescription = payload.statusDescription || '';
     this.libraryTitle = payload.libraryTitle || '';
     this.department = payload.departmentName || '';
     this.startDate = dtUtls.fmtDatetime(payload.startDate, true, true);
