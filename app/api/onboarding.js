@@ -38,9 +38,13 @@ module.exports = (api) => {
     ticket.addSubject(`Onboarding: ${employeeName}`);
     ticket.addOwner(config.rt.user);
 
-    // TODO: uncomment when closer to release
-    // if ( notifySupervisor ) ticket.addCc( ad.supervisorEmail );
-    // if ( ad.employeeEmail ) ticket.addCc( ad.employeeEmail );
+    if ( !config.rt.forbidCc) {
+      if ( notifySupervisor ) ticket.addCc( ad.supervisorEmail );
+
+      // todo - add checkbox to allow cc'ing the employee
+      // if ( ad.employeeEmail ) ticket.addCc( ad.employeeEmail );
+    }
+
 
     // ticket content
     ticket.addContent();

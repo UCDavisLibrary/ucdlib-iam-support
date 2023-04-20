@@ -117,29 +117,29 @@ CREATE TABLE outdated_records (
 
 -- Request Statuses
 --1
-INSERT INTO "status_codes" ("name", "request_type", 'description')
+INSERT INTO "status_codes" ("name", "request_type", "description")
 VALUES ('Submitted', '{"onboarding", "separation"}', 'The request has been submitted and is awaiting processing.');
 --2
-INSERT INTO "status_codes" ("name", "request_type", 'description')
-VALUES ('Awaiting Supervisor Response', '{"onboarding"}', "The employee's supervisor must fill out a permissions request form to proceed with the onboarding process.");
+INSERT INTO "status_codes" ("name", "request_type", "description")
+VALUES ('Awaiting Supervisor Response', '{"onboarding"}', 'The employee''s supervisor must fill out a permissions request form to proceed with the onboarding process.');
 --3
-INSERT INTO "status_codes" ("name", "request_type", 'description')
-VALUES ('Awaiting UCD IAM Record', '{"onboarding"}', "The employee must have an active record in the UC Davis Identity and Access Management system.");
+INSERT INTO "status_codes" ("name", "request_type", "description")
+VALUES ('Awaiting UCD IAM Record', '{"onboarding"}', 'The employee must have an active record in the UC Davis Identity and Access Management system.');
 --4
-INSERT INTO "status_codes" ("name", "request_type", 'description')
-VALUES ('Awaiting User ID Provisioning', '{"onboarding"}', "The employee must have an active computing account in the UC Davis Identity and Access Management system.");
+INSERT INTO "status_codes" ("name", "request_type", "description")
+VALUES ('Awaiting User ID Provisioning', '{"onboarding"}', 'The employee must have an active computing account in the UC Davis Identity and Access Management system.');
 --5
-INSERT INTO "status_codes" ("name", "request_type", 'description')
-VALUES ('Provisioning Access', '{"onboarding"}', "Access to Library systems and services is being provisioned.");
+INSERT INTO "status_codes" ("name", "request_type", "description")
+VALUES ('Provisioning Access', '{"onboarding"}', 'Access to Library systems and services is being provisioned.');
 --6
-INSERT INTO "status_codes" ("name", "request_type", 'description')
-VALUES ('Resolving', '{"onboarding", "separation"}', "The RT ticket associated with this request was recently set as 'Resolved'.");
+INSERT INTO "status_codes" ("name", "request_type", "description")
+VALUES ('Resolving', '{"onboarding", "separation"}', 'The RT ticket associated with this request was recently set as "Resolved".');
 --7
-INSERT INTO "status_codes" ("name", "request_type", "is_open", 'description')
-VALUES ('Resolved', '{"onboarding", "separation"}', FALSE, "This request has been resolved. You may comment on the associated RT ticket to reopen.");
+INSERT INTO "status_codes" ("name", "request_type", "is_open", "description")
+VALUES ('Resolved', '{"onboarding", "separation"}', FALSE, 'This request has been resolved. You may comment on the associated RT ticket to reopen.');
 --8
-INSERT INTO "status_codes" ("name", "request_type", 'description')
-VALUES ('Awaiting Supervisor Response', '{"permissions"}', "The employee's supervisor must approve the request.");
+INSERT INTO "status_codes" ("name", "request_type", "description")
+VALUES ('Awaiting Supervisor Response', '{"permissions"}', 'The employee''s supervisor must approve the request.');
 
 -- Group Types
 INSERT INTO "group_types" ("name", "part_of_org")
