@@ -110,15 +110,13 @@ export function render() {
     <ucd-theme-slim-select  @change=${(e) => this.user_roles = e.detail.map(g => g.value)}>
       <select multiple>
         ${this.roles.map(r => html`
-            <option .value=${r.code["_text"]} ?selected=${this.user_roles.includes(r.code["_text"])}> ${r.description["_text"]} - Code ${r.code["_text"]}</option>
+            <option .value=${r.code} ?selected=${this.user_roles.includes(r.description)}> ${r.description} - Code ${r.code}</option>
         `)}
       </select>
     </ucd-theme-slim-select>
     <a class='copy-text' @click=${this.openUserSearchModal}>Or copy roles from an existing Alma user.</a> 
   </div>
   <ucdlib-iam-modal id='user-search-modal' dismiss-text='Close' content-title='Alma User Search'>
-    ${this.isLookUp ?
-    html`
         <ucdlib-pages selected=${this.page}>
           <div id='form'>
             ${this.wasError ? html`
@@ -155,15 +153,14 @@ export function render() {
               <div class='results-list'>
                 <p class='results-label'>Select an Alma Entry:</p>
                 ${this.results.map(user => html`
-
-                  <a @click=${() => this._onUserClick(user.primary_id['_text'])} class="media-link link ${this.selectedAlmaId == user.primary_id ? 'selected-user' : ''}">
+                  <a @click=${() => this._onUserClick(user.primary_id)} class="media-link link ${this.selectedAlmaId == user.primary_id ? 'selected-user' : ''}">
                     <div class='media-link__body'>
-                      <h3 class="heading--highlight">${user.first_name['_text']} ${user.last_name['_text']}</h3>
-                      ${user.primary_id['_text'] ? html`
-                        <div><strong>Alma ID: </strong><span>${user.primary_id['_text']}</span></div>
+                      <h3 class="heading--highlight">${user.first_name} ${user.last_name}</h3>
+                      ${user.primary_id ? html`
+                        <div><strong>Alma ID: </strong><span>${user.primary_id}</span></div>
                       ` : html``}
                       ${user.status ? html`
-                        <div><strong>Status: </strong><span>${user.status['_text']}</span></div>
+                        <div><strong>Status: </strong><span>${user.status["value"]}</span></div>
                       ` : html``}
                     </div>
                   </a>
@@ -174,11 +171,7 @@ export function render() {
             `}
           </div>
         </ucdlib-pages>
-      `: 
-      html`
-        ${this.renderAlmaEntrySelectionForm()}
-        
-      `}
+
     </ucdlib-iam-modal>
 
 `;}
@@ -243,52 +236,4 @@ export function renderNameForm(){
 }
 
 
-/**
- * @description Renders the page for filling out custom employee data (if not in UCD IAM system yet)
- * @returns 
- */
-export function renderAlmaEntrySelectionForm(){
-  return html`
-  <div id='alma-manual'>
-      <section class="brand-textbox category-brand__background category-brand--double-decker u-space-mb--large">
-        You can use this form to get Alma Information, and choose which role type they have.  
-      </section>
-        <div class="panel panel--icon panel--icon-custom o-box panel--icon-pinot">
-        <h2 class="panel__title"><span class="panel__custom-icon fas fa-user-tie"></span>Alma Information</h2>
-      <div style="text-align:left;">
-          <div class="field-container">
-            <h6>First Name: ${this.firstName}</h6>
-          </div>
-          <div class="field-container">
-            <h6>Last Name: ${this.lastName}</h6>
-          </div>
-          <div class="field-container">
-            <h6>Alma Id: ${this.userId}</h6>
-          </div>
-          <div class="field-container">
-            <h6>Status: ${this.status}</h6>
-          </div>
-          <a class='pointer icon icon--circle-arrow-right' @click=${this.openEmployeeInfoModal} .hidden=${this.userEnteredData}>View Entire Employee Record</a>
-      </div>
-      <br />
-      <div style="text-align:left;">
-        <h2 class="panel__title"><span class="panel__custom-icon fas fa-sitemap"></span>Employee Roles</h2>          
-              <ucd-theme-slim-select  @change=${(e) => this.user_roles = e.detail.map(g => g.value)}>
-                      <select multiple>
-                        ${this.roles.map(r => html`
-                            <option .value=${r.description["_text"]} ?selected=${this.user_roles.includes(r.description["_text"])}> ${r.description["_text"]} - Code ${r.code["_text"]}</option>
-                        `)}
-                      </select>
-              </ucd-theme-slim-select>
-      </div>
-      <ucdlib-iam-modal id='alma-employee-modal' dismiss-text='Close' content-title='Alma Record'>
-        ${!this.userEnteredData ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.almaRecord.data, null, "  ")}</pre>` : html``}
-      </ucdlib-iam-modal>
-      <!-- <button type='button' @click=${this._onAlmaFormSubmit} class="btn btn--block btn--alt btn--search">Next</button> -->
-    </div>
 
-  </div>
-
-  `;
-}
-// .value=${r.code["_text"]} 

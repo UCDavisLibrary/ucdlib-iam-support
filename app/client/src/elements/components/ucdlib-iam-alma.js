@@ -32,6 +32,7 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
       searchParams: {state: true},
       navItems: {state: true},
       disableSearch: {state: true},
+      disableCopyPermissions:  {state: false},
       isFetching: {state: true},
       wasError: {state: true},
       page: {state: true},
@@ -58,7 +59,6 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     this.render = Templates.render.bind(this);
     this.renderAlmaIdForm = Templates.renderAlmaIdForm.bind(this);
     this.renderNameForm = Templates.renderNameForm.bind(this);
-    this.renderAlmaEntrySelectionForm = Templates.renderAlmaEntrySelectionForm.bind(this);
     
     this._injectModel('AppStateModel', 'AlmaUserModel');
     this.roles = [];
@@ -195,10 +195,10 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     this.contact_info = record.contact_info;
     this.status = record.status;
     this.userId = record.userId;
-    let uRoles = record.user_roles.user_role;
+    let uRoles = record.user_roles;
     let roleArr = [];
     for (let u of uRoles) {
-      let name = u.role_type["_attributes"]["desc"];
+      let name = u.role_type["desc"];
       roleArr.push(name);
     }
     this.user_roles = roleArr;
@@ -248,6 +248,7 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     this.selectedAlmaProfile = {};
   }
 
+
   /**
    * @description Attached to submit event on element form
    * @param {*} e - Submit event
@@ -269,7 +270,6 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     }// } else {
     //   r = await this.AlmaUserModel.getAlmaUserRoleType(); 
     // }
-
     let allRoles = await this.AlmaUserModel.getAlmaUserRoleType();
 
     if ( r.state === this.AlmaUserModel.store.STATE.LOADED ) {
@@ -278,7 +278,7 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
 
       this.isFetching = false;
       this.results = Array.isArray(r) ? r : [r];
-      this.roles = allRoles.payload.code_table.rows.row;
+      this.roles = allRoles.payload.row;
       if ( !this.hideResults ){
         this.page = 'results';
       }
@@ -300,7 +300,7 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
 
   _onRoletypeUpdate(e){
     if ( e.state == 'loaded'){
-      this.roles = e.payload.code_table.rows.row;
+      this.roles = e.payload.row;
     } 
   }
   
@@ -349,9 +349,10 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
 
     this.selectedAlmaId = id;
     const r = await this.AlmaUserModel.getAlmaUserById(id, 'almaId', 'select');
+
     if( r.state === this.AlmaUserModel.store.STATE.LOADED ) {
       this.isFetching = false;
-      this.selectedAlmaProfile = r.payload.user;
+      this.selectedAlmaProfile = r.payload;
     } else if( r.state === this.AlmaUserModel.store.STATE.ERROR ) {
       this.isFetching = false;
       this.wasError = true;
@@ -362,7 +363,8 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     this.almaRecord = new AlmaTransform(this.selectedAlmaProfile);
 
     this.userEnteredData = false;
-    this.isLookUp = false;
+    const ele = this.renderRoot.querySelector('#user-search-modal');
+    if ( ele ) ele.hide();
   }
 
 }
