@@ -27,6 +27,7 @@ CREATE TABLE onboarding_requests (
 CREATE TABLE permissions_requests (
     id SERIAL PRIMARY KEY,
     onboarding_request_id integer REFERENCES onboarding_requests (id),
+    permission_request_id integer,
     iam_id varchar(20),
     rt_ticket_id varchar(20),
     needs_supervisor_approval boolean NOT NULL DEFAULT FALSE,
