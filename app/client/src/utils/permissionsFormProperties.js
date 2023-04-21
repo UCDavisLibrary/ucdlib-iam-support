@@ -22,7 +22,9 @@ export default [
   {
     prop: 'pAlmaRoles',
     payload: 'permissions.alma.roles',
-    default: []
+    default: [],
+    eleId: 'alma-user-lookup',
+    eleProp: 'user_roles'
   },
   {
     prop: 'notes',

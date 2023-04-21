@@ -86,7 +86,7 @@ export function render() {
   return html`
   <div class="container" ?hidden="${!this.visible}">
     <div class="film" @click="${this.hide}"></div>
-    <div class="box-content">
+    <div class="box-content" style='width:${this.contentWidth}'>
       <div class="header">
         <h2>${this.contentTitle}</h2>
         <div class="header-right"><span class="close-icon" @click="${this.hide}">X</span></div>

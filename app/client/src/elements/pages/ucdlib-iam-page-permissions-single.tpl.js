@@ -89,7 +89,7 @@ export function render() {
               ${this.renderGroupLabel('Alma', 'alma')}
             </div>
             <div class='l-second'>
-              <ucdlib-iam-alma @role-select=${e => console.log(e.detail)} .user_roles=${this.pAlmaRoles}></ucdlib-iam-alma>
+              <ucdlib-iam-alma id='alma-user-lookup' @role-select=${e => this.pAlmaRoles = e.detail.roles}></ucdlib-iam-alma>
             </div>
           </div>
           <div class="l-2col l-2col--33-67 field-row">

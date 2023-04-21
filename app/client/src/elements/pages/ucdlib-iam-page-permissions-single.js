@@ -204,6 +204,13 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
   setDefaultForm(){
     formProperties.forEach(p => {
       this[p.prop] = p.default;
+
+      if ( p.eleId && p.eleProp ) {
+        const ele = this.querySelector(`#${p.eleId}`);
+        if ( ele ) ele[p.eleProp] = p.default;
+      }
+
+
     });
   }
 
@@ -226,7 +233,8 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
   _onSubmit(e){
     e.preventDefault();
     if ( this.submitting ) return;
-    this._setPayloadOrElement('payload');
+    this.setPayload('payload');
+    console.log('payload', this.payload);
     this.PermissionsModel.newSubmission(this.payload);
   }
 
@@ -299,6 +307,10 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
           const v = eval(`this.payload.${item.payload}`);
           if ( typeof v !== 'undefined' ){
             this[item.prop] = v;
+            if ( item.eleId && item.eleProp ){
+              const ele = this.querySelector(`#${item.eleId}`);
+              if ( ele ) ele[item.eleProp] = v;
+            }
           }
         } catch (error) {}
       }

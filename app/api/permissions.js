@@ -83,18 +83,21 @@ module.exports = (api) => {
 
     // send rt
     const rtClient = new UcdlibRt(config.rt);
+    const p = data.permissions;
     const permissions = [
-      {name: 'Tech Equipment', value: data.permissions.techEquipment},
-      {name: 'Main Website', value: data.permissions.mainWebsite},
-      {name: 'Bigsys', value: data.permissions.bigsys},
-      {name: 'Facilities', value: data.permissions.facilities},
-      {name: 'Staff Intranet', value: data.permissions.intranet},
-      {name: 'Libcal', value: data.permissions.libcal},
-      {name: 'Libguides', value: data.permissions.libguides},
-      {name: 'Slack', value: data.permissions.slack}
+      {name: 'Tech Equipment', value: p.techEquipment},
+      {name: 'Main Website', value: p.mainWebsite},
+      {name: 'Alma Roles', value: p.alma.roles, isArray: true},
+      {name: 'Bigsys', value: p.bigsys},
+      {name: 'Facilities', value: p.facilities},
+      {name: 'Staff Intranet', value: p.intranet},
+      {name: 'Libcal', value: p.libcal},
+      {name: 'Libguides', value: p.libguides},
+      {name: 'Slack', value: p.slack}
     ];
 
     // TODO: send facilities RT if first onboarding request, and facilities is checked
+    //iamAdmin.sendFacilitiesRequest(idOrRecord, params);
 
     if ( action === 'onboarding' && data.rtTicketId ){
       const ticket = new UcdlibRtTicket(false, {id: data.rtTicketId});
@@ -103,8 +106,15 @@ module.exports = (api) => {
 
       // loop permissions and add to reply
       permissions.forEach(p => {
-        reply.addContent(`<h4>${p.name}</h4>`);
-        reply.addContent(p.value, false);
+        try {
+          reply.addContent(`<h4>${p.name}</h4>`);
+          if ( p.isArray ){
+            p.value.forEach(v => reply.addContent(v, true));
+          } else {
+            reply.addContent(p.value, false);
+          }
+        } catch (error) {}
+
       });
 
       if ( data.notes ){
@@ -112,7 +122,6 @@ module.exports = (api) => {
         reply.addContent(data.notes, false);
       }
 
-      // TODO: Lookup user
       reply.addContent();
       reply.addContent(`Requested by: ${ req.auth.token.email}`);
 

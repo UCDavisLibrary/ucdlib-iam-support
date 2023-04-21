@@ -129,15 +129,6 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     if ( ele ) ele.show();
   }
 
-
-  /**
-   * @description Resets the ucd-iam lookup forms
-   */
-  _resetLookupForms(){
-    this.renderRoot.querySelector('#alma-manual ucdlib-iam-search' ).reset();
-    
-  }
-
   /**
    * @description Attached to manual form submit button click
    */
@@ -187,9 +178,6 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
    * @param {*} record 
    */
   _setStatePropertiesFromAlmaRecord(record){
-    this.firstName = record.firstName;
-    this.lastName = record.lastName;
-    this.middleName = record.middleName;
     this.account_type = record.account_type;
     this.campus_code = record.campus_code;
     this.contact_info = record.contact_info;
@@ -198,8 +186,10 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     let uRoles = record.user_roles;
     let roleArr = [];
     for (let u of uRoles) {
-      let name = u.role_type["desc"];
-      roleArr.push(name);
+      let description = u.role_type.desc;
+      let code = u.role_type.value;
+      let scope = u.scope.value;
+      roleArr.push({description, code, scope});
     }
     this.user_roles = roleArr;
 
@@ -221,6 +211,19 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     }
     this.disableSearch = true;
     return true;
+  }
+
+  _onManualRoleSelect(e) {
+    const selectedRoles =  e.detail.map(g => this.roles.find(({code}) => code === g.value));
+    this.user_roles = selectedRoles.map((r) => {
+      if ( !r ) return false;
+      if (!r.code || !r.description) return false; 
+      return {
+        code: r.code,
+        description: r.description,
+        scope: ''
+      };
+    }).filter(x => x);
   }
 
   /**
@@ -365,6 +368,7 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     this.userEnteredData = false;
     const ele = this.renderRoot.querySelector('#user-search-modal');
     if ( ele ) ele.hide();
+    this.reset();
   }
 
 }

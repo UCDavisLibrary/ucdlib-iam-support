@@ -21,8 +21,6 @@ export function styles() {
   const elementStyles = css`
     :host {
       display: block;
-      padding: 1rem;
-      max-width: 500px;
     }
     [hidden] {
       display: none !important;
@@ -80,6 +78,16 @@ export function styles() {
       font-weight: 700;
       text-decoration: none;
     }
+    @media screen and (min-width: 350px) {
+      #modal-content {
+        min-width: 250px;
+      }
+    }
+    @media screen and (min-width: 540px) {
+      #modal-content {
+        min-width: 400px;
+      }
+    }
   `;
 
   return [
@@ -107,16 +115,17 @@ export function render() {
   return html`
   <div class="field-container">
     <label >Search for Roles</label>
-    <ucd-theme-slim-select  @change=${(e) => this.user_roles = e.detail.map(g => g.value)}>
+    <ucd-theme-slim-select  @change=${this._onManualRoleSelect}>
       <select multiple>
         ${this.roles.map(r => html`
-            <option .value=${r.code} ?selected=${this.user_roles.includes(r.description)}> ${r.description} - Code ${r.code}</option>
+            <option .value=${r.code} ?selected=${this.user_roles.find(({code}) => code == r.code) ? true : false}> ${r.description} - Code ${r.code}</option>
         `)}
       </select>
     </ucd-theme-slim-select>
     <a class='copy-text' @click=${this.openUserSearchModal}>Or copy roles from an existing Alma user.</a> 
   </div>
-  <ucdlib-iam-modal id='user-search-modal' dismiss-text='Close' content-title='Alma User Search'>
+  <ucdlib-iam-modal id='user-search-modal' dismiss-text='Close' content-title='Alma User Search' auto-width>
+    <div id='modal-content'>
         <ucdlib-pages selected=${this.page}>
           <div id='form'>
             ${this.wasError ? html`
@@ -171,7 +180,7 @@ export function render() {
             `}
           </div>
         </ucdlib-pages>
-
+      </div>
     </ucdlib-iam-modal>
 
 `;}

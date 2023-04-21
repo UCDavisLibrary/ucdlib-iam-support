@@ -11,6 +11,8 @@ export default class UcdlibIamModal extends LitElement {
       visible: {type: Boolean},
       contentTitle: {type: String, attribute: "content-title"},
       dismissText: {type: String, attribute: 'dismiss-text'},
+      autoWidth: {type: Boolean, attribute: 'auto-width'},
+      contentWidth: {state: true},
       closeOnConfirm : {type: Boolean}
     };
   }
@@ -26,6 +28,21 @@ export default class UcdlibIamModal extends LitElement {
     this.contentTitle = "";
     this.dismissText = "Cancel";
     this.closeOnConfirm = true;
+    this.autoWidth = false;
+  }
+
+  /**
+   * @description Lit lifecycle method. Called when element is going to update
+   * @param {Object} props - properties that are changing
+   */
+  willUpdate(props) {
+    if ( props.has('autoWidth') ) {
+      if ( this.autoWidth ) {
+        this.contentWidth = 'auto';
+      } else {
+        this.contentWidth = '85%';
+      }
+    }
   }
 
   /**
