@@ -6,7 +6,7 @@ export default class UcdlibIamPageHome extends window.Mixin(LitElement)
 
   static get properties() {
     return {
-      
+
     };
   }
 
@@ -24,7 +24,7 @@ export default class UcdlibIamPageHome extends window.Mixin(LitElement)
 
   /**
    * @description Disables the shadowdom
-   * @returns 
+   * @returns
    */
   createRenderRoot() {
     return this;

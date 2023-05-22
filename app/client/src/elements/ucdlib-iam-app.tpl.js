@@ -4,15 +4,20 @@ import { html } from 'lit';
  * @description Template to be rendered
  * @returns {TemplateResult}
  */
-export function render() { 
+export function render() {
   return html`
   <ucd-theme-header>
     <ucdlib-branding-bar slogan='Identity and Access Management'>
       <a href='/logout'>Logout</a>
     </ucdlib-branding-bar>
     <ucd-theme-primary-nav>
-      <a href='/onboarding'>Onboarding</a>
+      <ul link-text='Onboarding' href='/onboarding'>
+        <li><a href='/onboarding/new#lookup'>New Request</a></li>
+        <li><a href='/onboarding/new#manual'>TES Employees</a></li>
+        <li><a href='/onboarding/new#manual'>Transfer from Another Library Unit</a></li>
+      </ul>
       <a href='/separation'>Separation</a>
+      <a href='/permissions'>Permissions</a>
     </ucd-theme-primary-nav>
   </ucd-theme-header>
   <ucdlib-iam-alert></ucdlib-iam-alert>
@@ -27,7 +32,7 @@ export function render() {
       </li>
     `)}
   </ol>
-  
+
   <ucdlib-pages id='main-pages' selected=${this.page}>
     <ucdlib-iam-state id='loading' state=${this.status} error-message=${this.errorMessage}></ucdlib-iam-state>
     <ucdlib-iam-page-onboarding id='onboarding'></ucdlib-iam-page-onboarding>
@@ -36,5 +41,6 @@ export function render() {
     <ucdlib-iam-page-home id='home'></ucdlib-iam-page-home>
     <ucdlib-iam-page-separation id='separation'></ucdlib-iam-page-separation>
     <ucdlib-iam-page-permissions-single id='permissions-single'></ucdlib-iam-page-permissions-single>
+    <ucdlib-iam-page-permissions id='permissions'></ucdlib-iam-page-permissions>
   </ucdlib-pages>
 `;}

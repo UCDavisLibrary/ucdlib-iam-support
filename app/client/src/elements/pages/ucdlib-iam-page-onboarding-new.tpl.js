@@ -4,7 +4,7 @@ import { html } from 'lit';
  * @description main render function
  * @returns {TemplateResult}
  */
-export function render() { 
+export function render() {
   return html`
   <div class='l-container u-space-pb'>
     <ucdlib-pages selected=${this.page}>
@@ -12,9 +12,9 @@ export function render() {
       ${this.renderSubmissionForm()}
       ${this.renderManualEntryForm()}
       <div id='obn-lookup'>
-        <ucdlib-iam-search 
-          @select=${e => this._onEmployeeSelect(e.detail.status)} 
-          search-param='employee-id' 
+        <ucdlib-iam-search
+          @select=${e => this._onEmployeeSelect(e.detail.status)}
+          search-param='employee-id'
           class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
         </ucdlib-iam-search>
       </div>
@@ -32,14 +32,14 @@ export function render() {
 export function renderHome(){
   return html`
   <div id='obn-home'>
-    <div class="priority-links">   
+    <div class="priority-links">
       <div class="priority-links__item">
         <a href="#lookup" class="vertical-link vertical-link--circle category-brand--tahoe">
           <div class="vertical-link__figure">
             <i class="vertical-link__image fas fa-search fa-3x"></i>
           </div>
           <div class="vertical-link__title">
-            Search UC Davis Directory <br> <span class='fw-light'>(preferred)</span>
+            Search UC Davis Directory <br> <span class='fw-light'>(for most cases)</span>
           </div>
         </a>
       </div>
@@ -53,7 +53,18 @@ export function renderHome(){
           </div>
         </a>
       </div>
+      <div class="priority-links__item">
+        <a href="" class="vertical-link vertical-link--circle category-brand--cabernet">
+          <div class="vertical-link__figure">
+            <i class="vertical-link__image fas fa-random fa-3x"></i>
+          </div>
+          <div class="vertical-link__title">
+            Employee Transfer <br> <span class='fw-light'>(from another Library Unit)</span>
+          </div>
+        </a>
+      </div>
     </div>
+  </div>
   `;
 }
 
@@ -159,8 +170,8 @@ export function renderSubmissionForm(){
           </div>
         </section>
       </div>
-      <button 
-          type='submit' 
+      <button
+          type='submit'
           class="btn btn--block btn--alt btn--search">Submit</button>
       </form>
     </form>
@@ -170,14 +181,14 @@ export function renderSubmissionForm(){
 
 /**
  * @description Renders the page for filling out custom employee data (if not in UCD IAM system yet)
- * @returns 
+ * @returns
  */
 export function renderManualEntryForm(){
   return html`
   <div id='obn-manual'>
     <div class='form-single-col'>
-      <section class="brand-textbox category-brand__background category-brand--double-decker u-space-mb--large">
-        You can use this form to create an RT ticket now, but access to most Library applications and services will be delayed until a UC Davis computing account is provisioned.  
+      <section class="brand-textbox category-brand__background category-brand--secondary u-space-mb--large">
+        Access to most Library applications and services will be delayed until a UC Davis computing account is successfully provisioned.
       </section>
       <div class="panel panel--icon panel--icon-custom o-box panel--icon-pinot">
         <h2 class="panel__title"><span class="panel__custom-icon fas fa-user-tie"></span>Employee</h2>
@@ -188,9 +199,9 @@ export function renderManualEntryForm(){
       <div class="panel panel--icon panel--icon-custom o-box panel--icon-delta">
         <h2 class="panel__title"><span class="panel__custom-icon fas fa-sitemap"></span>Supervisor</h2>
         <section>
-          <ucdlib-iam-search 
-            @select=${e => this._onSupervisorSelect(e.detail.status)} 
-            search-param='employee-id' 
+          <ucdlib-iam-search
+            @select=${e => this._onSupervisorSelect(e.detail.status)}
+            search-param='employee-id'
             class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
           </ucdlib-iam-search>
         </section>

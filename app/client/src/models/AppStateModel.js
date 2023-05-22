@@ -17,17 +17,17 @@ class AppStateModelImpl extends AppStateModel {
   /**
    * @description Sets the current route state
    * @param {Object} update - Route state - Returned in AppStateUpdate
-   * @returns 
+   * @returns
    */
   set(update) {
     if ( update.location.path.length && update.location.path[0] == 'logout' ){
       this.logout();
     }
-    
+
     this.setPage(update);
     this.setTitle(false, update);
     this.setBreadcrumbs(false, update);
-    
+
     let res = super.set(update);
 
     return res;
@@ -45,11 +45,11 @@ class AppStateModelImpl extends AppStateModel {
 
   /**
    * @description Sets page data for route
-   * @param {Object} update 
+   * @param {Object} update
    */
   setPage(update){
     let p;
-    if( 
+    if(
       !update.location.path.length ||
       !update.location.path[0]
     ) {
@@ -101,7 +101,11 @@ class AppStateModelImpl extends AppStateModel {
     } else if ( update.page === 'onboarding-new' ){
       title.show = this.store.pageTitles.onboardingNew ? true : false;
       title.text = this.store.pageTitles.onboardingNew;
+    } else if ( update.page === 'permissions' ){
+      title.show = this.store.pageTitles.permissions ? true : false;
+      title.text = this.store.pageTitles.permissions;
     }
+
 
     this.store.emit('app-header-update', {title});
   }
@@ -137,6 +141,10 @@ class AppStateModelImpl extends AppStateModel {
     } else if ( update.page === 'separation' ){
       breadcrumbs.show = true;
       breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.separation);
+    }
+    else if ( update.page === 'permissions' ){
+      breadcrumbs.show = true;
+      breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.permissions);
     }
 
     this.store.emit('app-header-update', {breadcrumbs});

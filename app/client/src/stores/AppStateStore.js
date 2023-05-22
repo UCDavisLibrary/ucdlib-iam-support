@@ -17,9 +17,9 @@ class AppStateStoreImpl extends AppStateStore {
       onboardingNewManual: {text: 'Manual Entry', link: `/onboarding/new#manual`},
       onboardingNewSubmission: {text: 'Submission', link: `/onboarding/new#submission`},
       usersSearch: {text: 'New Request', link: `/users/search`},
-      // // usersSearchManual: {text: 'Manual Entry', link: `/users/search#manual`},
-      // usersSearchAlma: {text: 'Alma Form', link: `/users/search#almaForm`},    
-      separation: {text: 'Separation', link: 'separation'}
+      separation: {text: 'Separation', link: 'separation'},
+      permissions: {text: 'Permissions', link: '/permissions'},
+      permissionsReport: {text: 'Select a Direct Report', link: '/permissions#report'}
     };
 
     // static page title values
@@ -27,7 +27,8 @@ class AppStateStoreImpl extends AppStateStore {
       onboarding: 'Onboarding',
       separation: 'Separation',
       onboardingNew: 'New Onboarding Request',
-      usersSearch: 'Alma Users Search'
+      usersSearch: 'Alma Users Search',
+      permissions: 'Employee Permissions'
     };
 
     this.userProfile = {};

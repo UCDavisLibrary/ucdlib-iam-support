@@ -1,8 +1,8 @@
 const defs = {
   all : [
-    'home', 'onboarding', 'separation', 'onboarding-new', 
-    'onboarding-single', 'permissions-single'
+    'home', 'onboarding', 'separation', 'onboarding-new',
+    'onboarding-single', 'permissions-single', 'permissions'
   ],
 };
-  
+
 export default defs;
