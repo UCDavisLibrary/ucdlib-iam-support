@@ -4,7 +4,7 @@ import { html } from 'lit';
  * @description Main render function
  * @returns {TemplateResult}
  */
-export function render() { 
+export function render() {
   return html`
   <div class='l-container l-basic--flipped'>
     <div class="l-sidebar-second">
@@ -13,7 +13,7 @@ export function render() {
           <i class="fas fa-user-plus fa-2x"></i>
         </div>
         <div class="focal-link__body">
-          <strong>Make a New Request</strong>
+          <strong>Make a New Request</strong><br>(HR Only)
         </div>
       </a>
     </div>

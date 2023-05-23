@@ -19,7 +19,9 @@ class AppStateStoreImpl extends AppStateStore {
       usersSearch: {text: 'New Request', link: `/users/search`},
       separation: {text: 'Separation', link: 'separation'},
       permissions: {text: 'Permissions', link: '/permissions'},
-      permissionsReport: {text: 'Select a Direct Report', link: '/permissions#report'}
+      permissionsReport: {text: 'Select a Direct Report', link: '/permissions#report'},
+      permissionsApplications: {text: 'Select Applications', link: '/permissions#applications'},
+      permissionsEmployee: {text: 'Select a UC Davis Employee', link: '/permissions#employee'}
     };
 
     // static page title values

@@ -197,7 +197,7 @@ export function renderManualEntryForm(){
         </section>
       </div>
       <div class="panel panel--icon panel--icon-custom o-box panel--icon-delta">
-        <h2 class="panel__title"><span class="panel__custom-icon fas fa-sitemap"></span>Supervisor</h2>
+        <h2 class="panel__title"><span class="panel__custom-icon fas fa-sitemap"></span>Library Supervisor</h2>
         <section>
           <ucdlib-iam-search
             @select=${e => this._onSupervisorSelect(e.detail.status)}

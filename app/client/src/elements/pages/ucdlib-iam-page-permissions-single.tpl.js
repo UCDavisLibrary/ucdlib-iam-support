@@ -5,7 +5,7 @@ import {ifDefined} from 'lit/directives/if-defined.js';
  * @description Primary render function
  * @returns {TemplateResult}
  */
-export function render() { 
+export function render() {
   return html`
   <div class='l-container u-space-pb'>
     <div class='l-basic--flipped'>
@@ -49,7 +49,7 @@ export function render() {
             </div>
           </div>
           <h2 class="heading--underline">Applications</h2>
-          <div class="l-2col l-2col--33-67 field-row">
+          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('main-website')}>
             <div class='l-first'>
               ${this.renderGroupLabel('Main Website', 'main-website')}
             </div>
@@ -67,7 +67,7 @@ export function render() {
               ${this.renderTextArea('pMainWebsiteNotes', 'Notes', 4)}
             </div>
           </div>
-          <div class="l-2col l-2col--33-67 field-row">
+          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('intranet')}>
             <div class='l-first'>
               ${this.renderGroupLabel('Staff Intranet', 'intranet')}
             </div>
@@ -84,7 +84,7 @@ export function render() {
               </div>
             </div>
           </div>
-          <div class="l-2col l-2col--33-67 field-row">
+          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('alma')}>
             <div class='l-first'>
               ${this.renderGroupLabel('Alma', 'alma')}
             </div>
@@ -92,7 +92,7 @@ export function render() {
               <ucdlib-iam-alma id='alma-user-lookup' @role-select=${e => this.pAlmaRoles = e.detail.roles}></ucdlib-iam-alma>
             </div>
           </div>
-          <div class="l-2col l-2col--33-67 field-row">
+          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('libguides')}>
             <div class='l-first'>
               ${this.renderGroupLabel('Libguides', 'libguides')}
             </div>
@@ -108,7 +108,7 @@ export function render() {
               </div>
             </div>
           </div>
-          <div class="l-2col l-2col--33-67 field-row">
+          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('libcal')}>
             <div class='l-first'>
               ${this.renderGroupLabel('Libcal', 'libcal')}
             </div>
@@ -124,7 +124,7 @@ export function render() {
               </div>
             </div>
           </div>
-          <div class="l-2col l-2col--33-67 field-row">
+          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('slack')}>
             <div class='l-first'>
               ${this.renderGroupLabel('Slack', 'slack')}
             </div>
@@ -132,7 +132,7 @@ export function render() {
               ${this.renderCheckbox('pSlack', 'Create Account')}
             </div>
           </div>
-          <div class="l-2col l-2col--33-67 field-row">
+          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('bigsys')}>
             <div class='l-first'>
               ${this.renderGroupLabel('Bigsys', 'bigsys')}
             </div>
@@ -145,7 +145,7 @@ export function render() {
               ${this.renderTextArea('pBigsysOther', 'Other:')}
             </div>
           </div>
-          <div class="l-2col l-2col--33-67 field-row">
+          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('calendly')}>
             <div class='l-first'>
               ${this.renderGroupLabel('Calendly', 'calendly')}
             </div>
@@ -155,7 +155,7 @@ export function render() {
               </div>
             </div>
           </div>
-          <div class="l-2col l-2col--33-67 field-row">
+          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('lang-prize')}>
             <div class='l-first'>
               ${this.renderGroupLabel('Lang Prize', 'lang-prize')}
             </div>
@@ -165,7 +165,7 @@ export function render() {
               </div>
             </div>
           </div>
-          <div class="l-2col l-2col--33-67 field-row">
+          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('aggie-open')}>
             <div class='l-first'>
               ${this.renderGroupLabel('Aggie Open', 'aggie-open')}
             </div>
@@ -185,9 +185,9 @@ export function render() {
             </div>
           </div>
           <div class='u-space-my--large flex-justify-center'>
-            <button 
+            <button
               ?disabled=${this.submitting}
-              type='submit' 
+              type='submit'
               class="btn btn--alt btn--search">${this.isAnEdit ? 'Update' : 'Submit'}
             </button>
           </div>
@@ -265,7 +265,7 @@ export function renderHelpModal(){
     `;
   } else if ( this.helpModal === 'libguides' ){
     title = 'Libguides';
-    const url = 'https://guides.library.ucdavis.edu/';
+    const url = 'https://guides.library.ucdavis.edu';
     content = html`
       <div>Libguides is located at <a href=${url}>${url}</a>.</div>
       <h3>Roles</h3>
@@ -275,7 +275,7 @@ export function renderHelpModal(){
     `;
   } else if ( this.helpModal === 'libcal' ){
     title = 'Libcal';
-    const url = 'https://reservations.library.ucdavis.edu/';
+    const url = 'https://reservations.library.ucdavis.edu';
     content = html`
       <div>Libcal is located at <a href=${url}>${url}</a>.</div>
       <h3>Roles</h3>

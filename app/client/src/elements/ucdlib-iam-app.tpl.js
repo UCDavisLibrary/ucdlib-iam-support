@@ -12,8 +12,8 @@ export function render() {
     </ucdlib-branding-bar>
     <ucd-theme-primary-nav>
       <ul link-text='Onboarding' href='/onboarding'>
-        <li><a href='/onboarding/new#lookup'>New Request</a></li>
-        <li><a href='/onboarding/new#manual'>TES Employees</a></li>
+        <li><a href='/onboarding/new#lookup'>From UC Davis Directory</a></li>
+        <li><a href='/onboarding/new#manual'>Manual Entry</a></li>
         <li><a href='/onboarding/new#manual'>Transfer from Another Library Unit</a></li>
       </ul>
       <a href='/separation'>Separation</a>

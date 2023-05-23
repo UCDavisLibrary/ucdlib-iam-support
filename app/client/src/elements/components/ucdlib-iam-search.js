@@ -23,6 +23,7 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
       iamId: {type: String, attribute: 'iam-id'},
       email: {type: String, attribute: 'email'},
       hideResults: {type: Boolean, attribute: 'hide-results'},
+      resetOnSelect: {type: Boolean, attribute: 'reset-on-select'},
       searchParams: {state: true},
       navItems: {state: true},
       disableSearch: {state: true},
@@ -98,7 +99,7 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
     });
 
     this.searchParam = 'name';
-    
+
     // display options
     this.hideNav = false;
     this.hideNavOptions = '';
@@ -115,7 +116,7 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
 
     // validates attribute for loading element with a specified search form
     if ( props.has('searchParam') ){
-      if ( 
+      if (
         !this.searchParam ||
         !this.searchParams.map(x => x.attribute).includes(this.searchParam)
       ) {
@@ -217,16 +218,16 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
       } else {
         this.wasError = true;
       }
-    } 
+    }
 
     this.dispatchEvent(new CustomEvent('search', {detail: {status: r}}));
-    
+
   }
 
   /**
    * @description Attached to click listeners on results page
    * @param {Number} id - IAM ID
-   * @returns 
+   * @returns
    */
   async _onPersonClick(id){
     if ( this.isFetching ) return;
@@ -245,6 +246,7 @@ export default class UcdlibIamSearch extends window.Mixin(LitElement)
     }
 
     this.dispatchEvent(new CustomEvent('select', {detail: {status: r}}));
+    if ( this.resetOnSelect ) this.reset();
 
   }
 

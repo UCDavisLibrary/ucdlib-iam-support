@@ -1,6 +1,3 @@
-// TODO: look through onboarding records and do status checks
-// ie if iam account is missing, look up, and write to rt if found
-
 import iamAdmin from "@ucd-lib/iam-support-lib/src/utils/admin.js";
 import UcdlibOnboarding from "@ucd-lib/iam-support-lib/src/utils/onboarding.js";
 import config from "./config.js";
@@ -10,7 +7,12 @@ function OnboardingStatusError(error) {
   this.message = "Error when checking status of onboarding records";
   }
 
-// you need to be on staff vpn or on itis network to run this script 
+/**
+ * @description Reviews all active onboarding records and
+ * - checks if the RT ticket has been resolved, in which case the status is updated
+ * - checks if the employee's UCD IAM record has been created, in which case the status is updated
+ * @param {Boolean} logError - if true, will simply throw an error instead of sending message to slack
+ */
 export const run = async (logError) => {
   try {
     const logs = [];
@@ -39,6 +41,6 @@ export const run = async (logError) => {
     } else {
       throw new OnboardingStatusError(error);
     }
-    
-  } 
+
+  }
 }

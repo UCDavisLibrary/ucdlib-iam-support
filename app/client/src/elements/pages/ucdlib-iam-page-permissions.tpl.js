@@ -1,4 +1,5 @@
 import { html } from 'lit';
+import applicationList from "../../utils/applications";
 
 /**
  * @description Main template for the element
@@ -10,6 +11,8 @@ export function render() {
     <ucdlib-pages selected=${'perm-' + this.page}>
       ${this.renderHome()}
       ${this.renderReportSelect()}
+      ${this.renderApplicationsSelect()}
+      ${this.renderEmployeeSelect()}
     </ucdlib-pages>
 
   </div>
@@ -25,7 +28,7 @@ export function renderHome(){
     <h2 class='heading--underline'>Request Permissions For</h2>
     <div class="priority-links">
       <div class="priority-links__item">
-        <a href="" class="vertical-link vertical-link--circle category-brand--tahoe">
+        <a href="#applications" class="vertical-link vertical-link--circle category-brand--tahoe">
           <div class="vertical-link__figure">
             <i class="vertical-link__image fas fa-user-plus fa-3x"></i>
           </div>
@@ -45,7 +48,7 @@ export function renderHome(){
         </a>
       </div>
       <div class="priority-links__item">
-        <a href="" class="vertical-link vertical-link--circle category-brand--redwood">
+        <a href="#employee" class="vertical-link vertical-link--circle category-brand--redwood">
           <div class="vertical-link__figure">
             <i class="vertical-link__image fas fa-user-secret fa-3x"></i>
           </div>
@@ -66,7 +69,68 @@ export function renderHome(){
 export function renderReportSelect(){
   return html`
   <div id='perm-report'>
-  <h2 class='heading--underline'>Select an Employee</h2>
+    <div class='form-single-col'>
+      ${this.reports.length ? html`
+        <h2 class='heading--underline'>Select an Employee</h2>
+        <form @submit=${this._onReportsFormSubmit}>
+          <div class="field-container">
+            <label>Your Direct Reports</label>
+            <select @input=${(e) => this.selectedReport = e.target.value} .value=${this.selectedReport} required>
+              <option value="">--Please choose an employee--</option>
+              ${this.reports.map(r => html`
+                <option .value=${r.iamId} ?selected=${this.selectedReport == r.iamId} >${r.firstName} ${r.lastName}</option>
+              `)}
+            </select>
+            <button class="u-space-mt--large btn btn--alt btn--block" type="submit">Next</button>
+          </div>
+        </form>
+      ` : html`
+        <section class="brand-textbox category-brand__background category-brand--redbud u-space-mb--large">
+          You have no direct reports.
+        </section>
+      `}
+    </div>
+  </div>
+  `;
+}
+
+/**
+ * @description Template for the select applications page
+ * @returns {TemplateResult}
+ */
+export function renderApplicationsSelect(){
+  return html`
+  <div id='perm-applications'>
+    <form class='form-single-col' @submit=${this._onSubmit}>
+      <h2 class='heading--underline'>Select Applications</h2>
+      <p>Select the applications you would like to request access to.
+        If the application is not listed, leave the field blank; you will have the opportunity to create a custom request on the next page.</p>
+      <ucd-theme-slim-select @change=${(e) => this.selectedApplications = e.detail.map(app => app.value)}>
+        <select multiple>
+          ${applicationList.map(app => html`
+            <option .value=${app.id} ?selected=${this.selectedApplications.includes(app.id)}>${app.name}</option>
+          `)}
+        </select>
+      </ucd-theme-slim-select>
+      <button class="u-space-mt--large btn btn--alt btn--block" type="submit">Next</button>
+    </form>
+  </div>
+  `;
+}
+
+/**
+ * @description Template for the select employee page
+ * @returns {TemplateResult}
+ */
+export function renderEmployeeSelect(){
+  return html`
+  <div id='perm-employee'>
+      <ucdlib-iam-search
+        @select=${e => this._onEmployeeSelect(e.detail.status)}
+        reset-on-select
+        search-param='name'
+        class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
+      </ucdlib-iam-search>
   </div>
   `;
 }

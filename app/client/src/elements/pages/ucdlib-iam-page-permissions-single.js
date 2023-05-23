@@ -4,9 +4,11 @@ import * as Templates from "./ucdlib-iam-page-permissions-single.tpl.js";
 import DtUtils from "@ucd-lib/iam-support-lib/src/utils/dtUtils.js";
 import selectOptions from "../../utils/permissionsFormOptions.js";
 import formProperties from '../../utils/permissionsFormProperties.js';
+import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform";
 
 import "../components/ucdlib-iam-modal";
 import "../components/ucdlib-iam-alma";
+
 
 /**
  * @classdesc Page for displaying a single permissions request form
@@ -20,6 +22,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       record: {state: true},
       associatedObjectId: {state: true},
       associatedObject: {state: true},
+      requestedPerson: {state: true},
       isActive: {state: true},
       submitting: {state: true},
       isAnEdit: {state: true},
@@ -50,7 +53,8 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     this.renderGroupLabel = Templates.renderGroupLabel.bind(this);
 
     this.formTypes = {
-      'onboarding': {title: 'Permissions for :name'}
+      'onboarding': {title: 'Permissions for :name'},
+      'update': {title: 'Update Permissions for :name'}
     };
     this.resetState();
 
@@ -60,12 +64,15 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
 
     this.setDefaultForm();
 
-    this._injectModel('AppStateModel', 'OnboardingModel', 'PermissionsModel', 'RtModel', 'AlmaUserModel');
+    this._injectModel(
+      'AppStateModel', 'OnboardingModel', 'PermissionsModel',
+      'RtModel', 'AlmaUserModel', 'AuthModel', 'PersonModel'
+    );
   }
 
   /**
    * @description Disables the shadowdom
-   * @returns 
+   * @returns
    */
   createRenderRoot() {
     return this;
@@ -80,6 +87,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
   async _onAppStateUpdate(e) {
     this.isActive = false;
     if ( e.page != this.id ) return;
+    this.AppStateModel.showLoading();
 
     if ( !Object.keys(this.formTypes).includes(e.location.path[1]) ){
       requestAnimationFrame(() => this.AppStateModel.showError('This page does not exist!'));
@@ -88,8 +96,13 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
 
     this.isActive = true;
     this.formType = e.location.path[1];
-    this.associatedObjectId = e.location.path[2];
+    this.associatedObjectId = e.location.path.length > 2 ? e.location.path[2] : '';
     await this.getRequiredPageData();
+    if ( this.formType == 'update'){
+      this.setBreadcrumbs();
+      const title = this.formTypes.update.title.replace(':name', `${this.firstName} ${this.lastName}`);
+      this.AppStateModel.setTitle({text: title, show: true});
+    }
     this.AppStateModel.showLoaded(this.id);
   }
 
@@ -102,8 +115,33 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     if ( this.formType == 'onboarding' ){
       promises.push(this.OnboardingModel.getById(this.associatedObjectId));
       promises.push(this.PermissionsModel.getById(this.associatedObjectId, 'onboarding'));
+    } else if ( this.formType == 'update' ){
+      promises.push(this.getRequestedEmployee());
+      if ( this.associatedObjectId ){
+        promises.push(this.PermissionsModel.getById(this.associatedObjectId, 'update'));
+      }
     }
     await Promise.all(promises);
+  }
+
+  async getRequestedEmployee(){
+    if ( this.formType != 'update') return;
+    const appState = await this.AppStateModel.get();
+    let iamId = '';
+    if ( appState.location.query.user ){
+      iamId = appState.location.query.user;
+    } else {
+      const token = this.AuthModel.getToken();
+      iamId = token.iamId;
+    }
+    const personRecord = await this.PersonModel.getPersonById(iamId, 'iamId', false);
+    if ( personRecord.state === 'error' ){
+      this.AppStateModel.showError('Unable to retrieve UC Davis record for this user.');
+      return;
+    }
+    this.requestedPerson = new IamPersonTransform(personRecord.payload);
+    this.firstName = this.requestedPerson.firstName;
+    this.lastName = this.requestedPerson.lastName;
   }
 
   /**
@@ -140,7 +178,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
    * @description Attached to OnboardingModel ONBOARDING_SUBMISSION_REQUEST event.
    * Fires when onboarding request is retrieved, even if cached
    * @param {*} e - cork-app-utils event
-   * @returns 
+   * @returns
    */
   _onOnboardingSubmissionRequest(e){
     if ( !this.isActive ) return;
@@ -162,6 +200,11 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     }
   }
 
+  hideApplication(application){
+    if ( this.formType == 'onboarding' ) return false;
+    return true;
+  }
+
   /**
    * @description Sets breadcrumbs for this page
    */
@@ -171,6 +214,9 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       breadcrumbs.push(this.AppStateModel.store.breadcrumbs.onboarding);
       breadcrumbs.push({text: 'Request', link: `/onboarding/${this.associatedObjectId}`});
       breadcrumbs.push({text: 'Permissions', link: ''});
+    } else if ( this.formType == 'update' ){
+      breadcrumbs.push(this.AppStateModel.store.breadcrumbs.permissions);
+      breadcrumbs.push({text: 'Update', link: ''});
     }
 
     this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs});
@@ -196,6 +242,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
 
     this.firstName = '';
     this.lastName = '';
+    this.requestedPerson = new IamPersonTransform({});
   }
 
   /**
@@ -209,8 +256,6 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
         const ele = this.querySelector(`#${p.eleId}`);
         if ( ele ) ele[p.eleProp] = p.default;
       }
-
-
     });
   }
 
@@ -285,7 +330,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
   /**
    * @description Sets payload properties based on element properties or vice versa
    * @param {String} toSet - 'payload' or 'element'
-   * @returns 
+   * @returns
    */
   _setPayloadOrElement(toSet){
     if ( !toSet ) return;
@@ -300,7 +345,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
             eval(`this.payload.${payloadPath} = this.${item.prop}`);
           } else if ( typeof eval(`this.payload.${payloadPath}`) === 'undefined' ){
             eval(`this.payload.${payloadPath} = {}`);
-          } 
+          }
         });
       } else if ( toSet === 'element' ){
         try {

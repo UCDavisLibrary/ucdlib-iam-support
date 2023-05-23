@@ -1,5 +1,12 @@
 import AppStateModel from "./AppStateModel";
-import { PersonModel, OnboardingModel, AuthModel, RtModel, PermissionsModel, AlmaUserModel } from "@ucd-lib/iam-support-lib";
+import {
+  PersonModel,
+  OnboardingModel,
+  AuthModel,
+  EmployeeModel,
+  RtModel,
+  PermissionsModel,
+  AlmaUserModel } from "@ucd-lib/iam-support-lib";
 AppStateModel.init(window.APP_CONFIG.appRoutes);
 
 export {
@@ -9,5 +16,6 @@ export {
   PersonModel,
   RtModel,
   PermissionsModel,
-  AlmaUserModel
+  AlmaUserModel,
+  EmployeeModel
 };

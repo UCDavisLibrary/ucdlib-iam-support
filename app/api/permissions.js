@@ -3,8 +3,8 @@ module.exports = (api) => {
     const { default: PermissionsRequests } = await import('@ucd-lib/iam-support-lib/src/utils/permissions.js');
     const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
 
-    const idTypes = ['permission', 'onboarding'];
-    const idType = idTypes.includes(req.query.idType) ?  req.query.idType : 'permission';
+    const idTypes = ['update', 'onboarding'];
+    const idType = idTypes.includes(req.query.idType) ?  req.query.idType : 'update';
 
     if ( idType === 'onboarding' ){
       const pRes = await PermissionsRequests.getOnboardingPermissions(req.params.id);
@@ -15,8 +15,8 @@ module.exports = (api) => {
       if ( !pRes.res.rows.length ){
         return res.status(404).json({error: true, message: 'Resource does not exist'});
       }
-      if ( 
-        !req.auth.token.hasAdminAccess && 
+      if (
+        !req.auth.token.hasAdminAccess &&
         !req.auth.token.hasHrAccess &&
         req.auth.token.iamId != pRes.res.rows[0].supervisor_id) {
           return res.status(403).json({
@@ -25,7 +25,10 @@ module.exports = (api) => {
           });
         }
       return res.json(TextUtils.camelCaseObject(pRes.res.rows[0]));
-    };
+    } else if ( idType === 'update' ) {
+      return res.json({});
+    }
+
 
   });
   api.post('/permissions', async (req, res) => {
@@ -54,7 +57,7 @@ module.exports = (api) => {
       if ( previousSubmission.res && previousSubmission.res.rows.length ){
         data.revision = previousSubmission.res.rows[0].revision + 1;
       }
-      
+
       if (onboardingRequest.res && onboardingRequest.res.rows.length) {
         data.rtTicketId = onboardingRequest.res.rows[0].rt_ticket_id;
         data.iamId = onboardingRequest.res.rows[0].iam_id;
@@ -138,11 +141,11 @@ module.exports = (api) => {
           newStatus = 3;
         } else if (!userId){
           newStatus = 4;
-        } 
+        }
         await UcdlibOnboarding.update(data.onboardingRequestId, {statusId: newStatus});
       }
     }
-    
+
     return res.json(output);
   })
 };
