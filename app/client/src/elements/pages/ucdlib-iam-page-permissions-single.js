@@ -23,6 +23,8 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       associatedObjectId: {state: true},
       associatedObject: {state: true},
       requestedPerson: {state: true},
+      requestedApplications: {state: true},
+      customApplications: {state: true},
       isActive: {state: true},
       submitting: {state: true},
       isAnEdit: {state: true},
@@ -87,6 +89,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
   async _onAppStateUpdate(e) {
     this.isActive = false;
     if ( e.page != this.id ) return;
+    this.resetState();
     this.AppStateModel.showLoading();
 
     if ( !Object.keys(this.formTypes).includes(e.location.path[1]) ){
@@ -102,6 +105,11 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       this.setBreadcrumbs();
       const title = this.formTypes.update.title.replace(':name', `${this.firstName} ${this.lastName}`);
       this.AppStateModel.setTitle({text: title, show: true});
+      if ( e.location.query.applications ) {
+        this.requestedApplications = e.location.query.applications.split(',');
+      } else {
+        this.requestedApplications = [];
+      }
     }
     this.AppStateModel.showLoaded(this.id);
   }
@@ -200,9 +208,15 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     }
   }
 
+  /**
+   * @description Determines if an application should be hidden from the form
+   * @param {String} application - id of application
+   * @returns {Boolean}
+   */
   hideApplication(application){
     if ( this.formType == 'onboarding' ) return false;
-    return true;
+    if ( application === 'custom-applications' && !this.requestedApplications.length ) return false;
+    return !this.requestedApplications.includes(application);
   }
 
   /**
@@ -243,6 +257,8 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     this.firstName = '';
     this.lastName = '';
     this.requestedPerson = new IamPersonTransform({});
+    this.requestedApplications = [];
+    this.customApplications = '';
   }
 
   /**
@@ -280,7 +296,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     if ( this.submitting ) return;
     this.setPayload('payload');
     console.log('payload', this.payload);
-    this.PermissionsModel.newSubmission(this.payload);
+    //this.PermissionsModel.newSubmission(this.payload);
   }
 
   /**
@@ -323,6 +339,9 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     this.payload.action = this.formType;
     if ( this.formType === 'onboarding' && this.associatedObjectId ){
       this.payload.onboardingRequestId = this.associatedObjectId;
+    }
+    if ( this.formType === 'update' && this.associatedObjectId ){
+      this.payload.permissionsRequestId = this.associatedObjectId;
     }
     this._setPayloadOrElement('payload');
   }

@@ -11,7 +11,7 @@ export function render() {
     <div class='l-basic--flipped'>
       <div class="l-content">
         <form @submit=${this._onSubmit}>
-          <div ?hidden=${this.formType != 'onboarding'}>
+          <div ?hidden=${this.formType != 'onboarding'} class='u-space-mb--large'>
             <h2 class="heading--underline">Physical Access and Equipment</h2>
             <div class="l-2col l-2col--33-67 field-row">
               <div class='l-first'>
@@ -48,148 +48,160 @@ export function render() {
               </div>
             </div>
           </div>
-          <h2 class="heading--underline">Applications</h2>
-          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('main-website')}>
-            <div class='l-first'>
-              ${this.renderGroupLabel('Main Website', 'main-website')}
+          <div class='u-space-mb--large'>
+            <h2 class="heading--underline">Applications</h2>
+            <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('main-website')}>
+              <div class='l-first'>
+                ${this.renderGroupLabel('Main Website', 'main-website')}
+              </div>
+              <div class='l-second'>
+                <div class="field-container">
+                  <label>Roles</label>
+                  <ucd-theme-slim-select @change=${(e) => this.pMainWebsiteRoles = e.detail.map(g => g.value)}>
+                    <select multiple>
+                      ${this.pMainWebsiteRolesList.map(r => html`
+                        <option .value=${r.slug} ?selected=${this.pMainWebsiteRoles.includes(r.slug)}>${r.label}</option>
+                      `)}
+                    </select>
+                  </ucd-theme-slim-select>
+                </div>
+                ${this.renderTextArea('pMainWebsiteNotes', 'Notes', 4)}
+              </div>
             </div>
-            <div class='l-second'>
-              <div class="field-container">
-                <label>Roles</label>
-                <ucd-theme-slim-select @change=${(e) => this.pMainWebsiteRoles = e.detail.map(g => g.value)}>
-                  <select multiple>
-                    ${this.pMainWebsiteRolesList.map(r => html`
-                      <option .value=${r.slug} ?selected=${this.pMainWebsiteRoles.includes(r.slug)}>${r.label}</option>
+            <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('intranet')}>
+              <div class='l-first'>
+                ${this.renderGroupLabel('Staff Intranet', 'intranet')}
+              </div>
+              <div class='l-second'>
+                <div class="field-container">
+                  <label>Roles</label>
+                  <ucd-theme-slim-select @change=${(e) => this.pIntranetRoles = e.detail.map(g => g.value)}>
+                    <select multiple>
+                      ${this.pIntranetRolesList.map(r => html`
+                        <option .value=${r.slug} ?selected=${this.pIntranetRoles.includes(r.slug)}>${r.label}</option>
+                      `)}
+                    </select>
+                  </ucd-theme-slim-select>
+                </div>
+              </div>
+            </div>
+            <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('alma')}>
+              <div class='l-first'>
+                ${this.renderGroupLabel('Alma', 'alma')}
+              </div>
+              <div class='l-second'>
+                <ucdlib-iam-alma id='alma-user-lookup' @role-select=${e => this.pAlmaRoles = e.detail.roles}></ucdlib-iam-alma>
+              </div>
+            </div>
+            <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('libguides')}>
+              <div class='l-first'>
+                ${this.renderGroupLabel('Libguides', 'libguides')}
+              </div>
+              <div class='l-second'>
+                <div class="field-container">
+                  <label>Roles</label>
+                  <select @input=${(e) => this.pLibguides = e.target.value}>
+                    <option value='none' ?selected=${!this.pLibguides}>-- Select an option --</option>
+                    ${this.libguidesRoles.map(e => html`
+                      <option value=${e.value} ?selected=${e.value == this.pLibguides}>${e.label}</option>
                     `)}
                   </select>
-                </ucd-theme-slim-select>
+                </div>
               </div>
-              ${this.renderTextArea('pMainWebsiteNotes', 'Notes', 4)}
             </div>
-          </div>
-          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('intranet')}>
-            <div class='l-first'>
-              ${this.renderGroupLabel('Staff Intranet', 'intranet')}
-            </div>
-            <div class='l-second'>
-              <div class="field-container">
-                <label>Roles</label>
-                <ucd-theme-slim-select @change=${(e) => this.pIntranetRoles = e.detail.map(g => g.value)}>
-                  <select multiple>
-                    ${this.pIntranetRolesList.map(r => html`
-                      <option .value=${r.slug} ?selected=${this.pIntranetRoles.includes(r.slug)}>${r.label}</option>
+            <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('libcal')}>
+              <div class='l-first'>
+                ${this.renderGroupLabel('Libcal', 'libcal')}
+              </div>
+              <div class='l-second'>
+                <div class="field-container">
+                  <label>Roles</label>
+                  <select @input=${(e) => this.pLibcal = e.target.value}>
+                    <option value='none' ?selected=${!this.pLibcal}>-- Select an option --</option>
+                    ${this.libcalRoles.map(e => html`
+                      <option value=${e.value} ?selected=${e.value == this.pLibcal}>${e.label}</option>
                     `)}
                   </select>
-                </ucd-theme-slim-select>
+                </div>
+              </div>
+            </div>
+            <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('slack')}>
+              <div class='l-first'>
+                ${this.renderGroupLabel('Slack', 'slack')}
+              </div>
+              <div class='l-second'>
+                ${this.renderCheckbox('pSlack', 'Create Account')}
+              </div>
+            </div>
+            <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('bigsys')}>
+              <div class='l-first'>
+                ${this.renderGroupLabel('Bigsys', 'bigsys')}
+              </div>
+              <div class='l-second'>
+                <label>Access to:</label>
+                ${this.renderCheckbox('pBigsysPatron', 'Patron Lookup Tool')}
+                ${this.renderCheckbox('pBigsysTravel', 'Travel Forms and Expenses')}
+                ${this.renderCheckbox('pBigsysOpenAccess', 'Open Access Funds Management')}
+                ${this.renderCheckbox('pBigsysCheckProcessing', 'Alma-KFS Integration Application')}
+                ${this.renderTextArea('pBigsysOther', 'Other:')}
+              </div>
+            </div>
+            <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('calendly')}>
+              <div class='l-first'>
+                ${this.renderGroupLabel('Calendly', 'calendly')}
+              </div>
+              <div class='l-second'>
+                <div class="field-container">
+                  TODO: ????
+                </div>
+              </div>
+            </div>
+            <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('lang-prize')}>
+              <div class='l-first'>
+                ${this.renderGroupLabel('Lang Prize', 'lang-prize')}
+              </div>
+              <div class='l-second'>
+                <div class="field-container">
+                  TODO: Ask Mark
+                </div>
+              </div>
+            </div>
+            <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('aggie-open')}>
+              <div class='l-first'>
+                ${this.renderGroupLabel('Aggie Open', 'aggie-open')}
+              </div>
+              <div class='l-second'>
+                <div class="field-container">
+                  TODO: Ask Mark
+                </div>
+              </div>
+            </div>
+            <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('custom-applications')}>
+              <div class='l-first'>
+                ${this.renderGroupLabel('List Applications', 'custom-applications')}
+              </div>
+              <div class='l-second'>
+                ${this.renderTextArea('customApplications', '', 10)}
               </div>
             </div>
           </div>
-          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('alma')}>
-            <div class='l-first'>
-              ${this.renderGroupLabel('Alma', 'alma')}
-            </div>
-            <div class='l-second'>
-              <ucdlib-iam-alma id='alma-user-lookup' @role-select=${e => this.pAlmaRoles = e.detail.roles}></ucdlib-iam-alma>
-            </div>
-          </div>
-          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('libguides')}>
-            <div class='l-first'>
-              ${this.renderGroupLabel('Libguides', 'libguides')}
-            </div>
-            <div class='l-second'>
-              <div class="field-container">
-                <label>Roles</label>
-                <select @input=${(e) => this.pLibguides = e.target.value}>
-                  <option value='none' ?selected=${!this.pLibguides}>-- Select an option --</option>
-                  ${this.libguidesRoles.map(e => html`
-                    <option value=${e.value} ?selected=${e.value == this.pLibguides}>${e.label}</option>
-                  `)}
-                </select>
+          <div>
+            <h2 class="heading--underline">Additional Info</h2>
+            <div class="l-2col l-2col--33-67 field-row">
+              <div class='l-first'>
+                ${this.renderGroupLabel('Notes')}
+              </div>
+              <div class='l-second'>
+                ${this.renderTextArea('notes', '', 6)}
               </div>
             </div>
-          </div>
-          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('libcal')}>
-            <div class='l-first'>
-              ${this.renderGroupLabel('Libcal', 'libcal')}
+            <div class='u-space-my--large flex-justify-center'>
+              <button
+                ?disabled=${this.submitting}
+                type='submit'
+                class="btn btn--alt btn--search">${this.isAnEdit ? 'Update' : 'Submit'}
+              </button>
             </div>
-            <div class='l-second'>
-              <div class="field-container">
-                <label>Roles</label>
-                <select @input=${(e) => this.pLibcal = e.target.value}>
-                  <option value='none' ?selected=${!this.pLibcal}>-- Select an option --</option>
-                  ${this.libcalRoles.map(e => html`
-                    <option value=${e.value} ?selected=${e.value == this.pLibcal}>${e.label}</option>
-                  `)}
-                </select>
-              </div>
-            </div>
-          </div>
-          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('slack')}>
-            <div class='l-first'>
-              ${this.renderGroupLabel('Slack', 'slack')}
-            </div>
-            <div class='l-second'>
-              ${this.renderCheckbox('pSlack', 'Create Account')}
-            </div>
-          </div>
-          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('bigsys')}>
-            <div class='l-first'>
-              ${this.renderGroupLabel('Bigsys', 'bigsys')}
-            </div>
-            <div class='l-second'>
-              <label>Access to:</label>
-              ${this.renderCheckbox('pBigsysPatron', 'Patron Lookup Tool')}
-              ${this.renderCheckbox('pBigsysTravel', 'Travel Forms and Expenses')}
-              ${this.renderCheckbox('pBigsysOpenAccess', 'Open Access Funds Management')}
-              ${this.renderCheckbox('pBigsysCheckProcessing', 'Alma-KFS Integration Application')}
-              ${this.renderTextArea('pBigsysOther', 'Other:')}
-            </div>
-          </div>
-          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('calendly')}>
-            <div class='l-first'>
-              ${this.renderGroupLabel('Calendly', 'calendly')}
-            </div>
-            <div class='l-second'>
-              <div class="field-container">
-                TODO: ????
-              </div>
-            </div>
-          </div>
-          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('lang-prize')}>
-            <div class='l-first'>
-              ${this.renderGroupLabel('Lang Prize', 'lang-prize')}
-            </div>
-            <div class='l-second'>
-              <div class="field-container">
-                TODO: Ask Mark
-              </div>
-            </div>
-          </div>
-          <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('aggie-open')}>
-            <div class='l-first'>
-              ${this.renderGroupLabel('Aggie Open', 'aggie-open')}
-            </div>
-            <div class='l-second'>
-              <div class="field-container">
-                TODO: Ask Mark
-              </div>
-            </div>
-          </div>
-          <h2 class="heading--underline">Additional Info</h2>
-          <div class="l-2col l-2col--33-67 field-row">
-            <div class='l-first'>
-              ${this.renderGroupLabel('Notes')}
-            </div>
-            <div class='l-second'>
-              ${this.renderTextArea('notes', '', 6)}
-            </div>
-          </div>
-          <div class='u-space-my--large flex-justify-center'>
-            <button
-              ?disabled=${this.submitting}
-              type='submit'
-              class="btn btn--alt btn--search">${this.isAnEdit ? 'Update' : 'Submit'}
-            </button>
           </div>
         </form>
       </div>
@@ -323,6 +335,11 @@ export function renderHelpModal(){
     title = 'Aggie Open';
     content = html`
       <div>TODO: Ask Mark</div>`;
+  }
+  else if ( this.helpModal === 'custom-applications' ){
+    title = 'List Applications';
+    content = html`
+      <div>Provide the urls of the applications you need access to. More information is usually better than less.</div>`;
   }
 
   return html`

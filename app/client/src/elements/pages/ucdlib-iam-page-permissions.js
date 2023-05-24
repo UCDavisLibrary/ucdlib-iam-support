@@ -2,13 +2,13 @@ import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-permissions.tpl.js";
 
 /**
- * @classdesc TODO: Page that displays options for requesting permissions
+ * @classdesc Page that displays options for requesting permissions
  * Allows user to pick if is for
  * - themselves
  * - one of their employees
- * - someone else (does not have to be employee list)
+ * - Any UC Davis employee
  *
- * And then can pick specific permissions wants to update
+ * And then can pick specific applications to update
  */
 export default class UcdlibIamPagePermissions extends window.Mixin(LitElement)
   .with(window.LitCorkUtils) {
@@ -142,6 +142,9 @@ export default class UcdlibIamPagePermissions extends window.Mixin(LitElement)
       params.set('user', this.selectedReport);
     } else if ( this.permissionsFor == 'employee' ){
       params.set('user', this.selectedEmployee);
+    }
+    if ( this.selectedApplications.length ){
+      params.set('applications', this.selectedApplications.join(','));
     }
 
     const urlParams = params.toString();

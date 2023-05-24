@@ -66,6 +66,8 @@ module.exports = (api) => {
         userId = onboardingRequest.res.rows[0].additional_data.employeeUserId;
       }
       if ( supervisorId == req.auth.token.iamId ) canAccess = true;
+    } else if ( action === 'update' ) {
+      data.needsSupervisorApproval = false;
     }
 
     if ( !canAccess && req.auth.token.hasAdminAccess ) canAccess = true;
@@ -88,15 +90,15 @@ module.exports = (api) => {
     const rtClient = new UcdlibRt(config.rt);
     const p = data.permissions;
     const permissions = [
-      {name: 'Tech Equipment', value: p.techEquipment},
-      {name: 'Main Website', value: p.mainWebsite},
-      {name: 'Alma Roles', value: p.alma.roles, isArray: true},
-      {name: 'Bigsys', value: p.bigsys},
-      {name: 'Facilities', value: p.facilities},
-      {name: 'Staff Intranet', value: p.intranet},
-      {name: 'Libcal', value: p.libcal},
-      {name: 'Libguides', value: p.libguides},
-      {name: 'Slack', value: p.slack}
+      {name: 'Tech Equipment', value: p?.techEquipment},
+      {name: 'Main Website', value: p?.mainWebsite},
+      {name: 'Alma Roles', value: p?.alma?.roles, isArray: true},
+      {name: 'Bigsys', value: p?.bigsys},
+      {name: 'Facilities', value: p?.facilities},
+      {name: 'Staff Intranet', value: p?.intranet},
+      {name: 'Libcal', value: p?.libcal},
+      {name: 'Libguides', value: p?.libguides},
+      {name: 'Slack', value: p?.slack}
     ];
 
     // TODO: send facilities RT if first onboarding request, and facilities is checked
