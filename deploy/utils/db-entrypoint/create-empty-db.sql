@@ -32,12 +32,13 @@ CREATE TABLE permissions_requests (
     rt_ticket_id varchar(20),
     needs_supervisor_approval boolean NOT NULL DEFAULT FALSE,
     has_supervisor_approval boolean NOT NULL DEFAULT FALSE,
-    revision integer NOT NULL DEFAULT 0, 
+    revision integer NOT NULL DEFAULT 0,
     permissions jsonb NOT NULL DEFAULT '{}'::jsonb,
     notes text,
     submitted timestamp NOT NULL DEFAULT NOW(),
     submitted_by varchar(100)
 );
+CREATE SEQUENCE permission_request_id START 1;
 CREATE TABLE separation_requests (
     id SERIAL PRIMARY KEY,
     iam_id varchar(20),

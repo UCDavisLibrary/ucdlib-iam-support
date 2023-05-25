@@ -18,7 +18,7 @@ module.exports = (api) => {
   // query for a person by name
   // returns a set of records
   api.get('/ucd-iam/person/search', async (req, res) => {
-    if ( !req.auth.token.hasAdminAccess && !req.auth.token.hasHrAccess ){
+    if ( !req.auth.token.canCreateRequests ){
       res.status(403).json({
         error: true,
         message: 'Not authorized to access this resource.'
@@ -44,13 +44,13 @@ module.exports = (api) => {
       if ( response.length > queryLimit ) response = response.slice(0, queryLimit);
     }
     res.json(response);
-    
+
   });
 
   // query for a person by a unique identifier
   // returns a single record if successful
   api.get('/ucd-iam/person/:id', async (req, res) => {
-    if ( !req.auth.token.hasAdminAccess && !req.auth.token.hasHrAccess ){
+    if ( !req.auth.token.canCreateRequests ){
       res.status(403).json({
         error: true,
         message: 'Not authorized to access this resource.'
@@ -76,7 +76,7 @@ module.exports = (api) => {
 
     if ( response.error ){
       setErrorStatusCode(res, response);
-    } else if ( 
+    } else if (
       UcdIamModel.getPersonSearchEndpoint(idType) &&
       UcdIamModel.getPersonSearchEndpoint(idType).id === 'people' &&
       response.iamId
@@ -88,7 +88,7 @@ module.exports = (api) => {
       }
     }
     res.json(response);
-    
+
   });
 
 }

@@ -8,8 +8,8 @@ module.exports = (api) => {
 
     if ( idType === 'onboarding' ){
       const pRes = await PermissionsRequests.getOnboardingPermissions(req.params.id);
-      if ( pRes.error ){
-        console.error(pRes.error);
+      if ( pRes.err ){
+        console.error(pRes.err);
         return res.status(400).json({error: true, message: 'Unable to retrieve permissions record'});
       }
       if ( !pRes.res.rows.length ){
@@ -33,13 +33,19 @@ module.exports = (api) => {
   });
   api.post('/permissions', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
+    const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
     const { default: PermissionsRequests } = await import('@ucd-lib/iam-support-lib/src/utils/permissions.js');
     const { default: config } = await import('../lib/config.js');
     const { UcdlibRt, UcdlibRtTicket } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
+    const { UcdIamModel } = await import('@ucd-lib/iam-support-lib/index.js');
+    const { default: IamPersonTransform } = await import('@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js');
+    UcdIamModel.init(config.ucdIamApi);
 
     const action = req.body.action || 'onboarding';
     let canAccess = false;
     let onboardingStatus = 0;
+    let ucdRecord, employeeRecord;
+    let supervisorId = '';
     let userId = '';
     const data = {
       ...req.body,
@@ -48,7 +54,6 @@ module.exports = (api) => {
     };
 
     if ( action === 'onboarding' ){
-      let supervisorId = '';
       data.needsSupervisorApproval = false;
       const [previousSubmission, onboardingRequest] = await Promise.all([
         PermissionsRequests.getOnboardingPermissions(data.onboardingRequestId),
@@ -67,7 +72,51 @@ module.exports = (api) => {
       }
       if ( supervisorId == req.auth.token.iamId ) canAccess = true;
     } else if ( action === 'update' ) {
+      canAccess = true;
       data.needsSupervisorApproval = false;
+
+      if ( !data.permissionRequestId ) {
+        const nextId = await PermissionsRequests.getNextPermissionId();
+        if ( nextId.err ) {
+          console.error(nextId.err);
+          return res.status(400).json({error: true, message: 'Unable to create permissions request.'});
+        }
+        data.permissionRequestId = nextId.res.rows[0].nextval;
+      }
+
+      if ( !data.requestedPerson ){
+        data.iamId = req.auth.token.iamId;
+      } else {
+        data.iamId = data.requestedPerson;
+      }
+
+      // Might need supervisor approval. lets check their records
+      [ucdRecord, employeeRecord] = await Promise.all([
+        UcdIamModel.getPersonByIamId(data.iamId),
+        UcdlibEmployees.getById(data.iamId, 'iamId')
+      ]);
+      if ( employeeRecord.err ){
+        console.error(employeeRecord.err);
+        return res.status(400).json({error: true, message: 'Unable to create permissions request.'});
+      }
+      if ( ucdRecord.error ) {
+        console.error(ucdRecord.error);
+        return res.status(400).json({error: true, message: 'Unable to create permissions request. Person does not exist.'});
+      }
+      ucdRecord = new IamPersonTransform(ucdRecord);
+
+      // check if one of our employees. if not submitted by supervisor, needs approval
+      if ( employeeRecord.res && employeeRecord.res.rows.length ) {
+        data.needsSupervisorApproval = true;
+        const employee = employeeRecord.res.rows[0];
+        supervisorId = employee.supervisor_id;
+        if ( supervisorId == req.auth.token.iamId ) data.needsSupervisorApproval = false;
+
+      // not one of our employees - a law library employee for example
+      // whoever is submitting the form for them is responsible for approval
+      } else {
+        data.needsSupervisorApproval = false;
+      }
     }
 
     if ( !canAccess && req.auth.token.hasAdminAccess ) canAccess = true;
@@ -88,48 +137,16 @@ module.exports = (api) => {
 
     // send rt
     const rtClient = new UcdlibRt(config.rt);
-    const p = data.permissions;
-    const permissions = [
-      {name: 'Tech Equipment', value: p?.techEquipment},
-      {name: 'Main Website', value: p?.mainWebsite},
-      {name: 'Alma Roles', value: p?.alma?.roles, isArray: true},
-      {name: 'Bigsys', value: p?.bigsys},
-      {name: 'Facilities', value: p?.facilities},
-      {name: 'Staff Intranet', value: p?.intranet},
-      {name: 'Libcal', value: p?.libcal},
-      {name: 'Libguides', value: p?.libguides},
-      {name: 'Slack', value: p?.slack}
-    ];
 
     // TODO: send facilities RT if first onboarding request, and facilities is checked
     //iamAdmin.sendFacilitiesRequest(idOrRecord, params);
 
-    if ( action === 'onboarding' && data.rtTicketId ){
+    // update existing onboarding/permissions request RT ticket
+    if ( data.rtTicketId ){
       const ticket = new UcdlibRtTicket(false, {id: data.rtTicketId});
-      const reply = ticket.createReply();
+      let reply = ticket.createReply();
       reply.addSubject(`Permissions Request${data.revision > 0 ? ' (Update)': ''}`);
-
-      // loop permissions and add to reply
-      permissions.forEach(p => {
-        try {
-          reply.addContent(`<h4>${p.name}</h4>`);
-          if ( p.isArray ){
-            p.value.forEach(v => reply.addContent(v, true));
-          } else {
-            reply.addContent(p.value, false);
-          }
-        } catch (error) {}
-
-      });
-
-      if ( data.notes ){
-        reply.addContent('<h4>Additional Notes</h4>');
-        reply.addContent(data.notes, false);
-      }
-
-      reply.addContent();
-      reply.addContent(`Requested by: ${ req.auth.token.email}`);
-
+      addPermissionRtBody(reply, data, req, action == 'update');
 
       const rtResponse = await rtClient.sendCorrespondence(reply);
       if ( rtResponse.err )  {
@@ -137,7 +154,7 @@ module.exports = (api) => {
         await PermissionsRequests.delete(output.id);
         return res.json({error: true, message: 'Unable to send RT request.'});
       }
-      if ( onboardingStatus == 2 ) {
+      if ( action === 'onboarding' && onboardingStatus == 2 ) {
         let newStatus = 5;
         if ( !data.iamId ){
           newStatus = 3;
@@ -146,8 +163,101 @@ module.exports = (api) => {
         }
         await UcdlibOnboarding.update(data.onboardingRequestId, {statusId: newStatus});
       }
+    } else if ( action === 'update' ) {
+      // check for supervisor
+      let supervisor;
+      if ( data.needsSupervisorApproval && supervisorId ) {
+        supervisor = await UcdlibEmployees.getById(supervisorId, 'iamId');
+        if ( supervisor.err || !supervisor.res.rows.length ) {
+          console.error(supervisor.err);
+          await PermissionsRequests.delete(output.id);
+          return res.status(400).json({error: true, message: 'Unable to create permissions request.'});
+        }
+        supervisor = supervisor.res.rows[0];
+      }
+
+      // create new RT ticket
+      const ticket = new UcdlibRtTicket();
+      ticket.addSubject(`Permissions Request Update for ${ucdRecord.fullName}`);
+      if ( supervisor ) {
+        if ( config.rt.forbidCc ){
+          console.log(`Forbidden to cc supervisor ${supervisor.email} on permissions request`);
+        } else {
+          ticket.addCc(supervisor.email);
+        }
+      }
+      addPermissionRtBody(ticket, data, req, true);
+      const rtResponse = await rtClient.createTicket(ticket);
+      if ( rtResponse.err )  {
+        console.error(rtResponse);
+        await PermissionsRequests.delete(output.id);
+        return res.json({error: true, message: 'Unable to send RT request.'});
+      }
+      await PermissionsRequests.setRtId(output.id, rtResponse.res.id);
+
+      // write reply to supervisor requesting approval
+      if ( supervisor ) {
+        const ticket = new UcdlibRtTicket(false, {id: rtResponse.res.id});
+        const reply = ticket.createReply();
+        reply.addSubject(`Supervisor Action Required!`);
+        reply.addContent(`Hi ${supervisor.first_name},`);
+        reply.addContent(``);
+        reply.addContent(`Please approve this permissions request for ${ucdRecord.fullName}.`);
+        reply.addContent(``);
+        reply.addContent('Thank you,');
+        reply.addContent('Library ITIS');
+        const replyResponse = await rtClient.sendCorrespondence(reply);
+        if ( replyResponse.err )  {
+          console.error(replyResponse);
+          await PermissionsRequests.delete(output.id);
+          return res.json({error: true, message: 'Unable to send RT request.'});
+        }
+      }
+
     }
 
     return res.json(output);
   })
+};
+
+/**
+ * @description Construct RT body for permissions request
+ * @param {RTTicket||RTCorrespondence} rtObject - Ticket or correspondence object
+ * @param {Object} data - Permissions request data payload
+ * @param {*} req - Express request object
+ * @param {Boolean} skipIfEmpty - Skip adding permission to RT if value is empty
+ */
+const addPermissionRtBody = (rtObject, data, req, skipIfEmpty = false) => {
+  const p = data.permissions;
+  const permissions = [
+    {name: 'Tech Equipment', value: p?.techEquipment},
+    {name: 'Main Website', value: p?.mainWebsite},
+    {name: 'Alma Roles', value: p?.alma?.roles, isArray: true},
+    {name: 'Bigsys', value: p?.bigsys},
+    {name: 'Facilities', value: p?.facilities},
+    {name: 'Staff Intranet', value: p?.intranet},
+    {name: 'Libcal', value: p?.libcal},
+    {name: 'Libguides', value: p?.libguides},
+    {name: 'Slack', value: p?.slack}
+  ];
+  permissions.forEach(p => {
+    try {
+      if ( skipIfEmpty && !p.value ) return;
+      rtObject.addContent(`<h4>${p.name}</h4>`);
+      if ( p.isArray ){
+        p.value.forEach(v => rtObject.addContent(v, true));
+      } else {
+        rtObject.addContent(p.value, false);
+      }
+    } catch (error) {}
+
+  });
+
+  if ( data.notes ){
+    rtObject.addContent('<h4>Additional Notes</h4>');
+    rtObject.addContent(data.notes, false);
+  }
+
+  rtObject.addContent();
+  rtObject.addContent(`Requested by: ${ req.auth.token.email}`);
 };

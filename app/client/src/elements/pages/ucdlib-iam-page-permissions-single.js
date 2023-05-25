@@ -294,9 +294,9 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
   _onSubmit(e){
     e.preventDefault();
     if ( this.submitting ) return;
-    this.setPayload('payload');
+    this.setPayload();
     console.log('payload', this.payload);
-    //this.PermissionsModel.newSubmission(this.payload);
+    this.PermissionsModel.newSubmission(this.payload);
   }
 
   /**
@@ -335,27 +335,38 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
    * @returns {Object} payload
    */
   setPayload(){
+    let includeList = [];
     this.payload = {};
     this.payload.action = this.formType;
     if ( this.formType === 'onboarding' && this.associatedObjectId ){
       this.payload.onboardingRequestId = this.associatedObjectId;
     }
-    if ( this.formType === 'update' && this.associatedObjectId ){
-      this.payload.permissionsRequestId = this.associatedObjectId;
+    if ( this.formType === 'update' ){
+      this.payload.requestedPerson = this.requestedPerson.id;
+      if ( this.requestedApplications.length ) {
+        includeList = [...this.requestedApplications, 'notes'];
+      } else {
+        includeList.push('custom-applications', 'notes' );
+      }
+      if ( this.associatedObjectId) {
+        this.payload.permissionsRequestId = this.associatedObjectId;
+      }
     }
-    this._setPayloadOrElement('payload');
+    this._setPayloadOrElement('payload', includeList);
   }
 
   /**
    * @description Sets payload properties based on element properties or vice versa
    * @param {String} toSet - 'payload' or 'element'
+   * @param {Array} payloadIncludeList - List of properties to include in payload. All others will be excluded.
    * @returns
    */
-  _setPayloadOrElement(toSet){
+  _setPayloadOrElement(toSet, payloadIncludeList=[]){
     if ( !toSet ) return;
 
     formProperties.forEach((item) => {
       if ( toSet === 'payload' ){
+        if ( payloadIncludeList.length && !payloadIncludeList.includes(item.applicationId) ) return;
         const payloadArr = item.payload.split('.');
         payloadArr.forEach((prop, i) => {
           const payloadPath = payloadArr.slice(0, i+1).join('.');
