@@ -100,16 +100,16 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     this.isActive = true;
     this.formType = e.location.path[1];
     this.associatedObjectId = e.location.path.length > 2 ? e.location.path[2] : '';
+    if ( e.location.query.applications && !this.associatedObjectId ) {
+      this.requestedApplications = e.location.query.applications.split(',');
+    } else {
+      this.requestedApplications = [];
+    }
     await this.getRequiredPageData();
     if ( this.formType == 'update'){
       this.setBreadcrumbs();
       const title = this.formTypes.update.title.replace(':name', `${this.firstName} ${this.lastName}`);
       this.AppStateModel.setTitle({text: title, show: true});
-      if ( e.location.query.applications ) {
-        this.requestedApplications = e.location.query.applications.split(',');
-      } else {
-        this.requestedApplications = [];
-      }
     }
     this.AppStateModel.showLoaded(this.id);
   }
@@ -119,21 +119,29 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
    */
   async getRequiredPageData(){
     const promises = [];
-    promises.push(this.AlmaUserModel.getAlmaUserRoleType());
     if ( this.formType == 'onboarding' ){
       promises.push(this.OnboardingModel.getById(this.associatedObjectId));
       promises.push(this.PermissionsModel.getById(this.associatedObjectId, 'onboarding'));
+      promises.push(this.AlmaUserModel.getAlmaUserRoleType());
     } else if ( this.formType == 'update' ){
-      promises.push(this.getRequestedEmployee());
       if ( this.associatedObjectId ){
         promises.push(this.PermissionsModel.getById(this.associatedObjectId, 'update'));
+      } else {
+        promises.push(this.getRequestedEmployee());
+      }
+      if ( this.requestedApplications.includes('alma') ){
+        promises.push(this.AlmaUserModel.getAlmaUserRoleType());
       }
     }
     await Promise.all(promises);
   }
 
+  /**
+   * @description Retrieves subject of a NEW permissions request
+   * @returns
+   */
   async getRequestedEmployee(){
-    if ( this.formType != 'update') return;
+    if ( this.formType != 'update' && !this.associatedObjectId ) return;
     const appState = await this.AppStateModel.get();
     let iamId = '';
     if ( appState.location.query.user ){
@@ -148,6 +156,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       return;
     }
     this.requestedPerson = new IamPersonTransform(personRecord.payload);
+    this.iamId = this.requestedPerson.id;
     this.firstName = this.requestedPerson.firstName;
     this.lastName = this.requestedPerson.lastName;
   }
@@ -167,7 +176,15 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       this.isAnEdit = true;
       this.submitted = DtUtils.fmtDatetime(p.submitted);
       this.submittedBy = p.submittedBy;
-      this._setPayloadOrElement('element');
+      this._setPayloadOrElement('element', {setRequestedApplications: this.formType === 'update'});
+
+      if ( this.formType === 'update' ){
+        this.firstName = p.additionalData.employeeFirstName || '';
+        this.lastName = p.additionalData.employeeLastName || '';
+        this.iamId = p.iamId || '';
+        const title = this.formTypes[this.formType].title.replace(':name', `${this.firstName} ${this.lastName}`);
+        this.AppStateModel.setTitle({text: title, show: true});
+      }
     }
     else if (e.state === 'error' ){
       if ( e.error && e.error.response && e.error.response.status == 404){
@@ -315,6 +332,11 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
         this.PermissionsModel.clearIdCache(this.associatedObjectId, 'onboarding');
         if ( this.rtTicketId ) this.RtModel.clearHistoryCache(this.rtTicketId);
         this.AppStateModel.setLocation(`/onboarding/${this.associatedObjectId}`);
+      } else if ( this.formType === 'update' ){
+        this.PermissionsModel.clearIdCache(this.associatedObjectId, 'update');
+        this.PermissionsModel.clearOwnUpdateListCache();
+        if ( this.rtTicketId ) this.RtModel.clearHistoryCache(this.rtTicketId);
+        this.AppStateModel.setLocation(`/permissions`);
       }
       this.AppStateModel.showAlertBanner({message: 'Permissions request submitted', brandColor: 'farmers-market'});
       this.setDefaultForm();
@@ -342,7 +364,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       this.payload.onboardingRequestId = this.associatedObjectId;
     }
     if ( this.formType === 'update' ){
-      this.payload.requestedPerson = this.requestedPerson.id;
+      this.payload.requestedPerson = this.iamId;
       if ( this.requestedApplications.length ) {
         includeList = [...this.requestedApplications, 'notes'];
       } else {
@@ -352,17 +374,21 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
         this.payload.permissionsRequestId = this.associatedObjectId;
       }
     }
-    this._setPayloadOrElement('payload', includeList);
+    this._setPayloadOrElement('payload', {payloadIncludeList: includeList});
   }
 
   /**
    * @description Sets payload properties based on element properties or vice versa
    * @param {String} toSet - 'payload' or 'element'
-   * @param {Array} payloadIncludeList - List of properties to include in payload. All others will be excluded.
+   * @param {Object} options - Options for setting payload or element, including properties:
+   *  payloadIncludeList - List of properties to include in payload. All others will be excluded.
+   *  setRequestedApplications
    * @returns
    */
-  _setPayloadOrElement(toSet, payloadIncludeList=[]){
+  _setPayloadOrElement(toSet, options={}){
     if ( !toSet ) return;
+    let { payloadIncludeList, setRequestedApplications } = options;
+    if ( !payloadIncludeList ) payloadIncludeList = [];
 
     formProperties.forEach((item) => {
       if ( toSet === 'payload' ){
@@ -382,6 +408,9 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
           const v = eval(`this.payload.${item.payload}`);
           if ( typeof v !== 'undefined' ){
             this[item.prop] = v;
+            if ( setRequestedApplications && item.applicationId ){
+              this.requestedApplications.push(item.applicationId);
+            }
             if ( item.eleId && item.eleProp ){
               const ele = this.querySelector(`#${item.eleId}`);
               if ( ele ) ele[item.eleProp] = v;

@@ -110,3 +110,35 @@ ucdlib-iam-onboarding-list .no-results {
 .field-row > div {
   padding: .75rem 0;
 }
+.update-list-header {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+}
+.update-list {
+  max-width: 600px;
+  width: 100%;
+}
+.update-list-name {
+  flex-grow: 1;
+  margin-right: 1rem;
+}
+.update-list-date {
+  width: 100px;
+  min-width: 100px;
+  text-align: right;
+}
+.update-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px dashed #cce0f3;
+  padding: .5rem 0;
+}
+.update-list-icon {
+  min-width: 40px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

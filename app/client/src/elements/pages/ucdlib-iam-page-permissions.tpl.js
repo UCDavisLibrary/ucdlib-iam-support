@@ -60,6 +60,26 @@ export function renderHome(){
         </div>
       </div>
     </div>
+    <div ?hidden=${!this.userPermissionRequests.length}>
+    <h2 class='heading--underline'>Your Previous Requests</h2>
+    <div class='update-list'>
+      <div class='update-list-header'>
+        <div class='update-list-name'>Name</div>
+        <div class='update-list-date'>Last Update</div>
+        <div class='update-list-icon'></div>
+      </div>
+      ${this.userPermissionRequests.map(req => html`
+        <div class='update-list-item'>
+          <div class='update-list-name'>${req.additionalData.employeeFirstName} ${req.additionalData.employeeLastName}</div>
+          <div class='update-list-date'>${new Date(req.submitted).toLocaleDateString()}</div>
+          <div class='update-list-icon'>
+            <a href='/permissions/update/${req.permissionRequestId	}'><i class='fas fa-chevron-circle-right'></i></a>
+          </div>
+        </div>
+
+      `)}
+      </div>
+    </div>
   </div>
   `;
 }

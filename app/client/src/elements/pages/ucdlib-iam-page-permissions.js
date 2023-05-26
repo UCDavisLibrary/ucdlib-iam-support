@@ -21,6 +21,7 @@ export default class UcdlibIamPagePermissions extends window.Mixin(LitElement)
       selectedReport: {type: String},
       selectedEmployee: {type: String},
       selectedApplications: {type: Array},
+      userPermissionRequests: {type: Array}
     };
   }
 
@@ -34,8 +35,9 @@ export default class UcdlibIamPagePermissions extends window.Mixin(LitElement)
 
     this.resetState();
     this.reports = [];
+    this.userPermissionRequests = [];
 
-    this._injectModel('AppStateModel', 'EmployeeModel');
+    this._injectModel('AppStateModel', 'EmployeeModel', 'PermissionsModel');
   }
 
   /**
@@ -81,12 +83,22 @@ export default class UcdlibIamPagePermissions extends window.Mixin(LitElement)
     const promises = [];
     if ( this.page == 'report' ){
       promises.push(this.EmployeeModel.getDirectReports());
+    } else if ( this.page == 'home' ){
+      promises.push(this.PermissionsModel.ownUpdateList());
     }
     await Promise.all(promises);
 
 
     this.setBreadcrumbs();
     this.AppStateModel.showLoaded(this.id);
+  }
+
+  _onPermissionsOwnUpdateListFetch(e){
+    if ( e.state === 'loaded' ){
+      this.userPermissionRequests = e.payload;
+    } else if ( e.state === 'error' ){
+      this.AppStateModel.showError('Error fetching your permission requests');
+    }
   }
 
   /**

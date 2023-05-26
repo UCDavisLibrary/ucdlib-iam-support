@@ -35,6 +35,7 @@ CREATE TABLE permissions_requests (
     revision integer NOT NULL DEFAULT 0,
     permissions jsonb NOT NULL DEFAULT '{}'::jsonb,
     notes text,
+    additional_data jsonb NOT NULL DEFAULT '{}'::jsonb,
     submitted timestamp NOT NULL DEFAULT NOW(),
     submitted_by varchar(100)
 );

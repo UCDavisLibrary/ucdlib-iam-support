@@ -6,15 +6,20 @@ module.exports = (api) => {
     const idTypes = ['update', 'onboarding'];
     const idType = idTypes.includes(req.query.idType) ?  req.query.idType : 'update';
 
+    let pRes;
     if ( idType === 'onboarding' ){
-      const pRes = await PermissionsRequests.getOnboardingPermissions(req.params.id);
-      if ( pRes.err ){
-        console.error(pRes.err);
-        return res.status(400).json({error: true, message: 'Unable to retrieve permissions record'});
-      }
-      if ( !pRes.res.rows.length ){
-        return res.status(404).json({error: true, message: 'Resource does not exist'});
-      }
+      pRes = await PermissionsRequests.getOnboardingPermissions(req.params.id);
+    } else if ( idType === 'update' ) {
+      pRes = await PermissionsRequests.getUpdatePermissions(req.params.id);
+    }
+    if ( pRes.err ){
+      console.error(pRes.err);
+      return res.status(400).json({error: true, message: 'Unable to retrieve permissions record'});
+    }
+    if ( !pRes.res.rows.length ){
+      return res.status(404).json({error: true, message: 'Resource does not exist'});
+    }
+    if ( idType === 'onboarding' ){
       if (
         !req.auth.token.hasAdminAccess &&
         !req.auth.token.hasHrAccess &&
@@ -23,14 +28,38 @@ module.exports = (api) => {
             error: true,
             message: 'Not authorized to access this resource.'
           });
-        }
-      return res.json(TextUtils.camelCaseObject(pRes.res.rows[0]));
+      }
     } else if ( idType === 'update' ) {
-      return res.json({});
+      if (
+        !req.auth.token.hasAdminAccess &&
+        !req.auth.token.hasHrAccess &&
+        req.auth.token.userId != pRes.res.rows[0].submitted_by) {
+          return res.status(403).json({
+            error: true,
+            message: 'Not authorized to access this resource.'
+          });
+      }
     }
 
-
+    return res.json(TextUtils.camelCaseObject(pRes.res.rows[0]));
   });
+
+  /**
+   * @description Get all submitted permission requests (most recent version) made by current user
+   */
+  api.get('/submitted-permission-requests', async (req, res) => {
+    const { default: PermissionsRequests } = await import('@ucd-lib/iam-support-lib/src/utils/permissions.js');
+    const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
+
+    const userId = req.auth.token.id;
+    const pRes = await PermissionsRequests.getAllBySubmitter(userId);
+    if ( pRes.err ){
+      console.error(pRes.err);
+      return res.status(400).json({error: true, message: 'Unable to retrieve permissions records'});
+    }
+    return res.json(pRes.res.rows.map(r => TextUtils.camelCaseObject(r)));
+  });
+
   api.post('/permissions', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
     const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
@@ -50,7 +79,8 @@ module.exports = (api) => {
     const data = {
       ...req.body,
       revision: 0,
-      rtTicketId: null
+      rtTicketId: null,
+      additionalData: {}
     };
 
     if ( action === 'onboarding' ){
@@ -104,6 +134,8 @@ module.exports = (api) => {
         return res.status(400).json({error: true, message: 'Unable to create permissions request. Person does not exist.'});
       }
       ucdRecord = new IamPersonTransform(ucdRecord);
+      data.additionalData.employeeFirstName = ucdRecord.firstName;
+      data.additionalData.employeeLastName = ucdRecord.lastName;
 
       // check if one of our employees. if not submitted by supervisor, needs approval
       if ( employeeRecord.res && employeeRecord.res.rows.length ) {
@@ -178,6 +210,7 @@ module.exports = (api) => {
 
       // create new RT ticket
       const ticket = new UcdlibRtTicket();
+      ticket.addOwner(config.rt.user);
       ticket.addSubject(`Permissions Request Update for ${ucdRecord.fullName}`);
       if ( supervisor ) {
         if ( config.rt.forbidCc ){
