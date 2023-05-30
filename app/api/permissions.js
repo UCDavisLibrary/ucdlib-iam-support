@@ -112,6 +112,12 @@ module.exports = (api) => {
           return res.status(400).json({error: true, message: 'Unable to create permissions request.'});
         }
         data.permissionRequestId = nextId.res.rows[0].nextval;
+      } else {
+        const previousSubmission = await PermissionsRequests.getUpdatePermissions(data.permissionRequestId);
+        if ( previousSubmission.res && previousSubmission.res.rows.length ){
+          data.revision = previousSubmission.res.rows[0].revision + 1;
+          data.rtTicketId = previousSubmission.res.rows[0].rt_ticket_id;
+        }
       }
 
       if ( !data.requestedPerson ){

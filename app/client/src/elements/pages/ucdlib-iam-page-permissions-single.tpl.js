@@ -213,6 +213,7 @@ export function render() {
             <div><label class='u-inline'>By:</label> ${this.submittedBy}</div>
           </div>
         </div>
+        <ucdlib-rt-history ticket-id=${this.rtTicketId} ?hidden=${!(this.formType == 'update' && this.isAnEdit)}></ucdlib-rt-history>
         <a href="/onboarding/${this.associatedObjectId}" class="focal-link category-brand--poppy u-space-mb" ?hidden=${this.formType != 'onboarding'}>
           <div class="focal-link__figure focal-link__icon">
             <i class="fas fa-door-open fa-2x"></i>

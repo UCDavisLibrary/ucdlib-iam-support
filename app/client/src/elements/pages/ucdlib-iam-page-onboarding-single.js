@@ -2,6 +2,8 @@ import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-onboarding-single.tpl.js";
 import dtUtls from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
 
+import "../components/ucdlib-rt-history";
+
 /**
  * @description Page element for displaying a single onboarding request
  */
@@ -14,7 +16,6 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       request: {state: true},
       firstName: {state: true},
       lastName: {state: true},
-      rtTransactions: {state: true},
       isActiveStatus: {state: true},
       status: {state: true},
       statusDescription: {state: true},
@@ -34,7 +35,6 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.request = {};
     this.firstName = '';
     this.lastName = '';
-    this.rtTransactions = [];
     this.isActiveStatus = false;
     this.status = '';
     this.libraryTitle = '';
@@ -50,7 +50,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
 
   /**
    * @description Disables the shadowdom
-   * @returns 
+   * @returns
    */
   createRenderRoot() {
     return this;
@@ -69,12 +69,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     const data = await this.OnboardingModel.getById(this.requestId);
     if ( data.state == 'loaded'){
       await this._setStateProperties(data.payload);
-      const rtHistory = await this.RtModel.getHistory(this.rtTicketId);
-      if ( rtHistory.state === 'loaded' ) {
-        this.rtTransactions = this.RtModel.formatHistory(rtHistory.payload.items);
-      } else {
-        this.rtTransactions = [];
-      }
+      await this.RtModel.getHistory(this.rtTicketId);
       this.AppStateModel.setTitle({show: true, text: this.pageTitle()});
       this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs: this.breadcrumbs()});
       requestAnimationFrame(() => this.AppStateModel.showLoaded(this.id));
