@@ -2,9 +2,10 @@ import slack from './slack.js';
 import config from "./config.js";
 import { CronJob } from 'cron';
 import UcdlibEmployees from "@ucd-lib/iam-support-lib/src/utils/employees.js";
+import UcdlibJobs from "@ucd-lib/iam-support-lib/src/utils/jobs.js";
 
 new CronJob(
-	config.cron.discrepancyNotification, 
+	config.cron.discrepancyNotification,
 	run,
 	null,
 	true,
@@ -13,6 +14,7 @@ new CronJob(
 
 async function run() {
   try {
+    const thisJob = await UcdlibJobs.start('discrepancy-notification');
     // get recent notifications
     const notifications = await UcdlibEmployees.getActiveRecordDiscrepancyNotifications(config.slack.iamSyncCacheThreshold);
     if ( notifications.err ) throw notifications.err;
@@ -32,7 +34,7 @@ async function run() {
     let msg = '';
     const employeeRecords = {};
     for (const [reason, notifications] of Object.entries(notificationsByType)) {
-      
+
       const meta = reasons[reason];
       msg += `*${meta ? meta.label : reason}*\n`;
       if ( meta ) msg += `_${meta.description}_\n`;
@@ -55,13 +57,18 @@ async function run() {
     }
 
     // send message
-    if ( !msg ) return;
+    if ( !msg ) {
+      thisJob.end();
+      return;
+    }
     msg = `*${notifications.res.rows.length} IAM Record Discrepancies Found!*\n\n${msg}`;
     await slack.send(msg);
+    thisJob.end();
 
   } catch (error) {
     console.error(error);
+    thisJob.end({error: error.message});
     await slack.sendErrorNotification('Unable to send IAM discrepancy notifications to slack.', error);
   }
-  
+
 };

@@ -6,7 +6,7 @@ import { run as syncKeycloak } from './keycloak-sync.js';
 import { run as checkOnboardingRecords } from './check-onboarding-records.js';
 
 new CronJob(
-	config.cron.iamSync, 
+	config.cron.iamSync,
 	run,
 	null,
 	true,
@@ -17,14 +17,14 @@ new CronJob(
 async function run() {
   try {
     console.log('Syncing employee data with UCD IAM...');
-    await syncEmployees();
+    await syncEmployees(true);
 
     console.log('Syncing employee data with keycloak...');
-    await syncKeycloak();
+    await syncKeycloak(true);
 
     console.log('Checking onboarding records against RT and UCD IAM...');
-    await checkOnboardingRecords();
-    
+    await checkOnboardingRecords(false, true);
+
   } catch (error) {
     console.error(error.message);
     console.error(error.error);
@@ -34,6 +34,6 @@ async function run() {
       console.error('Error sending slack notification');
       console.error(error);
     }
-    
+
   }
 }
