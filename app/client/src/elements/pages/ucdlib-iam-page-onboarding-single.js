@@ -3,6 +3,8 @@ import {render} from "./ucdlib-iam-page-onboarding-single.tpl.js";
 import dtUtls from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
 
 import "../components/ucdlib-rt-history";
+import "../components/ucdlib-iam-search";
+import "../components/ucdlib-iam-modal";
 
 /**
  * @description Page element for displaying a single onboarding request
@@ -24,7 +26,9 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       startDate: {state: true},
       supervisorName: {state: true},
       supervisorId: {state: true},
-      notes: {state: true}
+      notes: {state: true},
+      missingUid: {state: true},
+      reconId: {state: true},
     };
   }
 
@@ -44,6 +48,8 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.supervisorName = '';
     this.notes = '';
     this.statusDescription = '';
+    this.missingUid = false;
+    this.reconId = '';
 
     this._injectModel('AppStateModel', 'OnboardingModel', 'RtModel');
   }
@@ -85,6 +91,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
    * @param {Object} payload from /api/onboarding/id:
    */
   async _setStateProperties(payload){
+    this.missingUid = payload.statusId == 9;
     const ad = payload.additionalData;
     this.request = payload;
     this.firstName = ad.employeeFirstName || '';
@@ -122,6 +129,27 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       this.AppStateModel.store.breadcrumbs.onboarding,
       {text: this.pageTitle(), link: ''}
     ];
+  }
+
+  openReconModal(){
+    this.reconId = '';
+    this.querySelector('#obs-recon-modal').show();
+  }
+
+  _onReconEmployeeSelect(e){
+    console.log(e);
+    this.reconId = e.id;
+  }
+
+  async _onReconSubmit(){
+    if ( !this.reconId ) return;
+    console.log('recon', this.reconId);
+
+    const modal = this.querySelector('#obs-recon-modal');
+    modal.hide();
+
+    const lookupEle = modal.querySelector('ucdlib-iam-search');
+    lookupEle.reset();
   }
 
 }

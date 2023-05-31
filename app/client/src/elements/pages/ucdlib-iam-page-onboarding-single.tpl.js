@@ -39,10 +39,27 @@ export function render() {
             <h2 class="panel__title u-space-mb"><span class="panel__custom-icon fas ${this.isActiveStatus ? 'fa-check-circle' : 'fa-spinner'}"></span>Status</h2>
             <div class='primary fw-bold'>${this.status}</div>
             <div class='primary'>${this.statusDescription}</div>
+            <a class='icon icon--circle-arrow-right u-space-mt pointer' @click=${this.openReconModal} ?hidden=${!this.missingUid}>Reconcile Manually</a>
           </div>
         </div>
         <ucdlib-rt-history .ticketId=${this.rtTicketId}></ucdlib-rt-history>
       </div>
     </div>
   </div>
+  <ucdlib-iam-modal id='obs-recon-modal' dismiss-text='Close' content-title="Reconcile Record" auto-width hide-footer>
+    <ucdlib-iam-search
+      @select=${e => this._onReconEmployeeSelect(e.detail.status)}
+      search-param='employee-id'
+      class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
+    </ucdlib-iam-search>
+    <div>
+      <button
+        @click=${this._onReconSubmit}
+        style="padding-left:0;padding-right:0;"
+        type='button'
+        class="btn btn--alt btn--block u-space-mt"
+        ?disabled=${!this.reconId}>Reconcile Record
+      </button>
+    </div>
+  </ucdlib-iam-modal>
 `;}

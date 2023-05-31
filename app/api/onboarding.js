@@ -104,6 +104,54 @@ module.exports = (api) => {
 
   });
 
+  api.get('/onboarding/reconciliation', async (req, res) => {
+    const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
+
+    // make sure request is formatted correctly
+    const payload = req.body;
+    const ids = ['onboardingId', 'iamId'];
+    for ( const id of ids ) {
+      if ( !payload[id] ) {
+        res.status(400).json({
+          error: true,
+          message: `Missing required field: ${id}`
+        });
+        return;
+      }
+    }
+
+    // make sure onboarding record exists and user has access
+    let onboardingRecord = await UcdlibOnboarding.getById(payload.onboardingId);
+    if ( onboardingRecord.err ) {
+      console.error(onboardingRecord.err);
+      res.status(400).json({error: true, message: 'Unable to retrieve onboarding request'});
+      return;
+    }
+    if ( !onboardingRecord.res.rows.length ){
+      console.error(onboardingRecord.err);
+      res.status(400).json({error: true, message: 'Request does not exist!'});
+      return;
+    }
+    onboardingRecord = TextUtils.camelCaseObject(onboardingRecord.res.rows[0]);
+    if (
+      !req.auth.token.hasAdminAccess &&
+      !req.auth.token.hasHrAccess &&
+      req.auth.token.iamId != onboardingRecord.supervisorId ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
+
+    // make sure iam record exists
+
+
+    const data = {};
+    data.iamId = payload.iamId;
+    data.modifiedBy = req.auth.token.id;
+  });
+
   api.get('/onboarding/:id', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
     const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
@@ -124,9 +172,9 @@ module.exports = (api) => {
       return;
     }
     const obReq = TextUtils.camelCaseObject(r.res.rows[0]);
-    if ( 
-      !req.auth.token.hasAdminAccess && 
-      !req.auth.token.hasHrAccess && 
+    if (
+      !req.auth.token.hasAdminAccess &&
+      !req.auth.token.hasHrAccess &&
       req.auth.token.iamId != obReq.supervisorId ){
       res.status(403).json({
         error: true,
@@ -159,9 +207,9 @@ module.exports = (api) => {
     const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
     const { default: Pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
 
-    if ( 
-      !req.auth.token.hasAdminAccess && 
-      !req.auth.token.hasHrAccess && 
+    if (
+      !req.auth.token.hasAdminAccess &&
+      !req.auth.token.hasHrAccess &&
       req.auth.token.iamId != req.query.supervisorId ){
       res.status(403).json({
         error: true,

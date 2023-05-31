@@ -230,7 +230,9 @@ export function renderEmployeeForm(){
       <label for="obn-last-name">Last Name</label>
       <input id='obn-last-name' type="text" .value=${this.lastName} ?disabled=${disabled} @input=${e => this.lastName = e.target.value}>
     </div>
-    <div ?hidden=${isSub} class='double-decker u-space-mt--large u-space-mb--small'>At least one of the following identifier fields is required:</div>
+    <div ?hidden=${isSub} class='double-decker u-space-mt--large u-space-mb--small'>
+      If at least one of the following identifier fields is not provided, the employee record must be manually reconciled with the UC Davis IAM system.
+    </div>
     <div class="field-container">
       <label for="obn-employee-id">Employee Id</label>
       <input id='obn-employee-id' type="text" .value=${this.employeeId} ?disabled=${disabled} @input=${e => this.employeeId = e.target.value}>
@@ -240,7 +242,7 @@ export function renderEmployeeForm(){
       <input id='obn-user-id' type="text" .value=${this.userId} ?disabled=${disabled} @input=${e => this.userId = e.target.value}>
     </div>
     <div class="field-container">
-      <label for="obn-email">${isSub ? 'Email for RT Ticket' : 'Email'}</label>
+      <label for="obn-email">UC Davis Email</label>
       <input id='obn-email' type="text" .value=${this.email} @input=${e => this.email = e.target.value}>
     </div>
   `;

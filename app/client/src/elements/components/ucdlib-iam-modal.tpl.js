@@ -5,7 +5,7 @@ import buttonStyles from "@ucd-lib/theme-sass/2_base_class/_buttons.css";
 
 /**
  * @description element styles
- * @returns 
+ * @returns
  */
 export function styles() {
   const elementStyles = css`
@@ -82,7 +82,7 @@ export function styles() {
  * @description Main render function
  * @returns {TemplateResult}
  */
-export function render() { 
+export function render() {
   return html`
   <div class="container" ?hidden="${!this.visible}">
     <div class="film" @click="${this.hide}"></div>
@@ -92,7 +92,7 @@ export function render() {
         <div class="header-right"><span class="close-icon" @click="${this.hide}">X</span></div>
       </div>
       <div class="body-content"><slot></slot></div>
-      <div class="footer">
+      <div class="footer" ?hidden=${this.hideFooter}>
         <div>
           <a class='btn btn--alt3 btn--sm' @click="${this.hide}">${this.dismissText}</a>
           <slot name="confirmButton" @click="${this._onConfirmClicked}"></slot>

@@ -100,20 +100,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    * @param {*} props - Changed properties
    */
   _setManualFormDisabled(props){
-    let needUpdate = false;
-    let canSubmit = false;
-    const employeePropsToCheck = ['email', 'employeeId', 'userId'];
-    for (const p of employeePropsToCheck) {
-      if ( props.has(p) ) {
-        needUpdate = true;
-      }
-      if ( this[p] ) canSubmit = true;
-    }
-    if ( !needUpdate && props.has('supervisor') ) needUpdate = true;
-    if ( this.supervisor.isEmpty ) canSubmit = false;
-
-    if ( needUpdate ){
-      this.manualFormDisabled = !canSubmit;
+    if ( props.has('supervisor') ) {
+      this.manualFormDisabled = this.supervisor.isEmpty;
     }
   }
 

@@ -156,6 +156,9 @@ VALUES ('Resolved', '{"onboarding", "separation"}', FALSE, 'This request has bee
 --8
 INSERT INTO "status_codes" ("name", "request_type", "description")
 VALUES ('Awaiting Supervisor Response', '{"permissions"}', 'The employee''s supervisor must approve the request.');
+--9
+INSERT INTO "status_codes" ("name", "request_type", "description")
+VALUES ('Missing Any Unique Identifier', '{"onboarding"}', 'The employee must have at least one unique identifier to automatically reconcile this record with the UC Davis IAM System. The onboarding process cannot proceed without reconciliation.');
 
 -- Group Types
 INSERT INTO "group_types" ("name", "part_of_org")
