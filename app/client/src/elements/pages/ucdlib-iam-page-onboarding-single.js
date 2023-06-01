@@ -131,25 +131,51 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     ];
   }
 
+  /**
+   * @description Opens the reconciliation modal. Attached to button in status panel, if applicable
+   */
   openReconModal(){
     this.reconId = '';
     this.querySelector('#obs-recon-modal').show();
   }
 
+  /**
+   * @description Bound to ucdlib-iam-search select event. Sets reconId property (iam id of employee to reconcile)
+   * @param {*} e
+   */
   _onReconEmployeeSelect(e){
-    console.log(e);
     this.reconId = e.id;
   }
 
+  /**
+   * @description Called after user selects an employee and clicks the submit button in the reconciliation modal
+   * Sends request to reconcile onboarding request with iam id
+   * @returns
+   */
   async _onReconSubmit(){
     if ( !this.reconId ) return;
-    console.log('recon', this.reconId);
 
     const modal = this.querySelector('#obs-recon-modal');
     modal.hide();
-
     const lookupEle = modal.querySelector('ucdlib-iam-search');
     lookupEle.reset();
+
+    this.AppStateModel.showLoading();
+    const r = await this.OnboardingModel.reconcile(this.requestId, this.reconId);
+    if ( r.state == 'error' ){
+      let msg = 'Unable to reconcile onboarding request';
+      if ( r.error && r.error.payload && r.error.payload.message ) msg = r.error.payload.message;
+      console.error(r);
+      requestAnimationFrame(() => this.AppStateModel.showError(msg));
+    } else {
+      this.OnboardingModel.clearIdCache(this.requestId);
+      this.OnboardingModel.clearQueryCache();
+      if ( this.rtTicketId ){
+        this.RtModel.clearHistoryCache(this.rtTicketId);
+      }
+      this.AppStateModel.setLocation('/onboarding');
+      this.AppStateModel.showAlertBanner({message: 'Onboarding request reconciled', brandColor: 'farmers-market'});
+    }
   }
 
 }

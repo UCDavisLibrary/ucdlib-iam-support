@@ -13,8 +13,8 @@ function KeycloakSyncError(error) {
  * @param {Boolean} saveToDB - if true, will save a record of the run to the jobs table
  */
 export const run = async (saveToDB) => {
+  let thisJob;
   try {
-    let thisJob;
     if ( saveToDB ) {
       const r = await UcdlibJobs.start('keycloak-sync');
       if ( r.job ) thisJob = r.job;

@@ -18,7 +18,7 @@ module.exports = (api) => {
   // query for a person by name
   // returns a set of records
   api.get('/ucd-iam/person/search', async (req, res) => {
-    if ( !req.auth.token.canCreateRequests ){
+    if ( !req.auth.token.canQueryUcdIam ){
       res.status(403).json({
         error: true,
         message: 'Not authorized to access this resource.'

@@ -104,8 +104,19 @@ module.exports = (api) => {
 
   });
 
-  api.get('/onboarding/reconciliation', async (req, res) => {
+  /**
+   * @description Reconcile an onboarding request with a UC Davis IAM record
+   * Used if a manual submission does not have a unique identifier
+   * Someone must come back later and match the records
+   */
+  api.post('/onboarding/reconcile', async (req, res) => {
+    const { default: PermissionsRequests } = await import('@ucd-lib/iam-support-lib/src/utils/permissions.js');
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
+    const { UcdIamModel } = await import('@ucd-lib/iam-support-lib/index.js');
+    const { default: IamPersonTransform } = await import('@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js');
+    const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
+    const { UcdlibRt, UcdlibRtTicket } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
+    const { default: config } = await import('../lib/config.js');
 
     // make sure request is formatted correctly
     const payload = req.body;
@@ -145,11 +156,86 @@ module.exports = (api) => {
     }
 
     // make sure iam record exists
+    UcdIamModel.init(config.ucdIamApi);
+    const iamResponse = await UcdIamModel.getPersonByIamId(payload.iamId);
+    if ( iamResponse.error ) {
+      if ( UcdIamModel.noEmployeeFound ){
+        res.status(400).json({
+          error: true,
+          message: 'No employee found with this IAM ID'
+        });
+        return;
+      } else {
+        console.error(iamResponse.error);
+        res.status(502).json({
+          error: true,
+          message: 'Unable to retrieve employee record from UCD IAM API.'
+        });
+        return;
+      }
+    }
+    const iamRecord = new IamPersonTransform(iamResponse);
 
+    // send RT correspondence
+    if ( onboardingRecord.rtTicketId ) {
+      const rtClient = new UcdlibRt(config.rt);
+      const ticket = new UcdlibRtTicket(false, {id: onboardingRecord.rtTicketId});
+      let reply = ticket.createReply();
+      reply.addSubject(`Onboarding Record Reconciled with UC Davis IAM System`);
+      const d = {
+        'Name': iamRecord.fullName,
+        'Email': iamRecord.email,
+        'Employee Id': iamRecord.employeeId,
+        'User Id (kerberos)': iamRecord.userId,
+        'UCD IAM ID': iamRecord.id
+      }
+      reply.addContent(d);
+      const rtResponse = await rtClient.sendCorrespondence(reply);
+      if ( rtResponse.err )  {
+        console.error(rtResponse);
+        res.status(502).json({error: true, message: 'Unable to send RT correspondence.'});
+        return;
+      }
+    }
 
-    const data = {};
-    data.iamId = payload.iamId;
-    data.modifiedBy = req.auth.token.id;
+    // update onboarding record
+    const data = {
+      iamId: payload.iamId,
+      modifiedBy: req.auth.token.id,
+      additionalData: onboardingRecord.additionalData || {},
+      statusId: UcdlibOnboarding.statusCodes.supervisor
+    };
+    data.additionalData.employeeId = iamRecord.employeeId;
+    data.additionalData.employeeEmail = iamRecord.email;
+    data.additionalData.employeeUserId = iamRecord.userId;
+    if ( !iamRecord.userId ) {
+      data.statusId = UcdlibOnboarding.statusCodes.userId;
+    } else if ( onboardingRecord.skipSupervisor || !onboardingRecord.supervisorId ) {
+      data.statusId = UcdlibOnboarding.statusCodes.provisioning;
+    } else {
+      const permRequest = await PermissionsRequests.getOnboardingPermissions(onboardingRecord.id);
+      if ( permRequest.err ) {
+        console.error(permRequest.err);
+        res.status(502).json({
+          error: true,
+          message: 'Unable to retrieve permissions request.'
+        });
+        return;
+      }
+      if ( permRequest.res.rowCount ) {
+        data.statusId = UcdlibOnboarding.statusCodes.provisioning;
+      }
+    }
+    const update = await UcdlibOnboarding.update(onboardingRecord.id, data);
+    if ( update.err ) {
+      console.error(update.err);
+      res.status(500).json({
+        error: true,
+        message: 'Unable to update onboarding request.'
+      });
+      return;
+    }
+    return res.json({success: true});
   });
 
   api.get('/onboarding/:id', async (req, res) => {

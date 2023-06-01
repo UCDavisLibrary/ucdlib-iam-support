@@ -24,6 +24,7 @@ class AppStateModelImpl extends AppStateModel {
       this.logout();
     }
 
+    this.stripStateFromHash(update);
     this.setPage(update);
     this.setTitle(false, update);
     this.setBreadcrumbs(false, update);
@@ -108,6 +109,28 @@ class AppStateModelImpl extends AppStateModel {
 
 
     this.store.emit('app-header-update', {title});
+  }
+
+  /**
+   * @description Remove extraneous state values from hash set by keycloak.
+   * It interferes with the app's routing.
+   * @param {*} update
+   * @returns
+   */
+  stripStateFromHash(update){
+    if ( !update || !update.location || !update.location.hash ) return;
+    let hash = new URLSearchParams(update.location.hash);
+    const toStrip = ['state', 'session_state', 'code'];
+    let replace = false;
+    for (const key of toStrip) {
+      if ( hash.has(key) ) {
+        hash.delete(key);
+        replace = true;
+      }
+    }
+    if ( !replace ) return;
+    hash = hash.toString().replace('=','');
+    update.location.hash = hash;
   }
 
   /**

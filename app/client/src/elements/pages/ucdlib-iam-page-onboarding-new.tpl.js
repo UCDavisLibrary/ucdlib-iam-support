@@ -231,7 +231,8 @@ export function renderEmployeeForm(){
       <input id='obn-last-name' type="text" .value=${this.lastName} ?disabled=${disabled} @input=${e => this.lastName = e.target.value}>
     </div>
     <div ?hidden=${isSub} class='double-decker u-space-mt--large u-space-mb--small'>
-      If at least one of the following identifier fields is not provided, the employee record must be manually reconciled with the UC Davis IAM system.
+      If at least one of the following identifier fields is not provided,
+      the employee record must be manually reconciled with the UC Davis IAM system after submission.
     </div>
     <div class="field-container">
       <label for="obn-employee-id">Employee Id</label>

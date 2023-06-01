@@ -280,8 +280,8 @@ function IamEmployeesError(error) {
 
 // syncs records in the employees table with the ucd iam api
 export const run = async (saveToDB) => {
+  let thisJob;
   try {
-    let thisJob;
     if ( saveToDB ) {
       const r = await UcdlibJobs.start('iam-employee');
       if ( r.job ) thisJob = r.job;

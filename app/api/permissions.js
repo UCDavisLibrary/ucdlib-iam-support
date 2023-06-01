@@ -192,12 +192,12 @@ module.exports = (api) => {
         await PermissionsRequests.delete(output.id);
         return res.json({error: true, message: 'Unable to send RT request.'});
       }
-      if ( action === 'onboarding' && onboardingStatus == 2 ) {
-        let newStatus = 5;
+      if ( action === 'onboarding' && onboardingStatus == UcdlibOnboarding.statusCodes.supervisor ) {
+        let newStatus = UcdlibOnboarding.statusCodes.provisioning;
         if ( !data.iamId ){
-          newStatus = 3;
+          newStatus = UcdlibOnboarding.statusCodes.iamRecord;
         } else if (!userId){
-          newStatus = 4;
+          newStatus = UcdlibOnboarding.statusCodes.userId;
         }
         await UcdlibOnboarding.update(data.onboardingRequestId, {statusId: newStatus});
       }
