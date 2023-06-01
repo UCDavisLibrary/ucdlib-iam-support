@@ -145,3 +145,8 @@ ucdlib-iam-onboarding-list .no-results {
     color: #022851;
   }
 }
+.panel__title.space-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

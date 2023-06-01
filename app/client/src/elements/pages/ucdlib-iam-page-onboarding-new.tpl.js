@@ -22,6 +22,17 @@ export function render() {
     <ucdlib-iam-modal id='obn-employee-modal' dismiss-text='Close' content-title='Employee Record'>
       ${!this.userEnteredData ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.iamRecord.data, null, "  ")}</pre>` : html``}
     </ucdlib-iam-modal>
+    <ucdlib-iam-modal id='obn-custom-supervisor' dismiss-text='Close' content-title='Set a Custom Supervisor' auto-width>
+      <p>Override the supervisor record for this employee.
+        For example, TES employees should have their supervisor set to their library supervisor.
+      </p>
+      <ucdlib-iam-search
+        @select=${e => this._onSupervisorEditSelect(e.detail.status)}
+        search-param='employee-id'
+        reset-on-select
+        class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
+      </ucdlib-iam-search>
+    </ucdlib-iam-modal>
   </div>
 `;}
 
@@ -142,7 +153,10 @@ export function renderSubmissionForm(){
         <a class='pointer icon icon--circle-arrow-right' @click=${this.openEmployeeInfoModal} .hidden=${this.userEnteredData}>View Entire Employee Record</a>
       </div>
       <div class="panel panel--icon panel--icon-custom o-box panel--icon-delta">
-        <h2 class="panel__title"><span class="panel__custom-icon fas fa-sitemap"></span>Supervisor</h2>
+        <h2 class="panel__title space-between">
+          <div><span class="panel__custom-icon fas fa-sitemap"></span><span>Supervisor</span></div>
+          <a @click=${this._onSupervisorEdit} class='pointer u-space-ml' title="Set Custom Supervisor"><i class='fas fa-edit'></i></a>
+        </h2>
         <section>
           <div class="field-container">
             <label for="obn-supervisor">Supervisor</label>

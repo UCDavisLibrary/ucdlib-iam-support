@@ -297,6 +297,30 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
   }
 
   /**
+   * @description Attached #submission form supervisor edit button
+   */
+  _onSupervisorEdit(){
+    const modal = this.renderRoot.querySelector('#obn-custom-supervisor');
+    if ( modal ) modal.show();
+  }
+
+  /**
+   * @description Attached to ucd-iam-search element in custom supervisor modal
+   * @param {*} e
+   * @returns
+   */
+  _onSupervisorEditSelect(e){
+    if ( e.state !== 'loaded' ) {
+      this.AppStateModel.showError('Unable to load supervisor!');
+      return;
+    }
+    this.supervisor = new IamPersonTransform(e.payload);
+    this.supervisorEmail = this.supervisor.email;
+    const modal = this.renderRoot.querySelector('#obn-custom-supervisor');
+    if ( modal ) modal.hide();
+  }
+
+  /**
    * @description Do data retrieval required to display a subpage
    * @param {String} hash - url hash representing the subpage
    */
