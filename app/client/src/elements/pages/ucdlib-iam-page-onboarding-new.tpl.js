@@ -11,6 +11,7 @@ export function render() {
       ${this.renderHome()}
       ${this.renderSubmissionForm()}
       ${this.renderManualEntryForm()}
+      ${this.renderTransferForm()}
       <div id='obn-lookup'>
         <ucdlib-iam-search
           @select=${e => this._onEmployeeSelect(e.detail.status)}
@@ -60,12 +61,12 @@ export function renderHome(){
             <i class="vertical-link__image fas fa-pen fa-3x"></i>
           </div>
           <div class="vertical-link__title">
-            Manually Enter Employee <br> <span class='fw-light'>(for TES and special cases)</span>
+            Manually Enter Employee <br> <span class='fw-light'>(for special cases)</span>
           </div>
         </a>
       </div>
       <div class="priority-links__item">
-        <a href="" class="vertical-link vertical-link--circle category-brand--cabernet">
+        <a href="#transfer" class="vertical-link vertical-link--circle category-brand--cabernet">
           <div class="vertical-link__figure">
             <i class="vertical-link__image fas fa-random fa-3x"></i>
           </div>
@@ -260,5 +261,17 @@ export function renderEmployeeForm(){
       <label for="obn-email">UC Davis Email</label>
       <input id='obn-email' type="text" .value=${this.email} @input=${e => this.email = e.target.value}>
     </div>
+  `;
+}
+
+/**
+ * @description Renders the form for transferring an employee within the library
+ * @returns {TemplateResult}
+ */
+export function renderTransferForm(){
+  return html`
+  <div id='obn-transfer'>
+    <ucdlib-employee-search></ucdlib-employee-search>
+  </div>
   `;
 }

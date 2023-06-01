@@ -159,6 +159,8 @@ class AppStateModelImpl extends AppStateModel {
           breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboardingNewManual);
         } else if ( update.location.hash === 'submission' ) {
           breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboardingNewSubmission);
+        } else if ( update.location.hash === 'transfer' ) {
+          breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboardingTransfer);
         }
       }
     } else if ( update.page === 'separation' ){

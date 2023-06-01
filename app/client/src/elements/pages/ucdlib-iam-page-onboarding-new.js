@@ -4,6 +4,7 @@ import * as Templates from "./ucdlib-iam-page-onboarding-new.tpl.js";
 import "../components/ucdlib-iam-search";
 import "../components/ucdlib-iam-alma";
 import "../components/ucdlib-iam-modal";
+import "../components/ucdlib-employee-search";
 import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform";
 
 /**
@@ -47,6 +48,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.renderSubmissionForm = Templates.renderSubmissionForm.bind(this);
     this.renderEmployeeForm = Templates.renderEmployeeForm.bind(this);
     this.renderManualEntryForm = Templates.renderManualEntryForm.bind(this);
+    this.renderTransferForm = Templates.renderTransferForm.bind(this);
 
     this.page = 'obn-home';
     this.groups = [];
@@ -254,7 +256,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.AppStateModel.showLoading('onboarding-new');
     await this._getRequiredPageData(e.location.hash);
     this.AppStateModel.showLoaded();
-    if ( ['submission', 'manual', 'lookup'].includes(e.location.hash) ){
+    if ( ['submission', 'manual', 'lookup', 'transfer'].includes(e.location.hash) ){
       this.page = 'obn-' + e.location.hash;
     } else {
       this.page = 'obn-home';
