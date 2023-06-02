@@ -11,6 +11,7 @@ export function render() {
       ${this.renderHome()}
       ${this.renderSubmissionForm()}
       ${this.renderManualEntryForm()}
+      ${this.renderTransferForm()}
       <div id='obn-lookup'>
         <ucdlib-iam-search
           @select=${e => this._onEmployeeSelect(e.detail.status)}
@@ -21,6 +22,17 @@ export function render() {
     </ucdlib-pages>
     <ucdlib-iam-modal id='obn-employee-modal' dismiss-text='Close' content-title='Employee Record'>
       ${!this.userEnteredData ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.iamRecord.data, null, "  ")}</pre>` : html``}
+    </ucdlib-iam-modal>
+    <ucdlib-iam-modal id='obn-custom-supervisor' dismiss-text='Close' content-title='Set a Custom Supervisor' auto-width>
+      <p>Override the supervisor record for this employee.
+        For example, TES employees should have their supervisor set to their library supervisor.
+      </p>
+      <ucdlib-iam-search
+        @select=${e => this._onSupervisorEditSelect(e.detail.status)}
+        search-param='employee-id'
+        reset-on-select
+        class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
+      </ucdlib-iam-search>
     </ucdlib-iam-modal>
   </div>
 `;}
@@ -49,12 +61,12 @@ export function renderHome(){
             <i class="vertical-link__image fas fa-pen fa-3x"></i>
           </div>
           <div class="vertical-link__title">
-            Manually Enter Employee <br> <span class='fw-light'>(for TES and special cases)</span>
+            Manually Enter Employee <br> <span class='fw-light'>(for special cases)</span>
           </div>
         </a>
       </div>
       <div class="priority-links__item">
-        <a href="" class="vertical-link vertical-link--circle category-brand--cabernet">
+        <a href="#transfer" class="vertical-link vertical-link--circle category-brand--cabernet">
           <div class="vertical-link__figure">
             <i class="vertical-link__image fas fa-random fa-3x"></i>
           </div>
@@ -103,6 +115,7 @@ export function renderSubmissionForm(){
             <div class="field-container">
               <label for="obn-departments">Department <abbr title="Required">*</abbr></label>
               <select id="obn-departments" required @input=${(e) => this.departmentId = e.target.value} .value=${this.departmentId || ''}>
+                <option value="" ?selected=${!this.departmentId}>-- Please choose a department --</option>
                 ${this.groups.filter(g => g.partOfOrg).map(g => html`
                   <option value=${g.id} ?selected=${this.departmentId == g.id}>${g.name}</option>
                 `)}
@@ -141,7 +154,10 @@ export function renderSubmissionForm(){
         <a class='pointer icon icon--circle-arrow-right' @click=${this.openEmployeeInfoModal} .hidden=${this.userEnteredData}>View Entire Employee Record</a>
       </div>
       <div class="panel panel--icon panel--icon-custom o-box panel--icon-delta">
-        <h2 class="panel__title"><span class="panel__custom-icon fas fa-sitemap"></span>Supervisor</h2>
+        <h2 class="panel__title space-between">
+          <div><span class="panel__custom-icon fas fa-sitemap"></span><span>Supervisor</span></div>
+          <a @click=${this._onSupervisorEdit} class='pointer u-space-ml' title="Set Custom Supervisor"><i class='fas fa-edit'></i></a>
+        </h2>
         <section>
           <div class="field-container">
             <label for="obn-supervisor">Supervisor</label>
@@ -229,7 +245,10 @@ export function renderEmployeeForm(){
       <label for="obn-last-name">Last Name</label>
       <input id='obn-last-name' type="text" .value=${this.lastName} ?disabled=${disabled} @input=${e => this.lastName = e.target.value}>
     </div>
-    <div ?hidden=${isSub} class='double-decker u-space-mt--large u-space-mb--small'>At least one of the following identifier fields is required:</div>
+    <div ?hidden=${isSub} class='double-decker u-space-mt--large u-space-mb--small'>
+      If at least one of the following identifier fields is not provided,
+      the employee record must be manually reconciled with the UC Davis IAM system after submission.
+    </div>
     <div class="field-container">
       <label for="obn-employee-id">Employee Id</label>
       <input id='obn-employee-id' type="text" .value=${this.employeeId} ?disabled=${disabled} @input=${e => this.employeeId = e.target.value}>
@@ -239,8 +258,20 @@ export function renderEmployeeForm(){
       <input id='obn-user-id' type="text" .value=${this.userId} ?disabled=${disabled} @input=${e => this.userId = e.target.value}>
     </div>
     <div class="field-container">
-      <label for="obn-email">${isSub ? 'Email for RT Ticket' : 'Email'}</label>
+      <label for="obn-email">UC Davis Email</label>
       <input id='obn-email' type="text" .value=${this.email} @input=${e => this.email = e.target.value}>
     </div>
+  `;
+}
+
+/**
+ * @description Renders the form for transferring an employee within the library
+ * @returns {TemplateResult}
+ */
+export function renderTransferForm(){
+  return html`
+  <div id='obn-transfer'>
+    <ucdlib-employee-search></ucdlib-employee-search>
+  </div>
   `;
 }

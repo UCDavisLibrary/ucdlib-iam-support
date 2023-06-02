@@ -2,6 +2,10 @@ import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-onboarding-single.tpl.js";
 import dtUtls from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
 
+import "../components/ucdlib-rt-history";
+import "../components/ucdlib-iam-search";
+import "../components/ucdlib-iam-modal";
+
 /**
  * @description Page element for displaying a single onboarding request
  */
@@ -14,7 +18,6 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       request: {state: true},
       firstName: {state: true},
       lastName: {state: true},
-      rtTransactions: {state: true},
       isActiveStatus: {state: true},
       status: {state: true},
       statusDescription: {state: true},
@@ -23,7 +26,9 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       startDate: {state: true},
       supervisorName: {state: true},
       supervisorId: {state: true},
-      notes: {state: true}
+      notes: {state: true},
+      missingUid: {state: true},
+      reconId: {state: true},
     };
   }
 
@@ -34,7 +39,6 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.request = {};
     this.firstName = '';
     this.lastName = '';
-    this.rtTransactions = [];
     this.isActiveStatus = false;
     this.status = '';
     this.libraryTitle = '';
@@ -44,13 +48,15 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.supervisorName = '';
     this.notes = '';
     this.statusDescription = '';
+    this.missingUid = false;
+    this.reconId = '';
 
     this._injectModel('AppStateModel', 'OnboardingModel', 'RtModel');
   }
 
   /**
    * @description Disables the shadowdom
-   * @returns 
+   * @returns
    */
   createRenderRoot() {
     return this;
@@ -69,12 +75,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     const data = await this.OnboardingModel.getById(this.requestId);
     if ( data.state == 'loaded'){
       await this._setStateProperties(data.payload);
-      const rtHistory = await this.RtModel.getHistory(this.rtTicketId);
-      if ( rtHistory.state === 'loaded' ) {
-        this.rtTransactions = this.RtModel.formatHistory(rtHistory.payload.items);
-      } else {
-        this.rtTransactions = [];
-      }
+      await this.RtModel.getHistory(this.rtTicketId);
       this.AppStateModel.setTitle({show: true, text: this.pageTitle()});
       this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs: this.breadcrumbs()});
       requestAnimationFrame(() => this.AppStateModel.showLoaded(this.id));
@@ -90,6 +91,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
    * @param {Object} payload from /api/onboarding/id:
    */
   async _setStateProperties(payload){
+    this.missingUid = payload.statusId == 9;
     const ad = payload.additionalData;
     this.request = payload;
     this.firstName = ad.employeeFirstName || '';
@@ -127,6 +129,53 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       this.AppStateModel.store.breadcrumbs.onboarding,
       {text: this.pageTitle(), link: ''}
     ];
+  }
+
+  /**
+   * @description Opens the reconciliation modal. Attached to button in status panel, if applicable
+   */
+  openReconModal(){
+    this.reconId = '';
+    this.querySelector('#obs-recon-modal').show();
+  }
+
+  /**
+   * @description Bound to ucdlib-iam-search select event. Sets reconId property (iam id of employee to reconcile)
+   * @param {*} e
+   */
+  _onReconEmployeeSelect(e){
+    this.reconId = e.id;
+  }
+
+  /**
+   * @description Called after user selects an employee and clicks the submit button in the reconciliation modal
+   * Sends request to reconcile onboarding request with iam id
+   * @returns
+   */
+  async _onReconSubmit(){
+    if ( !this.reconId ) return;
+
+    const modal = this.querySelector('#obs-recon-modal');
+    modal.hide();
+    const lookupEle = modal.querySelector('ucdlib-iam-search');
+    lookupEle.reset();
+
+    this.AppStateModel.showLoading();
+    const r = await this.OnboardingModel.reconcile(this.requestId, this.reconId);
+    if ( r.state == 'error' ){
+      let msg = 'Unable to reconcile onboarding request';
+      if ( r.error && r.error.payload && r.error.payload.message ) msg = r.error.payload.message;
+      console.error(r);
+      requestAnimationFrame(() => this.AppStateModel.showError(msg));
+    } else {
+      this.OnboardingModel.clearIdCache(this.requestId);
+      this.OnboardingModel.clearQueryCache();
+      if ( this.rtTicketId ){
+        this.RtModel.clearHistoryCache(this.rtTicketId);
+      }
+      this.AppStateModel.setLocation('/onboarding');
+      this.AppStateModel.showAlertBanner({message: 'Onboarding request reconciled', brandColor: 'farmers-market'});
+    }
   }
 
 }

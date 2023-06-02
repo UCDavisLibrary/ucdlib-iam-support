@@ -4,7 +4,7 @@ import { html } from 'lit';
  * @description Main render function for this element
  * @returns {TemplateResult}
  */
-export function render() { 
+export function render() {
   return html`
   <div class='l-container u-space-pb'>
     <div class='l-basic--flipped'>
@@ -39,27 +39,27 @@ export function render() {
             <h2 class="panel__title u-space-mb"><span class="panel__custom-icon fas ${this.isActiveStatus ? 'fa-check-circle' : 'fa-spinner'}"></span>Status</h2>
             <div class='primary fw-bold'>${this.status}</div>
             <div class='primary'>${this.statusDescription}</div>
+            <a class='icon icon--circle-arrow-right u-space-mt pointer' @click=${this.openReconModal} ?hidden=${!this.missingUid}>Reconcile Manually</a>
           </div>
         </div>
-        <div class='category-brand__background-light-gold o-box u-space-mb'>
-          <div class="panel panel--icon panel--icon-custom panel--icon-redbud o-box background-transparent">
-            <h2 class="panel__title u-space-mb"><span class="panel__custom-icon fas fa-comment"></span>RT Ticket</h2>
-            <section>
-              ${this.rtTransactions.length ? html`
-                ${this.rtTransactions.map(t => html`
-                  <div class='u-space-mb'>
-                    <div class='rt-history-text'>${t.text}</div>
-                    <div class='rt-history-created'>${t.created}</div>
-                  </div>
-                `)}
-                <a class='icon icon--circle-arrow-right' href='https://rt.lib.ucdavis.edu/Ticket/Display.html?id=${this.rtTicketId}'>View Ticket</a>
-              ` : html`
-                <p>Unable to load RT ticket!</p>
-              `}
-            </section>
-          </div>
-        </div>
+        <ucdlib-rt-history .ticketId=${this.rtTicketId}></ucdlib-rt-history>
       </div>
     </div>
   </div>
+  <ucdlib-iam-modal id='obs-recon-modal' dismiss-text='Close' content-title="Reconcile Record" auto-width hide-footer>
+    <ucdlib-iam-search
+      @select=${e => this._onReconEmployeeSelect(e.detail.status)}
+      search-param='employee-id'
+      class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
+    </ucdlib-iam-search>
+    <div>
+      <button
+        @click=${this._onReconSubmit}
+        style="padding-left:0;padding-right:0;"
+        type='button'
+        class="btn btn--alt btn--block u-space-mt"
+        ?disabled=${!this.reconId}>Reconcile Record
+      </button>
+    </div>
+  </ucdlib-iam-modal>
 `;}

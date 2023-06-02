@@ -12,6 +12,7 @@ export default class UcdlibIamModal extends LitElement {
       contentTitle: {type: String, attribute: "content-title"},
       dismissText: {type: String, attribute: 'dismiss-text'},
       autoWidth: {type: Boolean, attribute: 'auto-width'},
+      hideFooter: {type: Boolean, attribute: 'hide-footer'},
       contentWidth: {state: true},
       closeOnConfirm : {type: Boolean}
     };
@@ -29,6 +30,7 @@ export default class UcdlibIamModal extends LitElement {
     this.dismissText = "Cancel";
     this.closeOnConfirm = true;
     this.autoWidth = false;
+    this.hideFooter = false;
   }
 
   /**
@@ -73,7 +75,7 @@ export default class UcdlibIamModal extends LitElement {
    * @method _onConfirmClicked
    * @description bound to click event on confirm slot.  Close modal
    * if this.closeOnConfirm is set to true.
-   * 
+   *
    */
   _onConfirmClicked() {
     if( this.closeOnConfirm ) {

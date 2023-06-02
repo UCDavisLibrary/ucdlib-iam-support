@@ -13,6 +13,7 @@
     "ucdlib-iam": "bin/ucdlib-iam.js"
   },
   "dependencies": {
-    "commander": "^10.0.0"
+    "commander": "^10.0.0",
+    "console-table-printer": "^2.11.1"
   }
 }

@@ -14,7 +14,7 @@ export function render() {
       <ul link-text='Onboarding' href='/onboarding'>
         <li><a href='/onboarding/new#lookup'>From UC Davis Directory</a></li>
         <li><a href='/onboarding/new#manual'>Manual Entry</a></li>
-        <li><a href='/onboarding/new#manual'>Transfer from Another Library Unit</a></li>
+        <li><a href='/onboarding/new#transfer'>Transfer from Another Library Unit</a></li>
       </ul>
       <a href='/separation'>Separation</a>
       <a href='/permissions'>Permissions</a>

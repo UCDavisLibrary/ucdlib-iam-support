@@ -4,6 +4,7 @@ import * as Templates from "./ucdlib-iam-page-onboarding-new.tpl.js";
 import "../components/ucdlib-iam-search";
 import "../components/ucdlib-iam-alma";
 import "../components/ucdlib-iam-modal";
+import "../components/ucdlib-employee-search";
 import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform";
 
 /**
@@ -47,7 +48,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.renderSubmissionForm = Templates.renderSubmissionForm.bind(this);
     this.renderEmployeeForm = Templates.renderEmployeeForm.bind(this);
     this.renderManualEntryForm = Templates.renderManualEntryForm.bind(this);
-    
+    this.renderTransferForm = Templates.renderTransferForm.bind(this);
+
     this.page = 'obn-home';
     this.groups = [];
     this._resetEmployeeStateProps();
@@ -100,20 +102,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    * @param {*} props - Changed properties
    */
   _setManualFormDisabled(props){
-    let needUpdate = false;
-    let canSubmit = false;
-    const employeePropsToCheck = ['email', 'employeeId', 'userId'];
-    for (const p of employeePropsToCheck) {
-      if ( props.has(p) ) {
-        needUpdate = true;
-      }
-      if ( this[p] ) canSubmit = true;
-    }
-    if ( !needUpdate && props.has('supervisor') ) needUpdate = true;
-    if ( this.supervisor.isEmpty ) canSubmit = false;
-
-    if ( needUpdate ){
-      this.manualFormDisabled = !canSubmit;
+    if ( props.has('supervisor') ) {
+      this.manualFormDisabled = this.supervisor.isEmpty;
     }
   }
 
@@ -127,7 +117,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
 
   /**
    * @description Disables the shadowdom
-   * @returns 
+   * @returns
    */
   createRenderRoot() {
     return this;
@@ -143,7 +133,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
 
   /**
    * @description Sets state properties from IAM person record class
-   * @param {*} record 
+   * @param {*} record
    */
   _setStatePropertiesFromIamRecord(record){
     this.hasAppointment = record.hasAppointment;
@@ -171,7 +161,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
 
   /**
    * @description Attached to ucd person lookup element for employee being onboarded
-   * @param {Object} response 
+   * @param {Object} response
    */
   async _onEmployeeSelect(response){
     if( response.state === this.PersonModel.store.STATE.LOADED ) {
@@ -202,7 +192,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
 
   /**
    * @description Attached to ucd person lookup element for employee supervisor on manual entry form
-   * @param {Object} response 
+   * @param {Object} response
    */
   _onSupervisorSelect(response){
     if( response.state === this.PersonModel.store.STATE.LOADED ) {
@@ -239,17 +229,17 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
   _resetLookupForms(){
     this.renderRoot.querySelector('#obn-lookup ucdlib-iam-search' ).reset();
     this.renderRoot.querySelector('#obn-manual ucdlib-iam-search' ).reset();
-    
+
   }
 
   /**
    * @description Attached to GroupModel GROUPS_FETCHED event
-   * @param {Object} e 
+   * @param {Object} e
    */
   _onGroupsFetched(e){
     if ( e.state === this.GroupModel.store.STATE.LOADED ){
       this.groups = e.payload.filter(g => !g.archived);
-      this.departmentId = this.groups.length ? this.groups[0].id : 0;
+      //this.departmentId = this.groups.length ? this.groups[0].id : 0;
     } else if ( e.state === this.GroupModel.store.STATE.ERROR ) {
       console.error('Cannot display page. Groups not loaded!');
       this.AppStateModel.showError('Unable to load department list.');
@@ -258,15 +248,15 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
 
   /**
    * @description Sets subpage based on location hash
-   * @param {Object} e 
+   * @param {Object} e
    */
   async _setPage(e){
     if (e.page != this.id ) return;
-  
+
     this.AppStateModel.showLoading('onboarding-new');
     await this._getRequiredPageData(e.location.hash);
     this.AppStateModel.showLoaded();
-    if ( ['submission', 'manual', 'lookup'].includes(e.location.hash) ){
+    if ( ['submission', 'manual', 'lookup', 'transfer'].includes(e.location.hash) ){
       this.page = 'obn-' + e.location.hash;
     } else {
       this.page = 'obn-home';
@@ -285,7 +275,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
 
   /**
    * @description Attached to Onboarding Model NEW_ONBOARDING_SUBMISSION event
-   * @param {Object} e 
+   * @param {Object} e
    */
   _onNewOnboardingSubmission(e){
     if ( e.state === this.OnboardingModel.store.STATE.LOADING ){
@@ -309,6 +299,30 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
   }
 
   /**
+   * @description Attached #submission form supervisor edit button
+   */
+  _onSupervisorEdit(){
+    const modal = this.renderRoot.querySelector('#obn-custom-supervisor');
+    if ( modal ) modal.show();
+  }
+
+  /**
+   * @description Attached to ucd-iam-search element in custom supervisor modal
+   * @param {*} e
+   * @returns
+   */
+  _onSupervisorEditSelect(e){
+    if ( e.state !== 'loaded' ) {
+      this.AppStateModel.showError('Unable to load supervisor!');
+      return;
+    }
+    this.supervisor = new IamPersonTransform(e.payload);
+    this.supervisorEmail = this.supervisor.email;
+    const modal = this.renderRoot.querySelector('#obn-custom-supervisor');
+    if ( modal ) modal.hide();
+  }
+
+  /**
    * @description Do data retrieval required to display a subpage
    * @param {String} hash - url hash representing the subpage
    */
@@ -329,7 +343,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     const additionalData = {};
     if ( !this.userEnteredData && this.iamRecord.id){
       payload.iamId = this.iamRecord.id;
-    } 
+    }
 
     payload.startDate = this.startDate;
     payload.libraryTitle = this.positionTitle;
@@ -350,13 +364,13 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     additionalData.employeeId = this.employeeId;
     additionalData.employeeUserId = this.userId;
     payload.additionalData = additionalData;
-    
+
     return payload;
   }
 
   /**
    * @description Displays error or reroutes to home if something with the page state is wrong
-   * @returns 
+   * @returns
    */
   _validatePage(){
     if ( this.page === 'obn-submission' ){
@@ -365,7 +379,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
         this.AppStateModel.setLocation('#home');
         return;
       }
-    } 
+    }
   }
 
 }

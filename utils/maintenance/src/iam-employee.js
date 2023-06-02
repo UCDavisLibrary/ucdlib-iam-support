@@ -1,6 +1,7 @@
 import UcdlibEmployees from "@ucd-lib/iam-support-lib/src/utils/employees.js";
 import UcdlibCache from '@ucd-lib/iam-support-lib/src/utils/cache.js';
 import { UcdIamModel } from "@ucd-lib/iam-support-lib/index.js";
+import UcdlibJobs from "@ucd-lib/iam-support-lib/src/utils/jobs.js";
 import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js";
 import config from "./config.js";
 import assert from 'node:assert/strict';
@@ -36,7 +37,7 @@ export class IamEmployees {
         await this._getIamRecord(iamId);
       }
     }
-    
+
     // loop iam id responses and map to employee id
     for ( let iamId in this.iamResponses.byId ){
       const response = this.iamResponses.byId[iamId];
@@ -236,7 +237,7 @@ export class IamEmployees {
     const libEmployees = new Set(this.employees.map(e => e.iam_id));
     for (const employee of this.employees) {
       if ( employee.custom_supervisor && !employee.supervisor_id ) continue;
-      
+
       if ( !libEmployees.has(employee.supervisor_id) ) {
         this.discrepancies.push({
           iam_id: employee.iam_id,
@@ -278,8 +279,13 @@ function IamEmployeesError(error) {
 }
 
 // syncs records in the employees table with the ucd iam api
-export const run = async () => {
+export const run = async (saveToDB) => {
+  let thisJob;
   try {
+    if ( saveToDB ) {
+      const r = await UcdlibJobs.start('iam-employee');
+      if ( r.job ) thisJob = r.job;
+    }
     const iamEmployees = new IamEmployees();
     console.log('Getting employees from the database');
     await iamEmployees.getEmployees();
@@ -288,13 +294,14 @@ export const run = async () => {
     console.log('Getting iam records for employees and supervisors');
     await iamEmployees.getIamRecords();
     console.log('Got iam records for employees and supervisors');
-    
+
     console.log('Comparing records');
     await iamEmployees.compareRecords();
 
     await iamEmployees.updateEmployees();
     console.log(`${iamEmployees.updates.length} employees were updated${iamEmployees.updates.length ? ':' : ''}`);
     for (const update of iamEmployees.updates) {
+      if ( thisJob ) await thisJob.log({type: 'update', ...update});
       console.log(update);
     }
 
@@ -302,12 +309,22 @@ export const run = async () => {
     await iamEmployees.writeDiscrepancies();
     console.log(`Found ${iamEmployees.discrepancies.length} discrepancies${iamEmployees.discrepancies.length ? ':' : ''}`);
     for (const discrepancy of iamEmployees.discrepancies) {
+      if ( thisJob ) await thisJob.log({type: 'discrepancy', ...discrepancy});
       console.log(discrepancy);
+    }
+
+    if ( thisJob ) {
+      const discrepanciesCt = iamEmployees.discrepancies.length;
+      const updatesCt = iamEmployees.updates.length;
+      await thisJob.end({discrepanciesCt, updatesCt});
     }
 
 
   } catch (error) {
+    if ( thisJob ) {
+      await thisJob.end({error: error.message}, false);
+    }
     throw new IamEmployeesError(error);
   }
-  
+
 }

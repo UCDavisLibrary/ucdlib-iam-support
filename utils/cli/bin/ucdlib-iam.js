@@ -9,5 +9,6 @@ program
   .command('person', 'commands for querying ucd people records')
   .command('groups', 'queries and updates the pg database and displays all groups')
   .command('employees', 'commands for interacting with library employees records, including onboarding and separation')
+  .command('jobs', 'query and inspect recent cron job runs')
 
 program.parse(process.argv);

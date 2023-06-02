@@ -24,6 +24,7 @@ class AppStateModelImpl extends AppStateModel {
       this.logout();
     }
 
+    this.stripStateFromHash(update);
     this.setPage(update);
     this.setTitle(false, update);
     this.setBreadcrumbs(false, update);
@@ -111,6 +112,28 @@ class AppStateModelImpl extends AppStateModel {
   }
 
   /**
+   * @description Remove extraneous state values from hash set by keycloak.
+   * It interferes with the app's routing.
+   * @param {*} update
+   * @returns
+   */
+  stripStateFromHash(update){
+    if ( !update || !update.location || !update.location.hash ) return;
+    let hash = new URLSearchParams(update.location.hash);
+    const toStrip = ['state', 'session_state', 'code'];
+    let replace = false;
+    for (const key of toStrip) {
+      if ( hash.has(key) ) {
+        hash.delete(key);
+        replace = true;
+      }
+    }
+    if ( !replace ) return;
+    hash = hash.toString().replace('=','');
+    update.location.hash = hash;
+  }
+
+  /**
    * @description Sets breadcrumbs
    * @param {Object} breadcrumbUpdate Manually set breadcrumbs: {show: bool, breadcrumbs: [{text, link}]}
    * @param {Object} update From app-state-update
@@ -136,6 +159,8 @@ class AppStateModelImpl extends AppStateModel {
           breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboardingNewManual);
         } else if ( update.location.hash === 'submission' ) {
           breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboardingNewSubmission);
+        } else if ( update.location.hash === 'transfer' ) {
+          breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboardingTransfer);
         }
       }
     } else if ( update.page === 'separation' ){

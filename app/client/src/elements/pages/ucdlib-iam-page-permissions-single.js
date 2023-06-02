@@ -8,6 +8,7 @@ import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTran
 
 import "../components/ucdlib-iam-modal";
 import "../components/ucdlib-iam-alma";
+import "../components/ucdlib-rt-history";
 
 
 /**
@@ -174,6 +175,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
       this.record = p;
       this.payload = p;
       this.isAnEdit = true;
+      this.rtTicketId = e.payload.rtTicketId || '';
       this.submitted = DtUtils.fmtDatetime(p.submitted);
       this.submittedBy = p.submittedBy;
       this._setPayloadOrElement('element', {setRequestedApplications: this.formType === 'update'});
@@ -184,6 +186,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
         this.iamId = p.iamId || '';
         const title = this.formTypes[this.formType].title.replace(':name', `${this.firstName} ${this.lastName}`);
         this.AppStateModel.setTitle({text: title, show: true});
+        if ( this.rtTicketId ) this.RtModel.getHistory(this.rtTicketId);
       }
     }
     else if (e.state === 'error' ){
@@ -371,7 +374,7 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
         includeList.push('custom-applications', 'notes' );
       }
       if ( this.associatedObjectId) {
-        this.payload.permissionsRequestId = this.associatedObjectId;
+        this.payload.permissionRequestId = this.associatedObjectId;
       }
     }
     this._setPayloadOrElement('payload', {payloadIncludeList: includeList});

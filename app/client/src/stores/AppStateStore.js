@@ -16,6 +16,7 @@ class AppStateStoreImpl extends AppStateStore {
       onboardingNewLookup: {text: 'Lookup Employee', link: `/onboarding/new#lookup`},
       onboardingNewManual: {text: 'Manual Entry', link: `/onboarding/new#manual`},
       onboardingNewSubmission: {text: 'Submission', link: `/onboarding/new#submission`},
+      onboardingTransfer: {text: 'Transfer', link: `/onboarding/new#transfer`},
       usersSearch: {text: 'New Request', link: `/users/search`},
       separation: {text: 'Separation', link: 'separation'},
       permissions: {text: 'Permissions', link: '/permissions'},

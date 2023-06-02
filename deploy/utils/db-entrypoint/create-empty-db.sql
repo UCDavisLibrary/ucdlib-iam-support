@@ -116,6 +116,20 @@ CREATE TABLE outdated_records (
     created timestamp DEFAULT NOW(),
     UNIQUE (reason, iam_id)
 );
+CREATE TABLE jobs (
+    id SERIAL PRIMARY KEY,
+    name varchar(100) NOT NULL,
+    start_time timestamp DEFAULT NOW(),
+    end_time timestamp,
+    success boolean NOT NULL DEFAULT FALSE,
+    data jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE TABLE job_logs (
+    id SERIAL PRIMARY KEY,
+    job_id integer REFERENCES jobs (id),
+    data jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created timestamp DEFAULT NOW()
+);
 
 -- Request Statuses
 --1
@@ -142,6 +156,9 @@ VALUES ('Resolved', '{"onboarding", "separation"}', FALSE, 'This request has bee
 --8
 INSERT INTO "status_codes" ("name", "request_type", "description")
 VALUES ('Awaiting Supervisor Response', '{"permissions"}', 'The employee''s supervisor must approve the request.');
+--9
+INSERT INTO "status_codes" ("name", "request_type", "description")
+VALUES ('Missing Any Unique Identifier', '{"onboarding"}', 'The employee must have at least one unique identifier to automatically reconcile this record with the UC Davis IAM System. The onboarding process cannot proceed without reconciliation.');
 
 -- Group Types
 INSERT INTO "group_types" ("name", "part_of_org")
