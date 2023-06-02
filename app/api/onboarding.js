@@ -1,3 +1,5 @@
+const { lstat } = require('fs');
+
 module.exports = (api) => {
   api.post('/onboarding/new', async (req, res) => {
     if ( !req.auth.token.canCreateRequests ){
@@ -103,6 +105,40 @@ module.exports = (api) => {
     return res.json(output);
 
   });
+
+
+  api.get('/onboarding/search', async (req, res) => {
+    const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
+    let q = {"employeeLastName" : req.query.lastName, "employeeFirstName": req.query.firstName};
+    const r = await UcdlibOnboarding.getByName(req.query.firstName, req.query.lastName);
+
+    if ( r.err ) {
+      console.error(r.err);
+      res.json({error: true, message: 'Unable to retrieve SEARCH onboarding request'});
+      return;
+    }
+    if ( !r.res.rows.length ){
+      console.error(r.err);
+      res.json({error: true, message: 'Request does not exist!'});
+      return;
+    }
+    if ( 
+      !req.auth.token.hasAdminAccess && 
+      !req.auth.token.hasHrAccess && 
+      req.auth.token.iamId != obReq.supervisorId ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
+
+
+    return res.json(r.res.rows);
+
+  });
+
+
 
   api.get('/onboarding/:id', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
