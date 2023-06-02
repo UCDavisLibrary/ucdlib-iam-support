@@ -154,4 +154,65 @@ ucdlib-employee-search {
   max-width: 500px;
   margin: auto;
   display: block;
+
+  .emp-search-top.field-container {
+    margin-bottom: 0;
+  }
+
+  .emp-search-bar {
+    position: relative;
+
+    input {
+      flex-grow: 1;
+      padding-right: 2rem;
+    }
+    .emp-search-icon {
+      position: absolute;
+      width: 2.5rem;
+      min-width: 2.5rem;
+      height: 2.5rem;
+      min-height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      right: 0;
+      top: 0;
+      color: #022851;
+    }
+  }
+  .emp-search-results-parent {
+    position: relative;
+  }
+  .emp-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background-color: #fffbed;
+    border-right: 1px solid #ffbf00;
+    border-left: 1px solid #ffbf00;
+    border-bottom: 1px solid #ffbf00;
+    color: #13639e;
+    max-height: 250px;
+    overflow-y: scroll;
+
+    .emp-search-result {
+      padding: .5rem .75rem;
+    }
+    .emp-search-result:hover {
+      background-color: #fde9ac;
+    }
+
+    .highlight {
+      font-weight: 700;
+    }
+    .muted {
+      font-weight: 400;
+      color: #545454;
+    }
+    .emp-search-more {
+      padding: .5rem .75rem;
+    }
+  }
 }
