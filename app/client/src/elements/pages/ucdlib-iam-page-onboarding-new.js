@@ -37,7 +37,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
       userId: {state: true},
       manualFormDisabled: {state: true},
       skipSupervisor: {state: true},
-      notes: {state: true}
+      notes: {state: true},
+      transferEmployee: {state: true},
     };
   }
 
@@ -49,6 +50,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.renderEmployeeForm = Templates.renderEmployeeForm.bind(this);
     this.renderManualEntryForm = Templates.renderManualEntryForm.bind(this);
     this.renderTransferForm = Templates.renderTransferForm.bind(this);
+    this.renderSupervisorSelectPanel = Templates.renderSupervisorSelectPanel.bind(this);
 
     this.page = 'obn-home';
     this.groups = [];
@@ -82,6 +84,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.skipSupervisor = false;
     this.supervisorEmail = '';
     this.notes = '';
+    this.transferEmployee = {};
   }
 
   /**
@@ -93,6 +96,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     if ( props.has('iamRecord') && !this.iamRecord.isEmpty && !this.userEnteredData ){
       this._setStatePropertiesFromIamRecord(this.iamRecord);
     }
+    if ( props.has('transferEmployee') ) this.hasTransferEmployee = Object.keys(this.transferEmployee).length > 0;
     this._setManualFormDisabled(props);
   }
 
@@ -157,7 +161,28 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this._setPage(e);
   }
 
+  /**
+   * @description Attached to ucdlib-employee-search element in transfer page. Fires when the state changes
+   * @param {*} e
+   */
+  _onTransferEmployeeStatusChange(e){
+    if ( e.detail.employee ){
+      this.transferEmployee = e.detail.employee;
+    } else {
+      this.transferEmployee = {};
+    }
+  }
 
+  _onTransferFormSubmit(){
+    if ( !this.hasTransferEmployee ) return;
+    this.userEnteredData = true;
+    this.firstName = this.transferEmployee.firstName || '';
+    this.lastName = this.transferEmployee.lastName || '';
+    this.email = this.transferEmployee.email || '';
+    this.employeeId = this.transferEmployee.employeeId || '';
+    this.userId = this.transferEmployee.userId || '';
+    this.AppStateModel.setLocation('#submission');
+  }
 
   /**
    * @description Attached to ucd person lookup element for employee being onboarded
@@ -343,6 +368,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     const additionalData = {};
     if ( !this.userEnteredData && this.iamRecord.id){
       payload.iamId = this.iamRecord.id;
+    } else if ( this.hasTransferEmployee ){
+      payload.iamId = this.transferEmployee.iamId;
     }
 
     payload.startDate = this.startDate;
@@ -363,6 +390,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     additionalData.employeeLastName = this.lastName;
     additionalData.employeeId = this.employeeId;
     additionalData.employeeUserId = this.userId;
+    additionalData.isTransfer = this.hasTransferEmployee;
     payload.additionalData = additionalData;
 
     return payload;

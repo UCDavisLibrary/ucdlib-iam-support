@@ -112,6 +112,7 @@ export default class UcdlibEmployeeSearch extends window.Mixin(LitElement)
    */
   _setStatus(p){
     if ( p.has('isSearching') || p.has('query') || p.has('noResults') || p.has('selectedText') ){
+      const detail = {status: this.status};
       let status = 'idle';
       if ( this.isSearching ) {
         status = 'searching';
@@ -119,8 +120,13 @@ export default class UcdlibEmployeeSearch extends window.Mixin(LitElement)
         status = 'no-results';
       } else if ( this.selectedText ){
         status = 'selected';
+        detail.employee = this.selectedObject;
       }
       this.status = status;
+
+      this.dispatchEvent(new CustomEvent('status-change', {
+        detail: detail
+      }));
     }
 
   }
@@ -168,7 +174,7 @@ export default class UcdlibEmployeeSearch extends window.Mixin(LitElement)
     this.selectedText = `${result.firstName} ${result.lastName}`;
     this.selectedObject = result;
     this.dispatchEvent(new CustomEvent('select', {
-      detail: result
+      detail: {employee: result}
     }));
   }
 

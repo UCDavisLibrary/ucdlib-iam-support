@@ -212,20 +212,38 @@ export function renderManualEntryForm(){
           ${this.renderEmployeeForm()}
         </section>
       </div>
-      <div class="panel panel--icon panel--icon-custom o-box panel--icon-delta">
-        <h2 class="panel__title"><span class="panel__custom-icon fas fa-sitemap"></span>Library Supervisor</h2>
-        <section>
-          <ucdlib-iam-search
-            @select=${e => this._onSupervisorSelect(e.detail.status)}
-            search-param='employee-id'
-            class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
-          </ucdlib-iam-search>
-        </section>
-      </div>
+      ${this.renderSupervisorSelectPanel()}
       <button type='button' @click=${this._onManualFormSubmit} ?disabled=${this.manualFormDisabled} class="btn btn--block btn--alt btn--search">Next</button>
     </div>
 
   </div>
+  `;
+}
+
+/**
+ * @description Renders the page panel for selecting a supervisor
+ * @returns {TemplateResult}
+ */
+export function renderSupervisorSelectPanel(){
+  let title = 'Library Supervisor';
+  let description = '';
+  if ( this.page === 'obn-transfer' ) {
+    title = 'New Library Supervisor';
+    description = 'If applicable, select the new supervisor for this employee:';
+  }
+
+  return html`
+    <div class="panel panel--icon panel--icon-custom o-box panel--icon-delta">
+      <h2 class="panel__title"><span class="panel__custom-icon fas fa-sitemap"></span>${title}</h2>
+      <section>
+        <p ?hidden=${!description}>${description}</p>
+        <ucdlib-iam-search
+          @select=${e => this._onSupervisorSelect(e.detail.status)}
+          search-param='employee-id'
+          class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
+        </ucdlib-iam-search>
+      </section>
+    </div>
   `;
 }
 
@@ -271,8 +289,33 @@ export function renderEmployeeForm(){
 export function renderTransferForm(){
   return html`
   <div id='obn-transfer'>
-    <ucdlib-employee-search></ucdlib-employee-search>
-    <p style='text-align:center'>hello world</p>
+    <div class='form-single-col'>
+      <div class="panel panel--icon panel--icon-custom o-box panel--icon-pinot">
+        <h2 class="panel__title"><span class="panel__custom-icon fas fa-user-tie"></span>Employee</h2>
+        <section>
+          <ucdlib-employee-search
+            class='u-space-mb'
+            @status-change=${this._onTransferEmployeeStatusChange}>
+          </ucdlib-employee-search>
+          <div ?hidden=${!this.hasTransferEmployee}>
+            <div><span class='fw-bold primary'>Name: </span>${this.transferEmployee.firstName || ''} ${this.transferEmployee.lastName || ''}</div>
+            <div><span class='fw-bold primary'>Title: </span>${this.transferEmployee.title || ''}</div>
+            <div>
+              <span class='fw-bold primary'>Department: </span>
+              ${(this.transferEmployee.groups || []).filter(g => g.partOfOrg).map((g, i, arr) => html`<span>${g.name}${arr.length > i+1 ? ', ' : ''}</span>`)}
+            </div>
+            <div>
+              <span class='fw-bold primary'>Supervisor: </span>
+              ${this.transferEmployee.supervisor?.firstName || ''} ${this.transferEmployee.supervisor?.lastName || ''}
+            </div>
+          </div>
+        </section>
+      </div>
+      <div ?hidden=${!this.hasTransferEmployee}>
+        ${this.renderSupervisorSelectPanel()}
+      </div>
+      <button type='button' @click=${this._onTransferFormSubmit} ?disabled=${!this.hasTransferEmployee} class="btn btn--block btn--alt">Next</button>
+    </div>
   </div>
   `;
 }
