@@ -11,10 +11,50 @@ module.exports = (api) => {
     const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
     const { default: config } = await import('../lib/config.js');
     const { UcdlibRt, UcdlibRtTicket } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
+    const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
     const payload = req.body;
+    if ( !payload.additionalData ) payload.additionalData = {};
 
     payload.submittedBy = req.auth.token.id;
     payload.modifiedBy = req.auth.token.id;
+
+    // special handling for an intra-library transfer
+    const transfer = {
+      isTransfer: payload?.additionalData?.isTransfer ? true : false
+    };
+    if ( transfer.isTransfer ) {
+
+      // check for local employee record
+      const options = {returnSupervisor: true, returnGroups: true};
+      const employeeRecord = await UcdlibEmployees.getById(payload.iamId, 'iamId', options);
+      if ( employeeRecord.err ) {
+        console.error(employeeRecord.err);
+        res.status(500).json({error: true, message: 'Unable to retrieve employee record'});
+        return;
+      }
+      if ( !employeeRecord.res.rowCount ) {
+        res.status(400).json({error: true, message: 'Employee record not found'});
+        return;
+      }
+      transfer.employeeRecord = employeeRecord.res.rows[0];
+      transfer.departmentName = transfer.employeeRecord.groups.find(g => g.partOfOrg)?.name || '';
+
+      // if supervisor is missing, carry over from previous position
+      if ( !payload.supervisorId && transfer.employeeRecord.supervisor.iamId ){
+        payload.supervisorId = transfer.employeeRecord.supervisor.iamId;
+        payload.additionalData.supervisorEmail = transfer.employeeRecord.supervisor.email;
+        payload.additionalData.supervisorFirstName = transfer.employeeRecord.supervisor.firstName;
+        payload.additionalData.supervisorLastName = transfer.employeeRecord.supervisor.lastName;
+      }
+
+      // add previous position to additionalData
+      if ( !payload.additionalData ) payload.additionalData = {};
+      payload.additionalData.previousPosition = {
+        title: transfer.employeeRecord.title,
+        groups: transfer.employeeRecord.groups,
+        supervisor: transfer.employeeRecord.supervisor
+      };
+    }
 
     const r = await UcdlibOnboarding.create(payload);
     if ( r.err ) {
@@ -25,7 +65,7 @@ module.exports = (api) => {
     const output = r.res.rows[0];
 
     // needed variables
-    const ad = payload.additionalData || {};
+    const ad = payload.additionalData;
     const notifySupervisor = ad.supervisorEmail && !ad.skipSupervisor;
     let department =  await UcdlibGroups.getDepartmentsById(payload.groupIds || []);
     department = department.res && department.res.rows.length ? department.res.rows[0].name : '';
@@ -39,10 +79,13 @@ module.exports = (api) => {
     ticket.addOwner(config.rt.user);
 
     if ( !config.rt.forbidCc) {
-      if ( notifySupervisor ) ticket.addCc( ad.supervisorEmail );
-
-      // todo - add checkbox to allow cc'ing the employee
-      // if ( ad.employeeEmail ) ticket.addCc( ad.employeeEmail );
+      if ( notifySupervisor ) {
+        ticket.addCc( ad.supervisorEmail );
+        if ( transfer.isTransfer ) {
+          const e = transfer.employeeRecord.supervisor.email;
+          if ( e && e != ad.supervisorEmail ) ticket.addCc( e );
+        }
+      }
     }
 
 
@@ -66,6 +109,15 @@ module.exports = (api) => {
     if ( payload.notes ){
       ticket.addContent(`<h4>Notes</h4>`);
       ticket.addContent(payload.notes, false);
+    }
+    if ( transfer.isTransfer ) {
+      ticket.addContent('');
+      ticket.addContent(`<h4>Previous Position</h4>`);
+      ticket.addContent({
+        'Title': transfer.employeeRecord.title || '',
+        'Department': transfer.departmentName || '',
+        'Supervisor': `${transfer.employeeRecord.supervisor.firstName || ''} ${transfer.employeeRecord.supervisor.lastName || ''}`
+      }, false);
     }
     ticket.addContent('');
     ticket.addContent(`<a href='${config.baseUrl}/onboarding/${output.id}'>View entire onboarding record.</a>`)
