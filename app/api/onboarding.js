@@ -291,12 +291,20 @@ module.exports = (api) => {
   });
 
   api.get('/onboarding/search', async (req, res) => {
-    if ( 
-      !req.auth.token.hasAdminAccess && 
+    if (
+      !req.auth.token.hasAdminAccess &&
       !req.auth.token.hasHrAccess ){
       res.status(403).json({
         error: true,
         message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
+
+    if ( !req.query.firstName && !req.query.lastName ) {
+      res.status(400).json({
+        error: true,
+        message: 'Missing required query parameters: firstName, lastName'
       });
       return;
     }
