@@ -24,6 +24,21 @@ export function render() {
           <h2 class="panel__title"><span class="panel__custom-icon fas fa-sticky-note"></span>Additional Information</h2>
           <div>${this.notes}</div>
         </div>
+        <div class="panel panel--icon panel--icon-custom o-box panel--icon-pinot" ?hidden=${!this.isTransfer}>
+          <h2 class="panel__title"><span class="panel__custom-icon fas fa-random"></span>Previous Library Position</h2>
+          <section>
+            <p>This is a transfer from another library unit:</p>
+            <div><label class='u-inline'>Title:</label> ${this.previousPosition.title || ''}</div>
+            <div>
+              <label class='u-inline'>Department:</label>
+              <span>${(this.previousPosition.groups || []).find(g => g.partOfOrg)?.name || ''}</span>
+            </div>
+            <div>
+              <label class='u-inline'>Supervisor:</label>
+              <span>${this.previousPosition.supervisor?.firstName || ''} ${this.previousPosition.supervisor?.lastName || ''}</span>
+            </div>
+          </section>
+        </div>
       </div>
       <div class="l-sidebar-second">
         <a href="/permissions/onboarding/${this.requestId}" class="focal-link category-brand--poppy u-space-mb">

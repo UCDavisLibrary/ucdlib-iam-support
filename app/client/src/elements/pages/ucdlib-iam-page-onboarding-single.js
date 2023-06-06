@@ -21,6 +21,8 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       isActiveStatus: {state: true},
       status: {state: true},
       statusDescription: {state: true},
+      previousPosition: {state: true},
+      isTransfer: {state: true},
       libraryTitle: {state: true},
       department: {state: true},
       startDate: {state: true},
@@ -37,6 +39,8 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.render = render.bind(this);
     this.requestId = '';
     this.request = {};
+    this.previousPosition = {};
+    this.isTransfer = false;
     this.firstName = '';
     this.lastName = '';
     this.isActiveStatus = false;
@@ -60,6 +64,16 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
    */
   createRenderRoot() {
     return this;
+  }
+
+  /**
+   * @description Lit lifecycle called when element will update
+   * @param {Map} props - changed properties
+   */
+  willUpdate(props) {
+    if ( props.has('previousPosition') ) {
+      this.isTransfer = Object.keys(this.previousPosition).length > 0;
+    }
   }
 
   /**
@@ -94,8 +108,8 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.missingUid = payload.statusId == 9;
     const ad = payload.additionalData;
     this.request = payload;
-    this.firstName = ad.employeeFirstName || '';
-    this.lastName = ad.employeeLastName || '';
+    this.firstName = ad?.employeeFirstName || '';
+    this.lastName = ad?.employeeLastName || '';
     this.rtTicketId = payload.rtTicketId || '';
     this.isActiveStatus = payload.isActiveStatus;
     this.status = payload.statusName || '';
@@ -104,8 +118,9 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.department = payload.departmentName || '';
     this.startDate = dtUtls.fmtDatetime(payload.startDate, true, true);
     this.supervisorId = payload.supervisorId || '';
-    this.supervisorName = `${ad.supervisorFirstName || ''} ${ad.supervisorLastName || ''}`;
+    this.supervisorName = `${ad?.supervisorFirstName || ''} ${ad?.supervisorLastName || ''}`;
     this.notes = payload.notes || '';
+    this.previousPosition = ad?.previousPosition || {};
   }
 
   /**
