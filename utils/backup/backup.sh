@@ -20,7 +20,7 @@ pg_dump | gzip > $DATA_DIR/$SQL_FILE_NAME
 
 echo "uploading files to cloud bucket ${BACKUP_ENV}"
 gcloud auth login --quiet --cred-file=${GOOGLE_APPLICATION_CREDENTIALS}
-gsutil cp $DATA_DIR/$SQL_FILE_NAME "gs://${GOOGLE_CLOUD_BUCKET}/${BACKUP_ENV}/${SQL_FILE_NAME"
+gsutil cp $DATA_DIR/$SQL_FILE_NAME "gs://${GOOGLE_CLOUD_BUCKET}/${BACKUP_ENV}/${SQL_FILE_NAME}"
 
 rm $DATA_DIR/$SQL_FILE_NAME
 
