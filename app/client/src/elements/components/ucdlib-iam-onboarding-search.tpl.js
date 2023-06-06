@@ -14,7 +14,7 @@ import mediaLinkStyles from "@ucd-lib/theme-sass/4_component/_wysiwyg-media-link
 
 /**
  * @description shadow styles
- * @returns 
+ * @returns
  */
 export function styles() {
   const elementStyles = css`
@@ -91,7 +91,7 @@ export function styles() {
  * @description Primary render function
  * @returns {TemplateResult}
  */
-export function render() { 
+export function render() {
   return html`
   <div class='header'>
     <h2 class='heading--underline' ?hidden=${!this.widgetTitle}>${this.widgetTitle}</h2>
@@ -105,9 +105,9 @@ export function render() {
         <ucdlib-pages selected=${this.searchParam}>
           ${this.renderNameForm()}
         </ucdlib-pages>
-        <button 
-          ?disabled=${this.disableSearch} 
-          type='submit' 
+        <button
+          ?disabled=${this.disableSearch}
+          type='submit'
           class="btn btn--block btn--alt btn--search">Search${this.isFetching ? html`<span>ing</span>` : html``}</button>
       </form>
     </div>
@@ -120,7 +120,7 @@ export function render() {
         <div class='results-list'>
           <p class='results-label'>Select an Onboarding Request:</p>
           ${this.results.map(r => html`
-            <a href="/onboarding/${r.id}" class="media-link link">
+            <a href="/onboarding/${r.id}" class="media-link link" @click=${() => this._onSelect(r)}>
                 <div class='media-link__body'>
                     <h3 class="heading--highlight">${r.additional_data.employeeFirstName} ${r.additional_data.employeeLastName}</h3>
                     ${r.additional_data.employeeId ? html`
@@ -128,15 +128,15 @@ export function render() {
                     ` : html``}
                     ${r.library_title ? html`
                         <div><strong>Library Title: </strong><span>${r.library_title}</span></div>
-                    ` : html``}   
+                    ` : html``}
                     ${r.rt_ticket_id ? html`
                         <div><strong>RT Ticket ID: </strong><span>${r.rt_ticket_id}</span></div>
-                    ` : html``}                   
+                    ` : html``}
                     ${r.submitted ? html`
                         <div><strong>Date Submitted: </strong><span>${new Date(r.submitted).toDateString()}</span></div>
-                    ` : html``}  
+                    ` : html``}
                 </div>
-             
+
             </a>
           `)}
        </div>
@@ -159,22 +159,22 @@ export function renderNameForm(){
       <div class="field-container">
         <label for='inp-first-name'>First Name</label>
         <div class='text-input-container'>
-          <input 
+          <input
             @input=${e => this.firstName = e.target.value}
             .value=${this.firstName}
-            id='inp-first-name' 
-            type="text" 
+            id='inp-first-name'
+            type="text"
             placeholder="Enter a first name">
         </div>
       </div>
       <div class="field-container">
         <label for='inp-last-name'>Last Name</label>
         <div class='text-input-container'>
-          <input 
+          <input
             @input=${e => this.lastName = e.target.value}
             .value=${this.lastName}
-            id='inp-last-name' 
-            type="text" 
+            id='inp-last-name'
+            type="text"
             placeholder="Enter a last name">
         </div>
       </div>

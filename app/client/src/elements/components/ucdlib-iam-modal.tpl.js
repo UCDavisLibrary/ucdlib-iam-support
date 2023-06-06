@@ -50,6 +50,9 @@ export function styles() {
       justify-content: space-between;
       padding: 1rem 1.5rem 0;
     }
+    .header-right {
+      margin-left: 1rem;
+    }
     .close-icon {
       color: #000;
       cursor: pointer;

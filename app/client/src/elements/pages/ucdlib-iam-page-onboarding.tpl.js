@@ -8,7 +8,7 @@ export function render() {
   return html`
   <div class='l-container l-basic--flipped'>
     <div class="l-sidebar-second">
-      <a href="/onboarding/new" class="focal-link category-brand--redbud">
+      <a href="/onboarding/new" class="focal-link category-brand--redbud u-space-mb">
         <div class="focal-link__figure focal-link__icon">
           <i class="fas fa-user-plus fa-2x"></i>
         </div>
@@ -16,13 +16,15 @@ export function render() {
           <strong>Make a New Request</strong><br>(HR Only)
         </div>
       </a>
-      <div>
-        <ucdlib-iam-onboarding-search
-          search-param='name'
-          class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'
-          ?hidden=${!this.canViewActiveList}
-          >
-        </ucdlib-iam-onboarding-search>
+      <div ?hidden=${!this.canViewActiveList}>
+        <a class="focal-link category-brand--putah-creek pointer" @click=${this.showSearchModal}>
+          <div class="focal-link__figure focal-link__icon">
+            <i class="fas fa-search fa-2x"></i>
+          </div>
+          <div class="focal-link__body">
+            <strong>Search for Prior Records</strong>
+          </div>
+        </a>
       </div>
     </div>
     <div class="l-content">
@@ -47,4 +49,12 @@ export function render() {
     </ucdlib-iam-onboarding-list>
     </div>
   </div>
+  <ucdlib-iam-modal id='ob-search' dismiss-text='Close' content-title="Search For Prior Onboarding Records" auto-width>
+    <ucdlib-iam-onboarding-search
+      search-param='name'
+      widget-title=''
+      @onboarding-select=${this.hideSearchModal}
+      class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
+    </ucdlib-iam-onboarding-search>
+  </ucdlib-iam-modal>
 `;}

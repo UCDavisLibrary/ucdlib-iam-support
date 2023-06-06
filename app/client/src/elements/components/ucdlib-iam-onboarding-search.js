@@ -175,6 +175,11 @@ export default class UcdlibIamOnboardingSearch extends window.Mixin(LitElement)
 
   }
 
+  _onSelect(result){
+    this.reset();
+    this.dispatchEvent(new CustomEvent('onboarding-select', {detail: {record: result}}));
+  }
+
 }
 
 customElements.define('ucdlib-iam-onboarding-search', UcdlibIamOnboardingSearch);

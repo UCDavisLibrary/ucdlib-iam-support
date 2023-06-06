@@ -3,6 +3,8 @@ import {render} from "./ucdlib-iam-page-onboarding.tpl.js";
 
 import "../components/ucdlib-iam-onboarding-list";
 import "../components/ucdlib-iam-onboarding-search";
+import "../components/ucdlib-iam-modal";
+
 /**
  * @classdesc Lists active onboarding requests and provides navigation to additional onboarding actions
  */
@@ -29,7 +31,7 @@ export default class UcdlibIamPageOnboarding extends window.Mixin(LitElement)
 
   /**
    * @description Disables the shadowdom
-   * @returns 
+   * @returns
    */
   createRenderRoot() {
     return this;
@@ -65,7 +67,7 @@ export default class UcdlibIamPageOnboarding extends window.Mixin(LitElement)
   /**
    * @method _onTokenRefreshed
    * @description bound to AuthModel token-refreshed event
-   * @param {AccessToken} token 
+   * @param {AccessToken} token
    */
   _onTokenRefreshed(token){
     this.canViewActiveList = token.hasAdminAccess || token.hasHrAccess;
@@ -86,6 +88,16 @@ export default class UcdlibIamPageOnboarding extends window.Mixin(LitElement)
     if ( this.canViewActiveList ) promises.push(activeListEle.doQuery());
     if ( this.userIamId ) promises.push(supervisorEle.doQuery(false, {supervisorId: this.userIamId}));
     await new Promise(resolve => {requestAnimationFrame(resolve);});
+  }
+
+  showSearchModal(){
+    const modal = this.querySelector('#ob-search');
+    modal.show();
+  }
+
+  hideSearchModal(){
+    const modal = this.querySelector('#ob-search');
+    modal.hide();
   }
 
 }
