@@ -16,10 +16,12 @@ export function render() {
           <strong>Make a New Request</strong><br>(HR Only)
         </div>
       </a>
-      <div id='active-lookup'>
+      <div>
         <ucdlib-iam-onboarding-search
           search-param='name'
-          class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
+          class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'
+          ?hidden=${!this.canViewActiveList}
+          >
         </ucdlib-iam-onboarding-search>
       </div>
     </div>
