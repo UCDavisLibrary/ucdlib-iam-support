@@ -100,6 +100,11 @@ export default [
     default: false
   },
   {
+    prop: 'facilitiesAggieAccess',
+    payload: 'permissions.facilities.aggieAccess',
+    default: false
+  },
+  {
     prop: 'facilitiesDetails',
     payload: 'permissions.facilities.details',
     default: ''

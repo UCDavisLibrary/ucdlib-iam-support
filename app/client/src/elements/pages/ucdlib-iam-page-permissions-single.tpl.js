@@ -44,6 +44,7 @@ export function render() {
                 ${this.renderCheckbox('facilitiesErgonmic', 'Needs an Ergonomic Assessment')}
                 ${this.renderCheckbox('facilitiesKeys', 'Needs Physical Keys')}
                 ${this.renderCheckbox('facilitiesAlarmCodes', 'Needs Alarm Codes')}
+                ${this.renderCheckbox('facilitiesAggieAccess', 'Needs Card Access to Restricted Areas')}
                 ${this.renderTextArea('facilitiesDetails', 'Facilities Request Details', 6)}
               </div>
             </div>

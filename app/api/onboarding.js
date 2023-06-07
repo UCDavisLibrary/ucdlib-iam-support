@@ -317,7 +317,6 @@ module.exports = (api) => {
       return;
     }
     if ( !r.res.rows.length ){
-      console.error(r.err);
       res.status(404).json({error: true, message: 'No requests match your search.'});
       return;
     }
