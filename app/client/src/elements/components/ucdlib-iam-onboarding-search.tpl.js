@@ -99,7 +99,7 @@ export function render() {
   <ucdlib-pages selected=${this.page}>
     <div id='form'>
       ${this.wasError ? html`
-        <div class="alert alert--error">An error occurred while querying the UC Davis IAM API!</div>
+        <div class="alert alert--error">${this.errorText}</div>
       ` : html``}
       <form @submit=${this._onSubmit} aria-label='Search for a UC Davis person'>
         <ucdlib-pages selected=${this.searchParam}>
@@ -141,7 +141,7 @@ export function render() {
           `)}
        </div>
       ` : html`
-        <div class="alert">No people matched your search.</div>
+        <div class="alert">No records matched your search.</div>
       `}
     </div>
   </ucdlib-pages>

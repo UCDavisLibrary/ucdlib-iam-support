@@ -22,6 +22,7 @@ export default class UcdlibIamOnboardingSearch extends window.Mixin(LitElement)
       disableSearch: {state: true},
       isFetching: {state: true},
       wasError: {state: true},
+      errorText: {state: true},
       page: {state: true},
       results: {state: true},
       selectedPersonId: {state: true},
@@ -131,6 +132,7 @@ export default class UcdlibIamOnboardingSearch extends window.Mixin(LitElement)
     this.results = [];
     this.selectedPersonId = '';
     this.selectedPersonProfile = {};
+    this.errorText = 'An error has occurred. Please try again later.';
   }
 
   /**
@@ -144,7 +146,6 @@ export default class UcdlibIamOnboardingSearch extends window.Mixin(LitElement)
     // reset state
     this.wasError = false;
     this.isFetching = true;
-
 
     let q = {};
 
@@ -161,7 +162,7 @@ export default class UcdlibIamOnboardingSearch extends window.Mixin(LitElement)
       }
     } else if( r.state === this.OnboardingModel.store.STATE.ERROR ) {
       this.isFetching = false;
-      if ( r.error.payload && r.error.payload.response && r.error.payload.response.status == 404) {
+      if ( r.error?.response?.status == 404) {
         this.results = [];
         if ( !this.hideResults ){
           this.page = 'results';
