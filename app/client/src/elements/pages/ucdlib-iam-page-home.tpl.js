@@ -4,77 +4,55 @@ import { html } from 'lit';
  * @description Main render function for this element
  * @returns {TemplateResult}
  */
-export function render() { 
+export function render() {
   return html`
   <div class='l-container u-space-mt--large'>
     <div class="l-3col">
       <div class='l-first'>
-        <div class="panel panel--icon panel--icon-custom panel--icon-${this.colors.hr}">
-          <h2 class="panel__title u-space-mb"><span class="panel__custom-icon fas fa-folder"></span>Human Resources</h2>
-          <section>
-          <a href="/onboarding/new" class="focal-link category-brand--${this.colors.hr} u-space-px--small">
-            <div class="focal-link__figure focal-link__icon focal-link__icon--xs">
-              <i class="fas fa-chevron-right"></i>
+        <div class='o-box u-space-mb'>
+          <a href="/onboarding" class="marketing-highlight category-brand--rec-pool">
+            <div class="marketing-highlight__image">
+              <img src="/img/LibraryGroup-Egghead.png" alt="4x3 Image" width="640" height="480" loading="lazy" />
+              <h3 class="marketing-highlight__type"><span><i class='fas fa-user-plus unskew'></i></span></h3>
             </div>
-            <div class="focal-link__body">
-              <strong>New Onboarding Request</strong>
-            </div>
-          </a>
-          <a href="/separation/new" class="focal-link category-brand--${this.colors.hr} u-space-px--small">
-            <div class="focal-link__figure focal-link__icon focal-link__icon--xs">
-              <i class="fas fa-chevron-right"></i>
-            </div>
-            <div class="focal-link__body">
-              <strong>New Separation Request</strong>
+            <div class="marketing-highlight__body">
+              <h3 class="marketing-highlight__title">Employee Onboarding</h3>
+              <p><label>HR</label>Submit requests to add people to the Library's employee database.</p>
+              <p><label>Supervisors</label>View the status of submitted onboarding requests for your direct reports.</p>
+              <span class="marketing-highlight__cta">Onboard</span>
             </div>
           </a>
-          </section>
         </div>
       </div>
       <div class='l-second'>
-        <div class="panel panel--icon panel--icon-custom panel--icon-${this.colors.supervisors}">
-          <h2 class="panel__title u-space-mb"><span class="panel__custom-icon fas fa-network-wired"></span>Supervisors</h2>
-          <section>
-          <a href="/onboarding" class="focal-link  category-brand--${this.colors.supervisors} u-space-px--small">
-            <div class="focal-link__figure focal-link__icon focal-link__icon--xs">
-              <i class="fas fa-chevron-right"></i>
+        <div class='o-box u-space-mb'>
+          <a href="/separation" class="marketing-highlight category-brand--sage">
+            <div class="marketing-highlight__image">
+              <img src="/img/shields-students-stairs.jpg" alt="4x3 Image" width="640" height="480" loading="lazy" />
+              <h3 class="marketing-highlight__type"><span><i class='fas fa-user-minus unskew'></i></span></h3>
             </div>
-            <div class="focal-link__body">
-              <strong>Employee Onboarding Status</strong>
-            </div>
-          </a>
-          <a href="/separation" class="focal-link  category-brand--${this.colors.supervisors} u-space-px--small">
-            <div class="focal-link__figure focal-link__icon focal-link__icon--xs">
-              <i class="fas fa-chevron-right"></i>
-            </div>
-            <div class="focal-link__body">
-              <strong>Employee Separation Status</strong>
+            <div class="marketing-highlight__body">
+              <h3 class="marketing-highlight__title">Employee Separation</h3>
+              <p><label>HR</label>Submit requests to remove people from the Library's employee database.</p>
+              <p><label>Supervisors</label>View the status of submitted separation requests for your direct reports.</p>
+              <span class="marketing-highlight__cta">Separate</span>
             </div>
           </a>
-          <a href="/permissions" class="focal-link  category-brand--${this.colors.supervisors} u-space-px--small">
-            <div class="focal-link__figure focal-link__icon focal-link__icon--xs">
-              <i class="fas fa-chevron-right"></i>
-            </div>
-            <div class="focal-link__body">
-              <strong>Update Employee Permissions</strong>
-            </div>
-          </a>
-          </section>
         </div>
       </div>
       <div class='l-third'>
-        <div class="panel panel--icon panel--icon-custom panel--icon-${this.colors.employees}">
-          <h2 class="panel__title u-space-mb"><span class="panel__custom-icon fas fa-user"></span>Employees</h2>
-          <section>
-          <a href="/permissions" class="focal-link category-brand--${this.colors.employees} u-space-px--small">
-            <div class="focal-link__figure focal-link__icon focal-link__icon--xs">
-              <i class="fas fa-chevron-right"></i>
+        <div class='o-box u-space-mb'>
+          <a href="/permissions" class="marketing-highlight category-brand--sunflower">
+            <div class="marketing-highlight__image">
+              <img src="/img/laptop-hands.jpg" alt="4x3 Image" width="640" height="480" loading="lazy" />
+              <h3 class="marketing-highlight__type"><span><i class='fas fa-lock unskew'></i></span></h3>
             </div>
-            <div class="focal-link__body">
-              <strong>Request Permissions</strong>
+            <div class="marketing-highlight__body">
+              <h3 class="marketing-highlight__title">Permissions</h3>
+              <p>Request permissions to library services and applications for yourself or another employee.</p>
+              <span class="marketing-highlight__cta">Request</span>
             </div>
           </a>
-          </section>
         </div>
       </div>
     </div>
