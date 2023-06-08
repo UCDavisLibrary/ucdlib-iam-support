@@ -31,6 +31,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       notes: {state: true},
       missingUid: {state: true},
       reconId: {state: true},
+      facilitiesRtTicketId: {state: true},
     };
   }
 
@@ -54,6 +55,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.statusDescription = '';
     this.missingUid = false;
     this.reconId = '';
+    this.facilitiesRtTicketId = '';
 
     this._injectModel('AppStateModel', 'OnboardingModel', 'RtModel');
   }
@@ -121,6 +123,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.supervisorName = `${ad?.supervisorFirstName || ''} ${ad?.supervisorLastName || ''}`;
     this.notes = payload.notes || '';
     this.previousPosition = ad?.previousPosition || {};
+    this.facilitiesRtTicketId = ad?.facilitiesRtTicketId || '';
   }
 
   /**

@@ -58,6 +58,14 @@ export function render() {
           </div>
         </div>
         <ucdlib-rt-history .ticketId=${this.rtTicketId}></ucdlib-rt-history>
+        <a href=${this.RtModel.makeTicketUrl(this.facilitiesRtTicketId)} ?hidden=${!this.facilitiesRtTicketId} class="focal-link category-brand--cabernet u-space-mb">
+          <div class="focal-link__figure focal-link__icon">
+            <i class="fas fa-broom fa-2x"></i>
+          </div>
+          <div class="focal-link__body">
+            <strong>View Facilities RT Ticket</strong>
+          </div>
+        </a>
       </div>
     </div>
   </div>
