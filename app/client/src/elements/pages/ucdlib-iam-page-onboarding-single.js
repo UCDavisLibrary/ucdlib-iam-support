@@ -31,6 +31,10 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       notes: {state: true},
       missingUid: {state: true},
       reconId: {state: true},
+      facilitiesRtTicketId: {state: true},
+      backgroundCheck: {state: true},
+      hideBackgroundCheckButton: {state: true},
+      sentBackgroundCheck: {state: true}
     };
   }
 
@@ -54,6 +58,10 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.statusDescription = '';
     this.missingUid = false;
     this.reconId = '';
+    this.facilitiesRtTicketId = '';
+    this.backgroundCheck = {};
+    this.hideBackgroundCheckButton = false;
+    this.sentBackgroundCheck = false;
 
     this._injectModel('AppStateModel', 'OnboardingModel', 'RtModel');
   }
@@ -73,6 +81,12 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
   willUpdate(props) {
     if ( props.has('previousPosition') ) {
       this.isTransfer = Object.keys(this.previousPosition).length > 0;
+    }
+    if ( props.has('rtTicketId') || props.has('facilitiesRtTicketId') ) {
+      this.hideBackgroundCheckButton = !this.rtTicketId && !this.facilitiesRtTicketId;
+    }
+    if ( props.has('backgroundCheck') ) {
+      this.sentBackgroundCheck = this.backgroundCheck?.notificationSent || false;
     }
   }
 
@@ -121,6 +135,8 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.supervisorName = `${ad?.supervisorFirstName || ''} ${ad?.supervisorLastName || ''}`;
     this.notes = payload.notes || '';
     this.previousPosition = ad?.previousPosition || {};
+    this.facilitiesRtTicketId = ad?.facilitiesRtTicketId || '';
+    this.backgroundCheck = ad?.backgroundCheck || {};
   }
 
   /**
@@ -191,6 +207,30 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       this.AppStateModel.setLocation('/onboarding');
       this.AppStateModel.showAlertBanner({message: 'Onboarding request reconciled', brandColor: 'farmers-market'});
     }
+  }
+
+
+  /**
+   * @description Opens the background check modal. Attached to button in side panel
+   */
+  openBackgroundCheckModal(){
+    this.querySelector('#obs-background-check').show();
+  }
+
+  _onBackgroundCheckChange(prop, value, inputType){
+    if (!prop ) return;
+    if ( inputType == 'checkbox' ) {
+      value = this.backgroundCheck[prop] ? false : true;
+    }
+    this.backgroundCheck[prop] = value;
+    this.requestUpdate();
+  }
+
+  async _onSendBackgroundCheck(){
+    const modal = this.querySelector('#obs-background-check');
+    modal.hide();
+    console.log(this.backgroundCheck);
+
   }
 
 }

@@ -3,7 +3,7 @@ import * as Templates from "./ucdlib-iam-page-permissions-single.tpl.js";
 
 import DtUtils from "@ucd-lib/iam-support-lib/src/utils/dtUtils.js";
 import selectOptions from "../../utils/permissionsFormOptions.js";
-import formProperties from '../../utils/permissionsFormProperties.js';
+import formProperties from '@ucd-lib/iam-support-lib/src/utils/permissionsFormProperties.js';
 import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform";
 
 import "../components/ucdlib-iam-modal";
@@ -315,7 +315,6 @@ export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElem
     e.preventDefault();
     if ( this.submitting ) return;
     this.setPayload();
-    console.log('payload', this.payload);
     this.PermissionsModel.newSubmission(this.payload);
   }
 

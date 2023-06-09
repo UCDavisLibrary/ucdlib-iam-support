@@ -1,6 +1,9 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-home.tpl.js";
 
+/**
+ * @classdesc Xomponent for displaying the application home page
+ */
 export default class UcdlibIamPageHome extends window.Mixin(LitElement)
   .with(window.LitCorkUtils) {
 

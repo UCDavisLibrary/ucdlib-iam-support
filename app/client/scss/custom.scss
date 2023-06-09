@@ -247,3 +247,9 @@ ucdlib-employee-search {
     }
   }
 }
+.marketing-highlight__image .unskew {
+  transform: skewX(15deg)
+}
+.border-box {
+  box-sizing: border-box !important;
+}

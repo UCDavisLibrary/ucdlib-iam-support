@@ -317,8 +317,7 @@ module.exports = (api) => {
       return;
     }
     if ( !r.res.rows.length ){
-      console.error(r.err);
-      res.json({error: true, message: 'Request does not exist!'});
+      res.status(404).json({error: true, message: 'No requests match your search.'});
       return;
     }
 
@@ -374,6 +373,96 @@ module.exports = (api) => {
     return res.json(obReq);
 
   });
+
+  /**
+   * @description Sends a notice that employee completed background check to specified RT ticket
+   * Payload looks for sendItisRt and sendFacilitiesRt booleans
+   * Will not send if background check notification has already been sent
+   */
+    api.post('/onboarding/:id/background-check-notification', async (req, res) => {
+
+      const { default: iamAdmin } = await import('@ucd-lib/iam-support-lib/src/utils/admin.js');
+      const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
+
+      if (
+        !req.auth.token.hasAdminAccess &&
+        !req.auth.token.hasHrAccess ){
+        res.status(403).json({
+          error: true,
+          message: 'Not authorized to perform this action.'
+        });
+        return;
+      }
+
+      const obReq = await UcdlibOnboarding.getById(req.params.id);
+      if ( obReq.err ) {
+        console.error(obReq.err);
+        res.status(500).json({error: true, message: 'Unable to retrieve onboarding request'});
+        return;
+      }
+      if ( !obReq.res.rowCount ){
+        res.status(404).json({error: true, message: 'Onboarding request does not exist!'});
+        return;
+      }
+      const onboardingRecord = obReq.res.rows[0];
+      const backgroundCheck = onboardingRecord.additional_data?.backgroundCheck || {};
+
+      if ( backgroundCheck.notificationSent ) {
+        res.status(400).json({error: true, message: 'Background check notification already sent!'});
+        return;
+      }
+
+      const payload = req.body;
+      if ( !payload.sendItisRt && !payload.sendFacilitiesRt ) {
+        res.status(400).json({error: true, message: 'Missing required field: sendItisRt or sendFacilitiesRt'});
+        return;
+      }
+      if ( payload.sendItisRt ) {
+        const ticketId = onboardingRecord.rt_ticket_id;
+        if ( !ticketId ) {
+          res.status(400).json({error: true, message: 'No ITIS RT ticket ID found!'});
+          return;
+        }
+        const r = await iamAdmin.sendBackgroundCheckRtNotification(ticketId, payload);
+        if ( r.error ) {
+          console.error(r);
+          res.status(500).json({error: true, message: 'Unable to send ITIS RT notification'});
+          return;
+        }
+        backgroundCheck.itisRtSent = true;
+        backgroundCheck.itisRtSentTimestamp = new Date().toISOString();
+      }
+      if ( payload.sendFacilitiesRt ) {
+        const ticketId = onboardingRecord.additional_data?.facilitiesRtTicketId;
+        if ( !ticketId ) {
+          res.status(400).json({error: true, message: 'No Facilities RT ticket ID found!'});
+          return;
+        }
+        const r = await iamAdmin.sendBackgroundCheckRtNotification(ticketId, payload);
+        if ( r.error ) {
+          console.error(r);
+          res.status(500).json({error: true, message: 'Unable to send Facilities RT notification'});
+          return;
+        }
+        backgroundCheck.facilitiesRtSent = true;
+        backgroundCheck.facilitiesRtSentTimestamp = new Date().toISOString();
+      }
+
+      // update onboarding record
+      backgroundCheck.message = payload.message || '';
+      backgroundCheck.notificationSent = true;
+      const additionalData = {...onboardingRecord.additional_data, backgroundCheck};
+      const update = await UcdlibOnboarding.update(onboardingRecord.id, {additionalData});
+      if ( update.err ) {
+        console.error(update.err);
+        res.status(500).json({
+          error: true,
+          message: 'Unable to update onboarding request.'
+        });
+        return;
+      }
+      return res.json({success: true, data: backgroundCheck});
+    });
 
   api.get('/onboarding', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');

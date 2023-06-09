@@ -17,7 +17,7 @@ export function render() {
               <div class='rt-history-created'>${t.created}</div>
             </div>
           `)}
-          <a class='icon icon--circle-arrow-right' href='https://rt.lib.ucdavis.edu/Ticket/Display.html?id=${this.ticketId}'>View Ticket</a>
+          <a class='icon icon--circle-arrow-right' href=${this.RtModel.makeTicketUrl(this.ticketId)}>View Ticket</a>
         ` : html`
           <p>Unable to load RT ticket!</p>
         `}

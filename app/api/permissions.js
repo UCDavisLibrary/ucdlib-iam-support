@@ -63,6 +63,7 @@ module.exports = (api) => {
   api.post('/permissions', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
     const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
+    const { default: iamAdmin } = await import('@ucd-lib/iam-support-lib/src/utils/admin.js');
     const { default: PermissionsRequests } = await import('@ucd-lib/iam-support-lib/src/utils/permissions.js');
     const { default: config } = await import('../lib/config.js');
     const { UcdlibRt, UcdlibRtTicket } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
@@ -176,8 +177,16 @@ module.exports = (api) => {
     // send rt
     const rtClient = new UcdlibRt(config.rt);
 
-    // TODO: send facilities RT if first onboarding request, and facilities is checked
-    //iamAdmin.sendFacilitiesRequest(idOrRecord, params);
+    //send facilities RT if first onboarding request, and facilities is checked
+    if ( action === 'onboarding' ){
+      const facilitiesRes = await iamAdmin.sendFacilitiesRtRequest(data.onboardingRequestId, {rtConfig: config.rt});
+      if ( facilitiesRes.error ) {
+        console.error(facilitiesRes.message);
+        await PermissionsRequests.delete(output.id);
+        return res.status(400).json({error: true, message: 'Unable to create facilities RT request.'});
+      }
+    }
+
 
     // update existing onboarding/permissions request RT ticket
     if ( data.rtTicketId ){
@@ -190,7 +199,7 @@ module.exports = (api) => {
       if ( rtResponse.err )  {
         console.error(rtResponse);
         await PermissionsRequests.delete(output.id);
-        return res.json({error: true, message: 'Unable to send RT request.'});
+        return res.status(503).json({error: true, message: 'Unable to send RT request.'});
       }
       if ( action === 'onboarding' && onboardingStatus == UcdlibOnboarding.statusCodes.supervisor ) {
         let newStatus = UcdlibOnboarding.statusCodes.provisioning;
