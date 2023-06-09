@@ -4,6 +4,7 @@ import {
   OnboardingModel,
   AuthModel,
   EmployeeModel,
+  SeparationModel,
   RtModel,
   PermissionsModel,
   AlmaUserModel } from "@ucd-lib/iam-support-lib";
@@ -13,6 +14,7 @@ export {
   AppStateModel,
   AuthModel,
   OnboardingModel,
+  SeparationModel,
   PersonModel,
   RtModel,
   PermissionsModel,
