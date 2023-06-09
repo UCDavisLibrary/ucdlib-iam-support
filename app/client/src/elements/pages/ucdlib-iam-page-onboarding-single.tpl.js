@@ -49,6 +49,22 @@ export function render() {
             <strong>Request Permissions</strong>
           </div>
         </a>
+        <a class="focal-link category-brand--quad u-space-mb pointer" ?hidden=${this.hideBackgroundCheckButton} @click=${this.openBackgroundCheckModal}>
+          <div class="focal-link__figure focal-link__icon">
+            <i class="fas fa-check fa-2x"></i>
+          </div>
+          <div class="focal-link__body">
+            <strong>${this.sentBackgroundCheck ? 'Background Check Notification' : 'Send Background Check Notification'}</strong>
+          </div>
+        </a>
+        <a href=${this.RtModel.makeTicketUrl(this.facilitiesRtTicketId)} ?hidden=${!this.facilitiesRtTicketId} class="focal-link category-brand--cabernet u-space-mb">
+          <div class="focal-link__figure focal-link__icon">
+            <i class="fas fa-broom fa-2x"></i>
+          </div>
+          <div class="focal-link__body">
+            <strong>View Facilities RT Ticket</strong>
+          </div>
+        </a>
         <div class='category-brand__background-light-gold o-box u-space-mb'>
           <div class="panel panel--icon panel--icon-custom ${this.isActiveStatus ? 'panel--icon-secondary' : 'panel--icon-quad'} o-box background-transparent">
             <h2 class="panel__title u-space-mb"><span class="panel__custom-icon fas ${this.isActiveStatus ? 'fa-check-circle' : 'fa-spinner'}"></span>Status</h2>
@@ -58,14 +74,6 @@ export function render() {
           </div>
         </div>
         <ucdlib-rt-history .ticketId=${this.rtTicketId}></ucdlib-rt-history>
-        <a href=${this.RtModel.makeTicketUrl(this.facilitiesRtTicketId)} ?hidden=${!this.facilitiesRtTicketId} class="focal-link category-brand--cabernet u-space-mb">
-          <div class="focal-link__figure focal-link__icon">
-            <i class="fas fa-broom fa-2x"></i>
-          </div>
-          <div class="focal-link__body">
-            <strong>View Facilities RT Ticket</strong>
-          </div>
-        </a>
       </div>
     </div>
   </div>
@@ -78,10 +86,52 @@ export function render() {
     <div>
       <button
         @click=${this._onReconSubmit}
-        style="padding-left:0;padding-right:0;"
         type='button'
-        class="btn btn--alt btn--block u-space-mt"
+        class="btn btn--alt btn--block u-space-mt border-box"
         ?disabled=${!this.reconId}>Reconcile Record
+      </button>
+    </div>
+  </ucdlib-iam-modal>
+  <ucdlib-iam-modal id='obs-background-check' dismiss-text='Close' content-title="Background Check" auto-width hide-footer>
+    ${this.sentBackgroundCheck ? html`
+      <p>Background check notification has already been sent to:</p>
+    ` : html`
+      <p>Send background check notification to:</p>
+    `}
+    <div>
+      <div class="u-space-my">
+        <ul class="list--reset">
+          <li>
+            <input
+              type="checkbox"
+              @input=${() => this._onBackgroundCheckChange('sendItisRt', '', 'checkbox')}
+              .checked=${this.backgroundCheck?.sendItisRt || this.backgroundCheck?.itisRtSent}
+              .disabled=${this.sentBackgroundCheck || !this.rtTicketId}
+              >
+            <label class='u-inline'>ITIS RT Ticket ${this.backgroundCheck?.itisRtSentTimestamp ? `(Sent ${this.backgroundCheck?.itisRtSentDate} )` : ''}</label>
+          </li>
+          <li>
+            <input
+              type="checkbox"
+              @input=${() => this._onBackgroundCheckChange('sendFacilitiesRt', '', 'checkbox')}
+              .checked=${this.backgroundCheck?.sendFacilitiesRt || this.backgroundCheck?.sendFacilitiesRt}
+              .disabled=${this.sentBackgroundCheck || !this.facilitiesRtTicketId}
+              >
+            <label class='u-inline'>Facilities RT Ticket ${this.backgroundCheck?.facilitiesRtSentTimestamp ? `(Sent ${this.backgroundCheck?.facilitiesRtSentTimestamp} )` : ''}</label>
+          </li>
+        </ul>
+        <div class="field-container u-space-mt">
+          <label>Optional Message:</label>
+          <textarea rows="5"  class='border-box' @input=${v => this._onBackgroundCheckChange('message', v.target.value)} .value=${this.backgroundCheck?.message || ''}></textarea>
+        </div>
+      </div>
+    </div>
+    <div>
+      <button
+        @click=${this._onSendBackgroundCheck}
+        type='button'
+        class="btn btn--alt btn--block u-space-mt--large border-box"
+        ?disabled=${this.sentBackgroundCheck || (!this.backgroundCheck?.sendItisRt && !this.backgroundCheck?.sendFacilitiesRt)}>Send Notification
       </button>
     </div>
   </ucdlib-iam-modal>
