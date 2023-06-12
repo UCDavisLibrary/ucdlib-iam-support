@@ -108,7 +108,7 @@ export function render() {
               .checked=${this.backgroundCheck?.sendItisRt || this.backgroundCheck?.itisRtSent}
               .disabled=${this.sentBackgroundCheck || !this.rtTicketId}
               >
-            <label class='u-inline'>ITIS RT Ticket ${this.backgroundCheck?.itisRtSentTimestamp ? `(Sent ${this.backgroundCheck?.itisRtSentDate} )` : ''}</label>
+            <label class='u-inline'>ITIS RT Ticket ${this.backgroundCheck?.itisRtSentTimestamp ? `(Sent ${(new Date(this.backgroundCheck?.itisRtSentTimestamp)).toLocaleString()})` : ''}</label>
           </li>
           <li>
             <input
@@ -117,7 +117,7 @@ export function render() {
               .checked=${this.backgroundCheck?.sendFacilitiesRt || this.backgroundCheck?.sendFacilitiesRt}
               .disabled=${this.sentBackgroundCheck || !this.facilitiesRtTicketId}
               >
-            <label class='u-inline'>Facilities RT Ticket ${this.backgroundCheck?.facilitiesRtSentTimestamp ? `(Sent ${this.backgroundCheck?.facilitiesRtSentTimestamp} )` : ''}</label>
+            <label class='u-inline'>Facilities RT Ticket ${this.backgroundCheck?.facilitiesRtSentTimestamp ? `(Sent ${(new Date(this.backgroundCheck?.facilitiesRtSentTimestamp)).toLocaleString()})` : ''}</label>
           </li>
         </ul>
         <div class="field-container u-space-mt">

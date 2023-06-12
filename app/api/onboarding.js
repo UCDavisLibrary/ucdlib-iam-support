@@ -383,6 +383,7 @@ module.exports = (api) => {
 
       const { default: iamAdmin } = await import('@ucd-lib/iam-support-lib/src/utils/admin.js');
       const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
+      const { default: config } = await import('../lib/config.js');
 
       if (
         !req.auth.token.hasAdminAccess &&
@@ -417,13 +418,14 @@ module.exports = (api) => {
         res.status(400).json({error: true, message: 'Missing required field: sendItisRt or sendFacilitiesRt'});
         return;
       }
+      const params = {rtConfig: config.rt, submittedBy: req.auth.token.id, onboardingRecord}
       if ( payload.sendItisRt ) {
         const ticketId = onboardingRecord.rt_ticket_id;
         if ( !ticketId ) {
           res.status(400).json({error: true, message: 'No ITIS RT ticket ID found!'});
           return;
         }
-        const r = await iamAdmin.sendBackgroundCheckRtNotification(ticketId, payload);
+        const r = await iamAdmin.sendBackgroundCheckRtNotification(ticketId, payload, params);
         if ( r.error ) {
           console.error(r);
           res.status(500).json({error: true, message: 'Unable to send ITIS RT notification'});
@@ -438,7 +440,7 @@ module.exports = (api) => {
           res.status(400).json({error: true, message: 'No Facilities RT ticket ID found!'});
           return;
         }
-        const r = await iamAdmin.sendBackgroundCheckRtNotification(ticketId, payload);
+        const r = await iamAdmin.sendBackgroundCheckRtNotification(ticketId, payload, params);
         if ( r.error ) {
           console.error(r);
           res.status(500).json({error: true, message: 'Unable to send Facilities RT notification'});
@@ -451,6 +453,7 @@ module.exports = (api) => {
       // update onboarding record
       backgroundCheck.message = payload.message || '';
       backgroundCheck.notificationSent = true;
+      backgroundCheck.submittedBy = req.auth.token.id;
       const additionalData = {...onboardingRecord.additional_data, backgroundCheck};
       const update = await UcdlibOnboarding.update(onboardingRecord.id, {additionalData});
       if ( update.err ) {

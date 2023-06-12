@@ -34,7 +34,8 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       facilitiesRtTicketId: {state: true},
       backgroundCheck: {state: true},
       hideBackgroundCheckButton: {state: true},
-      sentBackgroundCheck: {state: true}
+      sentBackgroundCheck: {state: true},
+      rtTicketId: {state: true}
     };
   }
 
@@ -48,6 +49,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.firstName = '';
     this.lastName = '';
     this.isActiveStatus = false;
+    this.rtTicketId = '';
     this.status = '';
     this.libraryTitle = '';
     this.department = '';
@@ -217,6 +219,13 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.querySelector('#obs-background-check').show();
   }
 
+  /**
+   * @description Bound to inputs in background check modal. Updates backgroundCheck property
+   * @param {String} prop - property to update
+   * @param {String} value - value to set
+   * @param {String} inputType - type of input (checkbox, text, etc). If checkbox, value is ignored
+   * @returns
+   */
   _onBackgroundCheckChange(prop, value, inputType){
     if (!prop ) return;
     if ( inputType == 'checkbox' ) {
@@ -226,11 +235,29 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.requestUpdate();
   }
 
+  /**
+   * @description Called after user clicks submit button in background check modal. Sends request to send background check notification
+   */
   async _onSendBackgroundCheck(){
     const modal = this.querySelector('#obs-background-check');
     modal.hide();
     console.log(this.backgroundCheck);
-
+    this.AppStateModel.showLoading();
+    const r = await this.OnboardingModel.sendBackgroundCheckNotification(this.requestId, this.backgroundCheck);
+    if ( r.state == 'error' ){
+      let msg = 'Unable to send background check notification';
+      if ( r.error && r.error.payload && r.error.payload.message ) msg = r.error.payload.message;
+      console.error(r);
+      requestAnimationFrame(() => this.AppStateModel.showError(msg));
+    } else {
+      this.OnboardingModel.clearIdCache(this.requestId);
+      this.OnboardingModel.clearQueryCache();
+      if ( this.rtTicketId ){
+        this.RtModel.clearHistoryCache(this.rtTicketId);
+      }
+      this.AppStateModel.refresh();
+      this.AppStateModel.showAlertBanner({message: 'Background check notification sent', brandColor: 'farmers-market'});
+    }
   }
 
 }
