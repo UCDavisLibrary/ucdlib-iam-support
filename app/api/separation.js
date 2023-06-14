@@ -20,7 +20,7 @@ module.exports = (api) => {
       const r = await UcdlibSeparation.create(payload);
       if ( r.err ) {
         console.error(r.err);
-        res.json({error: true, message: 'Unable to create onboarding request.'});
+        res.json({error: true, message: 'Unable to create separation request.'});
         return;
       }
       const output = r.res.rows[0];
@@ -64,7 +64,7 @@ module.exports = (api) => {
         ticket.addContent(payload.notes, false);
       }
       ticket.addContent('');
-      ticket.addContent(`<a href='${config.baseUrl}/separation/${output.id}'>View entire onboarding record.</a>`)
+      ticket.addContent(`<a href='${config.baseUrl}/separation/${output.id}'>View entire separation record.</a>`)
   
       // send ticket to RT for creation
       const rtResponse = await rtClient.createTicket(ticket);
@@ -100,120 +100,7 @@ module.exports = (api) => {
   
     });
   
-    /**
-     * @description Reconcile an separation request with a UC Davis IAM record
-     * Used if a manual submission does not have a unique identifier
-     * Someone must come back later and match the records
-     */
-    api.post('/separation/reconcile', async (req, res) => {
-      const { default: PermissionsRequests } = await import('@ucd-lib/iam-support-lib/src/utils/permissions.js');
-      const { default: UcdlibSeparation } = await import('@ucd-lib/iam-support-lib/src/utils/separation.js');
-      const { UcdIamModel } = await import('@ucd-lib/iam-support-lib/index.js');
-      const { default: IamPersonTransform } = await import('@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js');
-      const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
-      const { UcdlibRt, UcdlibRtTicket } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
-      const { default: config } = await import('../lib/config.js');
-  
-      // make sure request is formatted correctly
-      const payload = req.body;
-      const ids = ['separationId', 'iamId'];
-      for ( const id of ids ) {
-        if ( !payload[id] ) {
-          res.status(400).json({
-            error: true,
-            message: `Missing required field: ${id}`
-          });
-          return;
-        }
-      }
-  
-      // make sure onboarding record exists and user has access
-      let separationRecord = await UcdlibSeparation.getById(payload.separationId);
-      if ( separationRecord.err ) {
-        console.error(separationRecord.err);
-        res.status(400).json({error: true, message: 'Unable to retrieve separation request'});
-        return;
-      }
-      if ( !separationRecord.res.rows.length ){
-        console.error(separationRecord.err);
-        res.status(400).json({error: true, message: 'Request does not exist!'});
-        return;
-      }
-      separationRecord = TextUtils.camelCaseObject(separationRecord.res.rows[0]);
-      if (
-        !req.auth.token.hasAdminAccess &&
-        !req.auth.token.hasHrAccess &&
-        req.auth.token.iamId != separationRecord.supervisorId ){
-        res.status(403).json({
-          error: true,
-          message: 'Not authorized to access this resource.'
-        });
-        return;
-      }
-  
-      // make sure iam record exists
-      UcdIamModel.init(config.ucdIamApi);
-      const iamResponse = await UcdIamModel.getPersonByIamId(payload.iamId);
-      if ( iamResponse.error ) {
-        if ( UcdIamModel.noEmployeeFound ){
-          res.status(400).json({
-            error: true,
-            message: 'No employee found with this IAM ID'
-          });
-          return;
-        } else {
-          console.error(iamResponse.error);
-          res.status(502).json({
-            error: true,
-            message: 'Unable to retrieve employee record from UCD IAM API.'
-          });
-          return;
-        }
-      }
-      const iamRecord = new IamPersonTransform(iamResponse);
-  
-      // send RT correspondence
-      if ( separationRecord.rtTicketId ) {
-        const rtClient = new UcdlibRt(config.rt);
-        const ticket = new UcdlibRtTicket(false, {id: separationRecord.rtTicketId});
-        let reply = ticket.createReply();
-        reply.addSubject(`Separation Record Reconciled with UC Davis IAM System`);
-        const d = {
-          'Name': iamRecord.fullName,
-          'Email': iamRecord.email,
-          'Employee Id': iamRecord.employeeId,
-          'User Id (kerberos)': iamRecord.userId,
-          'UCD IAM ID': iamRecord.id
-        }
-        reply.addContent(d);
-        const rtResponse = await rtClient.sendCorrespondence(reply);
-        if ( rtResponse.err )  {
-          console.error(rtResponse);
-          res.status(502).json({error: true, message: 'Unable to send RT correspondence.'});
-          return;
-        }
-      }
-  
-      // update onboarding record
-      const data = {
-        iamId: payload.iamId,
-        additionalData: separationRecord.additionalData || {},
-      };
-      data.additionalData.employeeId = iamRecord.employeeId;
-      data.additionalData.employeeEmail = iamRecord.email;
-      data.additionalData.employeeUserId = iamRecord.userId;
-
-      const update = await UcdlibSeparation.update(separationRecord.id, data);
-      if ( update.err ) {
-        console.error(update.err);
-        res.status(500).json({
-          error: true,
-          message: 'Unable to update separation request.'
-        });
-        return;
-      }
-      return res.json({success: true});
-    });
+ 
   
     api.get('/separation/search', async (req, res) => {
       if (
@@ -317,7 +204,7 @@ module.exports = (api) => {
 
       if ( req.query.isOpen != undefined ) q['isOpen'] = req.query.isOpen;
   
-      const errorMsg = 'Unable to retrieve onboarding requests';
+      const errorMsg = 'Unable to retrieve separation requests';
       const q = {
         iamId: req.query.iamId,
         rtTicketId: req.query.rtTicketId,

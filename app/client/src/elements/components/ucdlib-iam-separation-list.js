@@ -103,20 +103,6 @@ export default class UcdlibIamSeparationList extends window.Mixin(LitElement)
     return await this.SeparationModel.query(q);
   }
 
-  /**
-   * @description Formats a date
-   * @param {String} d - ISO String
-   * @returns {String}
-   */
-  fmtDate(d){
-    try {
-      d = new Date(d);
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      return `${months[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
-    } catch (error) {
-      return '';
-    }
-  }
 
 }
 

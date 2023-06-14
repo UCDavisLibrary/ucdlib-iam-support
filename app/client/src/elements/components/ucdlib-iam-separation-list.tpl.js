@@ -1,4 +1,6 @@
 import { html } from 'lit';
+import DtUtils from "@ucd-lib/iam-support-lib/src/utils/dtUtils.js";
+
 
 /**
  * @description Main render function
@@ -21,7 +23,7 @@ export function render() {
                     <li><strong>IAM ID: </strong>${r.iamId}</li>
                     <li><strong>RT Ticket ID: </strong>${r.rtTicketId}</li>
                   </ul>
-                  <div class="text--smaller"><strong>Separation Date: </strong>${this.fmtDate(r.separationDate)}</div>
+                  <div class="text--smaller"><strong>Separation Date: </strong>${DtUtils.fmtDatetime(r.separationDate)}</div>
 
                 </div>
 

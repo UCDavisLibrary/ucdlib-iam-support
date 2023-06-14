@@ -126,10 +126,25 @@ export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
   }
 
   /**
+   * @description Attached to ucdlib-employee-search element in transfer page. Fires when the state changes
+   * @param {*} e
+   */
+  _onEmployeeStatusChange(e){
+    console.log(e);
+    // if ( e.detail.employee ){
+    //   this.record = e.detail.employee;
+    // } else {
+    //   this.record = {};
+    // }
+  }
+
+
+  /**
    * @description Attached to ucd person lookup element for employee being onboarded
    * @param {Object} response
    */
   async _onEmployeeSelect(response){
+    // console.log(response);
     if( response.state === this.PersonModel.store.STATE.LOADED ) {
       this.iamRecord = new IamPersonTransform(response.payload);
 

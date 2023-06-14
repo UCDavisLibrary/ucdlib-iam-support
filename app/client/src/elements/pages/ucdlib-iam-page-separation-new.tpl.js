@@ -10,27 +10,13 @@ export function render() {
     <ucdlib-pages selected=${this.page}>
       ${this.renderSubmissionForm()}
       <div id='sp-lookup'>
-        <ucdlib-iam-search
-          @select=${e => this._onEmployeeSelect(e.detail.status)}
-          search-param='employee-id'
-          class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
-        </ucdlib-iam-search>
+        <ucdlib-employee-search
+            class='u-space-mb'
+            @status-change=${e => this._onEmployeeStatusChange(e)}>
+      </ucdlib-employee-search>
+
       </div>
     </ucdlib-pages>
-    <ucdlib-iam-modal id='sp-employee-modal' dismiss-text='Close' content-title='Employee Record'>
-      ${!this.userEnteredData ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.iamRecord.data, null, "  ")}</pre>` : html``}
-    </ucdlib-iam-modal>
-    <ucdlib-iam-modal id='sp-custom-supervisor' dismiss-text='Close' content-title='Set a Custom Supervisor' auto-width>
-      <p>Override the supervisor record for this employee.
-        For example, TES employees should have their supervisor set to their library supervisor.
-      </p>
-      <ucdlib-iam-search
-        @select=${e => this._onSupervisorEditSelect(e.detail.status)}
-        search-param='employee-id'
-        reset-on-select
-        class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
-      </ucdlib-iam-search>
-    </ucdlib-iam-modal>
   </div>
 `;}
 
@@ -43,22 +29,6 @@ export function renderSubmissionForm(){
   return html`
   <div id='sp-submission'>
     <form class='form-single-col' @submit=${this._onSubmit}>
-      <div ?hidden=${!this.hasMultipleAppointments}>
-        <div class="panel panel--icon panel--icon-custom o-box panel--icon-double-decker">
-          <h2 class="panel__title"><span class="panel__custom-icon fas fa-exclamation-circle"></span>Appointment</h2>
-          <section>
-            <p class='double-decker'>This employee has more than one appointment. Please select a primary appointment:</p>
-            <div class="field-container">
-              <label for="sp-appointments">Appointment</label>
-              <select id="sp-appointments" @input=${(e) => this._onAppointmentSelect(e.target.value)}>
-                ${this.appointments.map((appt, i) => html`
-                  <option .value=${i}>${appt.titleDisplayName} - ${appt.apptDeptOfficialName}</option>
-                `)}
-              </select>
-            </div>
-          </section>
-        </div>
-      </div>
       <div>
         <div class="panel panel--icon panel--icon-custom o-box panel--icon-quad">
           <h2 class="panel__title"><span class="panel__custom-icon fas fa-briefcase"></span>Separation Information</h2>
@@ -143,10 +113,6 @@ export function renderEmployeeForm(){
     <div class="field-container">
       <label for="sp-last-name">Last Name</label>
       <input id='sp-last-name' type="text" .value=${this.lastName} ?disabled=${disabled} @input=${e => this.lastName = e.target.value}>
-    </div>
-    <div ?hidden=${isSub} class='double-decker u-space-mt--large u-space-mb--small'>
-      If at least one of the following identifier fields is not provided,
-      the employee record must be manually reconciled with the UC Davis IAM system after submission.
     </div>
     <div class="field-container">
       <label for="sp-employee-id">Employee Id</label>
