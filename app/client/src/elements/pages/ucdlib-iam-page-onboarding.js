@@ -2,7 +2,7 @@ import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-onboarding.tpl.js";
 
 import "../components/ucdlib-iam-onboarding-list";
-import "../components/ucdlib-iam-onboarding-search";
+import "../components/ucdlib-iam-existing-search";
 import "../components/ucdlib-iam-modal";
 
 /**

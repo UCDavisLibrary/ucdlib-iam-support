@@ -3,6 +3,7 @@ import {render} from "./ucdlib-iam-page-separation.tpl.js";
 import "../components/ucdlib-iam-separation-list";
 import "../components/ucdlib-iam-separation-search";
 import "../components/ucdlib-iam-modal";
+import "../components/ucdlib-iam-existing-search";
 
 /**
  * @classdesc Lists active separation requests and provides navigation to additional separations actions
@@ -20,11 +21,13 @@ export default class UcdlibIamPageSeparation extends window.Mixin(LitElement)
   constructor() {
     super();
     this.render = render.bind(this);
+
+    this._injectModel('AppStateModel', 'SeparationModel', 'AuthModel');
+
     this.activeId = 'sp-list-active'; //only show if hr or admin
     this.supervisorId = 'sp-list-supervisor';
     this.canViewActiveList = false;
     this.userIamId = '';
-    this._injectModel('AppStateModel');
   }
 
   /**
@@ -48,12 +51,12 @@ export default class UcdlibIamPageSeparation extends window.Mixin(LitElement)
 
 
   /**
-   * @description Attached to SeparationModel onboarding-query event
+   * @description Attached to SeparationModel separation-query event
    * @param {Object} e cork-app-utils event
    */
   _onSeparationQuery(e){
     if ( e.state === 'error'){
-      let msg = 'Unable to load onboarding requests';
+      let msg = 'Unable to load separation requests';
       if ( e.error.details && e.error.details.message ){
         msg =  e.error.details.message;
       }

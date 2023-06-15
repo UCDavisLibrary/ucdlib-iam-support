@@ -36,6 +36,7 @@ export function render() {
         open-status='open'
         no-results-message='There are no active separation requests at this time.'
         auto-update
+        ?hidden=${!this.canViewActiveList}
       >
     </ucdlib-iam-separation-list>
     <ucdlib-iam-separation-list
@@ -51,11 +52,11 @@ export function render() {
     </div>
   </div>
   <ucdlib-iam-modal id='sp-search' dismiss-text='Close' content-title="Search For Prior Separation Records" auto-width>
-    <ucdlib-iam-separation-search
+  <ucdlib-iam-existing-search
       search-param='name'
       widget-title=''
-      @separation-select=${this.hideSearchModal}
+      @onboarding-select=${this.hideSearchModal}
       class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
-    </ucdlib-iam-separation-search>
+    </ucdlib-iam-existing-search>
   </ucdlib-iam-modal>
 `;}

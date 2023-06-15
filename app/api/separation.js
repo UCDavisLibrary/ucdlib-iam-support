@@ -23,6 +23,7 @@ module.exports = (api) => {
         res.json({error: true, message: 'Unable to create separation request.'});
         return;
       }
+
       const output = r.res.rows[0];
 
       // needed variables
@@ -33,7 +34,7 @@ module.exports = (api) => {
       // create rt ticket
       const rtClient = new UcdlibRt(config.rt);
       const ticket = new UcdlibRtTicket();
-  
+
       ticket.addSubject(`Separation: ${employeeName}`);
       ticket.addOwner(config.rt.user);
   
@@ -65,7 +66,7 @@ module.exports = (api) => {
       }
       ticket.addContent('');
       ticket.addContent(`<a href='${config.baseUrl}/separation/${output.id}'>View entire separation record.</a>`)
-  
+
       // send ticket to RT for creation
       const rtResponse = await rtClient.createTicket(ticket);
       if ( rtResponse.err || !rtResponse.res.id )  {
@@ -74,11 +75,11 @@ module.exports = (api) => {
         res.json({error: true, message: 'Unable to create an RT ticket for this request.'});
         return;
       }
-  
+
       // send correspondence to supervisor
       if ( notifySupervisor ){
         const supervisorName = ad.supervisorFirstName && ad.supervisorLastName ? `${ad.supervisorFirstName} ${ad.supervisorLastName}` : 'Supervisor';
-        const supervisorLink = `${config.baseUrl}/permissions/separation/${output.id}`;
+        const supervisorLink = `${config.baseUrl}/separation/${output.id}`;
         const reply = ticket.createReply();
         reply.addSubject(`Supervisor Action Required!`);
         reply.addContent(`Hi ${supervisorName},`);
@@ -121,8 +122,9 @@ module.exports = (api) => {
         return;
       }
   
-      const { default: UcdlibSeparation } = await import('@ucd-lib/iam-support-lib/src/utils/separation.js');
-      const r = await UcdlibSeparation.getByName(req.query.firstName, req.query.lastName);
+      const { default: getByName } = await import('@ucd-lib/iam-support-lib/src/utils/getByName.js');
+
+      const r = await getByName.getByName("separation",req.query.firstName, req.query.lastName);
       if ( r.err ) {
         console.error(r.err);
         res.json({error: true, message: 'Unable to retrieve SEARCH separation request'});

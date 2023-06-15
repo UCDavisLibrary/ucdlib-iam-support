@@ -308,9 +308,9 @@ module.exports = (api) => {
       });
       return;
     }
+    const { default: getByName } = await import('@ucd-lib/iam-support-lib/src/utils/getByName.js');
 
-    const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
-    const r = await UcdlibOnboarding.getByName(req.query.firstName, req.query.lastName);
+    const r = await getByName.getByName("onboarding",req.query.firstName, req.query.lastName);
     if ( r.err ) {
       console.error(r.err);
       res.json({error: true, message: 'Unable to retrieve SEARCH onboarding request'});

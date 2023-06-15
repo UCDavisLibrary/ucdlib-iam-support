@@ -8,17 +8,37 @@ export function render() {
   return html`
   <div class='l-container u-space-pb'>
     <ucdlib-pages selected=${this.page}>
-      ${this.renderSubmissionForm()}
-      <div id='sp-lookup'>
-        <ucdlib-employee-search
-            class='u-space-mb'
-            @status-change=${e => this._onEmployeeStatusChange(e)}>
-      </ucdlib-employee-search>
+        ${this.renderSubmissionForm()}
 
-      </div>
+        <div class='form-single-col' id='sp-lookup'>
+          <div class="panel panel--icon panel--icon-custom o-box panel--icon-pinot">
+          <h2 class="panel__title"><span class="panel__custom-icon fas fa-user-tie"></span>Separated Employee</h2>
+              <div>
+                <ucdlib-employee-search
+                    class='u-space-mb'
+                    @status-change=${this._onEmployeeStatusChange}>
+                </ucdlib-employee-search>
+                <div ?hidden=${!this.hasEmployeeRecord}>
+                      <div><span class='fw-bold primary'>Name: </span>${this.employeeRecord.firstName || ''} ${this.employeeRecord.lastName || ''}</div>
+                      <div><span class='fw-bold primary'>Title: </span>${this.employeeRecord.title || ''}</div>
+                      <div>
+                        <span class='fw-bold primary'>Department: </span>
+                        ${(this.employeeRecord.groups || []).filter(g => g.partOfOrg).map((g, i, arr) => html`<span>${g.name}${arr.length > i+1 ? ', ' : ''}</span>`)}
+                      </div>
+                      <div>
+                        <span class='fw-bold primary'>Supervisor: </span>
+                        ${this.employeeRecord.supervisor?.firstName || ''} ${this.employeeRecord.supervisor?.lastName || ''}
+                      </div>
+                </div>
+              </div>
+          </div>
+          <button type='button' @click=${this._onSeparateFormSubmit} ?disabled=${!this.hasEmployeeRecord} class="btn btn--block btn--alt">Next</button>
+        </div>
     </ucdlib-pages>
   </div>
+
 `;}
+
 
 
 /**
@@ -49,7 +69,6 @@ export function renderSubmissionForm(){
         <section>
           ${this.renderEmployeeForm()}
         </section>
-        <a class='pointer icon icon--circle-arrow-right' @click=${this.openEmployeeInfoModal} .hidden=${this.userEnteredData}>View Entire Employee Record</a>
       </div>
 
 
@@ -58,12 +77,11 @@ export function renderSubmissionForm(){
       <div class="panel panel--icon panel--icon-custom o-box panel--icon-delta">
         <h2 class="panel__title space-between">
           <div><span class="panel__custom-icon fas fa-sitemap"></span><span>Supervisor</span></div>
-          <a @click=${this._onSupervisorEdit} class='pointer u-space-ml' title="Set Custom Supervisor"><i class='fas fa-edit'></i></a>
         </h2>
         <section>
           <div class="field-container">
             <label for="sp-supervisor">Supervisor</label>
-            <input id='sp-supervisor' type="text" .value=${this.supervisor.fullName} disabled >
+            <input id='sp-supervisor' type="text" .value=${this.supervisor_fullname} disabled >
           </div>
           <div class="checkbox">
             <ul class="list--reset">

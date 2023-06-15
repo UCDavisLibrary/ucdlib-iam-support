@@ -65,13 +65,6 @@ export default class UcdlibIamPageSeparationSingle extends window.Mixin(LitEleme
     return this;
   }
 
-  /**
-   * @description Lit lifecycle called when element will update
-   * @param {Map} props - changed properties
-   */
-  willUpdate(props) {
-    console.log(props);
-  }
 
   /**
    * @method _onAppStateUpdate
@@ -113,9 +106,9 @@ export default class UcdlibIamPageSeparationSingle extends window.Mixin(LitEleme
     this.supervisorId = payload.supervisorId || '';
     this.supervisorName = `${ad?.supervisorFirstName || ''} ${ad?.supervisorLastName || ''}`;
     this.notes = payload.notes || '';
-    this.isActiveStatus = ad?.open || false;
-    this.status = ad?.openStatus || '';
-    this.statusDescription = ad?.open ? this.open : this.closed;
+    this.isActiveStatus = true;
+    this.status = 'Awaiting Supervisor Response';
+    this.statusDescription = this.open;
   }
 
   /**
@@ -140,77 +133,6 @@ export default class UcdlibIamPageSeparationSingle extends window.Mixin(LitEleme
       {text: this.pageTitle(), link: ''}
     ];
   }
-
-  /**
-   * @description Opens the reconciliation modal. Attached to button in status panel, if applicable
-   */
-  openReconModal(){
-    this.reconId = '';
-    this.querySelector('#obs-recon-modal').show();
-  }
-
-  /**
-   * @description Bound to ucdlib-iam-search select event. Sets reconId property (iam id of employee to reconcile)
-   * @param {*} e
-   */
-  _onReconEmployeeSelect(e){
-    this.reconId = e.id;
-  }
-
-
-
-  /**
-   * @description Mark as the checklist for offboarding complete
-   * @param {*} 
-   */
-  async _changeStatus(){
-    if(this.isActiveStatus) {
-      this.isActiveStatus = false;
-      this.statusDescription = this.closed;
-      this.status = "Separation Complete";
-    } else {
-      this.isActiveStatus = true;
-      this.statusDescription = this.open;
-      this.status = "Awaiting Supervisor Response";
-    }
-    this.request.additionalData.open = this.isActiveStatus;
-    let change = {"additional_data":this.request.additionalData};
-    const r = await this.SeparationModel.getById(this.requestId, change);
-    console.log("R:", r);
-
-  }
-
-  /**
-   * @description Called after user selects an employee and clicks the submit button in the reconciliation modal
-   * Sends request to reconcile separation request with iam id
-   * @returns
-   */
-  async _onReconSubmit(){
-    if ( !this.reconId ) return;
-
-    const modal = this.querySelector('#obs-recon-modal');
-    modal.hide();
-    const lookupEle = modal.querySelector('ucdlib-iam-search');
-    lookupEle.reset();
-
-    this.AppStateModel.showLoading();
-    const r = await this.SeparationModel.reconcile(this.requestId, this.reconId);
-    if ( r.state == 'error' ){
-      let msg = 'Unable to reconcile separation request';
-      if ( r.error && r.error.payload && r.error.payload.message ) msg = r.error.payload.message;
-      console.error(r);
-      requestAnimationFrame(() => this.AppStateModel.showError(msg));
-    } else {
-      this.SeparationModel.clearIdCache(this.requestId);
-      this.SeparationModel.clearQueryCache();
-      if ( this.rtTicketId ){
-        this.RtModel.clearHistoryCache(this.rtTicketId);
-      }
-      this.AppStateModel.setLocation('/separation');
-      this.AppStateModel.showAlertBanner({message: 'Separation request reconciled', brandColor: 'farmers-market'});
-    }
-  }
-
 }
 
 customElements.define('ucdlib-iam-page-separation-single', UcdlibIamPageSeparationSingle);

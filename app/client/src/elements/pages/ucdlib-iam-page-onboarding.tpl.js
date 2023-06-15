@@ -50,11 +50,12 @@ export function render() {
     </div>
   </div>
   <ucdlib-iam-modal id='ob-search' dismiss-text='Close' content-title="Search For Prior Onboarding Records" auto-width>
-    <ucdlib-iam-onboarding-search
+    <ucdlib-iam-existing-search
       search-param='name'
       widget-title=''
       @onboarding-select=${this.hideSearchModal}
-      class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
-    </ucdlib-iam-onboarding-search>
+      class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'
+      onboarding>
+    </ucdlib-iam-existing-search>
   </ucdlib-iam-modal>
 `;}
