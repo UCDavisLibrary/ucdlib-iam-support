@@ -100,24 +100,26 @@ export function render() {
     `}
     <div>
       <div class="u-space-my">
-        <ul class="list--reset">
+        <ul class="list--reset checkbox">
           <li>
             <input
+              id='obs-send-itis-rt'
               type="checkbox"
               @input=${() => this._onBackgroundCheckChange('sendItisRt', '', 'checkbox')}
               .checked=${this.backgroundCheck?.sendItisRt || this.backgroundCheck?.itisRtSent}
               .disabled=${this.sentBackgroundCheck || !this.rtTicketId}
               >
-            <label class='u-inline'>ITIS RT Ticket ${this.backgroundCheck?.itisRtSentTimestamp ? `(Sent ${(new Date(this.backgroundCheck?.itisRtSentTimestamp)).toLocaleString()})` : ''}</label>
+            <label for='obs-send-itis-rt' class='u-inline'>ITIS RT Ticket ${this.backgroundCheck?.itisRtSentTimestamp ? `(Sent ${(new Date(this.backgroundCheck?.itisRtSentTimestamp)).toLocaleString()})` : ''}</label>
           </li>
           <li>
             <input
+              id='obs-send-facilities-rt'
               type="checkbox"
               @input=${() => this._onBackgroundCheckChange('sendFacilitiesRt', '', 'checkbox')}
               .checked=${this.backgroundCheck?.sendFacilitiesRt || this.backgroundCheck?.sendFacilitiesRt}
               .disabled=${this.sentBackgroundCheck || !this.facilitiesRtTicketId}
               >
-            <label class='u-inline'>Facilities RT Ticket ${this.backgroundCheck?.facilitiesRtSentTimestamp ? `(Sent ${(new Date(this.backgroundCheck?.facilitiesRtSentTimestamp)).toLocaleString()})` : ''}</label>
+            <label class='u-inline' for='obs-send-facilities-rt'>Facilities RT Ticket ${this.backgroundCheck?.facilitiesRtSentTimestamp ? `(Sent ${(new Date(this.backgroundCheck?.facilitiesRtSentTimestamp)).toLocaleString()})` : ''}</label>
           </li>
         </ul>
         <div class="field-container u-space-mt">
