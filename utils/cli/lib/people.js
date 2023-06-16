@@ -19,6 +19,7 @@ class PeopleCli {
       person = await UcdIamModel.getPersonByUserId(options.kerberos);
     }
 
+    console.log(person);
   }
 }
 

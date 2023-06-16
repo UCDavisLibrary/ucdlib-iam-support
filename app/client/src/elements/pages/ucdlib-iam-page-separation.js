@@ -1,7 +1,6 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-separation.tpl.js";
 import "../components/ucdlib-iam-separation-list";
-import "../components/ucdlib-iam-separation-search";
 import "../components/ucdlib-iam-modal";
 import "../components/ucdlib-iam-existing-search";
 

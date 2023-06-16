@@ -140,6 +140,37 @@ module.exports = (api) => {
   
     });
   
+    api.post('/separation/:id?', async (req, res) => {
+      const { default: UcdlibSeparation } = await import('@ucd-lib/iam-support-lib/src/utils/separation.js');
+      const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
+  
+      if (
+        !req.auth.token.hasAdminAccess &&
+        !req.auth.token.hasHrAccess ){
+        res.status(403).json({
+          error: true,
+          message: 'Not authorized to access this resource.'
+        });
+        return;
+      }
+
+      const r = await UcdlibSeparation.update(req.params.id, req.query);
+      if ( r.err ) {
+        console.error(r.err);
+        res.json({error: true, message: 'Unable to retrieve separation request'});
+        return;
+      }
+      if ( !r.res.rows.length ){
+        console.error(r.err);
+        res.json({error: true, message: 'Request does not exist!'});
+        return;
+      }
+      const obReq = TextUtils.camelCaseObject(r.res.rows[0]);
+      return res.json(obReq);
+
+  
+    });
+
     api.get('/separation/:id', async (req, res) => {
       const { default: UcdlibSeparation } = await import('@ucd-lib/iam-support-lib/src/utils/separation.js');
       const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
@@ -154,38 +185,19 @@ module.exports = (api) => {
         return;
       }
 
-      
-  
-      if ( Object.keys(req.query).length != 0 ){
-       const r = await UcdlibSeparation.update(req.params.id, req.query);
-        if ( r.err ) {
-          console.error(r.err);
-          res.json({error: true, message: 'Unable to retrieve separation request'});
-          return;
-        }
-        if ( !r.res.rows.length ){
-          console.error(r.err);
-          res.json({error: true, message: 'Request does not exist!'});
-          return;
-        }
-        const obReq = TextUtils.camelCaseObject(r.res.rows[0]);
-        return res.json(obReq);
-
-      } else {
-       const r = await UcdlibSeparation.getById(req.params.id);
-        if ( r.err ) {
-          console.error(r.err);
-          res.json({error: true, message: 'Unable to retrieve separation request'});
-          return;
-        }
-        if ( !r.res.rows.length ){
-          console.error(r.err);
-          res.json({error: true, message: 'Request does not exist!'});
-          return;
-        }
-        const obReq = TextUtils.camelCaseObject(r.res.rows[0]);
-        return res.json(obReq);
+      const r = await UcdlibSeparation.getById(req.params.id);
+      if ( r.err ) {
+        console.error(r.err);
+        res.json({error: true, message: 'Unable to retrieve separation request'});
+        return;
       }
+      if ( !r.res.rows.length ){
+        console.error(r.err);
+        res.json({error: true, message: 'Request does not exist!'});
+        return;
+      }
+      const obReq = TextUtils.camelCaseObject(r.res.rows[0]);
+      return res.json(obReq);
   
     });
   
