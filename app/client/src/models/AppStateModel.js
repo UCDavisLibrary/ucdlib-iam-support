@@ -75,7 +75,6 @@ class AppStateModelImpl extends AppStateModel {
       update.location.path[0] == 'patron' &&
       update.location.path.length > 1
     ) {
-      console.log("hee");
       p = 'patron';
     } else {
       p = update.location.path[0];

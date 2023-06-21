@@ -1,5 +1,8 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-patron-lookup.tpl.js";
+
+import "../components/ucdlib-iam-modal";
+
 /**
  * @description Component element for querying the UC Davis IAM API
  */
@@ -258,12 +261,12 @@ import * as Templates from "./ucdlib-iam-page-patron-lookup.tpl.js";
 
     this.selectedPersonId = id;
     const r = await this.PersonModel.getPersonById(id, 'iamId', 'select');
-    let alma = await this.AlmaUserModel.getAlmaUserById("sbagg", "almaId");
-    console.log("A:", alma);
+    
     if( r.state === this.PersonModel.store.STATE.LOADED ) {
       this.isFetching = false;
       this.selectedPersonProfile = r.payload;
-      console.log(this.selectedPersonProfile);
+      this.alma = await this.AlmaUserModel.getAlmaUserById(this.selectedPersonProfile.userID, "almaId");
+      console.log(this.alma);
       this.selectedPersonDepInfo = this.selectedPersonProfile.ppsAssociations;
       this.selectedPersonStdInfo = this.selectedPersonProfile.sisAssociations;
       this.informationHeaderID = this.selectedPersonProfile.iamId;
@@ -276,6 +279,14 @@ import * as Templates from "./ucdlib-iam-page-patron-lookup.tpl.js";
     this.dispatchEvent(new CustomEvent('select', {detail: {status: r}}));
     if ( this.resetOnSelect ) this.reset();
 
+  }
+
+    /**
+   * @description Opens the employee info modal
+   */
+  openAlmaInfoModal(){
+    const ele = this.renderRoot.querySelector('#alma-modal');
+    if ( ele ) ele.show();
   }
 
 }

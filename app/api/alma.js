@@ -63,7 +63,6 @@ module.exports = (api) => {
     let response;
 
     response = await AlmaModel._getUsersById(req.params.id, config.alma.key);
-    console.log(response);
     res.json(response);
     
   });

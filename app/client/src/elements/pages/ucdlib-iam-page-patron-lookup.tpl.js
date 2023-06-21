@@ -155,7 +155,6 @@ export function render() {
             <div class="alert">No people matched your search.</div>
           `}
         </div>
-
         <div id="information">
           <div class="field-container">
             <h3>IAM Patron Information</h3>
@@ -174,7 +173,7 @@ export function render() {
                       ${this.selectedPersonProfile.employeeId ? html`<tr><td><strong>Employee ID</td></strong><td>${this.selectedPersonProfile.employeeId}</td></tr>`:html``}
                       ${this.selectedPersonProfile.userID ? html`<tr><td><strong>Kerberos ID</td></strong><td>${this.selectedPersonProfile.userID}</td></tr>`:html``}
                       ${this.selectedPersonProfile.email ? html`<tr><td><strong>Email</td></strong><td>${this.selectedPersonProfile.email}</td></tr>`:html``}
-                      ${this.alma ? html`<tr><td><strong>Alma</td></strong><td>${this.alma}</td></tr>`:html``}
+                      ${this.alma ? html`<tr><td><strong>Alma</td></strong><td>View Alma Record: <a @click=${this.openAlmaInfoModal} >${this.alma.id}</a></td></tr>`:html``}
                       ${this.address ? html`<tr><td><strong>Current Address</td></strong><td>${this.address}</td></tr>`:html``}
                       </tbody>
                 </table>
@@ -246,7 +245,9 @@ export function render() {
           </div>
         </div>
       </ucdlib-pages>
-      
+      <ucdlib-iam-modal id='alma-modal' dismiss-text='Close' content-title='Alma Record'>
+          ${this.alma ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.alma.payload, null, "  ")}</pre>` : html``}
+      </ucdlib-iam-modal>
 `;}
 
 
