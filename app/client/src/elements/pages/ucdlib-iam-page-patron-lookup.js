@@ -266,7 +266,6 @@ import "../components/ucdlib-iam-modal";
       this.isFetching = false;
       this.selectedPersonProfile = r.payload;
       this.alma = await this.AlmaUserModel.getAlmaUserById(this.selectedPersonProfile.userID, "almaId");
-      console.log(this.alma);
       this.selectedPersonDepInfo = this.selectedPersonProfile.ppsAssociations;
       this.selectedPersonStdInfo = this.selectedPersonProfile.sisAssociations;
       this.informationHeaderID = this.selectedPersonProfile.iamId;

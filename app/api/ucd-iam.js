@@ -82,8 +82,6 @@ module.exports = (api) => {
     }
 
 
-    console.log("People:", people);
-
     res.json(people);
 
 
