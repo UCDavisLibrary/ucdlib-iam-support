@@ -1,321 +1,376 @@
-import { html } from 'lit';
+import { html, css } from 'lit';
+
+import normalizeStyles from "@ucd-lib/theme-sass/normalize.css.js";
+import headingStyles from "@ucd-lib/theme-sass/1_base_html/_headings.css";
+import headingClassesStyles from "@ucd-lib/theme-sass/2_base_class/_headings.css";
+import buttonStyles from "@ucd-lib/theme-sass/2_base_class/_buttons.css";
+import formStyles from "@ucd-lib/theme-sass/1_base_html/_forms.css.js";
+import listStyles from "@ucd-lib/theme-sass/1_base_html/_lists.css.js";
+import listClassesStyles from "@ucd-lib/theme-sass/2_base_class/_lists.css.js";
+import formsClassesStyles from "@ucd-lib/theme-sass/2_base_class/_forms.css.js";
+import alertStyles from "@ucd-lib/theme-sass/4_component/_messaging-alert.css.js";
+import breadcrumbStyles from "@ucd-lib/theme-sass/4_component/_nav-breadcrumbs.css.js";
+import mediaLinkStyles from "@ucd-lib/theme-sass/4_component/_wysiwyg-media-link.css.js";
+import layoutCss from "@ucd-lib/theme-sass/5_layout/_index.css.js";
+import base from "@ucd-lib/theme-sass/1_base_html/_index.css.js";
+import utility from "@ucd-lib/theme-sass/6_utility/_index.css.js";
+import dtUtls from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
 
 /**
- * @description main render function
+ * @description shadow styles
+ * @returns 
+ */
+export function styles() {
+  const elementStyles = css`
+    :host {
+      display: block;
+      padding: 1rem 10rem;
+    }
+    [hidden] {
+      display: none !important;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    nav label {
+      min-width: 9ch;
+      padding-bottom: 0;
+    }
+    nav select {
+      padding-left: .25rem;
+      flex-grow: 1;
+      width: initial;
+    }
+    .text-input-container {
+      display: flex;
+    }
+    .btn--search {
+      margin-top: 1rem;
+    }
+    .alert--error {
+      padding: 1rem;
+    }
+    .link {
+      cursor: pointer;
+    }
+    .breadcrumbs {
+      padding-left: 0;
+    }
+    .results-list {
+      max-width: 1000px;
+      overflow-y: scroll;
+    }
+    .selected-person {
+      background-color: rgba(var(--category-brand-rgb, var(--media-link-background)), 0.1);
+      border: 1px solid #ffbf00;
+    }
+    .results-label {
+      margin-top: 0;
+      margin-bottom: .5rem;
+      font-weight: 700;
+    }
+  `;
+
+  return [
+    normalizeStyles,
+    headingStyles,
+    headingClassesStyles,
+    buttonStyles,
+    formStyles,
+    listStyles,
+    listClassesStyles,
+    formsClassesStyles,
+    alertStyles,
+    breadcrumbStyles,
+    mediaLinkStyles,
+    elementStyles,
+    utility,
+    layoutCss,
+    base
+  ];
+}
+
+/**
+ * @description Primary render function
  * @returns {TemplateResult}
  */
-export function render() {
+export function render() { 
   return html`
-  <div class='l-container u-space-pb'>
-    <ucdlib-pages selected=${this.page}>
-      ${this.renderHome()}
-      ${this.renderSubmissionForm()}
-      ${this.renderManualEntryForm()}
-      ${this.renderTransferForm()}
-      <div id='obn-lookup'>
-        <ucdlib-iam-search
-          @select=${e => this._onEmployeeSelect(e.detail.status)}
-          search-param='employee-id'
-          class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
-        </ucdlib-iam-search>
+    <div class='header'>
+        <h2 class='heading--underline' ?hidden=${!this.widgetTitle}>${this.widgetTitle}</h2>
       </div>
-    </ucdlib-pages>
-    <ucdlib-iam-modal id='obn-employee-modal' dismiss-text='Close' content-title='Employee Record'>
-      ${!this.userEnteredData ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.iamRecord.data, null, "  ")}</pre>` : html``}
-    </ucdlib-iam-modal>
-    <ucdlib-iam-modal id='obn-custom-supervisor' dismiss-text='Close' content-title='Set a Custom Supervisor' auto-width>
-      <p>Override the supervisor record for this employee.
-        For example, TES employees should have their supervisor set to their library supervisor.
-      </p>
-      <ucdlib-iam-search
-        @select=${e => this._onSupervisorEditSelect(e.detail.status)}
-        search-param='employee-id'
-        reset-on-select
-        class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
-      </ucdlib-iam-search>
-    </ucdlib-iam-modal>
-  </div>
+      <ucdlib-pages selected=${this.page}>
+        <div id='form'>
+          ${this.wasError ? html`
+          <div class="alert alert--error">An error occurred while querying the UC Davis IAM API!</div>
+          ` : html``}
+          <nav ?hidden=${this.hideNav}>
+            <label>Search by: </label>
+            <select id='search-param' @input=${e => this.searchParam = e.target.value}>
+              ${this.navItems.map(item => html`
+                <option value=${item.attribute} ?selected=${item.attribute == this.searchParam}>${item.label}</option>
+              </li>
+              `)}
+            </select>
+          </nav>
+          <form @submit=${this._onSubmit} aria-label='Search for a UC Davis person'>
+            <ucdlib-pages selected=${this.searchParam}>
+              ${this.renderUserIdForm()}
+              ${this.renderEmployeeIdForm()}
+              ${this.renderStudentIdForm()}
+              ${this.renderNameForm()}
+            </ucdlib-pages>
+            <button 
+              ?disabled=${this.disableSearch} 
+              type='submit' 
+              class="btn btn--block btn--alt btn--search">Search${this.isFetching ? html`<span>ing</span>` : html``}</button>
+          </form>
+        </div>
+        <div id='results'>
+          <ol class='breadcrumbs'>
+            <li><a class='link' @click=${() => this.page = 'form'}>Search Form</a></li>
+            <li>Results</li>
+          </ol>
+          ${this.results.length ? html`
+            <div class='results-list'>
+              <p class='results-label'>Select an Employee:</p>
+              ${this.results.map(person => html`
+                <a @click=${() => this._onPersonClick(person.iamId)} class="media-link link ${this.selectedPersonId == person.iamId ? 'selected-person' : ''}">
+                  <div class='media-link__body'>
+                    <h3 class="heading--highlight">${person.oFullName}</h3>
+                    ${person.employeeId ? html`
+                      <div><strong>Employee Id: </strong><span>${person.employeeId}</span></div>
+                    ` : html``}
+                    ${person.studentId ? html`
+                      <div><strong>Student Id: </strong><span>${person.studentId}</span></div>
+                    ` : html``}
+                  </div>
+                </a>
+              `)}
+          </div>
+          ` : html`
+            <div class="alert">No people matched your search.</div>
+          `}
+        </div>
+
+        <div id="information">
+          <div class="field-container">
+            <h3>IAM Patron Information</h3>
+            <div class="focal-link__figure focal-link__icon">
+                        <i class="fas fa-check fa-2x"></i>
+                      </div>
+            ${this.selectedPersonProfile ? html`
+              <div class="responsive-table">
+                <table class="table--striped">
+                    <thead>
+                      <tr><h3><th>General Information for ${this.informationHeaderID}</th></h3></tr>
+                    </thead>
+                    <tbody>
+                      ${this.selectedPersonProfile.oFullName ? html`<tr><td><strong>Name</td></strong><td>${this.selectedPersonProfile.oFullName}</td></tr>`:html``}
+                      ${this.selectedPersonProfile.studentId ? html`<tr><td><strong>Student ID</td></strong><td>${this.selectedPersonProfile.studentId}</td></tr>`:html``}
+                      ${this.selectedPersonProfile.employeeId ? html`<tr><td><strong>Employee ID</td></strong><td>${this.selectedPersonProfile.employeeId}</td></tr>`:html``}
+                      ${this.selectedPersonProfile.userID ? html`<tr><td><strong>Kerberos ID</td></strong><td>${this.selectedPersonProfile.userID}</td></tr>`:html``}
+                      ${this.selectedPersonProfile.email ? html`<tr><td><strong>Email</td></strong><td>${this.selectedPersonProfile.email}</td></tr>`:html``}
+                      ${this.alma ? html`<tr><td><strong>Alma</td></strong><td>${this.alma}</td></tr>`:html``}
+                      ${this.address ? html`<tr><td><strong>Current Address</td></strong><td>${this.address}</td></tr>`:html``}
+                      </tbody>
+                </table>
+
+                <table class="table--striped">
+                    <thead>
+                      <tr><h3><th>Affiliation for ${this.informationHeaderID}</th></h3></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td><strong>Is Student</td></strong><td>${this.selectedPersonProfile.isStudent ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</td></tr>
+                      <tr><td><strong>Is Employee</td></strong><td>${this.selectedPersonProfile.isEmployee ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</td></tr>
+                      <tr><td><strong>Is External</td></strong><td>${this.selectedPersonProfile.isExternal ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</td></tr>
+                      <tr><td><strong>Is Faculty</td></strong><td>${this.selectedPersonProfile.isFaculty ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</td></tr>
+                      <tr><td><strong>Is Staff</td></strong><td>${this.selectedPersonProfile.isStaff ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</td></tr>
+                      <tr><td><strong>Is HS Employee</td></strong><td>${this.selectedPersonProfile.isHSEmployee ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</td></tr>
+                      
+                    </tbody>
+                </table>
+
+              ${this.selectedPersonDepInfo ? 
+                html`
+                <table class="table--striped">
+                    <thead>
+                      <tr><h3><th>Department Information for ${this.informationHeaderID}</th></h3></tr>
+                    </thead>
+                    <tbody>
+                          ${this.selectedPersonDepInfo.map(dep =>
+                            html`
+                              <tr><td><strong>Title</td></strong><td>${dep.titleOfficialName ? html`${dep.titleOfficialName} (${dep.titleCode})`: html`<p>Not Listed</p>`}</td></tr>
+                              <tr><td><strong>Position Type</td></strong><td>${dep.positionType ? html`${dep.positionType} (${dep.positionTypeCode})`: html`<p>Not Listed</p>`}</td></tr>
+                              <tr><td><strong>Department</td></strong><td>${dep.deptOfficialName ? html`${dep.deptOfficialName} (${dep.deptCode})`: html`<p>Not Listed</p>`}</td></tr>
+                              <tr><td><strong>Start Date</td></strong><td>${dep.assocStartDate ? html`${dtUtls.fmtDatetime(dep.assocStartDate, true, true)}`: html`<p>Not Listed</p>`}</td></tr>
+                              <tr><td><strong>End Date</td></strong><td>${dep.assocEndDate ? html`${dtUtls.fmtDatetime(dep.assocEndDate, true, true)}`: html`<p>Indefinite</p>`}</td></tr>
+                              <tr><td><strong>Admin Title</td></strong><td>${dep.adminDeptOfficialName ? html`${dep.adminDeptOfficialName} (${dep.adminDept})`: html`<p>Not Listed</p>`}</td></tr>
+                              <tr><td><strong>Appointment</td></strong><td>${dep.apptDeptOfficialName ? html`${dep.apptDeptOfficialName} (${dep.apptDeptCode})`: html`<p>Not Listed</p>`}</td></tr>
+                            `
+                          )}
+                      </tbody>
+                </table>
+                `:html``}
+
+              ${this.selectedPersonStdInfo ? 
+                html`
+                <table class="table--striped">
+                    <thead>
+                      <tr><h3><th>Student Information for ${this.informationHeaderID}</th></h3></tr>
+                    </thead>
+                    <tbody>
+                          ${this.selectedPersonStdInfo.map(std =>
+                            html`
+                              <tr><td><strong>College</td></strong><td>${std.collegeName ? html`${std.collegeName}`: html`<p>Not Listed</p>`}</td></tr>
+                              <tr><td><strong>Class</td></strong><td>${std.className ? html`${std.className}`: html`<p>Not Listed</p>`}</td></tr>
+                              <tr><td><strong>Level</td></strong><td>${std.levelName ? html`${std.levelName}`: html`<p>Not Listed</p>`}</td></tr>
+                              <tr><td><strong>Major</td></strong><td>${std.majorName ? html`${std.majorName}`: html`<p>Not Listed</p>`}</td></tr>
+                              <tr><td><strong>Start Date</td></strong><td>${std.createDate ? html`${dtUtls.fmtDatetime(std.createDate, true, true)}`: html`<p>Not Listed</p>`}</td></tr>
+                              <tr><td><strong>Modify Date</td></strong><td>${std.modifyDate ? html`${dtUtls.fmtDatetime(std.modifyDate, true, true)}`: html`<p>Not Listed</p>`}</td></tr>
+                            `
+                          )}
+                      </tbody>
+                </table>
+                `:html``}
+
+              </div> 
+            `:html`
+              <h4>There is no information on this individual in the IAM Database.</h4>
+            `}
+            
+
+          </div>
+        </div>
+      </ucdlib-pages>
+      
 `;}
 
+
 /**
- * @description Renders homepage for this element
+ * @description Renders form for querying by kerberos id
  * @returns {TemplateResult}
  */
-export function renderHome(){
+export function renderUserIdForm(){
+  const view = this.searchParamsByKey.userId;
   return html`
-  <div id='obn-home'>
-    <div class="priority-links">
-      <div class="priority-links__item">
-        <a href="#lookup" class="vertical-link vertical-link--circle category-brand--tahoe">
-          <div class="vertical-link__figure">
-            <i class="vertical-link__image fas fa-search fa-3x"></i>
-          </div>
-          <div class="vertical-link__title">
-            Search UC Davis Directory <br> <span class='fw-light'>(for most cases)</span>
-          </div>
-        </a>
-      </div>
-      <div class="priority-links__item">
-        <a href="#manual" class="vertical-link vertical-link--circle category-brand--delta">
-          <div class="vertical-link__figure">
-            <i class="vertical-link__image fas fa-pen fa-3x"></i>
-          </div>
-          <div class="vertical-link__title">
-            Manually Enter Employee <br> <span class='fw-light'>(for special cases)</span>
-          </div>
-        </a>
-      </div>
-      <div class="priority-links__item">
-        <a href="#transfer" class="vertical-link vertical-link--circle category-brand--cabernet">
-          <div class="vertical-link__figure">
-            <i class="vertical-link__image fas fa-random fa-3x"></i>
-          </div>
-          <div class="vertical-link__title">
-            Employee Transfer <br> <span class='fw-light'>(from another Library Unit)</span>
-          </div>
-        </a>
+    <div id=${view.attribute}>
+      <div class="field-container">
+        <label ?hidden=${!this.hideNav} for=${'inp-'+ view.attribute}>${view.label}</label>
+        <div class='text-input-container'>
+          <input 
+            @input=${(e) => this.userId = e.target.value}
+            .value=${this.userId}
+            id=${'inp-'+ view.attribute} 
+            type="text" 
+            placeholder="Enter a UC Davis computing account...">
+        </div>
+        
       </div>
     </div>
-  </div>
   `;
 }
 
 /**
- * @description Renders the main submission form for this element
+ * @description Renders form for querying by employee id
  * @returns {TemplateResult}
  */
-export function renderSubmissionForm(){
+export function renderEmployeeIdForm(){
+  const view = this.searchParamsByKey.employeeId;
   return html`
-  <div id='obn-submission'>
-    <form class='form-single-col' @submit=${this._onSubmit}>
-      <div ?hidden=${!this.hasMultipleAppointments}>
-        <div class="panel panel--icon panel--icon-custom o-box panel--icon-double-decker">
-          <h2 class="panel__title"><span class="panel__custom-icon fas fa-exclamation-circle"></span>Appointment</h2>
-          <section>
-            <p class='double-decker'>This employee has more than one appointment. Please select a primary appointment:</p>
-            <div class="field-container">
-              <label for="obn-appointments">Appointment</label>
-              <select id="obn-appointments" @input=${(e) => this._onAppointmentSelect(e.target.value)}>
-                ${this.appointments.map((appt, i) => html`
-                  <option .value=${i}>${appt.titleDisplayName} - ${appt.apptDeptOfficialName}</option>
-                `)}
-              </select>
-            </div>
-          </section>
+    <div id=${view.attribute}>
+      <div class="field-container">
+        <label ?hidden=${!this.hideNav} for=${'inp-'+ view.attribute}>${view.label}</label>
+        <div class='text-input-container'>
+          <input 
+            @input=${(e) => this.employeeId = e.target.value}
+            id=${'inp-'+ view.attribute} 
+            .value=${this.employeeId}
+            type="number" 
+            pattern="[0-9]*" 
+            placeholder="Enter a UC Path ID number...">
         </div>
       </div>
-      <div>
-        <div class="panel panel--icon panel--icon-custom o-box panel--icon-quad">
-          <h2 class="panel__title"><span class="panel__custom-icon fas fa-briefcase"></span>Library Position</h2>
-          <section>
-            <div class="field-container">
-              <label for="obn-title">Position Title <abbr title="Required">*</abbr></label>
-              <input id='obn-title' type="text" .value=${this.positionTitle} required @input=${e => this.positionTitle = e.target.value}>
-            </div>
-            <div class="field-container">
-              <label for="obn-departments">Department <abbr title="Required">*</abbr></label>
-              <select id="obn-departments" required @input=${(e) => this.departmentId = e.target.value} .value=${this.departmentId || ''}>
-                <option value="" ?selected=${!this.departmentId}>-- Please choose a department --</option>
-                ${this.groups.filter(g => g.partOfOrg).map(g => html`
-                  <option value=${g.id} ?selected=${this.departmentId == g.id}>${g.name}</option>
-                `)}
-              </select>
-            </div>
-            <div class="checkbox">
-              <ul class="list--reset">
-                <li>
-                  <input id="obn-is-dept-head" type="checkbox" @input=${() => this.isDeptHead = !this.isDeptHead} .checked=${this.isDeptHead}>
-                  <label for="obn-is-dept-head">Is Department Head</label>
-                </li>
-              </ul>
-            </div>
-            <div class="field-container">
-              <label>Groups</label>
-              <ucd-theme-slim-select @change=${(e) => this.groupIds = e.detail.map(g => g.value)}>
-                <select multiple>
-                  ${this.groups.filter(g => !g.partOfOrg).map(g => html`
-                    <option .value=${g.id} ?selected=${this.groupIds.includes(`${g.id}`)}>${g.name}</option>
-                  `)}
-                </select>
-              </ucd-theme-slim-select>
-            </div>
-            <div class="field-container">
-              <label for="obn-start-date">Start Date <abbr title="Required">*</abbr></label>
-              <input id='obn-start-date' type="date" required .value=${this.startDate} @input=${(e) => {this.startDate = e.target.value;}}>
-            </div>
-          </section>
+    </div>
+  `;
+}
+
+/**
+ * @description Renders form for querying by student id
+ * @returns {TemplateResult}
+ */
+export function renderStudentIdForm(){
+  const view = this.searchParamsByKey.studentId;
+  return html`
+    <div id=${view.attribute}>
+      <div class="field-container">
+        <label ?hidden=${!this.hideNav} for=${'inp-'+ view.attribute}>${view.label}</label>
+        <div class='text-input-container'>
+          <input 
+            @input=${(e) => this.studentId = e.target.value}
+            .value=${this.studentId}
+            id=${'inp-'+ view.attribute} 
+            type="number" 
+            pattern="[0-9]*" 
+            placeholder="Enter a student ID number...">
         </div>
       </div>
-      <div class="panel panel--icon panel--icon-custom o-box panel--icon-pinot">
-        <h2 class="panel__title"><span class="panel__custom-icon fas fa-user-tie"></span>Employee</h2>
-        <section>
-          ${this.renderEmployeeForm()}
-        </section>
-        <a class='pointer icon icon--circle-arrow-right' @click=${this.openEmployeeInfoModal} .hidden=${this.userEnteredData}>View Entire Employee Record</a>
-      </div>
-      <div class="panel panel--icon panel--icon-custom o-box panel--icon-delta">
-        <h2 class="panel__title space-between">
-          <div><span class="panel__custom-icon fas fa-sitemap"></span><span>Supervisor</span></div>
-          <a @click=${this._onSupervisorEdit} class='pointer u-space-ml' title="Set Custom Supervisor"><i class='fas fa-edit'></i></a>
-        </h2>
-        <section>
-          <div class="field-container">
-            <label for="obn-supervisor">Supervisor</label>
-            <input id='obn-supervisor' type="text" .value=${this.supervisor.fullName} disabled >
-          </div>
-          <div class="checkbox">
-            <ul class="list--reset">
-              <li>
-                <input id="obn-skip-supervisor" type="checkbox" @input=${() => this.skipSupervisor = !this.skipSupervisor} .checked=${this.skipSupervisor}>
-                <label for="obn-skip-supervisor">Do not notify supervisor</label>
-              </li>
-            </ul>
-          </div>
-          <div class="field-container" ?hidden=${this.skipSupervisor}>
-            <label for="obn-supervisor-email">Supervisor Email for RT Ticket</label>
-            <input id='obn-supervisor-email' type="text" @input=${e => this.supervisorEmail = e.target.value} .value=${this.supervisorEmail} >
-          </div>
-        </section>
-      </div>
-      <div class="panel panel--icon panel--icon-custom o-box panel--icon-poppy">
-        <h2 class="panel__title"><span class="panel__custom-icon fas fa-sticky-note"></span>Additional Information</h2>
-        <section>
-          <div class="field-container">
-            <label for="obn-notes">Notes</label>
-            <textarea id='obn-notes' rows="8" cols="48"  @input=${e => this.notes = e.target.value} .value=${this.notes}></textarea>
-          </div>
-        </section>
-      </div>
-      <button
-          type='submit'
-          class="btn btn--block btn--alt btn--search">Submit</button>
-      </form>
-    </form>
-  </div>
-  `;
-}
-
-/**
- * @description Renders the page for filling out custom employee data (if not in UCD IAM system yet)
- * @returns
- */
-export function renderManualEntryForm(){
-  return html`
-  <div id='obn-manual'>
-    <div class='form-single-col'>
-      <section class="brand-textbox category-brand__background category-brand--secondary u-space-mb--large">
-        Access to most Library applications and services will be delayed until a UC Davis computing account is successfully provisioned.
-      </section>
-      <div class="panel panel--icon panel--icon-custom o-box panel--icon-pinot">
-        <h2 class="panel__title"><span class="panel__custom-icon fas fa-user-tie"></span>Employee</h2>
-        <section>
-          ${this.renderEmployeeForm()}
-        </section>
-      </div>
-      ${this.renderSupervisorSelectPanel()}
-      <button type='button' @click=${this._onManualFormSubmit} ?disabled=${this.manualFormDisabled} class="btn btn--block btn--alt btn--search">Next</button>
     </div>
-
-  </div>
   `;
 }
 
 /**
- * @description Renders the page panel for selecting a supervisor
+ * @description Renders form for querying by name
  * @returns {TemplateResult}
  */
-export function renderSupervisorSelectPanel(){
-  let title = 'Library Supervisor';
-  let description = '';
-  if ( this.page === 'obn-transfer' ) {
-    title = 'New Library Supervisor';
-    description = 'If applicable, select the new supervisor for this employee:';
-  }
-
+export function renderNameForm(){
+  const view = this.searchParamsByKey.name;
   return html`
-    <div class="panel panel--icon panel--icon-custom o-box panel--icon-delta">
-      <h2 class="panel__title"><span class="panel__custom-icon fas fa-sitemap"></span>${title}</h2>
-      <section>
-        <p ?hidden=${!description}>${description}</p>
-        <ucdlib-iam-search
-          @select=${e => this._onSupervisorSelect(e.detail.status)}
-          search-param='employee-id'
-          class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
-        </ucdlib-iam-search>
-      </section>
-    </div>
-  `;
-}
-
-/**
- * @description Renders the form of employee details
- * @returns {TemplateResult}
- */
-export function renderEmployeeForm(){
-  const isSub = this.page == 'obn-submission';
-  const disabled = (!this.userEnteredData && isSub);
-  return html`
-    <div class="field-container">
-      <label for="obn-first-name">First Name</label>
-      <input id='obn-first-name' type="text" .value=${this.firstName} ?disabled=${disabled} @input=${e => this.firstName = e.target.value}>
-    </div>
-    <div class="field-container">
-      <label for="obn-last-name">Last Name</label>
-      <input id='obn-last-name' type="text" .value=${this.lastName} ?disabled=${disabled} @input=${e => this.lastName = e.target.value}>
-    </div>
-    <div ?hidden=${isSub} class='double-decker u-space-mt--large u-space-mb--small'>
-      If at least one of the following identifier fields is not provided,
-      the employee record must be manually reconciled with the UC Davis IAM system after submission.
-    </div>
-    <div class="field-container">
-      <label for="obn-employee-id">Employee Id</label>
-      <input id='obn-employee-id' type="text" .value=${this.employeeId} ?disabled=${disabled} @input=${e => this.employeeId = e.target.value}>
-    </div>
-    <div class="field-container">
-      <label for="obn-user-id">Kerberos</label>
-      <input id='obn-user-id' type="text" .value=${this.userId} ?disabled=${disabled} @input=${e => this.userId = e.target.value}>
-    </div>
-    <div class="field-container">
-      <label for="obn-email">UC Davis Email</label>
-      <input id='obn-email' type="text" .value=${this.email} @input=${e => this.email = e.target.value}>
-    </div>
-  `;
-}
-
-/**
- * @description Renders the form for transferring an employee within the library
- * @returns {TemplateResult}
- */
-export function renderTransferForm(){
-  return html`
-  <div id='obn-transfer'>
-    <div class='form-single-col'>
-      <div class="panel panel--icon panel--icon-custom o-box panel--icon-pinot">
-        <h2 class="panel__title"><span class="panel__custom-icon fas fa-user-tie"></span>Employee</h2>
-        <section>
-          <ucdlib-employee-search
-            class='u-space-mb'
-            @status-change=${this._onTransferEmployeeStatusChange}>
-          </ucdlib-employee-search>
-          <div ?hidden=${!this.hasTransferEmployee}>
-            <div><span class='fw-bold primary'>Name: </span>${this.transferEmployee.firstName || ''} ${this.transferEmployee.lastName || ''}</div>
-            <div><span class='fw-bold primary'>Title: </span>${this.transferEmployee.title || ''}</div>
-            <div>
-              <span class='fw-bold primary'>Department: </span>
-              ${(this.transferEmployee.groups || []).filter(g => g.partOfOrg).map((g, i, arr) => html`<span>${g.name}${arr.length > i+1 ? ', ' : ''}</span>`)}
-            </div>
-            <div>
-              <span class='fw-bold primary'>Supervisor: </span>
-              ${this.transferEmployee.supervisor?.firstName || ''} ${this.transferEmployee.supervisor?.lastName || ''}
-            </div>
-          </div>
-        </section>
+    <div id=${view.attribute}>
+      <div class="field-container">
+        <label for='inp-first-name'>First Name</label>
+        <div class='text-input-container'>
+          <input 
+            @input=${e => this.firstName = e.target.value}
+            .value=${this.firstName}
+            id='inp-first-name' 
+            type="text" 
+            placeholder="Enter a first name">
+        </div>
       </div>
-      <div ?hidden=${!this.hasTransferEmployee}>
-        ${this.renderSupervisorSelectPanel()}
+      <div class="field-container">
+        <label for='inp-middle-name'>Middle Name</label>
+        <div class='text-input-container'>
+          <input 
+            @input=${e => this.middleName = e.target.value}
+            .value=${this.middleName}
+            id='inp-middle-name' 
+            type="text" 
+            placeholder="Enter a middle name">
+        </div>
       </div>
-      <button type='button' @click=${this._onTransferFormSubmit} ?disabled=${!this.hasTransferEmployee} class="btn btn--block btn--alt">Next</button>
+      <div class="field-container">
+        <label for='inp-last-name'>Last Name</label>
+        <div class='text-input-container'>
+          <input 
+            @input=${e => this.lastName = e.target.value}
+            .value=${this.lastName}
+            id='inp-last-name' 
+            type="text" 
+            placeholder="Enter a last name">
+        </div>
+      </div>
+      <div class="checkbox">
+        <input 
+          @input=${() => this.isDName = !this.isDName} 
+          id="inp-isDName" 
+          type="checkbox" 
+          .checked=${this.isDName}>
+        <label for="inp-isDName">Query Online Directory</label>
+      </div>
     </div>
-  </div>
   `;
 }

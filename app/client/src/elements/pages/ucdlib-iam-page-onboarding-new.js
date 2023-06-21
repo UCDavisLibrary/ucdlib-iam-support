@@ -166,7 +166,6 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    * @param {*} e
    */
   _onTransferEmployeeStatusChange(e){
-    console.log("hee");
     if ( e.detail.employee ){
       this.transferEmployee = e.detail.employee;
     } else {

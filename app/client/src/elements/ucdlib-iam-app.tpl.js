@@ -18,6 +18,7 @@ export function render() {
       </ul>
       <a href='/separation'>Separation</a>
       <a href='/permissions'>Permissions</a>
+      <a href='/patron'>Patron Lookup</a>
     </ucd-theme-primary-nav>
   </ucd-theme-header>
   <ucdlib-iam-alert></ucdlib-iam-alert>
@@ -37,6 +38,7 @@ export function render() {
     <ucdlib-iam-state id='loading' state=${this.status} error-message=${this.errorMessage}></ucdlib-iam-state>
     <ucdlib-iam-page-onboarding id='onboarding'></ucdlib-iam-page-onboarding>
     <ucdlib-iam-page-onboarding-new id='onboarding-new'></ucdlib-iam-page-onboarding-new>
+    <ucdlib-iam-page-patron-lookup id='patron'></ucdlib-iam-page-patron-lookup>
     <ucdlib-iam-page-onboarding-single id='onboarding-single'></ucdlib-iam-page-onboarding-single>
     <ucdlib-iam-page-home id='home'></ucdlib-iam-page-home>
     <ucdlib-iam-page-separation id='separation'></ucdlib-iam-page-separation>

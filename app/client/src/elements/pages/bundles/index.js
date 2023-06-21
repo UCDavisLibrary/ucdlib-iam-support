@@ -1,7 +1,7 @@
 const defs = {
   all : [
     'home', 'onboarding', 'separation', 'onboarding-new',
-    'onboarding-single', 'permissions-single', 'permissions'
+    'onboarding-single', 'permissions-single', 'permissions', 'patron',
   ],
 };
 
