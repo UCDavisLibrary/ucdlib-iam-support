@@ -154,7 +154,7 @@ module.exports = (api) => {
         return;
       }
 
-      const r = await UcdlibSeparation.update(req.params.id, req.query);
+      const r = await UcdlibSeparation.update(req.params.id, req.body);
       if ( r.err ) {
         console.error(r.err);
         res.json({error: true, message: 'Unable to retrieve separation request'});

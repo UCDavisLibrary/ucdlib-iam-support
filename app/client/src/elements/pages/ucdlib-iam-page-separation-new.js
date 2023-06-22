@@ -215,14 +215,6 @@ export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
     }
   }
 
-  /**
-   * @description Attached #submission form supervisor edit button
-   */
-  _onSupervisorEdit(){
-    const modal = this.renderRoot.querySelector('#sp-custom-supervisor');
-    if ( modal ) modal.show();
-  }
-
 
   /**
    * @description Do data retrieval required to display a subpage
