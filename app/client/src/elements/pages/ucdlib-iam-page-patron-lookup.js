@@ -93,7 +93,7 @@ import "../components/ucdlib-iam-modal";
 
     this.reset();
   }
-
+form-single-col
   /**
    * @method _onAppStateUpdate
    * @description bound to AppStateModel app-state-update event
@@ -105,6 +105,13 @@ import "../components/ucdlib-iam-modal";
     this.AppStateModel.showLoading();
     await this._getRequiredPageData();
     this.AppStateModel.showLoaded(this.id);
+  }
+ /**
+   * @description Disables the shadowdom
+   * @returns
+   */
+  createRenderRoot() {
+    return this;
   }
 
     /**
@@ -266,6 +273,7 @@ import "../components/ucdlib-iam-modal";
       this.isFetching = false;
       this.selectedPersonProfile = r.payload;
       this.alma = await this.AlmaUserModel.getAlmaUserById(this.selectedPersonProfile.userID, "almaId");
+      console.log(this.alma);
       this.selectedPersonDepInfo = this.selectedPersonProfile.ppsAssociations;
       this.selectedPersonStdInfo = this.selectedPersonProfile.sisAssociations;
       this.informationHeaderID = this.selectedPersonProfile.iamId;
