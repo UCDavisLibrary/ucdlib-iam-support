@@ -99,15 +99,18 @@ export function styles() {
  */
 export function render() { 
   return html`
-    <div  class='header'>
+<div class="l-3col l-3col--25-50-25">
+  <div class="l-second panel o-box">
+    
+    <div class='header'>
         <h2 class='heading--underline' ?hidden=${!this.widgetTitle}>${this.widgetTitle}</h2>
       </div>
-      <ucdlib-pages  selected=${this.page}>
+      <ucdlib-pages selected=${this.page}>
         <div id='form'>
           ${this.wasError ? html`
           <div class="alert alert--error">An error occurred while querying the UC Davis IAM API!</div>
           ` : html``}
-          <nav class='form-single-col' ?hidden=${this.hideNav}>
+          <nav  ?hidden=${this.hideNav}>
             <label>Search by: </label>
             <select id='search-param' @input=${e => this.searchParam = e.target.value}>
               ${this.navItems.map(item => html`
@@ -117,7 +120,7 @@ export function render() {
             </select>
           </nav>
           <br />
-          <form class='form-single-col' @submit=${this._onSubmit} aria-label='Search for a UC Davis person'>
+          <form @submit=${this._onSubmit} aria-label='Search for a UC Davis person'>
             <ucdlib-pages selected=${this.searchParam}>
               ${this.renderUserIdForm()}
               ${this.renderEmployeeIdForm()}
@@ -130,7 +133,7 @@ export function render() {
               class="btn btn--block btn--alt btn--search">Search${this.isFetching ? html`<span>ing</span>` : html``}</button>
           </form>
         </div>
-        <div class='form-single-col' id='results'>
+        <div  id='results'>
           <ol class='breadcrumbs'>
             <li><a class='link' @click=${() => this.page = 'form'}>Search Form</a></li>
             <li>Results</li>
@@ -156,14 +159,8 @@ export function render() {
             <div class="alert">No people matched your search.</div>
           `}
         </div>
-        <div  id="information">
+        <div id="information">
           <div class="field-container">
-          
-
-          <div class="l-3col l-3col--25-50-25">
-            <div class="l-second panel o-box">
-              <h3>IAM Patron Information</h3>
-              <br />
               ${this.selectedPersonProfile ? html`
                 <div>
                   <div>
@@ -227,19 +224,19 @@ export function render() {
                   <button @click=${this._onReturn} class="btn btn--block btn--alt btn--search">Return to Patron Lookup</button>
                 </div> 
               `:html`<h4>There is no information on this individual in the IAM Database.</h4>`}
-
-
-
-            </div>
-          </div>
-
-
           </div>
         </div>
       </ucdlib-pages>
-      <ucdlib-iam-modal id='alma-modal' dismiss-text='Close' content-title='Alma Record'>
-          ${this.alma ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.alma.payload, null, "  ")}</pre>` : html``}
-      </ucdlib-iam-modal>
+  
+  </div>
+</div>
+
+
+
+
+<ucdlib-iam-modal id='alma-modal' dismiss-text='Close' content-title='Alma Record'>
+  ${this.alma ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.alma.payload, null, "  ")}</pre>` : html``}
+</ucdlib-iam-modal>
 `;}
 
 

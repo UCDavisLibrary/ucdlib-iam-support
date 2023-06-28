@@ -273,8 +273,9 @@ import "../components/ucdlib-iam-modal";
 
     // reset state
     this.wasError = false;
-    this.page = 'form';
     this.reset();
+    this.AppStateModel.setLocation('/patron');
+
   }
 
   /**
