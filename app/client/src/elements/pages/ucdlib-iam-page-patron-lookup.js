@@ -50,6 +50,7 @@ import "../components/ucdlib-iam-modal";
     this.renderStudentIdForm = Templates.renderStudentIdForm.bind(this);
     this.renderNameForm = Templates.renderNameForm.bind(this);
 
+    this.reset();
     this._injectModel('PersonModel','AppStateModel', 'AuthModel', 'AlmaUserModel');
 
     this.navItems = [];
@@ -85,15 +86,14 @@ import "../components/ucdlib-iam-modal";
     });
 
     this.searchParam = 'name';
-    this.informationHeader = "Sample ID"
+    this.informationHeader = "Sample ID";
     // display options
     this.hideNav = false;
     this.hideNavOptions = '';
     this.widgetTitle = 'UC Davis Patron Lookup Search';
 
-    this.reset();
+    
   }
-form-single-col
   /**
    * @method _onAppStateUpdate
    * @description bound to AppStateModel app-state-update event
@@ -101,12 +101,63 @@ form-single-col
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-    if ( e.page != this.id ) return;
-    this.AppStateModel.showLoading();
-    await this._getRequiredPageData();
-    this.AppStateModel.showLoaded(this.id);
+    this._setPage(e);
   }
- /**
+
+
+
+  /**
+   * @description Sets subpage based on location hash
+   * @param {Object} e
+   */
+  async _setPage(e){
+    if ( e.page != this.id ) return;
+    if (this.page == "information") this._onReturn();
+
+    this.requestId = e.location.hash;
+
+    /* This is for when the query option works */
+    // this.requestId = e.location.query.id;
+
+    this.AppStateModel.showLoading(this.id);
+
+    if(this.requestId && this.requestId != ""){
+      this.getInformation();
+    }
+
+    this.AppStateModel.showLoaded();
+
+  }
+
+
+  /**
+   * @description get information page data
+   * @returns
+   */
+  async getInformation(){
+    let id = this.requestId;
+
+    const r = await this.PersonModel.getPersonById(id, 'iamId', 'select');
+
+    if( r.state === this.PersonModel.store.STATE.LOADED ) {
+      this.isFetching = false;
+      this.selectedPersonProfile = r.payload;
+      this.alma = await this.AlmaUserModel.getAlmaUserById(this.selectedPersonProfile.userID, "almaId");
+      this.selectedPersonDepInfo = this.selectedPersonProfile.ppsAssociations;
+      this.selectedPersonStdInfo = this.selectedPersonProfile.sisAssociations;
+      this.informationHeaderID = this.selectedPersonProfile.iamId;
+      this.page = 'information';
+        
+    } else if( r.state === this.PersonModel.store.STATE.ERROR ) {
+      this.isFetching = false;
+      this.wasError = true;
+    }
+
+    this.dispatchEvent(new CustomEvent('select', {detail: {status: r}}));
+    if ( this.resetOnSelect ) this.reset();
+  }
+
+  /**
    * @description Disables the shadowdom
    * @returns
    */
@@ -114,7 +165,7 @@ form-single-col
     return this;
   }
 
-    /**
+  /**
    * @method _onTokenRefreshed
    * @description bound to AuthModel token-refreshed event
    * @param {AccessToken} token
@@ -213,6 +264,18 @@ form-single-col
     this.selectedPersonId = '';
     this.selectedPersonProfile = {};
   }
+  /**
+   * @description return to lookup page
+   * @param {*} e - Submit event
+   */
+  async _onReturn(e){
+    if ( this.isFetching ) return;
+
+    // reset state
+    this.wasError = false;
+    this.page = 'form';
+    this.reset();
+  }
 
   /**
    * @description Attached to submit event on element form
@@ -266,29 +329,15 @@ form-single-col
     this.wasError = false;
     this.isFetching = true;
 
-    this.selectedPersonId = id;
-    const r = await this.PersonModel.getPersonById(id, 'iamId', 'select');
-    
-    if( r.state === this.PersonModel.store.STATE.LOADED ) {
-      this.isFetching = false;
-      this.selectedPersonProfile = r.payload;
-      this.alma = await this.AlmaUserModel.getAlmaUserById(this.selectedPersonProfile.userID, "almaId");
-      console.log(this.alma);
-      this.selectedPersonDepInfo = this.selectedPersonProfile.ppsAssociations;
-      this.selectedPersonStdInfo = this.selectedPersonProfile.sisAssociations;
-      this.informationHeaderID = this.selectedPersonProfile.iamId;
-      this.page = 'information';
-    } else if( r.state === this.PersonModel.store.STATE.ERROR ) {
-      this.isFetching = false;
-      this.wasError = true;
-    }
+    this.AppStateModel.setLocation('/patron#' + id);
 
-    this.dispatchEvent(new CustomEvent('select', {detail: {status: r}}));
-    if ( this.resetOnSelect ) this.reset();
+    /* This is for when the query option works */
+    // this.AppStateModel.setLocation('/patron?id=' + id);
+
 
   }
 
-    /**
+  /**
    * @description Opens the employee info modal
    */
   openAlmaInfoModal(){
