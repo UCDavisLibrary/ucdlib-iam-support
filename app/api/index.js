@@ -9,7 +9,6 @@ const rt = require('./rt');
 const auth = require('./auth');
 const alma = require('./alma');
 const employees = require('./employees');
-const patron = require('./patron');
 
 // middleware
 auth(router);
@@ -22,7 +21,6 @@ permissions(router);
 rt(router);
 alma(router);
 employees(router);
-patron(router);
 
 module.exports = (app) => {
   app.use('/api', router);
