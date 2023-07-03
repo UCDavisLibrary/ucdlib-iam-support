@@ -118,9 +118,9 @@ export function render() {
       </ol>
       ${this.results.length ? html`
         <div class='results-list'>
-          <p class='results-label'>Select an Onboarding Request:</p>
+          <p class='results-label'>Select an ${this.resultLabel} Request:</p>
           ${this.results.map(r => html`
-            <a href="/onboarding/${r.id}" class="media-link link" @click=${() => this._onSelect(r)}>
+            <a href="${this.link}${r.id}" class="media-link link" @click=${() => this._onSelect(r)}>
                 <div class='media-link__body'>
                     <h3 class="heading--highlight">${r.additional_data.employeeFirstName} ${r.additional_data.employeeLastName}</h3>
                     ${r.additional_data.employeeId ? html`

@@ -8,7 +8,7 @@ export function render() {
   return html`
   <div class='l-container l-basic--flipped'>
     <div class="l-sidebar-second">
-      <a href="/onboarding/new" class="focal-link category-brand--redbud u-space-mb">
+      <a href="/separation/new" class="focal-link category-brand--redbud u-space-mb">
         <div class="focal-link__figure focal-link__icon">
           <i class="fas fa-user-plus fa-2x"></i>
         </div>
@@ -28,34 +28,35 @@ export function render() {
       </div>
     </div>
     <div class="l-content">
-      <ucdlib-iam-onboarding-list
+      <ucdlib-iam-separation-list
         id=${this.activeId}
         panel-title='All Active Requests'
         panel-icon='fa-folder-open'
         brand-color='arboretum'
         open-status='open'
-        no-results-message='There are no active onboarding requests at this time.'
+        no-results-message='There are no active separation requests at this time.'
+        auto-update
         ?hidden=${!this.canViewActiveList}
       >
-    </ucdlib-iam-onboarding-list>
-    <ucdlib-iam-onboarding-list
+    </ucdlib-iam-separation-list>
+    <ucdlib-iam-separation-list
         id=${this.supervisorId}
         panel-title='Your Employees'
         panel-icon='fa-network-wired'
         brand-color='poppy'
         supervisor-id=${this.userIamId}
-        no-results-message="You don't have any employee onboarding requests"
+        no-results-message="You don't have any employee separation requests"
+        auto-update
       >
-    </ucdlib-iam-onboarding-list>
+    </ucdlib-iam-separation-list>
     </div>
   </div>
-  <ucdlib-iam-modal id='ob-search' dismiss-text='Close' content-title="Search For Prior Onboarding Records" auto-width>
-    <ucdlib-iam-existing-search
+  <ucdlib-iam-modal id='sp-search' dismiss-text='Close' content-title="Search For Prior Separation Records" auto-width>
+  <ucdlib-iam-existing-search
       search-param='name'
       widget-title=''
       @onboarding-select=${this.hideSearchModal}
-      class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'
-      onboarding>
+      class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
     </ucdlib-iam-existing-search>
   </ucdlib-iam-modal>
 `;}

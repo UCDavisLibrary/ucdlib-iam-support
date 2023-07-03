@@ -19,6 +19,9 @@ class AppStateStoreImpl extends AppStateStore {
       onboardingTransfer: {text: 'Transfer', link: `/onboarding/new#transfer`},
       usersSearch: {text: 'New Request', link: `/users/search`},
       separation: {text: 'Separation', link: 'separation'},
+      separationNew: {text: 'New Request', link: '/separation/new'},
+      separationNewLookup: {text: 'Lookup Employee', link: '/separation/new#lookup'},
+      separationNewSubmission: {text: 'Submission', link: '/separation/new#submission'},
       permissions: {text: 'Permissions', link: '/permissions'},
       permissionsReport: {text: 'Select a Direct Report', link: '/permissions#report'},
       permissionsApplications: {text: 'Select Applications', link: '/permissions#applications'},
@@ -30,6 +33,7 @@ class AppStateStoreImpl extends AppStateStore {
       onboarding: 'Onboarding',
       separation: 'Separation',
       onboardingNew: 'New Onboarding Request',
+      separationNew: 'New Separation Request',
       usersSearch: 'Alma Users Search',
       permissions: 'Employee Permissions'
     };
