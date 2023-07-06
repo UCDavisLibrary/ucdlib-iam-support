@@ -111,19 +111,17 @@ import "../components/ucdlib-iam-modal";
    * @param {Object} e
    */
   async _setPage(e){
+    console.log(e);
     if ( e.page != this.id ) return;
     if (this.page == "information") this._onReturn();
+    this.AppStateModel.showLoading(this.id);
 
     this.requestId = e.location.hash;
-
-    /* This is for when the query option works */
-    // this.requestId = e.location.query.id;
-
-    this.AppStateModel.showLoading(this.id);
 
     if(this.requestId && this.requestId != ""){
       this.getInformation();
     }
+    
 
     this.AppStateModel.showLoaded();
 
@@ -270,7 +268,7 @@ import "../components/ucdlib-iam-modal";
    */
   async _onReturn(e){
     if ( this.isFetching ) return;
-
+    console.log(e);
     // reset state
     this.wasError = false;
     this.reset();
@@ -331,10 +329,13 @@ import "../components/ucdlib-iam-modal";
     this.isFetching = true;
 
     this.AppStateModel.setLocation('/patron#' + id);
-
     /* This is for when the query option works */
-    // this.AppStateModel.setLocation('/patron?id=' + id);
+    // this.AppStateModel.setLocation('/patron?q=' + id);
 
+
+    this.AppStateModel.refresh();
+    
+    
 
   }
 

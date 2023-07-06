@@ -24,7 +24,7 @@ class AppStateStoreImpl extends AppStateStore {
       permissionsApplications: {text: 'Select Applications', link: '/permissions#applications'},
       permissionsEmployee: {text: 'Select a UC Davis Employee', link: '/permissions#employee'},
       patronLookup: {text: 'Search by Patron Lookup Tool', link: '/patron'},
-
+      // patronLookupResults: {text: 'Patron Tool Results', link: '/patron#'},
     };
 
     // static page title values

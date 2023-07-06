@@ -72,6 +72,15 @@ export function styles() {
       margin-bottom: .5rem;
       font-weight: 700;
     }
+    .tbl {
+      border: 1px solid #b0d0ed;
+    }
+    .tLeft {
+      float:left;
+    }
+    .tRight {
+      float:right;
+    }
   `;
 
   return [
@@ -134,10 +143,6 @@ export function render() {
           </form>
         </div>
         <div  id='results'>
-          <ol class='breadcrumbs'>
-            <li><a class='link' @click=${() => this.page = 'form'}>Search Form</a></li>
-            <li>Results</li>
-          </ol>
           ${this.results.length ? html`
             <div class='results-list'>
               <p class='results-label'>Select an Employee:</p>
@@ -155,75 +160,92 @@ export function render() {
                 </a>
               `)}
           </div>
+          <br />
+          <button @click=${() => this.page = 'form'} class="btn btn--block btn--alt btn--search">Back To Search</button>
           ` : html`
             <div class="alert">No people matched your search.</div>
           `}
         </div>
         <div id="information">
           <div class="field-container">
-              ${this.selectedPersonProfile ? html`
-                <div>
-                  <div>
-                      <tbody>
-                        ${this.informationHeaderID ? html`<tr><td><h6>General Information for IAM ${this.informationHeaderID}</td></h6></tr>`:html``}
-                        ${this.selectedPersonProfile.oFullName ? html`<tr><td><strong>Name</td></strong><td>${this.selectedPersonProfile.oFullName}</td></tr>`:html``}
-                        ${this.selectedPersonProfile.studentId ? html`<tr><td><strong>Student ID</td></strong><td>${this.selectedPersonProfile.studentId}</td></tr>`:html``}
-                        ${this.selectedPersonProfile.employeeId ? html`<tr><td><strong>Employee ID</td></strong><td>${this.selectedPersonProfile.employeeId}</td></tr>`:html``}
-                        ${this.selectedPersonProfile.userID ? html`<tr><td><strong>Kerberos ID</td></strong><td>${this.selectedPersonProfile.userID}</td></tr>`:html``}
-                        ${this.selectedPersonProfile.email ? html`<tr><td><strong>Email</td></strong><td>${this.selectedPersonProfile.email}</td></tr>`:html``}
-                        ${this.alma ? html`<tr><td><strong>Alma</td></strong><td><a class='pointer icon icon--circle-arrow-right' @click=${this.openAlmaInfoModal}>Alma Record: <strong>${this.alma.id}</strong></a></td></tr>`:html``}
-                      </tbody>
-                  </div>
-                  <br/>
-                  <div>
-                    <tbody>
-                      ${this.informationHeaderID ? html`<tr><td><h6>Affiliation for IAM ${this.informationHeaderID}</td></h6></tr>`:html``}
-                      ${this.selectedPersonProfile ? html`<tr><td><strong>Is Student</td></strong><td>${this.selectedPersonProfile.isStudent ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</td></tr>`:html``}
-                      ${this.selectedPersonProfile ? html`<tr><td><strong>Is Employee</td></strong><td>${this.selectedPersonProfile.isEmployee ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</td></tr>`:html``}
-                      ${this.selectedPersonProfile ? html`<tr><td><strong>Is External</td></strong><td>${this.selectedPersonProfile.isExternal ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</td></tr>`:html``}
-                      ${this.selectedPersonProfile ? html`<tr><td><strong>Is Faculty</td></strong><td>${this.selectedPersonProfile.isFaculty ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</td></tr>`:html``}
-                      ${this.selectedPersonProfile ? html`<tr><td><strong>Is Staff</td></strong><td>${this.selectedPersonProfile.isStaff ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</td></tr>`:html``}
-                      ${this.selectedPersonProfile ? html`<tr><td><strong>Is HS Employee</td></strong><td>${this.selectedPersonProfile.isHSEmployee ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</td></tr>`:html``}
-                    </tbody>
-                  </div>
-                  <br/>
-                  ${this.selectedPersonDepInfo ? html`
-                    <div>
-                      <tbody>
-                        ${this.selectedPersonDepInfo.map(dep =>html`
-                          ${this.informationHeaderID ? html`<tr><td><h6>Department Information for IAM ${this.informationHeaderID}</td></h6></tr>`:html``}
-                          <tr><td><strong>Title</td></strong><td>${dep.titleOfficialName ? html`${dep.titleOfficialName} (${dep.titleCode})`: html`<p>Not Listed</p>`}</td></tr>
-                          <tr><td><strong>Position Type</td></strong><td>${dep.positionType ? html`${dep.positionType} (${dep.positionTypeCode})`: html`<p>Not Listed</p>`}</td></tr>
-                          <tr><td><strong>Department</td></strong><td>${dep.deptOfficialName ? html`${dep.deptOfficialName} (${dep.deptCode})`: html`<p>Not Listed</p>`}</td></tr>
-                          <tr><td><strong>Start Date</td></strong><td>${dep.assocStartDate ? html`${dtUtls.fmtDatetime(dep.assocStartDate, true, true)}`: html`<p>Not Listed</p>`}</td></tr>
-                          <tr><td><strong>End Date</td></strong><td>${dep.assocEndDate ? html`${dtUtls.fmtDatetime(dep.assocEndDate, true, true)}`: html`<p>Indefinite</p>`}</td></tr>
-                          <tr><td><strong>Admin Title</td></strong><td>${dep.adminDeptOfficialName ? html`${dep.adminDeptOfficialName} (${dep.adminDept})`: html`<p>Not Listed</p>`}</td></tr>
-                          <tr><td><strong>Appointment</td></strong><td>${dep.apptDeptOfficialName ? html`${dep.apptDeptOfficialName} (${dep.apptDeptCode})`: html`<p>Not Listed</p>`}</td></tr>
-                        `)}
-                      </tbody>
-                    </div>
-                  `:html``}
-                  <br/>
-                  ${this.selectedPersonStdInfo ? html`
-                    <div>
-                      <tbody>
-                        ${this.selectedPersonStdInfo.map(std => html`
-                          ${this.informationHeaderID ? html`<tr><td><h6>Student Information for IAM ${this.informationHeaderID}</td></h6></tr>`:html``}
-                          <tr><td><strong>College</td></strong><td>${std.collegeName ? html`${std.collegeName}`: html`<p>Not Listed</p>`}</td></tr>
-                          <tr><td><strong>Class</td></strong><td>${std.className ? html`${std.className}`: html`<p>Not Listed</p>`}</td></tr>
-                          <tr><td><strong>Level</td></strong><td>${std.levelName ? html`${std.levelName}`: html`<p>Not Listed</p>`}</td></tr>
-                          <tr><td><strong>Major</td></strong><td>${std.majorName ? html`${std.majorName}`: html`<p>Not Listed</p>`}</td></tr>
-                          <tr><td><strong>Start Date</td></strong><td>${std.createDate ? html`${dtUtls.fmtDatetime(std.createDate, true, true)}`: html`<p>Not Listed</p>`}</td></tr>
-                          <tr><td><strong>Modify Date</td></strong><td>${std.modifyDate ? html`${dtUtls.fmtDatetime(std.modifyDate, true, true)}`: html`<p>Not Listed</p>`}</td></tr>
-                        `)}
-                      </tbody>
-                    </div>
-                  `:html``}
-                  <br/>
+            ${this.selectedPersonProfile ? html`
+              <button @click=${this._onReturn} class="btn btn--block btn--alt btn--search">Return to Patron Lookup</button>
+              <br />
 
-                  <button @click=${this._onReturn} class="btn btn--block btn--alt btn--search">Return to Patron Lookup</button>
-                </div> 
-              `:html`<h4>There is no information on this individual in the IAM Database.</h4>`}
+              <div>
+                <div class="boxer">
+                  <div class="box-row"><!--Headings-->
+                    <div class="box"><h6>General Information for IAM ${this.informationHeaderID}</h6></div>
+                    <div class="box hide"></div>
+                  </div>
+
+                  ${this.selectedPersonProfile.oFullName ? html`<div class="box-row"><div class="box"><strong>Name</strong></div><div class="box">${this.selectedPersonProfile.oFullName}</div></div>`:html``}
+                  ${this.selectedPersonProfile.studentId ? html`<div class="box-row"><div class="box"><strong>Student ID</strong></div><div class="box">${this.selectedPersonProfile.studentId}</div></div>`:html``}
+                  ${this.selectedPersonProfile.employeeId ? html`<div class="box-row"><div class="box"><strong>Employee ID</strong></div><div class="box">${this.selectedPersonProfile.employeeId}</div></div>`:html``}
+                  ${this.selectedPersonProfile.userID ? html`<div class="box-row"><div class="box"><strong>Kerberos ID</strong></div><div class="box">${this.selectedPersonProfile.userID}</div></div>`:html``}
+                  ${this.selectedPersonProfile.email ? html`<div class="box-row"><div class="box"><strong>Email</strong></div><div class="box">${this.selectedPersonProfile.email}</div></div>`:html``}
+                  ${this.alma ? html`<div class="box-row"><div class="box"><strong>Alma</strong></div><div class="box"><a class='pointer icon icon--circle-arrow-right' @click=${this.openAlmaInfoModal}>Alma Record: <strong>${this.alma.id}</strong></a></div></div>`:html``}
+
+                </div>
+                <br />
+
+                <div class="boxer">
+                  <div class="box-row"><!--Headings-->
+                    <div class="box"><h6>Affiliation for IAM ${this.informationHeaderID}</h6></div>
+                    <div class="box hide"></div>
+                  </div>
+
+                  ${this.selectedPersonProfile ? html`<div class="box-row"><div class="box"><strong>Is Student</strong></div><div class="box">${this.selectedPersonProfile.isStudent ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile ? html`<div class="box-row"><div class="box"><strong>Is Employee</strong></div><div class="box">${this.selectedPersonProfile.isEmployee ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`} </div></div>`:html``}
+                  ${this.selectedPersonProfile ? html`<div class="box-row"><div class="box"><strong>Is External</strong></div><div class="box">${this.selectedPersonProfile.isExternal ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile ? html`<div class="box-row"><div class="box"><strong>Is Faculty</strong></div><div class="box">${this.selectedPersonProfile.isFaculty ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile ? html`<div class="box-row"><div class="box"><strong>Is Staff</strong></div><div class="box">${this.selectedPersonProfile.isStaff ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile ? html`<div class="box-row"><div class="box"><strong>Is HS Employee</strong></div><div class="box">${this.selectedPersonProfile.isHSEmployee ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
+
+                </div>
+                <br />
+
+                ${this.selectedPersonDepInfo ? html`
+                  <div class="boxer">
+                    <div class="box-row"><!--Headings-->
+                      <div class="box"><h6>Department Information for IAM ${this.informationHeaderID}</h6></div>
+                      <div class="box hide"></div>
+                    </div>
+
+                    ${this.selectedPersonDepInfo.map(dep =>html`
+                          <div class="box-row"><div class="box"><strong>Title</strong></div><div class="box">${dep.titleOfficialName ? html`${dep.titleOfficialName} (${dep.titleCode})`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Position Type</strong></div><div class="box">${dep.positionType ? html`${dep.positionType} (${dep.positionTypeCode})`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Department</strong></div><div class="box">${dep.deptOfficialName ? html`${dep.deptOfficialName} (${dep.deptCode})`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${dep.assocStartDate ? html`${dtUtls.fmtDatetime(dep.assocStartDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>End Date</strong></div><div class="box">${dep.assocEndDate ? html`${dtUtls.fmtDatetime(dep.assocEndDate, true, true)}`: html`<p>Indefinite</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Admin Title</strong></div><div class="box">${dep.adminDeptOfficialName ? html`${dep.adminDeptOfficialName} (${dep.adminDept})`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Appointment</strong></div><div class="box">${dep.apptDeptOfficialName ? html`${dep.apptDeptOfficialName} (${dep.apptDeptCode})`: html`<p>Not Listed</p>`}</div></div>
+                    `)}
+                  </div>
+                  <br />
+                `:html``}
+
+
+                ${this.selectedPersonStdInfo ? html`
+                  <div class="boxer">
+                    <div class="box-row"><!--Headings-->
+                      <div class="box"><h6>Student Information for IAM ${this.informationHeaderID}</h6></div>
+                      <div class="box hide"></div>
+                    </div>
+
+                    ${this.selectedPersonStdInfo.map(std =>html`
+                          <div class="box-row"><div class="box"><strong>College</strong></div><div class="box">${std.collegeName ? html`${std.collegeName}`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Class</strong></div><div class="box">${std.className ? html`${std.className}`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Level</strong></div><div class="box">${std.levelName ? html`${std.levelName}`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Major</strong></div><div class="box">${std.classdesc ? html`${std.classdesc}`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${std.createDate ? html`${dtUtls.fmtDatetime(std.createDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Modify Date</strong></div><div class="box">${std.modifyDate ? html`${dtUtls.fmtDatetime(std.modifyDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
+                    `)}
+                  </div>
+                  <br />
+                `:html``}
+              </div> 
+            `:html`<h4>There is no information on this individual in the IAM Database.</h4>`}
           </div>
         </div>
       </ucdlib-pages>
