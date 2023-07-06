@@ -331,8 +331,6 @@ module.exports = (api) => {
     const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
     const { default: Pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
 
-    // TODO: move auth here. change query to be by supervisorId as well for non hr/admin request
-
     const r = await UcdlibOnboarding.getById(req.params.id);
     if ( r.err ) {
       console.error(r.err);

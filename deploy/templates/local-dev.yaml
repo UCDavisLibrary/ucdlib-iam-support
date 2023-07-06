@@ -23,7 +23,8 @@ services:
       - ../../app/client:/app/client
       - ../../app/lib:/app/lib
       - ../../lib:/iam-support-lib
-    command: bash -c "tail -f /dev/null"
+    # command: bash -c "tail -f /dev/null"
+    command: node index.js
   cli:
     image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
     env_file:
