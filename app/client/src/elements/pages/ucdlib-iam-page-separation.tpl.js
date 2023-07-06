@@ -35,7 +35,6 @@ export function render() {
         brand-color='arboretum'
         open-status='open'
         no-results-message='There are no active separation requests at this time.'
-        auto-update
         ?hidden=${!this.canViewActiveList}
       >
     </ucdlib-iam-separation-list>
@@ -46,7 +45,6 @@ export function render() {
         brand-color='poppy'
         supervisor-id=${this.userIamId}
         no-results-message="You don't have any employee separation requests"
-        auto-update
       >
     </ucdlib-iam-separation-list>
     </div>

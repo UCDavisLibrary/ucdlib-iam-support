@@ -31,7 +31,7 @@ export default class UcdlibIamPageSeparation extends window.Mixin(LitElement)
 
   /**
    * @description Disables the shadowdom
-   * @returns 
+   * @returns
    */
   createRenderRoot() {
     return this;
@@ -87,9 +87,11 @@ export default class UcdlibIamPageSeparation extends window.Mixin(LitElement)
    */
   async _onAppStateUpdate(e) {
     if ( e.page != this.id ) return;
+    this.AppStateModel.showLoading(this.id);
+    await this. _getRequiredPageData();
     this.AppStateModel.showLoaded(this.id);
   }
-  
+
 
   showSearchModal(){
     const modal = this.querySelector('#sp-search');
