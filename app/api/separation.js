@@ -4,7 +4,7 @@ module.exports = (api) => {
         res.status(403).json({
           error: true,
           message: 'Not authorized to access this resource.'
-        }); 
+        });
         return;
       }
 
@@ -14,9 +14,9 @@ module.exports = (api) => {
       const payload = req.body;
 
       if ( !payload.additionalData ) payload.additionalData = {};
-  
+
       payload.submittedBy = req.auth.token.id;
-  
+
       const r = await UcdlibSeparation.create(payload);
       if ( r.err ) {
         console.error(r.err);
@@ -30,21 +30,21 @@ module.exports = (api) => {
       const ad = payload.additionalData;
       const notifySupervisor = ad.supervisorEmail;
       const employeeName = `${ad.employeeLastName}, ${ad.employeeFirstName}`;
-  
+
       // create rt ticket
       const rtClient = new UcdlibRt(config.rt);
       const ticket = new UcdlibRtTicket();
 
       ticket.addSubject(`Separation: ${employeeName}`);
       ticket.addOwner(config.rt.user);
-  
+
       if ( !config.rt.forbidCc) {
         if ( notifySupervisor ) {
           ticket.addCc( ad.supervisorEmail );
         }
       }
-  
-  
+
+
       // ticket content
       ticket.addContent();
       ticket.addContent(`<h4>Employee</h4>`);
@@ -95,14 +95,14 @@ module.exports = (api) => {
           return;
         }
       }
-  
+
       await UcdlibSeparation.update(output.id, {rtTicketId: rtResponse.res.id});
       return res.json(output);
-  
+
     });
-  
- 
-  
+
+
+
     api.get('/separation/search', async (req, res) => {
       if (
         !req.auth.token.hasAdminAccess &&
@@ -113,7 +113,7 @@ module.exports = (api) => {
         });
         return;
       }
-  
+
       if ( !req.query.firstName && !req.query.lastName ) {
         res.status(400).json({
           error: true,
@@ -121,7 +121,7 @@ module.exports = (api) => {
         });
         return;
       }
-  
+
       const { default: getByName } = await import('@ucd-lib/iam-support-lib/src/utils/getByName.js');
 
       const r = await getByName.getByName("separation",req.query.firstName, req.query.lastName);
@@ -132,18 +132,18 @@ module.exports = (api) => {
       }
       if ( !r.res.rows.length ){
         console.error(r.err);
-        res.json({error: true, message: 'Request does not exist!'});
+        res.status(404).json({error: true, message: 'Request does not exist!'});
         return;
       }
-  
+
       return res.json(r.res.rows);
-  
+
     });
-  
+
     api.post('/separation/:id?', async (req, res) => {
       const { default: UcdlibSeparation } = await import('@ucd-lib/iam-support-lib/src/utils/separation.js');
       const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
-  
+
       if (
         !req.auth.token.hasAdminAccess &&
         !req.auth.token.hasHrAccess ){
@@ -168,13 +168,13 @@ module.exports = (api) => {
       const obReq = TextUtils.camelCaseObject(r.res.rows[0]);
       return res.json(obReq);
 
-  
+
     });
 
     api.get('/separation/:id', async (req, res) => {
       const { default: UcdlibSeparation } = await import('@ucd-lib/iam-support-lib/src/utils/separation.js');
       const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
-  
+
       if (
         !req.auth.token.hasAdminAccess &&
         !req.auth.token.hasHrAccess ){
@@ -198,9 +198,9 @@ module.exports = (api) => {
       }
       const obReq = TextUtils.camelCaseObject(r.res.rows[0]);
       return res.json(obReq);
-  
+
     });
-  
+
     api.get('/separation', async (req, res) => {
       const { default: UcdlibSeparation } = await import('@ucd-lib/iam-support-lib/src/utils/separation.js');
       const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
@@ -217,14 +217,14 @@ module.exports = (api) => {
       }
 
       if ( req.query.isOpen != undefined ) q['isOpen'] = req.query.isOpen;
-  
+
       const errorMsg = 'Unable to retrieve separation requests';
       const q = {
         iamId: req.query.iamId,
         rtTicketId: req.query.rtTicketId,
         supervisorId: req.query.supervisorId
       };
-  
+
       const r = await UcdlibSeparation.query(q);
       if ( r.err ) {
         console.error(r.err);
@@ -232,11 +232,10 @@ module.exports = (api) => {
         return;
       }
 
-  
+
       const output = r.res.rows.map(row => {
         return TextUtils.camelCaseObject(row);
       });
       return res.json(output);
     });
     }
-  

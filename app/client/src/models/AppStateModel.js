@@ -72,7 +72,7 @@ class AppStateModelImpl extends AppStateModel {
       update.location.path.length > 1
     ) {
       p = 'onboarding-single';
-      
+
     } else if(
       update.location.path[0] == 'separation' &&
       update.location.path.length > 1
@@ -181,20 +181,21 @@ class AppStateModelImpl extends AppStateModel {
     } else if ( update.page === 'separation' ){
       breadcrumbs.show = true;
       breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.separation);
-      if ( update.page === 'separation-new' ) {
-        breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.separationNew);
-        if ( update.location.hash === 'lookup' ) {
-          breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.separationNewLookup);
-        } else if ( update.location.hash === 'submission' ) {
-          breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboardingNewSubmission);
-        } 
+    }
+    else if ( update.page === 'separation-new' ) {
+      breadcrumbs.show = true;
+      breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.separation);
+      breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.separationNew);
+      if ( update.location.hash === 'lookup' ) {
+        breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.separationNewLookup);
+      } else if ( update.location.hash === 'submission' ) {
+        breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboardingNewSubmission);
       }
     }
     else if ( update.page === 'permissions' ){
       breadcrumbs.show = true;
       breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.permissions);
     }
-
     this.store.emit('app-header-update', {breadcrumbs});
   }
 

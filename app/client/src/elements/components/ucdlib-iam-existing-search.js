@@ -157,7 +157,6 @@ export default class UcdlibIamExistingSearch extends window.Mixin(LitElement)
     let r = this.onboarding ? await this.OnboardingModel.recordSearch(q) : await this.SeparationModel.recordSearch(q);
     let error = this.onboarding ? this.OnboardingModel.store.STATE.ERROR : this.SeparationModel.store.STATE.ERROR;
     let loaded = this.onboarding ? this.OnboardingModel.store.STATE.LOADED : this.SeparationModel.store.STATE.LOADED;
-    console.log(r);
     this.link = this.onboarding ? "/onboarding/" : "/separation/";
     if ( r.state === loaded ) {
       this.isFetching = false;
@@ -180,10 +179,10 @@ export default class UcdlibIamExistingSearch extends window.Mixin(LitElement)
 
     if(this.onboarding) this.dispatchEvent(new CustomEvent('onboarding-search', {detail: {status: r}}));
     else this.dispatchEvent(new CustomEvent('separation-search', {detail: {status: r}}));
-    
-    
 
-    
+
+
+
 
   }
 

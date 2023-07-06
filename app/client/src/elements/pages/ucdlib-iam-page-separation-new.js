@@ -38,8 +38,7 @@ export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
     this.page = 'sp-lookup';
     this._resetEmployeeStateProps();
 
-    this._injectModel('AppStateModel', 'GroupModel', 'SeparationModel');
-    //this._setPage({location: this.AppStateModel.location, page: this.id}, false);
+    this._injectModel('AppStateModel', 'GroupModel', 'SeparationModel', 'AuthModel');
   }
 
 
@@ -113,7 +112,13 @@ export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-    this._setPage(e);
+    if (e.page != this.id ) return;
+    const token = this.AuthModel.getToken();
+    if ( token.canCreateRequests ){
+      this._setPage(e);
+    } else {
+      this.AppStateModel.showError('You do not have permission to create separation requests.');
+    }
   }
 
 
@@ -136,7 +141,7 @@ export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
     if ( !this.hasEmployeeRecord ) return;
     this.groups = this.employeeRecord.groups;
     this.iamId = this.employeeRecord.iamId;
-    this.id = this.employeeRecord.id;
+    this.dbId = this.employeeRecord.id;
     this.middleName = this.employeeRecord.middleName;
     this.primaryAssociation = this.employeeRecord.primaryAssociation;
     this.title = this.employeeRecord.title;
@@ -169,7 +174,6 @@ export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
    * @param {Object} e
    */
   async _setPage(e){
-    if (e.page != this.id ) return;
     this.AppStateModel.showLoading('separation-new');
     await this._getRequiredPageData(e.location.hash);
     this.AppStateModel.showLoaded();
@@ -245,7 +249,7 @@ export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
     payload.skipSupervisor = this.skipSupervisor;
     additionalData.employeeEmail = this.email;
     additionalData.groups = this.groups;
-    additionalData.id = this.id;
+    additionalData.id = this.dbId;
     additionalData.middleName = this.middleName;
     additionalData.primaryAssociation = this.primaryAssociation;
     additionalData.title = this.title;

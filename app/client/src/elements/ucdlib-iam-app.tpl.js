@@ -17,7 +17,7 @@ export function render() {
         <li><a href='/onboarding/new#transfer'>Transfer from Another Library Unit</a></li>
       </ul>
       <ul link-text='Separation' href='/separation'>
-        <li><a href='/separation/new'>From UC Davis Directory</a></li>
+        <li><a href='/separation/new'>New Request</a></li>
       </ul>
       <a href='/permissions'>Permissions</a>
     </ucd-theme-primary-nav>
