@@ -286,7 +286,10 @@ const addPermissionRtBody = (rtObject, data, req, skipIfEmpty = false) => {
     {name: 'Staff Intranet', value: p?.intranet},
     {name: 'Libcal', value: p?.libcal},
     {name: 'Libguides', value: p?.libguides},
-    {name: 'Slack', value: p?.slack}
+    {name: 'Slack', value: p?.slack},
+    {name: 'Calendly', value: p?.calendly},
+    {name: 'Lang Prize', value: p?.langPrize},
+    {name: 'Aggie Open', value: p?.aggieOpen}
   ];
   permissions.forEach(p => {
     try {

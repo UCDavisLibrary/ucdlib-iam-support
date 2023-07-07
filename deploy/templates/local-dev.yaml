@@ -105,7 +105,7 @@ services:
       - ../../utils/maintenance/src:/maintenance/src
       - ../../lib:/iam-support-lib
   db:
-    image: postgres
+    image: postgres:{{POSTGRES_TAG}}
     environment:
       POSTGRES_PASSWORD: localhost
     ports:

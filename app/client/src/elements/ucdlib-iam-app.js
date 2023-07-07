@@ -39,6 +39,7 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
   static get properties() {
     return {
       page: {type: String},
+      appVersion: {type: String},
       showPageTitle: {type: Boolean},
       pageTitle: {type: String},
       showBreadcrumbs: {type: Boolean},
@@ -58,6 +59,7 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
     this.pageTitle = '';
     this.showBreadcrumbs = false;
     this.breadcrumbs = [];
+    this.appVersion = AppConfig.version;
 
     this._injectModel('AppStateModel');
     this.AppStateModel.refresh();
