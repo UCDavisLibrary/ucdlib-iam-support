@@ -134,6 +134,7 @@ export function render() {
               ${this.renderUserIdForm()}
               ${this.renderEmployeeIdForm()}
               ${this.renderStudentIdForm()}
+              ${this.renderEmailForm()}
               ${this.renderNameForm()}
             </ucdlib-pages>
             <button 
@@ -169,9 +170,6 @@ export function render() {
         <div id="information">
           <div class="field-container">
             ${this.selectedPersonProfile ? html`
-              <button @click=${this._onReturn} class="btn btn--block btn--alt btn--search">Return to Patron Lookup</button>
-              <br />
-
               <div>
                 <div class="boxer">
                   <div class="box-row"><!--Headings-->
@@ -195,12 +193,12 @@ export function render() {
                     <div class="box hide"></div>
                   </div>
 
-                  ${this.selectedPersonProfile ? html`<div class="box-row"><div class="box"><strong>Is Student</strong></div><div class="box">${this.selectedPersonProfile.isStudent ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile ? html`<div class="box-row"><div class="box"><strong>Is Employee</strong></div><div class="box">${this.selectedPersonProfile.isEmployee ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`} </div></div>`:html``}
-                  ${this.selectedPersonProfile ? html`<div class="box-row"><div class="box"><strong>Is External</strong></div><div class="box">${this.selectedPersonProfile.isExternal ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile ? html`<div class="box-row"><div class="box"><strong>Is Faculty</strong></div><div class="box">${this.selectedPersonProfile.isFaculty ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile ? html`<div class="box-row"><div class="box"><strong>Is Staff</strong></div><div class="box">${this.selectedPersonProfile.isStaff ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile ? html`<div class="box-row"><div class="box"><strong>Is HS Employee</strong></div><div class="box">${this.selectedPersonProfile.isHSEmployee ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile.isStudent ? html`<div class="box-row"><div class="box"><strong>Is Student</strong></div><div class="box">${this.selectedPersonProfile.isStudent ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile.isEmployee ? html`<div class="box-row"><div class="box"><strong>Is Employee</strong></div><div class="box">${this.selectedPersonProfile.isEmployee ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`} </div></div>`:html``}
+                  ${this.selectedPersonProfile.isExternal ? html`<div class="box-row"><div class="box"><strong>Is External</strong></div><div class="box">${this.selectedPersonProfile.isExternal ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile.isFaculty ? html`<div class="box-row"><div class="box"><strong>Is Faculty</strong></div><div class="box">${this.selectedPersonProfile.isFaculty ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile.isStaff ? html`<div class="box-row"><div class="box"><strong>Is Staff</strong></div><div class="box">${this.selectedPersonProfile.isStaff ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile.isHSEmployee ? html`<div class="box-row"><div class="box"><strong>Is HS Employee</strong></div><div class="box">${this.selectedPersonProfile.isHSEmployee ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
 
                 </div>
                 <br />
@@ -281,6 +279,29 @@ export function renderUserIdForm(){
             placeholder="Enter a UC Davis computing account...">
         </div>
         
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * @description Renders form for querying by email
+ * @returns {TemplateResult}
+ */
+ export function renderEmailForm(){
+  const view = this.searchParamsByKey.email;
+  return html`
+    <div id=${view.attribute}>
+      <div class="field-container">
+        <label ?hidden=${!this.hideNav} for=${'inp-'+ view.attribute}>${view.label}</label>
+        <div class='text-input-container'>
+          <input 
+            @input=${(e) => this.email = e.target.value}
+            .value=${this.email}
+            id=${'inp-'+ view.attribute} 
+            type="email" 
+            placeholder="Enter an email address">
+        </div>
       </div>
     </div>
   `;

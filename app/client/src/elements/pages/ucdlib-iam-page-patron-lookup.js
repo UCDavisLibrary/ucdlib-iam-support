@@ -1,5 +1,6 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-patron-lookup.tpl.js";
+import dtUtls from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
 
 import "../components/ucdlib-iam-modal";
 
@@ -22,6 +23,7 @@ import "../components/ucdlib-iam-modal";
       studentId: {type: String, attribute: 'student-id'},
       employeeId: {type: String, attribute: 'employee-id'},
       userId: {type: String, attribute: 'user-id'},
+      email: {type: String, attribute: 'email'},
       hideResults: {type: Boolean, attribute: 'hide-results'},
       resetOnSelect: {type: Boolean, attribute: 'reset-on-select'},
       searchParams: {state: true},
@@ -48,6 +50,7 @@ import "../components/ucdlib-iam-modal";
     this.renderUserIdForm = Templates.renderUserIdForm.bind(this);
     this.renderEmployeeIdForm = Templates.renderEmployeeIdForm.bind(this);
     this.renderStudentIdForm = Templates.renderStudentIdForm.bind(this);
+    this.renderEmailForm = Templates.renderEmailForm.bind(this);
     this.renderNameForm = Templates.renderNameForm.bind(this);
 
     this.reset();
@@ -78,6 +81,12 @@ import "../components/ucdlib-iam-modal";
         key: 'userId',
         label: 'Kerberos',
         requiredProps: ['userId']
+      },
+      {
+        attribute: 'email',
+        key: 'email',
+        label: 'Email',
+        requiredProps: ['email']
       },
     ];
     this.searchParamsByKey = {};
@@ -111,12 +120,11 @@ import "../components/ucdlib-iam-modal";
    * @param {Object} e
    */
   async _setPage(e){
-    console.log(e);
     if ( e.page != this.id ) return;
     if (this.page == "information") this._onReturn();
     this.AppStateModel.showLoading(this.id);
 
-    this.requestId = e.location.hash;
+    this.requestId = e.location.query.iamid;
 
     if(this.requestId && this.requestId != ""){
       this.getInformation();
@@ -140,6 +148,10 @@ import "../components/ucdlib-iam-modal";
     if( r.state === this.PersonModel.store.STATE.LOADED ) {
       this.isFetching = false;
       this.selectedPersonProfile = r.payload;
+      console.log(this.selectedPersonProfile);
+      await this._setStateProperties(r.payload);
+      this.AppStateModel.setTitle({show: true, text: this.pageTitle()});
+      this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs: this.breadcrumbs()});
       this.alma = await this.AlmaUserModel.getAlmaUserById(this.selectedPersonProfile.userID, "almaId");
       this.selectedPersonDepInfo = this.selectedPersonProfile.ppsAssociations;
       this.selectedPersonStdInfo = this.selectedPersonProfile.sisAssociations;
@@ -153,6 +165,24 @@ import "../components/ucdlib-iam-modal";
 
     this.dispatchEvent(new CustomEvent('select', {detail: {status: r}}));
     if ( this.resetOnSelect ) this.reset();
+  }
+
+
+  /**
+   * @description Sets element state properties from onboarding request api payload
+   * @param {Object} payload from /api/onboarding/id:
+   */
+  async _setStateProperties(payload){
+    this.missingUid = payload.statusId == 9;
+    this.request = payload;
+    this.firstName = payload.oFirstName || '';
+    this.lastName = payload.oLastName || '';
+    this.middleName = payload.oMiddleName || '';
+    this.email = payload.email;
+    this.employeeId = payload.employeeId || '';
+    this.uuid = payload.uuid || '';
+    this.mothraId = payload.mothraId || '';
+    this.modifyDate = dtUtls.fmtDatetime(payload.modifyDate, true, true);
   }
 
   /**
@@ -231,6 +261,30 @@ import "../components/ucdlib-iam-modal";
     this.disableSearch = true;
     return true;
   }
+  /**
+   * @description Returns title for page header and breadcrumbs
+   * @returns {String}
+   */
+  pageTitle(){
+    if ( this.firstName && this.lastName ) {
+      return `${this.firstName} ${this.lastName}`;
+    }
+    return `Request ${this.requestId}`;
+  }
+
+  /**
+   * @description Returns breadcrumbs for this page
+   * @returns {Array}
+   */
+  breadcrumbs(){
+    return [
+      this.AppStateModel.store.breadcrumbs.home,
+      this.AppStateModel.store.breadcrumbs.patronLookup,
+      {text: this.pageTitle(), link: ''}
+    ];
+  }
+
+  
 
   /**
    * @description Returns the 'searchParams' object for the active search form
@@ -253,7 +307,6 @@ import "../components/ucdlib-iam-modal";
     this.userId = '';
     this.email = '';
     this.iamId = '';
-
     this.isFetching = false;
     this.wasError = false;
     this.page = 'form';
@@ -293,7 +346,7 @@ import "../components/ucdlib-iam-modal";
     if ( selectedParam.key === 'name' ){
       r = await this.PersonModel.getPersonByName(this.lastName, this.firstName, this.middleName, this.isDName);
     } else {
-      r = await this.PersonModel.getPersonById(this[selectedParam.key], selectedParam.key);
+      r = await this.PersonModel.getPersonById(this[selectedParam.key].toLowerCase(), selectedParam.key);
     }
 
     if ( r.state === this.PersonModel.store.STATE.LOADED ) {
@@ -328,9 +381,9 @@ import "../components/ucdlib-iam-modal";
     this.wasError = false;
     this.isFetching = true;
 
-    this.AppStateModel.setLocation('/patron#' + id);
+    // this.AppStateModel.setLocation('/patron#' + id);
     /* This is for when the query option works */
-    // this.AppStateModel.setLocation('/patron?q=' + id);
+    this.AppStateModel.setLocation('/patron?iamid=' + id);
 
 
     this.AppStateModel.refresh();

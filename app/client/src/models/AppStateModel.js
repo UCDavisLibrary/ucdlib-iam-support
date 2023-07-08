@@ -75,6 +75,7 @@ class AppStateModelImpl extends AppStateModel {
       update.location.path[0] == 'patron' &&
       update.location.path.length > 1
     ) {
+      console.log(update.location);
       p = 'patron';
     } else {
       p = update.location.path[0];
@@ -183,7 +184,6 @@ class AppStateModelImpl extends AppStateModel {
       breadcrumbs.show = true;
       breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.patronLookup);
     }
-
     this.store.emit('app-header-update', {breadcrumbs});
   }
 
