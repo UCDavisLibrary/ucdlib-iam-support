@@ -28,6 +28,7 @@ class AppStateModelImpl extends AppStateModel {
     this.setPage(update);
     this.setTitle(false, update);
     this.setBreadcrumbs(false, update);
+    this.closeNav();
 
     let res = super.set(update);
 
@@ -239,6 +240,16 @@ class AppStateModelImpl extends AppStateModel {
   showLoaded(page){
     page = page || this.store.lastPage;
     this.store.emit('app-status-change', {status: 'loaded', page});
+  }
+
+  /**
+   * @description Close the app's primary nav menu
+   */
+  closeNav(){
+    const ele = document.querySelector('ucd-theme-header');
+    if ( ele ) {
+      ele.close();
+    }
   }
 
 }

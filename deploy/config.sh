@@ -33,14 +33,14 @@ CLI_DIR=$ROOT_DIR/utils/cli
 ##
 
 # Container Registery
-CONTAINER_REG_ORG=gcr.io/digital-ucdavis-edu
+CONTAINER_REG_ORG=gcr.io/ucdlib-pubreg
 
-#if [[ -z $BRANCH_NAME ]]; then
-#  CONTAINER_CACHE_TAG=$(git rev-parse --abbrev-ref HEAD)
-#else
-#  CONTAINER_CACHE_TAG=$BRANCH_NAME
-#fi
-CONTAINER_CACHE_TAG='sandbox'
+if [[ -z $BRANCH_NAME ]]; then
+ CONTAINER_CACHE_TAG=$(git rev-parse --abbrev-ref HEAD)
+else
+ CONTAINER_CACHE_TAG=$BRANCH_NAME
+fi
+#CONTAINER_CACHE_TAG='sandbox'
 
 # set localhost/local-dev used by
 # local development docker-compose file

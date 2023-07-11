@@ -248,16 +248,16 @@ export class IamEmployees {
       if ( !employee.supervisor_id ){
         this.discrepancies.push({
           iam_id: employee.iam_id,
-          reason: UcdlibEmployees.outdatedReasons.noSupervisorIamRecord.slug
+          reason: UcdlibEmployees.outdatedReasons.noSupervisor.slug
         });
-      }
-
-      const supervisorIamRecord = await this._getIamRecord(employee.supervisor_id, 'iamId');
-      if ( this.iam.noEmployeeFound(supervisorIamRecord) ){
-        this.discrepancies.push({
-          iam_id: employee.iam_id,
-          reason: UcdlibEmployees.outdatedReasons.noSupervisorIamRecord.slug
-        });
+      } else {
+        const supervisorIamRecord = await this._getIamRecord(employee.supervisor_id, 'iamId');
+        if ( this.iam.noEmployeeFound(supervisorIamRecord) ){
+          this.discrepancies.push({
+            iam_id: employee.iam_id,
+            reason: UcdlibEmployees.outdatedReasons.noSupervisorIamRecord.slug
+          });
+        }
       }
     }
   }

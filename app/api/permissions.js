@@ -1,4 +1,8 @@
 module.exports = (api) => {
+
+  /**
+   * @description Get a single permission request by either 'update' id or 'onboarding' id, denoted by idType url param
+   */
   api.get('/permissions/:id', async (req, res) => {
     const { default: PermissionsRequests } = await import('@ucd-lib/iam-support-lib/src/utils/permissions.js');
     const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
@@ -60,6 +64,9 @@ module.exports = (api) => {
     return res.json(pRes.res.rows.map(r => TextUtils.camelCaseObject(r)));
   });
 
+  /**
+   * @description Create a new permissions request tied to an onboarding or update request.
+   */
   api.post('/permissions', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
     const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
@@ -186,7 +193,6 @@ module.exports = (api) => {
         return res.status(400).json({error: true, message: 'Unable to create facilities RT request.'});
       }
     }
-
 
     // update existing onboarding/permissions request RT ticket
     if ( data.rtTicketId ){

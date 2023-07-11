@@ -58,6 +58,18 @@ steps:
     - name: 'config'
       path: '/config'
 
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: "docker"
+    args: ["push", '${_LIB_IMAGE_NAME_TAG}']
+
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: "docker"
+    args: ["push", '${_APP_IMAGE_NAME_TAG}']
+
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: "docker"
+    args: ["push", '${_UTILS_IMAGE_NAME_TAG}']
+
 substitutions:
   _CONFIG_BUCKET: ci-build-config
   _CONFIG_PROJECT: itis-iam-support

@@ -1,4 +1,9 @@
 module.exports = (api) => {
+
+  /**
+   * @description get all direct reports for a user, from local db
+   * Returns blank array if no reports
+   */
   api.get('/employees/direct-reports', async (req, res) => {
     const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
     const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js')
@@ -18,6 +23,10 @@ module.exports = (api) => {
   });
 
 
+  /**
+   * @description search for library employees from local db. Can use the following url query parameters:
+   * - name: search by name
+   */
   api.get('/employees/search', async (req, res) => {
     const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
     const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');

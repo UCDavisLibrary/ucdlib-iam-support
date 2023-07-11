@@ -2,6 +2,10 @@ const jwt_decode = require('jwt-decode');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 module.exports = (api) => {
+
+  /**
+   * @description Middleware to check for access token and parse it
+   */
   api.use(async (req, res, next) => {
     const { default: AccessToken } = await import('@ucd-lib/iam-support-lib/src/utils/accessToken.js');
     const { default: UcdlibCache } = await import('@ucd-lib/iam-support-lib/src/utils/cache.js');
@@ -45,25 +49,6 @@ module.exports = (api) => {
       next();
       return;
     }
-
-    // discover userinfo endpoint
-    /**
-    try {
-      const wellKnown = await fetch(`${token.iss}/.well-known/openid-configuration`);
-      if ( !wellKnown.ok ) {
-        throw new Error(`HTTP Error Response: ${wellKnown.status} ${wellKnown.statusText}`)
-      }
-      oidcConfig = await wellKnown.json();
-      if ( !oidcConfig.userinfo_endpoint ) throw new Error('Missing userinfo endpoint');
-    } catch (error) {
-      console.log(error);
-      res.status(401).json({
-        error: true,
-        message: 'Unable to access openid configuration.'
-      });
-      return;
-    }
-    */
 
     // fetch userinfo with access token
     try {

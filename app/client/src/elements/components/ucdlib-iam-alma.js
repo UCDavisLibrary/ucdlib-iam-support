@@ -5,12 +5,12 @@ import AlmaTransform from "@ucd-lib/iam-support-lib/src/utils/AlmaTransform";
 
 /**
  * @description Component element for querying the UC Davis Alma API
- * 
+ *
  * Example
  *    <div class="l-container">
         <div class="panel o-box" style="border: 1px solid #ffbf00;">
           <ucdlib-iam-alma
-              search-param='name' 
+              search-param='name'
               class='u-space-px--medium u-space-py--medium u-align--auto'>
             </ucdlib-iam-alma>
         </div>
@@ -59,7 +59,7 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     this.render = Templates.render.bind(this);
     this.renderAlmaIdForm = Templates.renderAlmaIdForm.bind(this);
     this.renderNameForm = Templates.renderNameForm.bind(this);
-    
+
     this._injectModel('AppStateModel', 'AlmaUserModel');
     this.roles = [];
     this.page = 'alma-home';
@@ -87,7 +87,7 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     });
 
     this.searchParam = 'name';
-    
+
     // display options
     this.hideNav = false;
     this.hideNavOptions = '';
@@ -145,7 +145,7 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
   willUpdate(props) {
     // validates attribute for loading element with a specified search form
     if ( props.has('searchParam') ){
-      if ( 
+      if (
         !this.searchParam ||
         !this.searchParams.map(x => x.attribute).includes(this.searchParam)
       ) {
@@ -175,7 +175,7 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
 
   /**
    * @description Sets state properties from Alma record class
-   * @param {*} record 
+   * @param {*} record
    */
   _setStatePropertiesFromAlmaRecord(record){
     this.account_type = record.account_type;
@@ -194,7 +194,7 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     this.user_roles = roleArr;
 
   }
-  
+
 
   /**
    * @description Disables form submit if actively fetching or missing required inputs
@@ -217,7 +217,7 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     const selectedRoles =  e.detail.map(g => this.roles.find(({code}) => code === g.value));
     this.user_roles = selectedRoles.map((r) => {
       if ( !r ) return false;
-      if (!r.code || !r.description) return false; 
+      if (!r.code || !r.description) return false;
       return {
         code: r.code,
         description: r.description,
@@ -271,13 +271,18 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
     } else if (selectedParam.key === 'almaId') {
       r = await this.AlmaUserModel.getAlmaUserById(this[selectedParam.key], selectedParam.key);
     }// } else {
-    //   r = await this.AlmaUserModel.getAlmaUserRoleType(); 
+    //   r = await this.AlmaUserModel.getAlmaUserRoleType();
     // }
     let allRoles = await this.AlmaUserModel.getAlmaUserRoleType();
 
     if ( r.state === this.AlmaUserModel.store.STATE.LOADED ) {
-      if('user' in r.payload) r = r.payload.user;
-      else if('users' in r.payload) r = r.payload.users.user;
+      if ('user' in r.payload) {
+        r = r.payload.user;
+      } else if ('users' in r.payload) {
+        r = r.payload.users.user;
+      } else {
+        r = [];
+      }
 
       this.isFetching = false;
       this.results = Array.isArray(r) ? r : [r];
@@ -295,7 +300,7 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
       } else {
         this.wasError = true;
       }
-    } 
+    }
 
     this.dispatchEvent(new CustomEvent('search', {detail: {status: r}}));
 
@@ -304,12 +309,12 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
   _onRoletypeUpdate(e){
     if ( e.state == 'loaded'){
       this.roles = e.payload.row;
-    } 
+    }
   }
-  
+
   /**
    * @description Displays error or reroutes to home if something with the page state is wrong
-   * @returns 
+   * @returns
    */
   _validatePage(){
     if ( this.page === 'alma-submission' ){
@@ -318,16 +323,16 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
         this.AppStateModel.setLocation('#home');
         return;
       }
-    } 
+    }
   }
 
   /**
    * @description Sets subpage based on location hash
-   * @param {Object} e 
+   * @param {Object} e
    */
   async _setPage(e){
     if (e.page != this.id ) return;
-  
+
     this.AppStateModel.showLoading('alma');
     await this._getRequiredPageData(e.location.hash);
     this.AppStateModel.showLoaded();
@@ -342,7 +347,7 @@ export default class UcdlibIamAlma extends window.Mixin(LitElement)
   /**
    * @description Attached to click listeners on results page
    * @param {Number} id - IAM ID
-   * @returns 
+   * @returns
    */
   async _onUserClick(id){
     if ( this.isFetching ) return;
