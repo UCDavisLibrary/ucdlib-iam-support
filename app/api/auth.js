@@ -26,6 +26,7 @@ module.exports = (api) => {
       token = req.headers.authorization.replace('Bearer ', '');
       token = jwt_decode(token)
       if ( !token.iss ) throw new Error('Missing iss');
+      if ( !token.jti ) throw new Error('Missing jti');
     } catch (error) {
       console.log(error);
       res.status(401).json({
@@ -40,14 +41,18 @@ module.exports = (api) => {
     if ( cached.err ) {
       console.error(cached.err);
     }
-    if ( cached.res && cached.res.rows.length ) {
+    if ( cached.res && cached.res.rowCount ) {
       cached = cached.res.rows[0];
-      req.auth = {
-        token: new AccessToken(cached.data.token, config.keycloak.clientId),
-        userInfo: cached.data.userInfo
+      const cachedToken = cached.data.token;
+      const tokenExpiration = new Date(cachedToken.exp * 1000);
+      if ( tokenExpiration >= (new Date()).getTime() && cachedToken.jti === token.jti ) {
+        req.auth = {
+          token: new AccessToken(cached.data.token, clientId),
+          userInfo: cached.data.userInfo
+        }
+        next();
+        return;
       }
-      next();
-      return;
     }
 
     // fetch userinfo with access token
