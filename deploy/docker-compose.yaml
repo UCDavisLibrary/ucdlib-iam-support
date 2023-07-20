@@ -1,7 +1,7 @@
 version: '3'
 services:
   app:
-    image: gcr.io/ucdlib-pubreg/itis-iam-support-app:v1.0.0
+    image: gcr.io/ucdlib-pubreg/itis-iam-support-app:v1.0.1
     env_file:
       - .env
     ports:
@@ -11,7 +11,7 @@ services:
       - db
     command: node index.js
   cli:
-    image: gcr.io/ucdlib-pubreg/itis-iam-support-utils:v1.0.0
+    image: gcr.io/ucdlib-pubreg/itis-iam-support-utils:v1.0.1
     restart: always
     env_file:
       - .env
@@ -19,7 +19,7 @@ services:
       - db
     command: /cli/cli.sh
   backup:
-    image: gcr.io/ucdlib-pubreg/itis-iam-support-utils:v1.0.0
+    image: gcr.io/ucdlib-pubreg/itis-iam-support-utils:v1.0.1
     restart: always
     env_file:
       - .env
@@ -31,9 +31,9 @@ services:
       SQL_FILE_NAME: 'itis-iam.sql.gz'
     command: /backup/entrypoint.sh
     volumes:
-      - ../../gc-itis-iam-writer-key.json:/etc/service-account.json
+      - ../gc-itis-iam-writer-key.json:/etc/service-account.json
   init:
-    image: gcr.io/ucdlib-pubreg/itis-iam-support-utils:v1.0.0
+    image: gcr.io/ucdlib-pubreg/itis-iam-support-utils:v1.0.1
     restart: always
     env_file:
       - .env
@@ -45,9 +45,9 @@ services:
       SQL_FILE_NAME: 'itis-iam.sql.gz'
     command: /init/init.sh
     volumes:
-      - ../../gc-itis-iam-reader-key.json:/etc/service-account.json
+      - ../gc-itis-iam-reader-key.json:/etc/service-account.json
   maintenance:
-    image: gcr.io/ucdlib-pubreg/itis-iam-support-utils:v1.0.0
+    image: gcr.io/ucdlib-pubreg/itis-iam-support-utils:v1.0.1
     restart: always
     env_file:
       - .env

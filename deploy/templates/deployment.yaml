@@ -31,7 +31,7 @@ services:
       SQL_FILE_NAME: 'itis-iam.sql.gz'
     command: /backup/entrypoint.sh
     volumes:
-      - ../../gc-itis-iam-writer-key.json:/etc/service-account.json
+      - ../gc-itis-iam-writer-key.json:/etc/service-account.json
   init:
     image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
     restart: always
@@ -45,7 +45,7 @@ services:
       SQL_FILE_NAME: 'itis-iam.sql.gz'
     command: /init/init.sh
     volumes:
-      - ../../gc-itis-iam-reader-key.json:/etc/service-account.json
+      - ../gc-itis-iam-reader-key.json:/etc/service-account.json
   maintenance:
     image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
     restart: always
