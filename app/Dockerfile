@@ -20,6 +20,11 @@ RUN cd client && npm link @ucd-lib/iam-support-lib
 COPY client/src client/src
 COPY client/scss client/scss
 COPY client/public/index.html client/public/index.html
+COPY client/public/logged-out.html client/public/logged-out.html
+COPY client/public/unauthorized.html client/public/unauthorized.html
+COPY client/public/silent-check-sso.html client/public/silent-check-sso.html
+COPY client/public/fonts client/public/fonts
+COPY client/public/img client/public/img
 COPY client/build-config.js client/build-config.js
 COPY client/webpack-dist.config.js client/webpack-dist.config.js
 
