@@ -6,19 +6,14 @@ services:
       - .env
     ports:
       - ${UCDLIB_APP_HOST_PORT:-3000}:3000
-    deploy:
-      restart_policy:
-        condition: any
-        max_attempts: 5
+    restart: always
     depends_on:
       - db
     command: node index.js
   cli:
     image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
     deploy:
-      restart_policy:
-        condition: any
-        max_attempts: 5
+    restart: always
     env_file:
       - .env
     depends_on:
@@ -26,10 +21,7 @@ services:
     command: /cli/cli.sh
   backup:
     image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
-    deploy:
-      restart_policy:
-        condition: any
-        max_attempts: 5
+    restart: always
     env_file:
       - .env
     depends_on:
@@ -43,9 +35,6 @@ services:
       - ../gc-itis-iam-writer-key.json:/etc/service-account.json
   init:
     image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
-    deploy:
-      restart_policy:
-        condition: none
     env_file:
       - .env
     depends_on:
@@ -59,10 +48,7 @@ services:
       - ../gc-itis-iam-reader-key.json:/etc/service-account.json
   maintenance:
     image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
-    deploy:
-      restart_policy:
-        condition: any
-        max_attempts: 5
+    restart: always
     env_file:
       - .env
     depends_on:
@@ -70,10 +56,7 @@ services:
     command: /maintenance/entrypoint.sh
   db:
     image: postgres:{{POSTGRES_TAG}}
-    deploy:
-      restart_policy:
-        condition: any
-        max_attempts: 5
+    restart: always
     env_file:
       - .env
     volumes:
