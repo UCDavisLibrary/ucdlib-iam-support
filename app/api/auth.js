@@ -47,7 +47,7 @@ module.exports = (api) => {
       const tokenExpiration = new Date(cachedToken.exp * 1000);
       if ( tokenExpiration >= (new Date()).getTime() && cachedToken.jti === token.jti ) {
         req.auth = {
-          token: new AccessToken(cached.data.token, clientId),
+          token: new AccessToken(cached.data.token, config.keycloak.clientId),
           userInfo: cached.data.userInfo
         }
         next();
