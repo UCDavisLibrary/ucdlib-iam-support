@@ -19,11 +19,21 @@ program
 
 program
   .command('search')
-  .description('Search for employees')
-  .argument('[name]', 'Employee name')
-  .addOption(new Option('--format <format>', 'Output format').choices(outputChoices).default('table'))
+  .description('Search for employees by name')
+  .argument('<name>', 'Employee name')
+  //.addOption(new Option('--format <format>', 'Output format').choices(outputChoices).default('table'))
   .action((name, options) => {
     employees.search(name, options);
+  }
+);
+
+program
+  .command('get')
+  .description('Get an employee by id')
+  .argument('<id>', 'Employee unique indentifier')
+  .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(idChoices).default('iamId'))
+  .action((id, options) => {
+    employees.get(id, options);
   }
 );
 

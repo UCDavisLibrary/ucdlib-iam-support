@@ -106,19 +106,29 @@ class employeesCli {
    * @returns
    */
   async search(name, options){
-    let r;
-    if ( name ) {
-      r = await UcdlibEmployees.searchByName(name);
-    }
+    let r = await UcdlibEmployees.searchByName(name);
 
-    if ( !r || r.err ) {
-      console.error(`Error searching for employees\n${r ? r.err.message : ''}`);
-      await pg.client.end();
-      return;
-    }
     utils.logObject(r.res.rows);
     await pg.client.end();
   }
+
+  /**
+   * @description Get an employee by id
+   * @param {String} id - Employee unique indentifier
+   * @param {*} options
+   */
+  async get(id, options){
+    const idType = options.idtype ? options.idtype : 'iamId';
+    id = id.trim();
+    const r = await UcdlibEmployees.getById(id, idType, {returnGroups: true, returnSupervisor: true});
+    await pg.client.end();
+    if ( r.res.rowCount ) {
+      utils.logObject(r.res.rows);
+    } else {
+      console.log(`Employee ${id} not found`);
+    }
+  }
+
 
   /**
    * @description Adopt an employee into the Library IAM database
