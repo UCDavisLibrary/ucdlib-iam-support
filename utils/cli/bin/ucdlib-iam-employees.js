@@ -1,5 +1,5 @@
-const {Command, Option} = require('commander');
-const employees = require('../lib/employees');
+import { Command, Option } from 'commander';
+import employees from '../lib/employees.js';
 const program = new Command();
 
 const idChoices = ['iamId', 'employeeId', 'userId', 'email', 'id'];

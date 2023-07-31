@@ -1,4 +1,8 @@
-const config = require('./cli-config.js');
+import config from './cli-config.js';
+import iamAdmin from '@ucd-lib/iam-support-lib/src/utils/admin.js';
+import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
+import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
+import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.js';
 
 class employeesCli {
 
@@ -9,10 +13,6 @@ class employeesCli {
    */
   async adopt(onboardingId, options){
     console.log(`Adopting employee from onboarding record ${onboardingId} with options:`, options);
-    
-    const { default: iamAdmin } = await import('@ucd-lib/iam-support-lib/src/utils/admin.js');
-    const { default: pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
-    const { UcdlibRt, UcdlibRtTicket } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
 
     const forceMessage = 'Use --force to override this check.';
 
@@ -47,7 +47,7 @@ class employeesCli {
         pg.client.end();
         return;
       }
-      
+
     }
 
     // comment on rt ticket
@@ -74,8 +74,6 @@ class employeesCli {
    * @param {String} iamId - Employee IAM id
    */
   async dismissRecordDiscrepancyNotifications(iamId){
-    const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
-    const { default: pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
     const r = await UcdlibEmployees.dismissRecordDiscrepancyNotifications(iamId);
     await pg.client.end();
     if ( r.err) {
@@ -86,12 +84,10 @@ class employeesCli {
   }
 
   async updateCreationDate(id, idtype){
-    const { default: iamAdmin } = await import('@ucd-lib/iam-support-lib/src/utils/admin.js');
-    const { default: pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
     const r = await iamAdmin.updateEmployeeCreationDate(id, idtype);
     console.log(`${r.error ? 'Error:' : 'Success:'} ${r.message}`);
     await pg.client.end();
   }
 }
 
-module.exports = new employeesCli();
+export default new employeesCli();

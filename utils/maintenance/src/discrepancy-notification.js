@@ -13,8 +13,9 @@ new CronJob(
 );
 
 async function run() {
+  let thisJob;
   try {
-    const thisJob = await UcdlibJobs.start('discrepancy-notification');
+    thisJob = await UcdlibJobs.start('discrepancy-notification');
     // get recent notifications
     const notifications = await UcdlibEmployees.getActiveRecordDiscrepancyNotifications(config.slack.iamSyncCacheThreshold);
     if ( notifications.err ) throw notifications.err;

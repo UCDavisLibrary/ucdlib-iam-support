@@ -1,6 +1,6 @@
 #! /usr/bin/env node
-const {Command} = require('commander');
-const config = require('../lib/cli-config.js');
+import { Command } from 'commander';
+import config from '../lib/cli-config.js';
 
 const program = new Command();
 program
