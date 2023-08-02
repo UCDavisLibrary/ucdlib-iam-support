@@ -3,6 +3,10 @@ import { printTable } from 'console-table-printer';
 
 class UtilsCli{
 
+  constructor(){
+    this.employeeIds = ['iamId', 'employeeId', 'userId', 'email', 'id'];
+  }
+
   logObject(data){
     console.log(util.inspect(data, { showHidden: false, depth: null, colors: true }));
   }

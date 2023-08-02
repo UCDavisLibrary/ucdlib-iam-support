@@ -4,7 +4,11 @@ import iamAdmin from '@ucd-lib/iam-support-lib/src/utils/admin.js';
 import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
 import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
 import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.js';
+import IamPersonTransform from '@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js';
+import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
+import * as fs from 'node:fs/promises';
 
+UcdIamModel.init(config.ucdIamApi);
 
 
 class employeesCli {
@@ -229,6 +233,123 @@ class employeesCli {
     const r = await iamAdmin.updateEmployeeCreationDate(id, idtype);
     console.log(`${r.error ? 'Error:' : 'Success:'} ${r.message}`);
     await pg.client.end();
+  }
+
+  async createTemplate(name){
+    const template = {
+      "iam_id": "",
+      "first_name": "",
+      "last_name": "",
+      "middle_name": "",
+      "title": "",
+      "supervisor_id": "",
+      "custom_supervisor": false,
+      "primary_association": {
+        "deptCode": "",
+        "titleCode": ""
+      },
+      "groups": [
+        {
+          "id": "",
+          "isHead": false
+        }
+      ]
+    }
+
+    // write template to json file
+    if ( !name.endsWith('.json') ) name += '.json';
+    await fs.writeFile(name, JSON.stringify(template, null, 2));
+
+  }
+
+  async addToDb(file, options){
+    const forceMessage = 'Use --force to override this check.';
+    const force = options.force;
+    let dataToWrite = {};
+
+    // Read employee template file
+    const fileContents = await fs.readFile(file, 'utf8');
+    const employee = JSON.parse(fileContents);
+    const iamId = employee.iam_id;
+    if ( !iamId ) {
+      console.error(`Iam id is required`);
+      return;
+    }
+
+    // check if employee exists in uc davis iam
+    let iamRecord = await UcdIamModel.getPersonByIamId(iamId);
+    if ( iamRecord.error ) {
+      console.error(`Unable to retrieve UC Davis IAM record for ${iamId}`);
+      console.log(iamRecord);
+      return;
+    }
+    iamRecord = new IamPersonTransform(iamRecord);
+
+    // check if employee already exists in local db
+    // const localRecord = await UcdlibEmployees.getById(iamId, 'iamId');
+    // if ( localRecord.res.rowCount ) {
+    //   await pg.client.end();
+    //   console.error(`Employee ${iamId} already exists in local database`);
+    //   console.error('Use the update command if you need to update the record');
+    //   return;
+    // }
+
+    // Check has basic employee data
+    let args = {
+      iamRecord,
+      templateRecord: employee,
+      force
+    }
+    let d = iamAdmin.extractAndPopulateEmployeeFields(args);
+    if ( d.error ) {
+      console.error(`Error validating employee data\n${d.error.message}`);
+      if ( d.error.canForce ) console.error(forceMessage);
+      await pg.client.end();
+      return;
+    }
+    dataToWrite = {...dataToWrite, ...d.employeeData};
+
+    // validate appointments
+    const primaryAssociation = employee.primary_association?.deptCode || employee.primary_association?.titleCode ? employee.primary_association : {};
+    const appointments = await iamAdmin.validateAppointments(iamRecord, primaryAssociation, force);
+    if ( appointments.error ) {
+      console.error(`Error validating appointments\n${appointments.error.message}`);
+      if ( appointments.error.canForce ) console.error(forceMessage);
+      await pg.client.end();
+      return;
+    }
+    dataToWrite.primaryAssociation = primaryAssociation;
+    dataToWrite.ucdDeptCode = iamRecord.primaryAssociation.deptCode;
+
+    // validate supervisor
+    if ( employee.supervisor_id ) {
+      const supervisor = await iamAdmin.employeeRecordsExist(employee.supervisor_id, force);
+      if ( supervisor.error ) {
+        console.error(`Error validating supervisor\n${supervisor.error.message}`);
+        if ( supervisor.error.canForce ) console.error(forceMessage);
+        await pg.client.end();
+        return;
+      }
+      if ( supervisor.iamRecord.employeeId != iamRecord.supervisorEmployeeId && !force ) {
+        console.error(`Error validating supervisor`);
+        console.error(`Specified supervisor not listed in primary association of UC Davis IAM record`);
+        console.error(`Use --force to override this check`);
+        await pg.client.end();
+        return;
+      }
+    }
+
+    // validate groups
+    const groups = await iamAdmin.validateGroupList(employee.groups, false, force);
+    if ( groups.error ) {
+      console.error(`Error validating groups\n${groups.error.message}`);
+      if ( groups.error.canForce ) console.error(forceMessage);
+      await pg.client.end();
+      return;
+    }
+    console.log(dataToWrite)
+    await pg.client.end();
+
   }
 
 }
