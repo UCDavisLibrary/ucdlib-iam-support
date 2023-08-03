@@ -262,6 +262,132 @@ class employeesCli {
 
   }
 
+  async updatePrimaryAssociation(id, deptCode, titleCode, options){
+    const idType = options.idtype ? options.idtype : 'iamId';
+    id = id.trim();
+
+    // check if employee exists
+    const employee = await utils.validateEmployee(id, idType);
+    if ( !employee ) return;
+
+    // check for iam record
+    const iamRecord = await utils.validateIamRecord(employee.iam_id);
+    if ( !iamRecord ) return;
+
+    if ( iamRecord.appointments.length <= 1 ){
+      console.error(`Employee has only one appointment. No need to update primary association.`);
+      await pg.client.end();
+      return;
+    }
+
+    const association = iamRecord.getAssociation(deptCode, titleCode, true);
+    if ( !Object.keys(association).length ) {
+      console.error(`Employee does not have an appointment with department code ${deptCode} and title code ${titleCode}`);
+      console.log('Available appointments:');
+      utils.logObject(iamRecord.appointments);
+      await pg.client.end();
+      return;
+    }
+
+    // validate supervisor
+    let supervisorId;
+    if ( !employee.custom_supervisor ){
+      const supervisorEmployeeId = iamRecord.getSupervisorEmployeeId();
+      if ( !supervisorEmployeeId ) {
+        console.error(`Error: Appointment does not have a supervisor listed`);
+        console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
+        await pg.client.end();
+        return;
+      }
+      const supervisor = await UcdIamModel.getPersonByEmployeeId(supervisorEmployeeId);
+      if ( supervisor.error ) {
+        if ( !UcdIamModel.noEmployeeFound(supervisor) ) {
+          console.log(`Error interacting with IAM API: ${supervisor.message}`);
+          console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
+        } else {
+          console.log(`No record found for supervisor ${supervisorEmployeeId} in UCD IAM`);
+          console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
+        }
+        await pg.client.end();
+        return
+      }
+      supervisorId = supervisor.iamId;
+    }
+
+    // update employee record
+    const d = {primaryAssociation: {deptCode, titleCode}, ucdDeptCode: deptCode};
+    if ( supervisorId ) d.supervisorId = supervisorId;
+    const update = await UcdlibEmployees.update(employee.id, d);
+    if ( update.err ) {
+      console.error(`Error updating employee record\n${update.err.message}`);
+    } else {
+      console.log(`Updated primary association of ${employee.first_name} ${employee.last_name}`);
+    }
+
+    await pg.client.end();
+
+  }
+
+  async resetPrimaryAssociation(id, options){
+    const idType = options.idtype ? options.idtype : 'iamId';
+    id = id.trim();
+
+    // check if employee exists
+    const employee = await utils.validateEmployee(id, idType);
+    if ( !employee ) return;
+
+    // check for iam record
+    const iamRecord = await utils.validateIamRecord(employee.iam_id);
+    if ( !iamRecord ) return;
+
+    if ( iamRecord.appointments.length > 1 ){
+      console.error(`Employee has more than one appointment. Use the update-primary-association command to set a new primary association.`);
+      await pg.client.end();
+      return;
+    }
+    if ( !iamRecord.appointments.length ){
+      console.error(`Employee has no appointments. Cannot reset primary association.`);
+      await pg.client.end();
+      return;
+    }
+
+    // validate supervisor
+    let supervisorId;
+    if ( !employee.custom_supervisor ){
+      const supervisorEmployeeId = iamRecord.getSupervisorEmployeeId();
+      if ( !supervisorEmployeeId ) {
+        console.error(`Error: Appointment does not have a supervisor listed`);
+        console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
+        await pg.client.end();
+        return;
+      }
+      const supervisor = await UcdIamModel.getPersonByEmployeeId(supervisorEmployeeId);
+      if ( supervisor.error ) {
+        if ( !UcdIamModel.noEmployeeFound(supervisor) ) {
+          console.log(`Error interacting with IAM API: ${supervisor.message}`);
+          console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
+        } else {
+          console.log(`No record found for supervisor ${supervisorEmployeeId} in UCD IAM`);
+          console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
+        }
+        await pg.client.end();
+        return
+      }
+      supervisorId = supervisor.iamId;
+    }
+
+    // update employee record
+    const d = {primaryAssociation: {}, ucdDeptCode: iamRecord.getPrimaryAssociation().deptCode};
+    if ( supervisorId ) d.supervisorId = supervisorId;
+    const update = await UcdlibEmployees.update(employee.id, d);
+    if ( update.err ) {
+      console.error(`Error updating employee record\n${update.err.message}`);
+    } else {
+      console.log(`Reset primary association of ${employee.first_name} ${employee.last_name}`);
+    }
+    await pg.client.end();
+  }
+
   async addToDb(file, options){
     const forceMessage = 'Use --force to override this check.';
     const force = options.force;
@@ -319,7 +445,7 @@ class employeesCli {
       return;
     }
     dataToWrite.primaryAssociation = primaryAssociation;
-    dataToWrite.ucdDeptCode = iamRecord.primaryAssociation.deptCode;
+    dataToWrite.ucdDeptCode = iamRecord.getPrimaryAssociation().deptCode;
 
     // validate supervisor
     if ( employee.supervisor_id ) {
@@ -330,7 +456,7 @@ class employeesCli {
         await pg.client.end();
         return;
       }
-      if ( supervisor.iamRecord.employeeId != iamRecord.supervisorEmployeeId && !force ) {
+      if ( supervisor.iamRecord.employeeId != iamRecord.getSupervisorEmployeeId() && !force ) {
         console.error(`Error validating supervisor`);
         console.error(`Specified supervisor not listed in primary association of UC Davis IAM record`);
         console.error(`Use --force to override this check`);

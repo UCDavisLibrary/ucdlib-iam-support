@@ -13,6 +13,10 @@ The application does not assign permissions, but creates, routes, and tracks sys
 ## CLI
 The command line interface (in `/utils/cli`) is designed to be used by ITIS to perform adminstrative actions, such as loading a user into Keycloak and assigning permissions.
 
+To use the CLI:
+1. bash into container: `docker compose exec cli bash`
+2. run commands: `ucdlib-iam --help`
+
 ## Backup Utility
 
 Located in `utils/backup`, this container will automatically back up the database to the `itis-iam` Google Cloud Storage bucket if `NIGHTLY_BACKUPS` and `BACKUP_ENV` env variables are set.

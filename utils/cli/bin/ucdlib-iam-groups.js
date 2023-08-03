@@ -1,11 +1,12 @@
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import groups from '../lib/groups.js';
 import utils from '../lib/utils.js';
 const program = new Command();
 
 program
   .command('list')
-  .description('list of library departments/groups')
+  .alias('ls')
+  .description('List of library departments/groups')
   .option('-act, --active', 'Active Groups', false)
   .option('-arc, --archived', 'Only Archived Groups', false)
   .option('-g, --group_type <type>',  'group type by id')
@@ -18,7 +19,7 @@ program
   .option('-c, --child', 'A child table', false)
   .option('--return_head', 'Return head of group', false)
   .action((options) => {
-    groups.groupsUcd(options);
+    groups.list(options);
   });
 
 program
@@ -30,9 +31,42 @@ program
   });
 
 program
-  .command('inspect')
-  .description('Inspect a single group')
+  .command('add-head')
+  .description('Add head of group')
   .argument('<group_id>', 'group id')
+  .argument('<employee_id>', 'Employee unique indentifier. See idtype option for possible values')
+  .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(utils.employeeIds).default('iamId'))
+  .option('-m, --member', 'Overrides error employee is not already a group member.', false)
+  .action((group_id, employee_id, options) => {
+    groups.addHead(group_id, employee_id, options);
+  });
+
+program
+  .command('remove-member')
+  .description('Remove member from group')
+  .argument('<group_id>', 'group id')
+  .argument('<employee_id>', 'Employee unique indentifier. See idtype option for possible values')
+  .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(utils.employeeIds).default('iamId'))
+  .option('-f, --force', 'Force removal of employee', false)
+  .action((group_id, employee_id, options) => {
+    groups.removeMember(group_id, employee_id, options);
+  });
+
+program
+  .command('add-member')
+  .description('Add member to group')
+  .argument('<group_id>', 'group id')
+  .argument('<employee_id>', 'Employee unique indentifier. See idtype option for possible values')
+  .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(utils.employeeIds).default('iamId'))
+  .option('-f, --force', 'Force removal of employee', false)
+  .action((group_id, employee_id, options) => {
+    groups.addMember(group_id, employee_id, options);
+  });
+
+program
+  .command('inspect')
+  .description('Retrieve all group information')
+  .argument('<group_id...>', 'A group id or ids')
   .action((group_id) => {
     groups.inspect(group_id);
   });

@@ -91,6 +91,28 @@ program
 );
 
 program
+  .command('update-primary-association')
+  .description('Update the primary association of an employee record. If custom_supervisor is set to false, the supervisor will be updated.')
+  .argument('<id>', 'an Employee unique indentifier')
+  .argument('<deptCode>', 'Department code of the new primary association')
+  .argument('<titleCode>', 'Title code of the new primary association')
+  .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(utils.employeeIds).default('iamId'))
+  .action((id, deptCode, titleCode, options) => {
+    employees.updatePrimaryAssociation(id, deptCode, titleCode, options);
+    }
+);
+
+program
+  .command('reset-primary-association')
+  .description('Reset the primary association of an employee to their only association.')
+  .argument('<id>', 'an Employee unique indentifier')
+  .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(utils.employeeIds).default('iamId'))
+  .action((id, options) => {
+    employees.resetPrimaryAssociation(id, options);
+  }
+);
+
+program
   .command('create-template')
   .description('Make a json template for an employee record. Should be used in conjunction with the add command')
   .argument('<name>', 'File name')
@@ -102,7 +124,7 @@ program
 program
   .command('add')
   .description('Add a UC Davis employee to the local database. Skips the onboarding process.')
-  .argument('<file>', 'Employee record json file')
+  .argument('<file>', 'Employee record json file. Use the create-template command to make one.')
   .option('-f, --force', 'force adoption even if employee is missing crucial data')
   .action((file, options) => {
     employees.addToDb(file, options);

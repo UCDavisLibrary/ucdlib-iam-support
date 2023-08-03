@@ -154,7 +154,7 @@ export class IamEmployees {
       if ( !UcdlibEmployees.libDeptCodes.includes(employee.ucd_dept_code)) {
         let libApptStart = new Date(employee.created);
         libApptStart.setDate(libApptStart.getDate()-5); // grace period of 5 days
-        const iamAppStart = new Date(iamRecord.primaryAssociation.assocStartDate);
+        const iamAppStart = new Date(iamRecord.getPrimaryAssociation().assocStartDate);
         if ( libApptStart < iamAppStart ) {
           this.discrepancies.push({
             iam_id: employee.iam_id,
@@ -199,7 +199,7 @@ export class IamEmployees {
       if ( !employee.custom_supervisor ){
         existingEmployeeRecord.supervisorId = employee.supervisor_id;
 
-        const supervisorEmployeeId = iamRecord.supervisorEmployeeId;
+        const supervisorEmployeeId = iamRecord.getSupervisorEmployeeId();
         if ( supervisorEmployeeId ) {
           let supervisorIamId = this.employeeIdToIamId[supervisorEmployeeId];
           if ( supervisorIamId ) {

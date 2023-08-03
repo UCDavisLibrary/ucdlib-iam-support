@@ -203,7 +203,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
         this.iamRecord.allSupervisorEmployeeIds.forEach( async empId => {
           let emp = await this.PersonModel.getPersonById(empId, 'employeeId', false);
           emp = new IamPersonTransform(emp.payload);
-          if ( emp.employeeId == this.iamRecord.supervisorEmployeeId ){
+          if ( emp.employeeId == this.iamRecord.getSupervisorEmployeeId() ){
             this.supervisor = emp;
             this.supervisorEmail = this.supervisor.email;
           }
