@@ -1,5 +1,7 @@
 FROM node:18
 
+RUN apt-get update && apt-get install -y vim
+
 RUN mkdir /iam-support-lib
 WORKDIR /iam-support-lib
 

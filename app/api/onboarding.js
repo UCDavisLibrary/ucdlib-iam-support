@@ -1,4 +1,8 @@
 module.exports = (api) => {
+
+  /**
+   * @description Create a new onboarding request
+   */
   api.post('/onboarding/new', async (req, res) => {
     if ( !req.auth.token.canCreateRequests ){
       res.status(403).json({
@@ -64,7 +68,7 @@ module.exports = (api) => {
     }
     const output = r.res.rows[0];
 
-    // needed variables
+    // needed variables for RT ticket
     const ad = payload.additionalData;
     const notifySupervisor = ad.supervisorEmail && !ad.skipSupervisor;
     let department =  await UcdlibGroups.getDepartmentsById(payload.groupIds || []);
@@ -87,7 +91,6 @@ module.exports = (api) => {
         }
       }
     }
-
 
     // ticket content
     ticket.addContent();
@@ -290,6 +293,11 @@ module.exports = (api) => {
     return res.json({success: true});
   });
 
+  /**
+   * @description Search for a previously-submitted onboarding request, with the following url query params:
+   * firstName - first name of employee
+   * lastName - last name of employee
+   */
   api.get('/onboarding/search', async (req, res) => {
     if (
       !req.auth.token.hasAdminAccess &&
@@ -308,9 +316,9 @@ module.exports = (api) => {
       });
       return;
     }
+    const { default: getByName } = await import('@ucd-lib/iam-support-lib/src/utils/getByName.js');
 
-    const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
-    const r = await UcdlibOnboarding.getByName(req.query.firstName, req.query.lastName);
+    const r = await getByName.getByName("onboarding",req.query.firstName, req.query.lastName);
     if ( r.err ) {
       console.error(r.err);
       res.json({error: true, message: 'Unable to retrieve SEARCH onboarding request'});
@@ -325,13 +333,14 @@ module.exports = (api) => {
 
   });
 
+  /**
+   * @description Get a single onboarding request by id
+   */
   api.get('/onboarding/:id', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
     const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
     const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
     const { default: Pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
-
-    // TODO: move auth here. change query to be by supervisorId as well for non hr/admin request
 
     const r = await UcdlibOnboarding.getById(req.params.id);
     if ( r.err ) {
@@ -467,6 +476,14 @@ module.exports = (api) => {
       return res.json({success: true, data: backgroundCheck});
     });
 
+  /**
+   * @description Query for existing onboarding requests by the following query params:
+   * statusId - status id of request
+   * iamId - iam id of employee
+   * rtTicketId - rt ticket id of request
+   * supervisorId - iam id of supervisor
+   * isOpen - boolean indicating whether request is open or closed
+   */
   api.get('/onboarding', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
     const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');

@@ -39,6 +39,7 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
   static get properties() {
     return {
       page: {type: String},
+      appVersion: {type: String},
       showPageTitle: {type: Boolean},
       pageTitle: {type: String},
       showBreadcrumbs: {type: Boolean},
@@ -58,15 +59,16 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
     this.pageTitle = '';
     this.showBreadcrumbs = false;
     this.breadcrumbs = [];
+    this.appVersion = AppConfig.version;
 
     this._injectModel('AppStateModel');
     this.AppStateModel.refresh();
   }
-  
+
 
   /**
    * @description Disables the shadowdom
-   * @returns 
+   * @returns
    */
   createRenderRoot() {
     return this;
@@ -106,7 +108,7 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
     if ( !bundleAlreadyLoaded ){
       this.AppStateModel.store.emit('app-state-update', e);
       AuthModel._onAuthRefreshSuccess();
-    } 
+    }
 
     //this.page = e.page;
     window.scroll(0,0);
@@ -114,7 +116,7 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
 
   /**
    * @description bound to AppStateModel app-header-update event
-   * @param {Object} e 
+   * @param {Object} e
    */
   _onAppHeaderUpdate(e){
     if ( e.breadcrumbs ) {
@@ -155,11 +157,11 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
    * @description code splitting done here
    *
    * @param {String} bundle bundle to load
-   * 
+   *
    * @returns {Promise}
    */
   loadBundle(bundle) {
-    
+
     if( bundle == 'all' ) {
       return import(/* webpackChunkName: "pages" */ "./pages/bundles/all");
     }
@@ -169,7 +171,7 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
 
   /**
    * @description Get name of bundle a page element is in
-   * @param {*} page 
+   * @param {*} page
    * @returns {String}
    */
   _getBundleName(page){

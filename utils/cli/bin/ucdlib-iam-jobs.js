@@ -1,5 +1,5 @@
-const {Command, Option} = require('commander');
-const jobs = require('../lib/jobs');
+import { Command } from 'commander';
+import jobs from '../lib/jobs.js';
 const program = new Command();
 
 program

@@ -1,15 +1,65 @@
 version: '3'
 services:
   app:
-    image: gcr.io/digital-ucdavis-edu/itis-iam-support-app:sandbox
+    image: gcr.io/ucdlib-pubreg/itis-iam-support-app:v1.1.0
     env_file:
       - .env
     ports:
       - ${UCDLIB_APP_HOST_PORT:-3000}:3000
     restart: always
+    depends_on:
+      - db
+    command: node index.js
   cli:
-    image: gcr.io/digital-ucdavis-edu/itis-iam-support-utils:sandbox
+    image: gcr.io/ucdlib-pubreg/itis-iam-support-utils:v1.1.0
+    deploy:
+    restart: always
     env_file:
       - .env
-    restart: always
+    depends_on:
+      - db
     command: /cli/cli.sh
+  backup:
+    image: gcr.io/ucdlib-pubreg/itis-iam-support-utils:v1.1.0
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /etc/service-account.json
+      GOOGLE_CLOUD_BUCKET: 'itis-iam'
+      SQL_FILE_NAME: 'itis-iam.sql.gz'
+    command: /backup/entrypoint.sh
+    volumes:
+      - ../gc-itis-iam-writer-key.json:/etc/service-account.json
+  init:
+    image: gcr.io/ucdlib-pubreg/itis-iam-support-utils:v1.1.0
+    env_file:
+      - .env
+    depends_on:
+      - db
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /etc/service-account.json
+      GOOGLE_CLOUD_BUCKET: 'itis-iam'
+      SQL_FILE_NAME: 'itis-iam.sql.gz'
+    command: /init/init.sh
+    volumes:
+      - ../gc-itis-iam-reader-key.json:/etc/service-account.json
+  maintenance:
+    image: gcr.io/ucdlib-pubreg/itis-iam-support-utils:v1.1.0
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: /maintenance/entrypoint.sh
+  db:
+    image: postgres:15.3
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - db-data:/var/lib/postgresql/data
+volumes:
+  db-data:

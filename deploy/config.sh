@@ -13,12 +13,13 @@ fi
 
 # Main version number we are tagging the app with. Always update
 # this when you cut a new version of the app!
-APP_VERSION=v0.0.9.${BUILD_NUM}
+APP_VERSION=v1.1.0.${BUILD_NUM}
 
 # Repository tags/branchs
 # Tags should always be used for production deployments
 # Branches can be used for development deployments
-REPO_TAG=sandbox
+REPO_TAG=v1.1.0
+POSTGRES_TAG=15.3
 
 DEPLOY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ROOT_DIR="$( cd $DEPLOY_DIR/.. && pwd )"
@@ -32,14 +33,14 @@ CLI_DIR=$ROOT_DIR/utils/cli
 ##
 
 # Container Registery
-CONTAINER_REG_ORG=gcr.io/digital-ucdavis-edu
+CONTAINER_REG_ORG=gcr.io/ucdlib-pubreg
 
-#if [[ -z $BRANCH_NAME ]]; then
-#  CONTAINER_CACHE_TAG=$(git rev-parse --abbrev-ref HEAD)
-#else
-#  CONTAINER_CACHE_TAG=$BRANCH_NAME
-#fi
-CONTAINER_CACHE_TAG='sandbox'
+if [[ -z $BRANCH_NAME ]]; then
+ CONTAINER_CACHE_TAG=$(git rev-parse --abbrev-ref HEAD)
+else
+ CONTAINER_CACHE_TAG=$BRANCH_NAME
+fi
+#CONTAINER_CACHE_TAG='sandbox'
 
 # set localhost/local-dev used by
 # local development docker-compose file

@@ -16,7 +16,9 @@ export function render() {
         <li><a href='/onboarding/new#manual'>Manual Entry</a></li>
         <li><a href='/onboarding/new#transfer'>Transfer from Another Library Unit</a></li>
       </ul>
-      <a href='/separation'>Separation</a>
+      <ul link-text='Separation' href='/separation'>
+        <li><a href='/separation/new'>New Request</a></li>
+      </ul>
       <a href='/permissions'>Permissions</a>
     </ucd-theme-primary-nav>
   </ucd-theme-header>
@@ -40,6 +42,8 @@ export function render() {
     <ucdlib-iam-page-onboarding-single id='onboarding-single'></ucdlib-iam-page-onboarding-single>
     <ucdlib-iam-page-home id='home'></ucdlib-iam-page-home>
     <ucdlib-iam-page-separation id='separation'></ucdlib-iam-page-separation>
+    <ucdlib-iam-page-separation-new id='separation-new'></ucdlib-iam-page-separation-new>
+    <ucdlib-iam-page-separation-single id='separation-single'></ucdlib-iam-page-separation-single>
     <ucdlib-iam-page-permissions-single id='permissions-single'></ucdlib-iam-page-permissions-single>
     <ucdlib-iam-page-permissions id='permissions'></ucdlib-iam-page-permissions>
   </ucdlib-pages>

@@ -7,9 +7,59 @@ services:
     ports:
       - ${UCDLIB_APP_HOST_PORT:-3000}:3000
     restart: always
+    depends_on:
+      - db
+    command: node index.js
   cli:
+    image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
+    deploy:
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: /cli/cli.sh
+  backup:
+    image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /etc/service-account.json
+      GOOGLE_CLOUD_BUCKET: 'itis-iam'
+      SQL_FILE_NAME: 'itis-iam.sql.gz'
+    command: /backup/entrypoint.sh
+    volumes:
+      - ../gc-itis-iam-writer-key.json:/etc/service-account.json
+  init:
     image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
     env_file:
       - .env
+    depends_on:
+      - db
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /etc/service-account.json
+      GOOGLE_CLOUD_BUCKET: 'itis-iam'
+      SQL_FILE_NAME: 'itis-iam.sql.gz'
+    command: /init/init.sh
+    volumes:
+      - ../gc-itis-iam-reader-key.json:/etc/service-account.json
+  maintenance:
+    image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
     restart: always
-    command: /cli/cli.sh
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: /maintenance/entrypoint.sh
+  db:
+    image: postgres:{{POSTGRES_TAG}}
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - db-data:/var/lib/postgresql/data
+volumes:
+  db-data:

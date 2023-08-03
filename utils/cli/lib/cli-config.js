@@ -1,4 +1,4 @@
-const BaseConfig = require('@ucd-lib/iam-support-lib/src/utils/config.cjs');
+import BaseConfig from '@ucd-lib/iam-support-lib/src/utils/config.cjs';
 
 class CliConfig extends BaseConfig{
   constructor(){
@@ -6,5 +6,5 @@ class CliConfig extends BaseConfig{
     const env = process.env;
   }
 }
-  
-module.exports = new CliConfig();
+
+export default new CliConfig();

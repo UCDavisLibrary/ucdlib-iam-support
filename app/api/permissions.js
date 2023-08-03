@@ -1,4 +1,8 @@
 module.exports = (api) => {
+
+  /**
+   * @description Get a single permission request by either 'update' id or 'onboarding' id, denoted by idType url param
+   */
   api.get('/permissions/:id', async (req, res) => {
     const { default: PermissionsRequests } = await import('@ucd-lib/iam-support-lib/src/utils/permissions.js');
     const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
@@ -60,6 +64,9 @@ module.exports = (api) => {
     return res.json(pRes.res.rows.map(r => TextUtils.camelCaseObject(r)));
   });
 
+  /**
+   * @description Create a new permissions request tied to an onboarding or update request.
+   */
   api.post('/permissions', async (req, res) => {
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
     const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
@@ -187,7 +194,6 @@ module.exports = (api) => {
       }
     }
 
-
     // update existing onboarding/permissions request RT ticket
     if ( data.rtTicketId ){
       const ticket = new UcdlibRtTicket(false, {id: data.rtTicketId});
@@ -286,7 +292,10 @@ const addPermissionRtBody = (rtObject, data, req, skipIfEmpty = false) => {
     {name: 'Staff Intranet', value: p?.intranet},
     {name: 'Libcal', value: p?.libcal},
     {name: 'Libguides', value: p?.libguides},
-    {name: 'Slack', value: p?.slack}
+    {name: 'Slack', value: p?.slack},
+    {name: 'Calendly', value: p?.calendly},
+    {name: 'Lang Prize', value: p?.langPrize},
+    {name: 'Aggie Open', value: p?.aggieOpen}
   ];
   permissions.forEach(p => {
     try {
