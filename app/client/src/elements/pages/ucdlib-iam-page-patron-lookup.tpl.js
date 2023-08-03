@@ -230,7 +230,7 @@ export function render() {
                       <div class="box"><h6>Student Information for IAM ${this.informationHeaderID}</h6></div>
                       <div class="box hide"></div>
                     </div>
-
+                    Student Status: <span style="color:green;">ACTIVE</span>
                     ${this.selectedPersonStdInfo.map(std =>html`
                           <div class="box-row"><div class="box"><strong>College</strong></div><div class="box">${std.collegeName ? html`${std.collegeName}`: html`<p>Not Listed</p>`}</div></div>
                           <div class="box-row"><div class="box"><strong>Class</strong></div><div class="box">${std.className ? html`${std.className}`: html`<p>Not Listed</p>`}</div></div>
@@ -241,7 +241,7 @@ export function render() {
                     `)}
                   </div>
                   <br />
-                `:html``}
+                `:html`Student Status: <span style="color:red;">INACTIVE</span>`}
               </div> 
             `:html`<h4>There is no information on this individual in the IAM Database.</h4>`}
           </div>
