@@ -3,4 +3,4 @@ import pg from "@ucd-lib/iam-support-lib/src/utils/pg.js";
 
 await checkOnboardingRecords(true);
 
-await pg.client.end();
+await pg.pool.end();

@@ -9,16 +9,16 @@ class GroupsCli {
     const groups = await UcdlibGroups.groupQuery(options, {returnHead: options.return_head});
     if ( groups.err ) {
       console.log(groups.err);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
     if ( !groups.res.rowCount ) {
       console.log('No groups found');
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
     utils.logObject(groups.res.rows);
-    await pg.client.end();
+    await pg.pool.end();
 
   }
 
@@ -26,22 +26,22 @@ class GroupsCli {
     const group = await UcdlibGroups.getById(group_id);
     if ( group.err ) {
       console.log(group.err);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
     if ( !group.res.rowCount ) {
       console.log('No group found');
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
     const rmHead = await UcdlibGroups.removeGroupHead(group_id);
     if ( rmHead.err ) {
       console.log(rmHead.err);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
     console.log(`Removed head of group ${group_id}`);
-    await pg.client.end();
+    await pg.pool.end();
   }
 
   async removeMember(group_id, employee_id, options){
@@ -61,7 +61,7 @@ class GroupsCli {
     const isMember = employee.groups.find(g => g.id === group_id);
     if ( !isMember ) {
       console.log(`Error: ${employee.first_name} ${employee.last_name} is not a member of ${group.name}`);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -70,7 +70,7 @@ class GroupsCli {
     if ( isHead && !force ) {
       console.log(`Error: ${employee.first_name} ${employee.last_name} is head of ${group.name}. Most groups must have a head.`);
       console.log('Rerun with --force option to remove employee as head.');
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -78,7 +78,7 @@ class GroupsCli {
     if ( group.part_of_org && employee.groups.filter(g => g.partOfOrg).length == 1 && !force) {
       console.log(`Error: Every employee must belong to at least one department.`);
       console.log('Rerun with --force option to remove employee from department.');
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -89,7 +89,7 @@ class GroupsCli {
       console.log(`Removed ${employee.first_name} ${employee.last_name} from ${group.name}`);
     }
 
-    await pg.client.end();
+    await pg.pool.end();
   }
 
   async addMember(group_id, employee_id, options){
@@ -109,7 +109,7 @@ class GroupsCli {
     const isMember = employee.groups.find(g => g.id === group_id);
     if ( isMember ) {
       console.log(`Error: ${employee.first_name} ${employee.last_name} is already a member of ${group.name}`);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -118,7 +118,7 @@ class GroupsCli {
     if ( inAnotherDepartment && !force) {
       console.log(`Error: ${employee.first_name} ${employee.last_name} is already a member of another department.`);
       console.log('Rerun with --force option to add employee to this department as well.');
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -129,7 +129,7 @@ class GroupsCli {
       console.log(`Added ${employee.first_name} ${employee.last_name} to ${group.name}`);
     }
 
-    await pg.client.end();
+    await pg.pool.end();
   }
 
   async addHead(group_id, employee_id, options){
@@ -146,7 +146,7 @@ class GroupsCli {
       console.log(`${group.name} already has a head:`);
       utils.logObject(group.head);
       console.log('Remove current head before adding new head');
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -159,7 +159,7 @@ class GroupsCli {
     if ( !isMember && !addAsMember ) {
       console.log('Employee is not a member of this group, and must be a member to be added as head.');
       console.log('Rerun with --member option to add employee as member and head.');
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -168,7 +168,7 @@ class GroupsCli {
     if ( inAnotherDepartment ) {
       console.log('Employee is already a member of another department.');
       console.log('Remove employee from other department before adding as head.');
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -176,19 +176,19 @@ class GroupsCli {
       const r = await UcdlibGroups.setGroupHead(group_id, employee.id);
       if ( r.err ) {
         console.log(r.err);
-        await pg.client.end();
+        await pg.pool.end();
         return;
       }
     } else {
       const r = await UcdlibEmployees.addEmployeeToGroup(employee.id, group_id, true)
       if ( r.err ) {
         console.log(r.err);
-        await pg.client.end();
+        await pg.pool.end();
         return;
       }
     }
     console.log(`Added ${employee.first_name} ${employee.last_name} as head of ${group.name}`);
-    await pg.client.end();
+    await pg.pool.end();
   }
 
   async inspect(group_id){
@@ -196,12 +196,12 @@ class GroupsCli {
     const group = await UcdlibGroups.getById(group_id, args);
     if ( group.err ) {
       console.log(group.err);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
     if ( !group.res.rowCount ) {
       console.log('No group found');
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
     if ( group.res.rowCount > 1 ) {
@@ -209,7 +209,7 @@ class GroupsCli {
     } else {
       utils.logObject(group.res.rows[0]);
     }
-    await pg.client.end();
+    await pg.pool.end();
   }
 
   /**
@@ -223,12 +223,12 @@ class GroupsCli {
     let group = await UcdlibGroups.getById(group_id, args);
     if ( group.err ) {
       console.log(group.err);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
     if ( !group.res.rowCount ) {
       console.log('No group found');
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
     return group.res.rows[0];

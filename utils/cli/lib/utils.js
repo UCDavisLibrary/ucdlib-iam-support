@@ -38,12 +38,12 @@ class UtilsCli{
     let employee = await UcdlibEmployees.getById(employee_id.trim(), idType, args);
     if ( employee.err ) {
       console.log(employee.err);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
     if ( !employee.res.rowCount ) {
       console.log('No employee found');
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
     return employee.res.rows[0];

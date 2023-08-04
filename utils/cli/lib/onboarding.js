@@ -12,7 +12,7 @@ class onboardingCli {
       query.isOpen = false;
     }
     const r = await UcdlibOnboarding.query(query);
-    await pg.client.end();
+    await pg.pool.end();
     if ( !r.res.rowCount ) {
       console.log('No onboarding records found');
       return;
@@ -23,7 +23,7 @@ class onboardingCli {
 
   async inspect(id){
     const r = await UcdlibOnboarding.getById(id);
-    await pg.client.end();
+    await pg.pool.end();
     if ( !r.res.rowCount ) {
       console.log('No onboarding records found');
       return;
@@ -35,13 +35,13 @@ class onboardingCli {
     const request = await UcdlibOnboarding.getById(id);
     if ( !request.res.rowCount ) {
       console.error(`Onboarding request ${id} not found`);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
     await UcdlibOnboarding.deleteAllPermissionRequests(id);
     await UcdlibOnboarding.delete(id);
-    await pg.client.end();
+    await pg.pool.end();
     console.log(`Removed onboarding request ${id}`);
   }
 }

@@ -27,7 +27,7 @@ class employeesCli {
     const data = {};
     data[property] = value;
     const r = await UcdlibEmployees.update(id, data, idType);
-    await pg.client.end();
+    await pg.pool.end();
     if ( r.err ) {
       console.error(`Error updating employee record\n${r.err.message}`);
       return;
@@ -43,14 +43,14 @@ class employeesCli {
     let employee = await UcdlibEmployees.getById(id, idType, {returnGroups: true});
     if ( !employee.res.rowCount ) {
       console.error(`Employee ${id} not found`);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
     employee = employee.res.rows[0];
     const iamId = employee.iam_id;
     if ( !iamId ) {
       console.error(`Error retrieving employee IAM id`);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -60,7 +60,7 @@ class employeesCli {
       console.error(`Employee has direct reports. Please remove direct reports first.`);
       const colsToShow = ['id', 'iam_id', 'first_name', 'last_name'];
       utils.printTable(directReports.res.rows, colsToShow);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -69,7 +69,7 @@ class employeesCli {
     if ( isHeadOf.length && !options.force ) {
       console.error(`Employee is head of the following groups. You might want to set a new head first, but you can use --force to override this check.`);
       utils.printTable(isHeadOf);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -77,7 +77,7 @@ class employeesCli {
     const rmGroups = await UcdlibEmployees.removeAllGroupMemberships(employee.id);
     if ( rmGroups.err ) {
       console.error(`Error removing employee from groups\n${rmGroups.err.message}`);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -85,7 +85,7 @@ class employeesCli {
     const rmEmployee = await UcdlibEmployees.delete(id, idType);
     if ( rmEmployee.err ) {
       console.error(`Error removing employee\n${rmEmployee.err.message}`);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -93,14 +93,14 @@ class employeesCli {
     const dismissNotifications = await UcdlibEmployees.dismissRecordDiscrepancyNotifications(iamId);
     if ( dismissNotifications.err ) {
       console.error(`Error dismissing record discrepancy notifications\n${dismissNotifications.err.message}`);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
     console.log(`Record removed:`);
     utils.logObject(employee);
 
-    await pg.client.end();
+    await pg.pool.end();
   }
 
   /**
@@ -113,7 +113,7 @@ class employeesCli {
     let r = await UcdlibEmployees.searchByName(name);
 
     utils.logObject(r.res.rows);
-    await pg.client.end();
+    await pg.pool.end();
   }
 
   /**
@@ -125,7 +125,7 @@ class employeesCli {
     const idType = options.idtype ? options.idtype : 'iamId';
     id = id.trim();
     const r = await UcdlibEmployees.getById(id, idType, {returnGroups: true, returnSupervisor: true});
-    await pg.client.end();
+    await pg.pool.end();
     if ( r.res.rowCount ) {
       utils.logObject(r.res.rows);
     } else {
@@ -158,7 +158,7 @@ class employeesCli {
       if ( result.canForce ) msg += `\n${forceMessage}`;
       if ( result.canForce && result.forceMessage ) msg += `\n${result.forceMessage}`;
       console.error(msg);
-      pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -172,7 +172,7 @@ class employeesCli {
         await iamAdmin.deleteEmployee(result.employeeId);
         let msg = `Error provisioning keycloak account!\n${kcResult.message}.`;
         console.error(msg);
-        pg.client.end();
+        await pg.pool.end();
         return;
       }
 
@@ -194,7 +194,7 @@ class employeesCli {
 
     console.log(result.message);
     console.log(`Employee adopted with id ${result.employeeId}.`);
-    await pg.client.end();
+    await pg.pool.end();
   }
 
   /**
@@ -203,7 +203,7 @@ class employeesCli {
    */
   async dismissRecordDiscrepancyNotifications(iamId){
     const r = await UcdlibEmployees.dismissRecordDiscrepancyNotifications(iamId);
-    await pg.client.end();
+    await pg.pool.end();
     if ( r.err) {
       console.error(`Error dismissing record discrepancy notifications\n${r.err.message}`);
       return;
@@ -217,7 +217,7 @@ class employeesCli {
       interval = `${intervalLength} ${intervalUnit}`;
     }
     const r = await UcdlibEmployees.getActiveRecordDiscrepancyNotifications(interval);
-    await pg.client.end();
+    await pg.pool.end();
     if ( r.err ) {
       console.error(`Error getting active record discrepancy notifications\n${r.err.message}`);
       return;
@@ -232,7 +232,7 @@ class employeesCli {
   async updateCreationDate(id, idtype){
     const r = await iamAdmin.updateEmployeeCreationDate(id, idtype);
     console.log(`${r.error ? 'Error:' : 'Success:'} ${r.message}`);
-    await pg.client.end();
+    await pg.pool.end();
   }
 
   async createTemplate(name){
@@ -276,7 +276,7 @@ class employeesCli {
 
     if ( iamRecord.appointments.length <= 1 ){
       console.error(`Employee has only one appointment. No need to update primary association.`);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -285,7 +285,7 @@ class employeesCli {
       console.error(`Employee does not have an appointment with department code ${deptCode} and title code ${titleCode}`);
       console.log('Available appointments:');
       utils.logObject(iamRecord.appointments);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -296,7 +296,7 @@ class employeesCli {
       if ( !supervisorEmployeeId ) {
         console.error(`Error: Appointment does not have a supervisor listed`);
         console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
-        await pg.client.end();
+        await pg.pool.end();
         return;
       }
       const supervisor = await UcdIamModel.getPersonByEmployeeId(supervisorEmployeeId);
@@ -308,7 +308,7 @@ class employeesCli {
           console.log(`No record found for supervisor ${supervisorEmployeeId} in UCD IAM`);
           console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
         }
-        await pg.client.end();
+        await pg.pool.end();
         return
       }
       supervisorId = supervisor.iamId;
@@ -324,7 +324,7 @@ class employeesCli {
       console.log(`Updated primary association of ${employee.first_name} ${employee.last_name}`);
     }
 
-    await pg.client.end();
+    await pg.pool.end();
 
   }
 
@@ -342,12 +342,12 @@ class employeesCli {
 
     if ( iamRecord.appointments.length > 1 ){
       console.error(`Employee has more than one appointment. Use the update-primary-association command to set a new primary association.`);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
     if ( !iamRecord.appointments.length ){
       console.error(`Employee has no appointments. Cannot reset primary association.`);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
 
@@ -358,7 +358,7 @@ class employeesCli {
       if ( !supervisorEmployeeId ) {
         console.error(`Error: Appointment does not have a supervisor listed`);
         console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
-        await pg.client.end();
+        await pg.pool.end();
         return;
       }
       const supervisor = await UcdIamModel.getPersonByEmployeeId(supervisorEmployeeId);
@@ -370,7 +370,7 @@ class employeesCli {
           console.log(`No record found for supervisor ${supervisorEmployeeId} in UCD IAM`);
           console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
         }
-        await pg.client.end();
+        await pg.pool.end();
         return
       }
       supervisorId = supervisor.iamId;
@@ -385,7 +385,7 @@ class employeesCli {
     } else {
       console.log(`Reset primary association of ${employee.first_name} ${employee.last_name}`);
     }
-    await pg.client.end();
+    await pg.pool.end();
   }
 
   async addToDb(file, options){
@@ -412,13 +412,13 @@ class employeesCli {
     iamRecord = new IamPersonTransform(iamRecord);
 
     // check if employee already exists in local db
-    // const localRecord = await UcdlibEmployees.getById(iamId, 'iamId');
-    // if ( localRecord.res.rowCount ) {
-    //   await pg.client.end();
-    //   console.error(`Employee ${iamId} already exists in local database`);
-    //   console.error('Use the update command if you need to update the record');
-    //   return;
-    // }
+    const localRecord = await UcdlibEmployees.getById(iamId, 'iamId');
+    if ( localRecord.res.rowCount ) {
+      await pg.pool.end();
+      console.error(`Employee ${iamId} already exists in local database`);
+      console.error('Use the update-property command if you need to update the record');
+      return;
+    }
 
     // Check has basic employee data
     let args = {
@@ -430,7 +430,7 @@ class employeesCli {
     if ( d.error ) {
       console.error(`Error validating employee data\n${d.error.message}`);
       if ( d.error.canForce ) console.error(forceMessage);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
     dataToWrite = {...dataToWrite, ...d.employeeData};
@@ -441,28 +441,47 @@ class employeesCli {
     if ( appointments.error ) {
       console.error(`Error validating appointments\n${appointments.error.message}`);
       if ( appointments.error.canForce ) console.error(forceMessage);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
     dataToWrite.primaryAssociation = primaryAssociation;
     dataToWrite.ucdDeptCode = iamRecord.getPrimaryAssociation().deptCode;
 
     // validate supervisor
+
+    // user entered supervisor id
     if ( employee.supervisor_id ) {
       const supervisor = await iamAdmin.employeeRecordsExist(employee.supervisor_id, force);
       if ( supervisor.error ) {
         console.error(`Error validating supervisor\n${supervisor.error.message}`);
         if ( supervisor.error.canForce ) console.error(forceMessage);
-        await pg.client.end();
+        await pg.pool.end();
         return;
       }
-      if ( supervisor.iamRecord.employeeId != iamRecord.getSupervisorEmployeeId() && !force ) {
+      if ( !employee.custom_supervisor && supervisor.iamRecord.employeeId != iamRecord.getSupervisorEmployeeId() ) {
         console.error(`Error validating supervisor`);
         console.error(`Specified supervisor not listed in primary association of UC Davis IAM record`);
-        console.error(`Use --force to override this check`);
-        await pg.client.end();
+        console.error("The 'custom_supervisor' property should be set to true");
+        await pg.pool.end();
         return;
       }
+    } else {
+      // user did not provide a supervisor id, so we need to validate appointment supervisor is in our db
+      const supervisorEmployeeId = iamRecord.getSupervisorEmployeeId();
+      if ( !supervisorEmployeeId ) {
+        console.error(`Error validating supervisor`);
+        console.error(`Appointment does not have a supervisor listed`);
+        await pg.pool.end();
+        return;
+      }
+      const supervisorLocalRecord = await UcdlibEmployees.getById(supervisorEmployeeId, 'employeeId');
+      if ( !supervisorLocalRecord.res.rowCount ) {
+        await pg.pool.end();
+        console.error(`Error validating supervisor`);
+        console.error(`Appointment supervisor employee id ${supervisorEmployeeId} not found in local database`);
+        return;
+      }
+      dataToWrite.supervisorId = supervisorLocalRecord.res.rows[0].iam_id;
     }
 
     // validate groups
@@ -470,11 +489,21 @@ class employeesCli {
     if ( groups.error ) {
       console.error(`Error validating groups\n${groups.error.message}`);
       if ( groups.error.canForce ) console.error(forceMessage);
-      await pg.client.end();
+      await pg.pool.end();
       return;
     }
-    console.log(dataToWrite)
-    await pg.client.end();
+
+    // create record
+    const createEmployee = await UcdlibEmployees.create(dataToWrite, employee.groups);
+    if ( createEmployee.err ) {
+      console.error(`Error creating employee record\n${createEmployee.err.message}`);
+      await pg.pool.end();
+      return;
+    }
+    const newEmployeeId = createEmployee.res[0].rows[0].id;
+
+    console.log(`Created employee record with id ${newEmployeeId}`);
+    await pg.pool.end();
 
   }
 
