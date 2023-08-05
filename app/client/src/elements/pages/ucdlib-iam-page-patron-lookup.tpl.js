@@ -81,6 +81,21 @@ export function styles() {
     .tRight {
       float:right;
     }
+    .box {
+      float: left;
+      width: 50%;
+      padding: 10px;
+      border-top: 1px solid #b0d0ed;
+      box-sizing: border-box;
+    
+    }
+    
+    /* Clear floats after the columns */
+    .box-row:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
   `;
 
   return [
@@ -170,12 +185,7 @@ export function render() {
         <div id="information">
           <div class="field-container">
             ${this.selectedPersonProfile ? html`
-              <div>
-                <div class="boxer">
-                  <div class="box-row"><!--Headings-->
-                    <div class="box"><h6>General Information for IAM ${this.informationHeaderID}</h6></div>
-                    <div class="box hide"></div>
-                  </div>
+                  <div class="box-row"><div class="box"><h6>General Information for IAM ${this.informationHeaderID}</h6></div><div class="box hide"></div></div>
 
                   ${this.selectedPersonProfile.oFullName ? html`<div class="box-row"><div class="box"><strong>Name</strong></div><div class="box">${this.selectedPersonProfile.oFullName}</div></div>`:html``}
                   ${this.selectedPersonProfile.studentId ? html`<div class="box-row"><div class="box"><strong>Student ID</strong></div><div class="box">${this.selectedPersonProfile.studentId}</div></div>`:html``}
@@ -183,24 +193,17 @@ export function render() {
                   ${this.selectedPersonProfile.userID ? html`<div class="box-row"><div class="box"><strong>Kerberos ID</strong></div><div class="box">${this.selectedPersonProfile.userID}</div></div>`:html``}
                   ${this.selectedPersonProfile.email ? html`<div class="box-row"><div class="box"><strong>Email</strong></div><div class="box">${this.selectedPersonProfile.email}</div></div>`:html``}
                   ${this.alma ? html`<div class="box-row"><div class="box"><strong>Alma</strong></div><div class="box"><a class='pointer icon icon--circle-arrow-right' @click=${this.openAlmaInfoModal}>Alma Record: <strong>${this.alma.id}</strong></a></div></div>`:html``}
-
-                </div>
                 <br />
 
-                <div class="boxer">
-                  <div class="box-row"><!--Headings-->
-                    <div class="box"><h6>Affiliation for IAM ${this.informationHeaderID}</h6></div>
-                    <div class="box hide"></div>
-                  </div>
+                  <div class="box-row"><div class="box"><h6>Affiliation for IAM ${this.informationHeaderID}</h6></div><div class="box hide"></div></div>
 
-                  ${this.selectedPersonProfile.isStudent ? html`<div class="box-row"><div class="box"><strong>Is Student</strong></div><div class="box">${this.selectedPersonProfile.isStudent ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile.isEmployee ? html`<div class="box-row"><div class="box"><strong>Is Employee</strong></div><div class="box">${this.selectedPersonProfile.isEmployee ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`} </div></div>`:html``}
-                  ${this.selectedPersonProfile.isExternal ? html`<div class="box-row"><div class="box"><strong>Is External</strong></div><div class="box">${this.selectedPersonProfile.isExternal ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile.isFaculty ? html`<div class="box-row"><div class="box"><strong>Is Faculty</strong></div><div class="box">${this.selectedPersonProfile.isFaculty ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile.isStaff ? html`<div class="box-row"><div class="box"><strong>Is Staff</strong></div><div class="box">${this.selectedPersonProfile.isStaff ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile.isHSEmployee ? html`<div class="box-row"><div class="box"><strong>Is HS Employee</strong></div><div class="box">${this.selectedPersonProfile.isHSEmployee ? html`<p style="color:green;">&#x2713;</p>`:html`<p style="color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile.isStudent ? html`<div class="box-row"><div class="box"><strong>Is Student</strong></div><div class="box">${this.selectedPersonProfile.isStudent ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile.isEmployee ? html`<div class="box-row"><div class="box"><strong>Is Employee</strong></div><div class="box">${this.selectedPersonProfile.isEmployee ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`} </div></div>`:html``}
+                  ${this.selectedPersonProfile.isExternal ? html`<div class="box-row"><div class="box"><strong>Is External</strong></div><div class="box">${this.selectedPersonProfile.isExternal ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile.isFaculty ? html`<div class="box-row"><div class="box"><strong>Is Faculty</strong></div><div class="box">${this.selectedPersonProfile.isFaculty ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile.isStaff ? html`<div class="box-row"><div class="box"><strong>Is Staff</strong></div><div class="box">${this.selectedPersonProfile.isStaff ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile.isHSEmployee ? html`<div class="box-row"><div class="box"><strong>Is HS Employee</strong></div><div class="box">${this.selectedPersonProfile.isHSEmployee ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
 
-                </div>
                 <br />
 
                 ${this.selectedPersonDepInfo ? html`
