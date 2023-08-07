@@ -17,6 +17,7 @@
     "@ucd-lib/cork-app-utils": "^5.1.0",
     "@ucd-lib/theme-elements": "^1.2.1",
     "breakpoint-sass": "^3.0.0",
+    "export-from-json": "^1.7.3",
     "keycloak-js": "^22.0.0",
     "lit": "^2.6.1",
     "normalize-scss": "^7.0.1",

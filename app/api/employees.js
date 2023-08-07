@@ -22,6 +22,22 @@ module.exports = (api) => {
     res.json(r.res.rows.map(row => TextUtils.camelCaseObject(row)));
   });
 
+  /**
+   * @description get all employees, from local db
+   * Returns blank array if no employees
+   */
+  api.get('/employees', async (req, res) => {
+    const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
+    const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js')
+    const r = await UcdlibEmployees.getAll();
+    if ( r.err ) {
+      console.error(r.err);
+      res.status(500);
+      res.json({error: true});
+      return;
+    }
+    res.json(r.res.rows.map(row => TextUtils.camelCaseObject(row)));
+  });
 
   /**
    * @description search for library employees from local db. Can use the following url query parameters:
