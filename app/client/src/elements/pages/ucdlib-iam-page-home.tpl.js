@@ -6,11 +6,11 @@ import { html } from 'lit';
  */
 export function render() {
   return html`
-  <div class="l-3col">
+  <!-- <div class="l-3col">
       <div class='l-second'>
         <ucdlib-org-chart></ucdlib-org-chart>
       </div> 
-  </div>
+  </div> -->
   
   <div class='l-container u-space-mt--large'>
     <div class="l-3col">
