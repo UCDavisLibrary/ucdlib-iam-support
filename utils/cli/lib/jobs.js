@@ -1,12 +1,11 @@
-const config = require('./cli-config');
-const { printTable } = require('console-table-printer');
+import config from './cli-config.js';
+import { printTable } from 'console-table-printer';
+import ucdlibJobs from '@ucd-lib/iam-support-lib/src/utils/jobs.js';
+import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
 
 class jobsCli {
 
   async list(options){
-    const { default: ucdlibJobs } = await import('@ucd-lib/iam-support-lib/src/utils/jobs.js');
-    const { default: pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
-
     const r = await ucdlibJobs.getRecent(options);
     await pg.client.end();
     if ( r.err ) {
@@ -27,9 +26,6 @@ class jobsCli {
   }
 
   async names(){
-    const { default: ucdlibJobs } = await import('@ucd-lib/iam-support-lib/src/utils/jobs.js');
-    const { default: pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
-
     const r = await ucdlibJobs.getUniqueJobNames();
     await pg.client.end();
     if ( r.err ) {
@@ -44,9 +40,6 @@ class jobsCli {
   }
 
   async inspect(id){
-    const { default: ucdlibJobs } = await import('@ucd-lib/iam-support-lib/src/utils/jobs.js');
-    const { default: pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
-
     const jobResult = await ucdlibJobs.getById(id);
     const logCtResult = await ucdlibJobs.getJobLogCount(id);
     await pg.client.end();
@@ -77,9 +70,6 @@ class jobsCli {
   }
 
   async getLogs(id, options){
-    const { default: ucdlibJobs } = await import('@ucd-lib/iam-support-lib/src/utils/jobs.js');
-    const { default: pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
-
     const r = await ucdlibJobs.getLogs(id, options);
     await pg.client.end();
     if ( r.err ) {
@@ -99,4 +89,4 @@ class jobsCli {
 
 }
 
-module.exports = new jobsCli();
+export default new jobsCli();

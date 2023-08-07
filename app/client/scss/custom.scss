@@ -70,6 +70,37 @@ ucdlib-iam-onboarding-list .no-results {
   display: flex;
   align-items: center;
 }
+
+ucdlib-iam-separation-list .sp-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed #cce0f3;
+}
+ucdlib-iam-separation-list .sp-row:first-child {
+  padding-top: 0;
+}
+ucdlib-iam-separation-list .sp-name {
+  flex-grow: 1;
+}
+ucdlib-iam-separation-list .sp-status {
+  font-weight: 700;
+  color: #022851;
+  text-align: right;
+}
+@media (max-width: 600px){
+  ucdlib-iam-separation-list .sp-name {
+    width: 100%;
+  }
+  ucdlib-iam-separation-list .sp-row {
+    flex-wrap: wrap;
+  }
+}
+ucdlib-iam-separation-list .no-results {
+  display: flex;
+  align-items: center;
+}
+
 .focal-link__icon--xs {
   width: 1rem;
   font-size: .5rem;

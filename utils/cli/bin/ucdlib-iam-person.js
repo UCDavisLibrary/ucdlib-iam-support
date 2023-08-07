@@ -1,5 +1,5 @@
-const {Command} = require('commander');
-const people = require('../lib/people');
+import { Command } from 'commander';
+import people from '../lib/people.js';
 const program = new Command();
 
 program

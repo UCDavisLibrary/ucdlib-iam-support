@@ -56,8 +56,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.groups = [];
     this._resetEmployeeStateProps();
 
-    this._injectModel('AppStateModel', 'PersonModel', 'GroupModel', 'OnboardingModel');
-    //this._setPage({location: this.AppStateModel.location, page: this.id}, false);
+    this._injectModel('AppStateModel', 'PersonModel', 'GroupModel', 'OnboardingModel', 'AuthModel');
   }
 
   /**
@@ -158,7 +157,14 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-    this._setPage(e);
+    if (e.page != this.id ) return;
+    const token = this.AuthModel.getToken();
+    if ( token.canCreateRequests ){
+      this._setPage(e);
+    } else {
+      this.AppStateModel.showError('You do not have permission to create onboarding requests.');
+    }
+
   }
 
   /**
@@ -276,7 +282,6 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
    * @param {Object} e
    */
   async _setPage(e){
-    if (e.page != this.id ) return;
 
     this.AppStateModel.showLoading('onboarding-new');
     await this._getRequiredPageData(e.location.hash);

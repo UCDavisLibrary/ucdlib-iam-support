@@ -185,7 +185,7 @@ export default class UcdlibEmployeeSearch extends window.Mixin(LitElement)
   _onBlur(){
     setTimeout(() => {
       this.isFocused = false;
-    }, 100);
+    }, 250);
   }
 
 }

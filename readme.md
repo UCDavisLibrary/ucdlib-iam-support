@@ -17,7 +17,7 @@ The command line interface (in `/utils/cli`) is designed to be used by ITIS to p
 
 Located in `utils/backup`, this container will automatically back up the database to the `itis-iam` Google Cloud Storage bucket if `NIGHTLY_BACKUPS` and `BACKUP_ENV` env variables are set.
 
-TODO: write script for retrieving writer/reader SA keys.
+In order to backup, you need a GC key, which can be obtained by running `deploy/cmds/get-writer-key.sh`.
 
 ## Init Utility
 
@@ -60,5 +60,5 @@ To get this application up and running for the first time:
 3. Run `./deploy/cmds/init-local-dev.sh` to install npm dependencies and generate dev bundles
 4. Run `./deploy/cmds/build-local-dev.sh` to build custom docker images used by this project
 5. Run `./deploy/cmds/generate-deployment-files.sh` to create the docker-compose file for local development
-6. Create and fill out an env file in `./deploy/iam-support-local-dev` and then cd into the directory
+6. Download an env file in `./deploy/iam-support-local-dev` by running `./deploy/cmds/get-env-file-dev.sh`and then cd into the directory
 7. Run `docker compose up`

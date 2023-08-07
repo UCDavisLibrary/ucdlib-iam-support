@@ -28,6 +28,7 @@ class AppStateModelImpl extends AppStateModel {
     this.setPage(update);
     this.setTitle(false, update);
     this.setBreadcrumbs(false, update);
+    this.closeNav();
 
     let res = super.set(update);
 
@@ -62,10 +63,22 @@ class AppStateModelImpl extends AppStateModel {
     ) {
       p = 'onboarding-new';
     } else if(
+      update.location.path[0] == 'separation' &&
+      update.location.path.length > 1 &&
+      update.location.path[1] == 'new'
+    ) {
+      p = 'separation-new';
+    } else if(
       update.location.path[0] == 'onboarding' &&
       update.location.path.length > 1
     ) {
       p = 'onboarding-single';
+
+    } else if(
+      update.location.path[0] == 'separation' &&
+      update.location.path.length > 1
+    ) {
+      p = 'separation-single';
     } else if(
       update.location.path[0] == 'permissions' &&
       update.location.path.length > 1
@@ -108,6 +121,9 @@ class AppStateModelImpl extends AppStateModel {
     } else if ( update.page === 'onboarding-new' ){
       title.show = this.store.pageTitles.onboardingNew ? true : false;
       title.text = this.store.pageTitles.onboardingNew;
+    } else if ( update.page === 'separation-new' ){
+      title.show = this.store.pageTitles.separationNew ? true : false;
+      title.text = this.store.pageTitles.separationNew;
     } else if ( update.page === 'permissions' ){
       title.show = this.store.pageTitles.permissions ? true : false;
       title.text = this.store.pageTitles.permissions;
@@ -176,6 +192,16 @@ class AppStateModelImpl extends AppStateModel {
       breadcrumbs.show = true;
       breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.separation);
     }
+    else if ( update.page === 'separation-new' ) {
+      breadcrumbs.show = true;
+      breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.separation);
+      breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.separationNew);
+      if ( update.location.hash === 'lookup' ) {
+        breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.separationNewLookup);
+      } else if ( update.location.hash === 'submission' ) {
+        breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboardingNewSubmission);
+      }
+    }
     else if ( update.page === 'permissions' ){
       breadcrumbs.show = true;
       breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.permissions);
@@ -184,6 +210,7 @@ class AppStateModelImpl extends AppStateModel {
       breadcrumbs.show = true;
       breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.patronLookup);
     }
+
     this.store.emit('app-header-update', {breadcrumbs});
   }
 
@@ -227,6 +254,16 @@ class AppStateModelImpl extends AppStateModel {
   showLoaded(page){
     page = page || this.store.lastPage;
     this.store.emit('app-status-change', {status: 'loaded', page});
+  }
+
+  /**
+   * @description Close the app's primary nav menu
+   */
+  closeNav(){
+    const ele = document.querySelector('ucd-theme-header');
+    if ( ele ) {
+      ele.close();
+    }
   }
 
 }

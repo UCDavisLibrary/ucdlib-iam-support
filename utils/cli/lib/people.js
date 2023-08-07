@@ -1,8 +1,8 @@
-const config = require('./cli-config');
+import config from './cli-config.js';
+import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
 
 class PeopleCli {
   async searchUcd(options){
-    const { UcdIamModel } = await import('@ucd-lib/iam-support-lib/index.js');
     UcdIamModel.init(config.ucdIamApi);
     let person;
 
@@ -23,4 +23,4 @@ class PeopleCli {
   }
 }
 
-module.exports = new PeopleCli();
+export default new PeopleCli();

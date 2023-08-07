@@ -1,5 +1,5 @@
-const {Command} = require('commander');
-const groups = require('../lib/groups');
+import { Command } from 'commander';
+import groups from '../lib/groups.js';
 const program = new Command();
 
 program

@@ -1,4 +1,7 @@
 module.exports = (api) => {
+  /**
+   * @description Retrieve all groups in local db
+   */
   api.get('/groups', async (req, res) => {
     const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
     const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js')

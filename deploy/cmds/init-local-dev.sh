@@ -10,3 +10,4 @@ cd $DEPLOY_DIR/..
 
 ./cmds/install-npm-dependencies.sh
 ./cmds/generate-dev-bundle.sh
+./cmds/get-reader-key.sh

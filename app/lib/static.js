@@ -10,10 +10,10 @@ module.exports = (app) => {
   `;
 
   spaMiddleware({
-    app, 
-    htmlFile : path.join(assetsDir, 'index.html'), 
-    isRoot : true, 
-    appRoutes : config.routes, 
+    app,
+    htmlFile : path.join(assetsDir, 'index.html'),
+    isRoot : true,
+    appRoutes : config.routes,
     static : {
       dir : assetsDir
     },
@@ -22,10 +22,11 @@ module.exports = (app) => {
     getConfig : async (req, res, next) => {
       next({
         appRoutes : config.routes,
-        keycloak: config.keycloak
+        keycloak: config.keycloak,
+        version: config.version
       });
     },
-    
+
     template : (req, res, next) => {
       next({
         title: config.title,

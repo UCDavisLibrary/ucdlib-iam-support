@@ -153,7 +153,7 @@ export function render() {
               </div>
               <div class='l-second'>
                 <div class="field-container">
-                  TODO: ????
+                  ${this.renderTextArea('pCalendly', 'Permission Request:')}
                 </div>
               </div>
             </div>
@@ -163,7 +163,7 @@ export function render() {
               </div>
               <div class='l-second'>
                 <div class="field-container">
-                  TODO: Ask Mark
+                ${this.renderTextArea('pLangPrize', 'Permission Request:')}
                 </div>
               </div>
             </div>
@@ -173,7 +173,7 @@ export function render() {
               </div>
               <div class='l-second'>
                 <div class="field-container">
-                  TODO: Ask Mark
+                  ${this.renderTextArea('pAggieOpen', 'Permission Request:')}
                 </div>
               </div>
             </div>
@@ -299,7 +299,7 @@ export function renderHelpModal(){
     `;
   } else if ( this.helpModal === 'calendly' ){
     title = 'Calendly';
-    content = html`<div>TODO</div>`;
+    content = html`<div>Calendly is used to manage appointments with patrons.</div>`;
   } else if ( this.helpModal === 'facilities'){
     title = 'Facilities Request';
     content = html`
@@ -330,13 +330,15 @@ export function renderHelpModal(){
     `;
   } else if ( this.helpModal === 'lang-prize') {
     title = 'Lang Prize';
+    const url = 'https://langprize.library.ucdavis.edu/';
     content = html`
-      <div>TODO: Ask Mark</div>
+      <div>Lang Prize can be found at <a href=${url}>${url}</a>.</div>
     `;
   } else if ( this.helpModal === 'aggie-open' ){
     title = 'Aggie Open';
+    const url = 'https://aggieopen.library.ucdavis.edu/';
     content = html`
-      <div>TODO: Ask Mark</div>`;
+      <div>Aggie Open can be found at <a href=${url}>${url}</a>.</div>`;
   }
   else if ( this.helpModal === 'custom-applications' ){
     title = 'List Applications';
