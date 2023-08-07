@@ -1,6 +1,7 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-org-chart.tpl.js";
 import exportFromJSON from 'export-from-json';
+import OrgChartTransform from "@ucd-lib/iam-support-lib/src/utils/orgChart.js";
 
 /**
  * @description Component for generating the organization chart datasheet
@@ -81,25 +82,27 @@ export default class UcdlibOrgChart extends window.Mixin(LitElement)
       this.results = Array.isArray(r.payload) ? r.payload : [r.payload];
       this.dataSource = [];
       this.results.map(emp => {
-        let uniqueId = emp.employeeId;
-        let dpt = Object.entries(emp.groups).find(a => a[1].type === 'Department')[1];
-        let name = emp.firstName + " " + emp.lastName;
-        let supervisor = emp.supervisorId != "" ? 
-          emp.supervisor.firstName + " " + emp.supervisor.lastName 
-          : "";
-        let title = emp.title;
-        let department = dpt.name;
-        let email = emp.email;
+        let orgChart = new OrgChartTransform(emp);
+        // let uniqueId = emp.employeeId;
+        // let dpt = Object.entries(emp.groups).find(a => a[1].type === 'Department')[1];
+        // let name = emp.firstName + " " + emp.lastName;
+        // let supervisor = emp.supervisorId != "" ? 
+        //   emp.supervisor.firstName + " " + emp.supervisor.lastName 
+        //   : "";
+        // let title = emp.title;
+        // let department = dpt.name;
+        // let email = emp.email;
         let dict = {
-          "Employee_No" : uniqueId,
-          "Name" : name,
-          "Reports_to" : supervisor,
-          "Title" : title,
-          "Department" : department,
-          "Email" : email,
+          "Employee_No" : orgChart.unique_id,
+          "Name" : orgChart.name,
+          "Reports_to" : orgChart.supervisor,
+          "Title" : orgChart.title,
+          "Department" : orgChart.department,
+          "Email" : orgChart.email,
         };
         this.dataSource.push(dict);
       });
+      console.log(this.dataSource);
     } else if( r.state === this.EmployeeModel.store.STATE.ERROR ) {
       this.isFetching = false;
       if ( r.error.payload && r.error.payload.response && r.error.payload.response.status == 404) {
