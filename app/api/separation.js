@@ -216,14 +216,15 @@ module.exports = (api) => {
         return;
       }
 
-      if ( req.query.isOpen != undefined ) q['isOpen'] = req.query.isOpen;
-
       const errorMsg = 'Unable to retrieve separation requests';
       const q = {
+        statusId: req.query.statusId,
         iamId: req.query.iamId,
         rtTicketId: req.query.rtTicketId,
         supervisorId: req.query.supervisorId
       };
+      if ( req.query.isOpen != undefined ) q['isOpen'] = req.query.isOpen;
+
 
       const r = await UcdlibSeparation.query(q);
       if ( r.err ) {
