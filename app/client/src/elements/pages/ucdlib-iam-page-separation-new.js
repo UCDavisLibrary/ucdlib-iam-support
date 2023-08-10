@@ -63,9 +63,6 @@ export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
     this.employeeRecord = {};
     this.supervisor = {};
     this.notes = '';
-    this.open = true;
-    this.openStatus = 'Awaiting Supervisor Response';
-
   }
 
   /**

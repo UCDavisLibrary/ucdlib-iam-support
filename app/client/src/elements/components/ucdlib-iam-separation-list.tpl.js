@@ -10,10 +10,11 @@ export function render() {
   return html`
   <div class="panel panel--icon panel--icon-custom o-box panel--icon-${this.brandColor}">
     <h2 class="panel__title"><span class="panel__custom-icon fas ${this.panelIcon}"></span>${this.panelTitle}</h2>
+    
     ${this._records.length ? html`
         <div>
           ${this._records.map(r => html`
-          ${r.additionalData.open ? html`
+          ${console.log(r)}
               <div class='sp-row o-box o-box--medium'>
                 <div class='sp-name u-space-mr'>
                   <h3 class='vm-teaser__title'>
@@ -27,9 +28,8 @@ export function render() {
 
                 </div>
 
-                <div class='sp-status'> ${r.additionalData.open ? html`<p><strong>Awaiting Supervisor Response</strong></p>`:html``}</div>
+                <div class='ob-status'>${r.statusName}</div>
               </div>
-            `:html``}
           `)}
         </div>
 
