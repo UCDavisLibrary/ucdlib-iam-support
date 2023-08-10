@@ -72,6 +72,18 @@ program
 );
 
 program
+  .command('separate')
+  .description('Delete local employee record and remove from keycloak')
+  .argument('<separationId>', 'Employee unique indentifier')
+  .option('--no-deprovision', 'do not remove the user account from keycloak')
+  .option('--no-rm', 'do not remove the employee record from the local database')
+  .option('--no-rt', 'do not comment on the RT ticket')
+  .action((separationId, options) => {
+    employees.separate(separationId, options);
+  }
+);
+
+program
   .command('dismiss-notifications')
   .description('Dismiss all record discrepancy notifications for an employee')
   .argument('<iamId>', 'Employee IAM id')

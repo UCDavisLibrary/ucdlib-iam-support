@@ -39,8 +39,19 @@ class onboardingCli {
       return;
     }
 
-    await UcdlibOnboarding.deleteAllPermissionRequests(id);
-    await UcdlibOnboarding.delete(id);
+    let r;
+    r = await UcdlibOnboarding.deleteAllPermissionRequests(id);
+    if ( r.err ) {
+      console.error(r.err);
+      await pg.pool.end();
+      return;
+    }
+    r = await UcdlibOnboarding.delete(id);
+    if ( r.err ) {
+      console.error(r.err);
+      await pg.pool.end();
+      return;
+    }
     await pg.pool.end();
     console.log(`Removed onboarding request ${id}`);
   }

@@ -63,5 +63,5 @@ ENV BUILD_NUM ${BUILD_NUM}
 ARG BUILD_TIME
 ENV BUILD_TIME ${BUILD_TIME}
 
-ENTRYPOINT [ "sh", "-c" ]
+ENTRYPOINT [ "bash", "-c" ]
 CMD ["echo 'Use command arg to specify a script to run.'"]

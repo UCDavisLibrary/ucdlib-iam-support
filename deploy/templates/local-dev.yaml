@@ -11,6 +11,7 @@ services:
     environment:
       UCDLIB_APP_ENV: ${UCDLIB_APP_ENV:-dev}
       UCDLIB_RT_QUEUE: ${UCDLIB_RT_QUEUE:-test}
+      UCDLIB_RT_FACILITIES_QUEUE: ${UCDLIB_RT_FACILITIES_QUEUE:-test}
       UCDLIB_BASE_URL: ${UCDLIB_BASE_URL:-http://localhost:3000}
       UCDLIB_RT_FORBID_WRITE: ${UCDLIB_RT_FORBID_WRITE:-true}
       KEYCLOAK_ADMIN_BASE_URL: https://sandbox.auth.library.ucdavis.edu
@@ -46,6 +47,7 @@ services:
     volumes:
       - ../../utils/cli/bin:/cli/bin
       - ../../utils/cli/lib:/cli/lib
+      - ../utils/db-entrypoint:/cli/sql
       - ../../lib:/iam-support-lib
   backup:
     image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}

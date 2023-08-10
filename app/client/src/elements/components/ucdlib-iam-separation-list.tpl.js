@@ -6,11 +6,11 @@ import DtUtils from "@ucd-lib/iam-support-lib/src/utils/dtUtils.js";
  * @description Main render function
  * @returns {TemplateResult}
  */
-export function render() { 
+export function render() {
   return html`
   <div class="panel panel--icon panel--icon-custom o-box panel--icon-${this.brandColor}">
     <h2 class="panel__title"><span class="panel__custom-icon fas ${this.panelIcon}"></span>${this.panelTitle}</h2>
-    
+
     ${this._records.length ? html`
         <div>
           ${this._records.map(r => html`
@@ -24,11 +24,12 @@ export function render() {
                     <li><strong>IAM ID: </strong>${r.iamId}</li>
                     <li><strong>RT Ticket ID: </strong>${r.rtTicketId}</li>
                   </ul>
-                  <div class="text--smaller"><strong>Separation Date: </strong>${DtUtils.fmtDatetime(r.separationDate)}</div>
-
+                  ${r.separationDate ? html`
+                    <div class="text--smaller"><strong>Separation Date: </strong>${DtUtils.fmtDatetime(r.separationDate, true)}</div>
+                  ` : html``}
                 </div>
 
-                <div class='ob-status'>${r.statusName}</div>
+                <div class='sp-status'>${r.statusName}</div>
               </div>
           `)}
         </div>
@@ -38,7 +39,7 @@ export function render() {
       <div class='no-results'>
         <i class="fas fa-exclamation-circle ${this.brandColor} u-space-mr--small"></i>
         <div>${this.noResultsMessage}</div>
-      
+
       </div>
     `}
   </div>

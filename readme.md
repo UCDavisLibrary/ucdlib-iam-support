@@ -53,8 +53,24 @@ Most relevant env variables:
 | `SLACK_WEBHOOK_URL_FOR_ERRORS` | If you want to write to the `itis-error-notifications` slack channel | 
 | `KEYCLOAK_ADMIN_PASSWORD` | Required to manipulate keycloak data - user lists, groups, etc |
 
-
 For a complete list, see `config.js`.
+
+## Production Deployment
+
+On your machine:
+1. Merge your changes into main.
+2. Update `APP_VERSION` and `REPO_TAG` in deploy/config.sh
+3. Run `generate-deployment-files.sh`
+4. Check in your changes and tag your release.
+5. Build images in Google Cloud with `submit.sh`
+
+On the production server (currently veers.library)
+1. cd `/opt/ucdlib-iam-support/deploy`
+2. git pull && git checkout <tag>
+3. `docker compose pull` to download images from Google Cloud
+4. `docker compose down` then `docker compose up -d`
+
+There will be a brief service outage as the containers start up, so try to schedule deployents accordingly. If something goes wrong, you can always revert to the previously tagged images.
 
 ### Local Development
 

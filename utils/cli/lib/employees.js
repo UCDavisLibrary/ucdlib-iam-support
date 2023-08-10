@@ -6,6 +6,8 @@ import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
 import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.js';
 import IamPersonTransform from '@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js';
 import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
+import UcdlibSeparation from '@ucd-lib/iam-support-lib/src/utils/separation.js';
+import keycloakClient from "@ucd-lib/iam-support-lib/src/utils/keycloakAdmin.js";
 import * as fs from 'node:fs/promises';
 
 UcdIamModel.init(config.ucdIamApi);
@@ -33,6 +35,73 @@ class employeesCli {
       return;
     }
     console.log(`Updated ${r.res.rowCount} employee records`);
+  }
+
+  async separate(separationId, options){
+    let separationRecord = await UcdlibSeparation.getById(separationId);
+    if ( !separationRecord.res.rowCount ) {
+      console.error(`Separation request ${separationId} not found`);
+      await pg.pool.end();
+      return;
+    }
+    separationRecord = separationRecord.res.rows[0];
+    const iamId = separationRecord.iam_id;
+    if ( !iamId ) {
+      console.error(`Separation request ${separationId} does not have an IAM id`);
+      await pg.pool.end();
+      return;
+    }
+    let userId = separationRecord.additional_data?.employeeUserId;
+
+    if ( options.rm ) {
+      let employeeRecord = await UcdlibEmployees.getById(iamId, 'iamId');
+      if ( !employeeRecord.res.rowCount ) {
+        console.error(`Employee ${iamId} not found in employee table`);
+        await pg.pool.end();
+        return;
+      }
+      employeeRecord = employeeRecord.res.rows[0];
+      if ( !employeeRecord.user_id ){
+        console.error(`Employee ${iamId} does not have a user_id, which is the keycloak id`);
+        await pg.pool.end();
+        return;
+      }
+      userId = employeeRecord.user_id;
+    }
+
+    if ( options.deprovision ){
+      await keycloakClient.init({...config.keycloakAdmin, refreshInterval: 58000});
+      let keycloakUser = await keycloakClient.getUserByUserName(employeeRecord.user_id);
+      if ( !keycloakUser ) {
+        console.error(`Employee ${employeeRecord.user_id} not found in keycloak`);
+        await pg.pool.end();
+        keycloakClient.stopRefreshInterval();
+        return;
+      }
+      keycloakUser = keycloakUser[0];
+      await keycloakClient.client.users.del({id: keycloakUser.id});
+      keycloakClient.stopRefreshInterval();
+      console.log(`User ${keycloakUser.id} removed from ${config.keycloakAdmin.baseUrl}`);
+    }
+
+    if ( options.rm ) {
+      await this.removeEmployee(iamId, {keepPoolOpen: true});
+    }
+
+    if ( options.rt && separationRecord.rt_ticket_id ) {
+      const rtClient = new UcdlibRt(config.rt);
+      const ticket = new UcdlibRtTicket(false, {id: separationRecord.rt_ticket_id});
+      const reply = ticket.createReply();
+      reply.addSubject('Employee Access Was Removed');
+      reply.addContent('This employee was removed from the UC Davis Library Identity and Access Management System.');
+      const rtResponse = await rtClient.sendCorrespondence(reply);
+      if ( rtResponse.err )  {
+        console.error('Error sending RT correspondence');
+        console.error(rtResponse);
+      }
+    }
+
+    await pg.pool.end();
   }
 
   async removeEmployee(id, options){
@@ -100,7 +169,9 @@ class employeesCli {
     console.log(`Record removed:`);
     utils.logObject(employee);
 
-    await pg.pool.end();
+    if ( !options.keepPoolOpen ){
+      await pg.pool.end();
+    }
   }
 
   /**

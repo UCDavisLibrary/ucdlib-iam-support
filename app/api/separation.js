@@ -77,7 +77,8 @@ module.exports = (api) => {
       }
 
       // send correspondence to supervisor
-      if ( notifySupervisor ){
+      // TODO: remove 'false' when HR supplys their separation todo list - sp 2023-08-10
+      if ( notifySupervisor && false ){
         const supervisorName = ad.supervisorFirstName && ad.supervisorLastName ? `${ad.supervisorFirstName} ${ad.supervisorLastName}` : 'Supervisor';
         const supervisorLink = `${config.baseUrl}/separation/${output.id}`;
         const reply = ticket.createReply();

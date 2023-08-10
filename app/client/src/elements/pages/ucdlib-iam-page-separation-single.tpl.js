@@ -26,12 +26,12 @@ export function render() {
         </div>
       </div>
       <div class="l-sidebar-second">
-        <div class='category-brand__background-light-gold o-box u-space-mb'>
-          <div class="panel panel--icon panel--icon-custom ${this.isActiveStatus ? 'panel--icon-secondary' : 'panel--icon-quad'} o-box background-transparent">
-            <h2 class="panel__title u-space-mb"><span class="panel__custom-icon fas ${this.isActiveStatus ? 'fa-check-circle' : 'fa-spinner'}"></span><strong>Off-Boarding Checklist (TO-DO)</strong> </h2>
+        <!-- <div class='category-brand__background-light-gold o-box u-space-mb'>
+          <div class="panel panel--icon panel--icon-custom panel--icon-delta o-box background-transparent">
+            <h2 class="panel__title u-space-mb"><span class="panel__custom-icon fas fa-tasks></span><strong>Off-Boarding Checklist (TO-DO)</strong> </h2>
             <div class='primary'>Put todo list here</div>
           </div>
-        </div>
+        </div> -->
         <div class='category-brand__background-light-gold o-box u-space-mb'>
           <div class="panel panel--icon panel--icon-custom ${this.isActiveStatus ? 'panel--icon-secondary' : 'panel--icon-quad'} o-box background-transparent">
             <h2 class="panel__title u-space-mb"><span class="panel__custom-icon fas ${this.isActiveStatus ? 'fa-check-circle' : 'fa-spinner'}"></span>Status</h2>

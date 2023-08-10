@@ -18,6 +18,8 @@ services:
       - .env
     depends_on:
       - db
+    volumes:
+      - ./utils/db-entrypoint:/cli/sql
     command: /cli/cli.sh
   backup:
     image: gcr.io/ucdlib-pubreg/itis-iam-support-utils:sandbox
