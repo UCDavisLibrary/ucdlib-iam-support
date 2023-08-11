@@ -14,7 +14,6 @@ export function render() {
     ${this._records.length ? html`
         <div>
           ${this._records.map(r => html`
-          ${console.log(r)}
               <div class='sp-row o-box o-box--medium'>
                 <div class='sp-name u-space-mr'>
                   <h3 class='vm-teaser__title'>

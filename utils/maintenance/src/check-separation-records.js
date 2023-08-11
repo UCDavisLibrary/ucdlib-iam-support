@@ -29,6 +29,13 @@ export const run = async (logError, saveToDB) => {
       const resolvedStatus = await iamAdmin.resolveSeparationRecord(record, {rtConfig: config.rt});
       if ( resolvedStatus.log?.error ) throw resolvedStatus.log.message;
       logs.push(resolvedStatus.log);
+
+      if ( !resolvedStatus.isResolved ) {
+        const reminderStatus = await iamAdmin.sendSeparationReminder(record, {rtConfig: config.rt});
+        if ( reminderStatus.log?.error ) throw reminderStatus.log.message;
+        logs.push(reminderStatus.log);
+      }
+
     }
 
      for (const log of logs ) {
