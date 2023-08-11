@@ -139,12 +139,17 @@ module.exports = (api) => {
       const supervisorName = ad.supervisorFirstName && ad.supervisorLastName ? `${ad.supervisorFirstName} ${ad.supervisorLastName}` : 'Supervisor';
       const supervisorLink = `${config.baseUrl}/permissions/onboarding/${output.id}`;
       const reply = ticket.createReply();
-      reply.addSubject(`Supervisor Action Required!`);
+      reply.addSubject(`${transfer.isTransfer ? 'New ' : ''}Supervisor Action Required!`);
       reply.addContent(`Hi ${supervisorName},`);
       reply.addContent('');
       reply.addContent(`To proceed with your employee's onboarding, please describe the accounts and permissions required to perform their essential job duties using the following form:`);
       reply.addContent('');
       reply.addContent(`<a href='${supervisorLink}'>${supervisorLink}</a>`);
+      if ( transfer.isTransfer ) {
+        reply.addContent('');
+        reply.addContent('');
+        reply.addContent("Since this is an intra-library transfer, if any special existing permissions need to be removed, the former supervisor should just reply to this ticket.");
+      }
       const replyResponse = await rtClient.sendCorrespondence(reply);
       if ( replyResponse.err )  {
         console.error(replyResponse);

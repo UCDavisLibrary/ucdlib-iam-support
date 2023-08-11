@@ -120,6 +120,7 @@ export function render() {
               .disabled=${this.sentBackgroundCheck || !this.facilitiesRtTicketId}
               >
             <label class='u-inline' for='obs-send-facilities-rt'>Facilities RT Ticket ${this.backgroundCheck?.facilitiesRtSentTimestamp ? `(Sent ${(new Date(this.backgroundCheck?.facilitiesRtSentTimestamp)).toLocaleString()})` : ''}</label>
+            ${!this.facilitiesRtTicketId ? html`<div class='checkbox-detail'>There is no facilities RT ticket associated with this request.</div>` : html``}
           </li>
         </ul>
         <div class="field-container u-space-mt">
