@@ -80,7 +80,9 @@ module.exports = (api) => {
     const ticket = new UcdlibRtTicket();
 
     ticket.addSubject(`Onboarding: ${employeeName}`);
-    ticket.addOwner(config.rt.user);
+    if ( config.rt.user ){
+      ticket.addOwner(config.rt.user);
+    }
 
     if ( !config.rt.forbidCc) {
       if ( notifySupervisor ) {

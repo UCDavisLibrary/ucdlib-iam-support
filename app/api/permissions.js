@@ -231,7 +231,9 @@ module.exports = (api) => {
 
       // create new RT ticket
       const ticket = new UcdlibRtTicket();
-      ticket.addOwner(config.rt.user);
+      if ( config.rt.user ) {
+        ticket.addOwner(config.rt.user);
+      }
       ticket.addSubject(`Permissions Request Update for ${ucdRecord.fullName}`);
       if ( supervisor ) {
         if ( config.rt.forbidCc ){
