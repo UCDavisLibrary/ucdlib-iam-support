@@ -96,21 +96,8 @@ module.exports = (api) => {
 
     // ticket content
     ticket.addContent();
-    ticket.addContent(`<h4>Employee</h4>`);
-    ticket.addContent({
-      'Name': employeeName,
-      'Email': ad.employeeEmail || '????',
-      'Employee Id': ad.employeeId || '????',
-      'User Id (kerberos)': ad.employeeUserId || '????',
-      'UCD IAM ID': payload.iamId || '????'
-    }, false);
-    ticket.addContent(`<h4>Position</h4>`);
-    ticket.addContent({
-      'Title': payload.libraryTitle,
-      'Department': department,
-      'Start Date': payload.startDate,
-      'Supervisor': `${ad.supervisorLastName}, ${ad.supervisorFirstName}`
-    }, false);
+    ticket.addOnboardingEmployeeInfo(payload);
+    await ticket.addOnboardingPositionInfo(payload);
     if ( payload.notes ){
       ticket.addContent(`<h4>Notes</h4>`);
       ticket.addContent(payload.notes, false);
