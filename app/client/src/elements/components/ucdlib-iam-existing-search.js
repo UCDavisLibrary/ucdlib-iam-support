@@ -2,7 +2,7 @@ import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-existing-search.tpl.js";
 
 /**
- * @description Component element for querying the UC Davis IAM Onboarding API
+ * @description Component element for querying existing onboarding and separation records
  */
 export default class UcdlibIamExistingSearch extends window.Mixin(LitElement)
   .with(window.LitCorkUtils) {
@@ -186,7 +186,7 @@ export default class UcdlibIamExistingSearch extends window.Mixin(LitElement)
 
   }
 
- /**
+  /**
    * @description Attached to submit event on element form
    * @param {*} result - Submit result
    */
