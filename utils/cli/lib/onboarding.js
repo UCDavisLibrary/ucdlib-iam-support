@@ -1,5 +1,5 @@
 import utils from './utils.js';
-import UcdlibOnboarding from '@ucd-lib/iam-support-lib/src/utils/onboarding.js';
+import UcdlibOnboarding from '@ucd-lib/iam-support-lib/src/utils/onboarding.js';;
 import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
 
 class onboardingCli {
@@ -54,6 +54,47 @@ class onboardingCli {
     }
     await pg.pool.end();
     console.log(`Removed onboarding request ${id}`);
+  }
+
+  async setUcdIamRecord(id, options) {
+    let request = await UcdlibOnboarding.getById(id);
+    if ( !request.res.rowCount ) {
+      console.error(`Onboarding request ${id} not found`);
+      await pg.pool.end();
+      return;
+    }
+    request = request.res.rows[0];
+
+    if ( request.additional_data?.ucdIamRecord?.dateRetrieved && !options.update ) {
+      console.log(`Onboarding request ${id} already has a UCD IAM record. Use --update to overwrite`);
+      await pg.pool.end();
+      return;
+    }
+
+    if ( !request.iam_id ) {
+      console.error(`Onboarding request ${id} does not have an IAM ID`);
+      await pg.pool.end();
+      return;
+    }
+
+    const iamRecord = await utils.validateIamRecord(request.iam_id);
+    if ( !iamRecord ) {
+      await pg.pool.end();
+      return;
+    }
+    const ucdIamRecord = {
+      dateRetrieved: (new Date()).toISOString(),
+      record: iamRecord.data
+    }
+    const additionalData = {...(request.additional_data || {}), ucdIamRecord};
+    const update = await UcdlibOnboarding.update(id, {additionalData});
+    if ( update.err ) {
+      console.error(update.err);
+      await pg.pool.end();
+      return;
+    }
+    await pg.pool.end();
+    console.log(`Set UCD IAM record for onboarding request ${id}`);
   }
 }
 

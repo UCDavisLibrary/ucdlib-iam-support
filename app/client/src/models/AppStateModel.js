@@ -24,6 +24,11 @@ class AppStateModelImpl extends AppStateModel {
       this.logout();
     }
 
+    const modals = document?.querySelectorAll?.('ucdlib-iam-modal');
+    if ( modals && modals.length ) {
+      modals.forEach(m => m.hide?.());
+    }
+
     this.stripStateFromHash(update);
     this.setPage(update);
     this.setTitle(false, update);

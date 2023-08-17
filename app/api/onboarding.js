@@ -16,11 +16,25 @@ module.exports = (api) => {
     const { default: config } = await import('../lib/config.js');
     const { UcdlibRt, UcdlibRtTicket } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
     const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
+    const { UcdIamModel } = await import('@ucd-lib/iam-support-lib/index.js');
+    UcdIamModel.init(config.ucdIamApi);
+
     const payload = req.body;
     if ( !payload.additionalData ) payload.additionalData = {};
 
     payload.submittedBy = req.auth.token.id;
     payload.modifiedBy = req.auth.token.id;
+
+    // get ucd iam record
+    if ( payload.iamId ){
+      const iamResponse = await UcdIamModel.getPersonByIamId(payload.iamId);
+      if ( !iamResponse.error ){
+        payload.additionalData.ucdIamRecord = {
+          dateRetrieved: (new Date()).toISOString(),
+          record: iamResponse
+        }
+      }
+    }
 
     // special handling for an intra-library transfer
     const transfer = {
@@ -257,6 +271,10 @@ module.exports = (api) => {
     data.additionalData.employeeId = iamRecord.employeeId;
     data.additionalData.employeeEmail = iamRecord.email;
     data.additionalData.employeeUserId = iamRecord.userId;
+    data.additionalData.ucdIamRecord = {
+      dateRetrieved: (new Date()).toISOString(),
+      record: iamRecord.data
+    }
     if ( !iamRecord.userId ) {
       data.statusId = UcdlibOnboarding.statusCodes.userId;
     } else if ( onboardingRecord.skipSupervisor || !onboardingRecord.supervisorId ) {

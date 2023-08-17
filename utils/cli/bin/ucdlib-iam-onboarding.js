@@ -33,4 +33,14 @@ program
   }
 );
 
+program
+  .command('set-ucd-iam-record')
+  .description("Retrieves and sets the employee's UCD IAM record in the additional_data section of the onboarding record")
+  .argument('<id>', 'Onboarding record id')
+  .option('-u --update', 'Update the record if it already exists')
+  .action((id, options) => {
+    onboarding.setUcdIamRecord(id, options);
+  }
+);
+
   program.parse(process.argv);
