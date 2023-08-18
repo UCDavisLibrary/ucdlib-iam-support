@@ -150,6 +150,20 @@ export function renderSubmissionForm(){
         <h2 class="panel__title"><span class="panel__custom-icon fas fa-user-tie"></span>Employee</h2>
         <section>
           ${this.renderEmployeeForm()}
+          <div>
+            <div class="checkbox u-space-mb--small">
+              <ul class="list--reset">
+                <li>
+                  <input id="obn-contact-employee" type="checkbox" @input=${() => this.contactEmployee = !this.contactEmployee} .checked=${!this.contactEmployee}>
+                  <label for="obn-contact-employee">Do not notify employee</label>
+                </li>
+              </ul>
+            </div>
+            <div class="field-container u-space-ml" ?hidden=${!this.contactEmployee}>
+              <label for="obn-employee-contact-email">Employee Email for RT Ticket CC</label>
+              <input id='obn-employee-contact-email' type="text" @input=${e => this.employeeContactEmail = e.target.value} .value=${this.employeeContactEmail} >
+            </div>
+          </div>
         </section>
         <a class='pointer icon icon--circle-arrow-right' @click=${this.openEmployeeInfoModal} .hidden=${this.userEnteredData}>View Entire Employee Record</a>
       </div>
@@ -163,7 +177,7 @@ export function renderSubmissionForm(){
             <label for="obn-supervisor">Supervisor</label>
             <input id='obn-supervisor' type="text" .value=${this.supervisor.fullName} disabled >
           </div>
-          <div class="checkbox">
+          <div class="checkbox u-space-mb--small">
             <ul class="list--reset">
               <li>
                 <input id="obn-skip-supervisor" type="checkbox" @input=${() => this.skipSupervisor = !this.skipSupervisor} .checked=${this.skipSupervisor}>
@@ -171,7 +185,7 @@ export function renderSubmissionForm(){
               </li>
             </ul>
           </div>
-          <div class="field-container" ?hidden=${this.skipSupervisor}>
+          <div class="field-container u-space-ml" ?hidden=${this.skipSupervisor}>
             <label for="obn-supervisor-email">Supervisor Email for RT Ticket</label>
             <input id='obn-supervisor-email' type="text" @input=${e => this.supervisorEmail = e.target.value} .value=${this.supervisorEmail} >
           </div>
@@ -277,7 +291,7 @@ export function renderEmployeeForm(){
     </div>
     <div class="field-container">
       <label for="obn-email">UC Davis Email</label>
-      <input id='obn-email' type="text" .value=${this.email} @input=${e => this.email = e.target.value}>
+      <input id='obn-email' type="text" .value=${this.email} ?disabled=${disabled} @input=${e => this.email = e.target.value}>
     </div>
   `;
 }

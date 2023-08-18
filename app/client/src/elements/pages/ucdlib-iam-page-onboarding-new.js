@@ -34,6 +34,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
       lastName: {state: true},
       email: {state: true},
       employeeId: {state: true},
+      contactEmployee: {state: true},
+      employeeContactEmail: {state: true},
       userId: {state: true},
       manualFormDisabled: {state: true},
       skipSupervisor: {state: true},
@@ -84,6 +86,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.supervisorEmail = '';
     this.notes = '';
     this.transferEmployee = {};
+    this.contactEmployee = true;
+    this.employeeContactEmail = '';
   }
 
   /**
@@ -146,6 +150,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.firstName = record.firstName;
     this.lastName = record.lastName;
     this.email = record.email;
+    this.employeeContactEmail = record.email;
     this.employeeId = record.employeeId;
     this.userId = record.userId;
   }
@@ -185,6 +190,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.firstName = this.transferEmployee.firstName || '';
     this.lastName = this.transferEmployee.lastName || '';
     this.email = this.transferEmployee.email || '';
+    this.employeeContactEmail = this.transferEmployee.email || '';
     this.employeeId = this.transferEmployee.employeeId || '';
     this.userId = this.transferEmployee.userId || '';
     this.AppStateModel.setLocation('#submission');
@@ -395,6 +401,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     additionalData.employeeLastName = this.lastName;
     additionalData.employeeId = this.employeeId;
     additionalData.employeeUserId = this.userId;
+    additionalData.employeeContactEmail = this.employeeContactEmail;
+    additionalData.contactEmployee = this.contactEmployee;
     additionalData.isTransfer = this.hasTransferEmployee;
     payload.additionalData = additionalData;
 

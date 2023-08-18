@@ -84,8 +84,9 @@ module.exports = (api) => {
     const output = r.res.rows[0];
 
     // needed variables for RT ticket
-    const ad = payload.additionalData;
+    const ad = payload.additionalData || {};
     const notifySupervisor = ad.supervisorEmail && !ad.skipSupervisor;
+    const notifyEmployee = ad.contactEmployee && ad.employeeContactEmail;
     let department =  await UcdlibGroups.getDepartmentsById(payload.groupIds || []);
     department = department.res && department.res.rows.length ? department.res.rows[0].name : '';
     const employeeName = `${ad.employeeLastName}, ${ad.employeeFirstName}`;
@@ -106,6 +107,16 @@ module.exports = (api) => {
           const e = transfer.employeeRecord.supervisor.email;
           if ( e && e != ad.supervisorEmail ) ticket.addCc( e );
         }
+      }
+      if ( notifyEmployee ) {
+        ticket.addCc( ad.employeeContactEmail );
+      }
+    } else {
+      if ( notifySupervisor ){
+        console.log(`Not adding supervisor email to RT ticket CC: ${ad.supervisorEmail}`);
+      }
+      if ( notifyEmployee ){
+        console.log(`Not adding employee email to RT ticket CC: ${ad.employeeContactEmail}`);
       }
     }
 

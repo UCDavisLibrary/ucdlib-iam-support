@@ -29,6 +29,7 @@ program
 
 program
   .command('get')
+  .alias('inspect')
   .description('Get an employee by id')
   .argument('<id>', 'Employee unique indentifier')
   .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(utils.employeeIds).default('iamId'))
