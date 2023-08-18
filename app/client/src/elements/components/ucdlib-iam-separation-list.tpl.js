@@ -24,7 +24,7 @@ export function render() {
                     <li><strong>RT Ticket ID: </strong>${r.rtTicketId}</li>
                   </ul>
                   ${r.separationDate ? html`
-                    <div class="text--smaller"><strong>Separation Date: </strong>${DtUtils.fmtDatetime(r.separationDate, true)}</div>
+                    <div class="text--smaller"><strong>Separation Date: </strong>${DtUtils.fmtDatetime(r.separationDate, {dateOnly: true})}</div>
                   ` : html``}
                 </div>
 

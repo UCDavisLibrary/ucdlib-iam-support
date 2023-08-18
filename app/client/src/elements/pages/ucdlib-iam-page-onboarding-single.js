@@ -137,7 +137,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.statusDescription = payload.statusDescription || '';
     this.libraryTitle = payload.libraryTitle || '';
     this.department = payload.departmentName || '';
-    this.startDate = dtUtls.fmtDatetime(payload.startDate, true, true);
+    this.startDate = dtUtls.fmtDatetime(payload.startDate,  {dateOnly: true, UTC: true, includeDayOfWeek: true});
     this.supervisorId = payload.supervisorId || '';
     this.supervisorName = `${ad?.supervisorFirstName || ''} ${ad?.supervisorLastName || ''}`;
     this.supervisorEmail = ad?.supervisorEmail || '';

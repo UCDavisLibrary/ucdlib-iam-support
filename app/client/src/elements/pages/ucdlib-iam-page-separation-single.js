@@ -100,7 +100,7 @@ export default class UcdlibIamPageSeparationSingle extends window.Mixin(LitEleme
     this.employeeId = ad?.employeeId || '';
     this.employeeUserId = ad?.employeeUserId || '';
     this.rtTicketId = payload.rtTicketId || '';
-    this.separationDate = dtUtls.fmtDatetime(payload.separationDate, true, true);
+    this.separationDate = dtUtls.fmtDatetime(payload.separationDate, {dateOnly: true, UTC: true, includeDayOfWeek: true});
     this.supervisorId = payload.supervisorId || '';
     this.supervisorName = `${ad?.supervisorFirstName || ''} ${ad?.supervisorLastName || ''}`;
     this.notes = payload.notes || '';
