@@ -11,6 +11,7 @@ module.exports = (api) => {
       });
       return;
     }
+    const { default: RequestsIsoUtils } = await import('@ucd-lib/iam-support-lib/src/utils/requests-iso-utils.js');
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
     const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
     const { default: config } = await import('../lib/config.js');
@@ -139,8 +140,10 @@ module.exports = (api) => {
 
     // send correspondence to supervisor
     if ( notifySupervisor ){
+      const obUtils = new RequestsIsoUtils(payload);
       const supervisorName = ad.supervisorFirstName && ad.supervisorLastName ? `${ad.supervisorFirstName} ${ad.supervisorLastName}` : 'Supervisor';
       const supervisorLink = `${config.baseUrl}/permissions/onboarding/${output.id}`;
+      const onboardingLink = `${config.baseUrl}/onboarding/${output.id}`;
       const reply = ticket.createReply();
       reply.addSubject(`${transfer.isTransfer ? 'New ' : ''}Supervisor Action Required!`);
       reply.addContent(`Hi ${supervisorName},`);
@@ -148,6 +151,12 @@ module.exports = (api) => {
       reply.addContent(`To proceed with your employee's onboarding, please describe the accounts and permissions required to perform their essential job duties using the following form:`);
       reply.addContent('');
       reply.addContent(`<a href='${supervisorLink}'>${supervisorLink}</a>`);
+      if ( !obUtils.hasUniqueIdentifier() ){
+        reply.addContent('');
+        reply.addContent('<b>IMPORTANT:</b> The employee is currently missing a record in UC Path, and most account provisioning requires this record to exist.' );
+        reply.addContent("While you may fill out the above form now, the employee will not be able to access most accounts until their record is created in UC Path and merged with the Library's record.");
+        reply.addContent(`To merge records, go to <a href='${onboardingLink}'>${onboardingLink}</a> and click the "Reconcile Manually" button in the "Status" box when their UC Path record has been created.`);
+      }
       if ( transfer.isTransfer ) {
         reply.addContent('');
         reply.addContent('');
