@@ -71,9 +71,9 @@ class employeesCli {
 
     if ( options.deprovision ){
       await keycloakClient.init({...config.keycloakAdmin, refreshInterval: 58000});
-      let keycloakUser = await keycloakClient.getUserByUserName(employeeRecord.user_id);
+      let keycloakUser = await keycloakClient.getUserByUserName(userId);
       if ( !keycloakUser ) {
-        console.error(`Employee ${employeeRecord.user_id} not found in keycloak`);
+        console.error(`Employee ${userId} not found in keycloak`);
         await pg.pool.end();
         keycloakClient.stopRefreshInterval();
         return;
@@ -109,7 +109,7 @@ class employeesCli {
     id = id.trim();
 
     // check if employee exists
-    let employee = await UcdlibEmployees.getById(id, idType, {returnGroups: true});
+    let employee = await UcdlibEmployees.getById(id, idType, {returnGroups: true, returnSupervisor: true});
     if ( !employee.res.rowCount ) {
       console.error(`Employee ${id} not found`);
       await pg.pool.end();
