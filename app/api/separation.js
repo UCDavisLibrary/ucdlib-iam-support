@@ -11,12 +11,30 @@ module.exports = (api) => {
       const { default: UcdlibSeparation } = await import('@ucd-lib/iam-support-lib/src/utils/separation.js');
       const { default: config } = await import('../lib/config.js');
       const { UcdlibRt, UcdlibRtTicket } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
+      const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
+
       const payload = req.body;
 
       if ( !payload.additionalData ) payload.additionalData = {};
 
       payload.submittedBy = req.auth.token.id;
 
+      // department info for ticket
+      const options = {returnSupervisor: true, returnGroups: true};
+      const employeeRecord = await UcdlibEmployees.getById(payload.iamId, 'iamId', options);
+      if ( employeeRecord.err ) {
+        console.error(employeeRecord.err);
+        res.status(500).json({error: true, message: 'Unable to retrieve employee record'});
+        return;
+      }
+      if ( !employeeRecord.res.rowCount ) {
+        res.status(400).json({error: true, message: 'Employee record not found'});
+        return;
+      }
+      payload.additionalData.employeeRecord = employeeRecord.res.rows[0];
+      payload.additionalData.departmentName = payload.additionalData.employeeRecord.groups.find(g => g.partOfOrg)?.name || '';
+
+      //create separation request entry
       const r = await UcdlibSeparation.create(payload);
       if ( r.err ) {
         console.error(r.err);
@@ -25,6 +43,8 @@ module.exports = (api) => {
       }
 
       const output = r.res.rows[0];
+
+
 
       // needed variables
       const ad = payload.additionalData;
@@ -54,6 +74,7 @@ module.exports = (api) => {
         'Name': employeeName,
         'Email': ad.employeeEmail || '????',
         'Employee Id': ad.employeeId || '????',
+        'Department': ad.departmentName || '????',
         'User Id (kerberos)': ad.employeeUserId || '????',
         'UCD IAM ID': payload.iamId || '????'
       }, false);
