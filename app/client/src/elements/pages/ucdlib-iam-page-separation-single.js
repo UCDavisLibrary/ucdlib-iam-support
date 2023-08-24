@@ -99,6 +99,7 @@ export default class UcdlibIamPageSeparationSingle extends window.Mixin(LitEleme
     this.lastName = ad?.employeeLastName || '';
     this.employeeId = ad?.employeeId || '';
     this.employeeUserId = ad?.employeeUserId || '';
+    this.department = ad?.departmentName || '';
     this.rtTicketId = payload.rtTicketId || '';
     this.separationDate = dtUtls.fmtDatetime(payload.separationDate, {dateOnly: true, UTC: true, includeDayOfWeek: true});
     this.supervisorId = payload.supervisorId || '';
