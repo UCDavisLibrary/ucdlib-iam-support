@@ -32,6 +32,7 @@ program
   .alias('inspect')
   .description('Get an employee by id')
   .argument('<id>', 'Employee unique indentifier')
+  .option('-u, --ucd', 'UCD IAM record should be printed along with the local employee record')
   .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(utils.employeeIds).default('iamId'))
   .action((id, options) => {
     employees.get(id, options);
