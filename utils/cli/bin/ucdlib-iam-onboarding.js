@@ -43,4 +43,15 @@ program
   }
 );
 
+program
+  .command('update-primary-association')
+  .description('Update the primary association of an onboarding record.')
+  .argument('<id>', 'Onboarding record id')
+  .argument('<deptCode>', 'Department code of the new primary association')
+  .argument('<titleCode>', 'Title code of the new primary association')
+  .action((id, deptCode, titleCode, options) => {
+    onboarding.updatePrimaryAssociation(id, deptCode, titleCode);
+    }
+);
+
   program.parse(process.argv);

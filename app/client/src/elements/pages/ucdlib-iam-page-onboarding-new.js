@@ -250,6 +250,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.appointmentIndex = i;
     const appt = this.appointments[i];
     this.startDate = appt.assocStartDate.split(' ')[0];
+    this.iamRecord.setPrimaryAssociationIndex(i);
 
     // set supervisor, if different.
     // personModel object should already be cached
@@ -391,7 +392,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     payload.skipSupervisor = this.skipSupervisor;
 
     additionalData.appointmentIndex = this.appointmentIndex;
-    additionalData.primaryAssociation = {deptCode: this.iamRecord.deptCode, titleCode: this.iamRecord.titleCode};
+    const primaryAssociation = this.iamRecord.getPrimaryAssociation();
+    additionalData.primaryAssociation = {deptCode: primaryAssociation.deptCode, titleCode: primaryAssociation.titleCode};
     additionalData.isDeptHead = this.isDeptHead;
     additionalData.employeeEmail = this.email;
     additionalData.supervisorEmail = this.supervisorEmail;
