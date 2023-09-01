@@ -96,6 +96,25 @@ class onboardingCli {
     await pg.pool.end();
     console.log(`Set UCD IAM record for onboarding request ${id}`);
   }
+
+  async updatePrimaryAssociation(id, deptCode, titleCode){
+    const request = await UcdlibOnboarding.getById(id);
+    if ( !request.res.rowCount ) {
+      console.error(`Onboarding request ${id} not found`);
+      await pg.pool.end();
+      return;
+    }
+
+    const additionalData = request.res.rows[0].additional_data;
+    additionalData.primaryAssociation = {deptCode, titleCode};
+    const update = await UcdlibOnboarding.update(id, {additionalData});
+    await pg.pool.end();
+    if ( update.err ) {
+      console.error(update.err);
+      return;
+    }
+    console.log(`Updated primary association for onboarding request ${id}`);
+  }
 }
 
 export default new onboardingCli();
