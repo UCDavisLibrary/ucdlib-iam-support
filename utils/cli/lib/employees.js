@@ -211,7 +211,6 @@ class employeesCli {
           console.log(iamRecord);
           return;
         }
-        iamRecord = new IamPersonTransform(iamRecord);
         console.log("IAM Record:");
         utils.logObject(iamRecord);
       }
