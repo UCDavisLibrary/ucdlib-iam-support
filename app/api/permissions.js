@@ -232,6 +232,9 @@ module.exports = (api) => {
 
       // create new RT ticket
       const ticket = new UcdlibRtTicket();
+      if ( req.auth.token.email ) {
+        ticket.addRequestor(req.auth.token.email);
+      }
       if ( config.rt.user ) {
         ticket.addOwner(config.rt.user);
       }
@@ -239,7 +242,7 @@ module.exports = (api) => {
       if ( supervisor ) {
         if ( config.rt.forbidCc ){
           console.log(`Forbidden to cc supervisor ${supervisor.email} on permissions request`);
-        } else {
+        } else if ( supervisor.email != req.auth.token.email ) {
           ticket.addCc(supervisor.email);
         }
       }
