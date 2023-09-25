@@ -21,6 +21,7 @@ module.exports = (api) => {
     UcdIamModel.init(config.ucdIamApi);
 
     const payload = req.body;
+
     if ( !payload.additionalData ) payload.additionalData = {};
 
     payload.submittedBy = req.auth.token.id;
@@ -99,8 +100,8 @@ module.exports = (api) => {
     if ( config.rt.user ){
       ticket.addOwner(config.rt.user);
     }
-
     if ( !config.rt.forbidCc) {
+      
       if ( notifySupervisor ) {
         ticket.addCc( ad.supervisorEmail );
         if ( transfer.isTransfer ) {
@@ -178,6 +179,28 @@ module.exports = (api) => {
         console.error(replyResponse);
         await UcdlibOnboarding.delete(output.id);
         res.json({error: true, message: 'Unable to send RT request to supervisor.'});
+        return;
+      }
+    }
+
+    if ( notifyEmployee ) {
+      const employeeName = ad.employeeFirstName && ad.employeeLastName ? `${ad.employeeFirstName} ${ad.employeeLastName}` : 'Prospective Employee';
+      const accessLink = `https://aggieaccess.ucdavis.edu/request-credentials`;
+
+      const Emreply = ticket.createReply();
+      Emreply.addSubject(`New Employee Access Credential Requests`);
+      Emreply.addContent(`Hi ${employeeName},`);
+      Emreply.addContent('');
+      Emreply.addContent(`To proceed with your onboarding, please go here to go get Aggie Access credentials:`);
+      Emreply.addContent('');
+      Emreply.addContent(`<a href='${accessLink}'>Aggie Access Credentials</a>`);
+      Emreply.addContent(`Select either AggieAccess Card or AggieAccess Mobile Credentials and fill out the form given.  For Key Control Manager please write Dale Snapp.`);
+
+      const emReplyResponse = await rtClient.sendCorrespondence(Emreply);
+      if ( emReplyResponse.err )  {
+        console.error(emReplyResponse);
+        await UcdlibOnboarding.delete(output.id);
+        res.json({error: true, message: 'Unable to send RT request to employee.'});
         return;
       }
     }
