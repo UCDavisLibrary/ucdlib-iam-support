@@ -194,11 +194,27 @@ class employeesCli {
    */
   async get(id, options){
     const idType = options.idtype ? options.idtype : 'iamId';
+    const ucd = options.ucd;
     id = id.trim();
+
     const r = await UcdlibEmployees.getById(id, idType, {returnGroups: true, returnSupervisor: true});
     await pg.pool.end();
     if ( r.res.rowCount ) {
+      console.log("Employee Record:");
       utils.logObject(r.res.rows);
+
+      if(ucd) {
+        let iamRecord;
+        iamRecord = await UcdIamModel.getPersonByIamId(r.res.rows[0].iam_id);
+        if ( iamRecord.error ) {
+          console.error(`Unable to retrieve UC Davis IAM record for ${id}`);
+          console.log(iamRecord);
+          return;
+        }
+        console.log("IAM Record:");
+        utils.logObject(iamRecord);
+      }
+
     } else {
       console.log(`Employee ${id} not found`);
     }
