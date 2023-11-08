@@ -22,7 +22,7 @@ export function render() {
       <a href='/permissions'>Permissions</a>
       <ul link-text='Support Tools'>
         <li><a href='/orgchart'>Organizational Chart</a></li>
-        <li><a href='/patron'>Patron Lookup Tool</a></li>
+        <!-- <li><a href='/patron'>Patron Lookup Tool</a></li> -->
 
       </ul>
     </ucd-theme-primary-nav>
