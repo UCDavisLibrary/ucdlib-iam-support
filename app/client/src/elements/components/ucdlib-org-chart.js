@@ -48,7 +48,7 @@ export default class UcdlibOrgChart extends window.Mixin(LitElement)
   _downloadOrgChart(){
     const data = this.dataSource;
     console.log(data);
-    const fileName = this.fileType == "csv" ? 'orgChart_csv' : 'orgChart_excel';
+    const fileName = this.fileType == "csv" ? 'orgchart_csv' : 'orgchart_excel';
     const exportType =  this.fileType == "csv" ? exportFromJSON.types.csv : exportFromJSON.types.xls; 
     exportFromJSON({ data, fileName, exportType });
   }
@@ -60,6 +60,7 @@ export default class UcdlibOrgChart extends window.Mixin(LitElement)
    */
   onInput(v){
     this.fileType = v;
+    console.log(this.fileType);
     this._onSubmit();
   }
 
@@ -83,15 +84,6 @@ export default class UcdlibOrgChart extends window.Mixin(LitElement)
       this.dataSource = [];
       this.results.map(emp => {
         let orgChart = new OrgChartTransform(emp);
-        // let uniqueId = emp.employeeId;
-        // let dpt = Object.entries(emp.groups).find(a => a[1].type === 'Department')[1];
-        // let name = emp.firstName + " " + emp.lastName;
-        // let supervisor = emp.supervisorId != "" ? 
-        //   emp.supervisor.firstName + " " + emp.supervisor.lastName 
-        //   : "";
-        // let title = emp.title;
-        // let department = dpt.name;
-        // let email = emp.email;
         let dict = {
           "Employee_No" : orgChart.unique_id,
           "Name" : orgChart.name,

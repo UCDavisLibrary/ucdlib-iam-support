@@ -90,7 +90,6 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-
     const bundle = this._getBundleName(e.page);
     let bundleAlreadyLoaded = true;
 
@@ -161,8 +160,8 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
    * @returns {Promise}
    */
   loadBundle(bundle) {
-
     if( bundle == 'all' ) {
+      
       return import(/* webpackChunkName: "pages" */ "./pages/bundles/all");
     }
     console.warn('No code chunk loaded for this page');

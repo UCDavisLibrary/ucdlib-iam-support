@@ -1,5 +1,5 @@
 import { LitElement } from 'lit';
-import {render} from "./ucdlib-iam-page-org-chart.tpl.js";
+import {render} from "./ucdlib-iam-page-orgchart.tpl.js";
 import "../components/ucdlib-org-chart";
 
 /**
@@ -17,7 +17,11 @@ export default class UcdlibIamPageOrgChart extends window.Mixin(LitElement)
   constructor() {
     super();
     this.render = render.bind(this);
-
+    this.colors = {
+      hr: 'arboretum',
+      supervisors: 'redwood',
+      employees: 'redbud'
+    };
     this._injectModel('AppStateModel');
   }
 
@@ -42,4 +46,4 @@ export default class UcdlibIamPageOrgChart extends window.Mixin(LitElement)
 
 }
 
-customElements.define('ucdlib-iam-page-org-chart', UcdlibIamPageOrgChart);
+customElements.define('ucdlib-iam-page-orgchart', UcdlibIamPageOrgChart);

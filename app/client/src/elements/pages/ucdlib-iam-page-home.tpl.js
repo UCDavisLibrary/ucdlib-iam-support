@@ -5,13 +5,7 @@ import { html } from 'lit';
  * @returns {TemplateResult}
  */
 export function render() {
-  return html`
-  <div class="l-3col">
-      <div class='l-second'>
-        <ucdlib-org-chart></ucdlib-org-chart>
-      </div> 
-  </div>
-  
+  return html`  
   <div class='l-container u-space-mt--large'>
     <div class="l-3col">
       <div class='l-first'>
