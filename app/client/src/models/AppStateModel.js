@@ -84,6 +84,11 @@ class AppStateModelImpl extends AppStateModel {
       update.location.path.length > 1
     ) {
       p = 'permissions-single';
+    }else if(
+      update.location.path[0] == 'orgChart' &&
+      update.location.path.length > 1
+    ) {
+      p = 'orgChart';
     }else {
       p = update.location.path[0];
     }
@@ -121,6 +126,9 @@ class AppStateModelImpl extends AppStateModel {
     } else if ( update.page === 'permissions' ){
       title.show = this.store.pageTitles.permissions ? true : false;
       title.text = this.store.pageTitles.permissions;
+    } else if ( update.page === 'orgchart' ){
+      title.show = this.store.pageTitles.orgChart ? true : false;
+      title.text = this.store.pageTitles.orgChart;
     }
 
 
@@ -196,6 +204,10 @@ class AppStateModelImpl extends AppStateModel {
     else if ( update.page === 'permissions' ){
       breadcrumbs.show = true;
       breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.permissions);
+    }
+    else if ( update.page === 'orgChart' ){
+      breadcrumbs.show = true;
+      breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.orgChart);
     }
     this.store.emit('app-header-update', {breadcrumbs});
   }

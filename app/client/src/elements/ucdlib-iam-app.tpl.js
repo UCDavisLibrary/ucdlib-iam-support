@@ -20,9 +20,9 @@ export function render() {
         <li><a href='/separation/new'>New Request</a></li>
       </ul>
       <a href='/permissions'>Permissions</a>
-      <ul link-text='Support Tools' href='/supportTools'>
-        <li><a href='/supportTools/orgChart'>Organizational Chart</a></li>
-        <li><a href='/supportTools/patronLookup'>Patron Lookup Tool</a></li>
+      <ul link-text='Support Tools'>
+        <li><a href='/orgChart'>Organizational Chart</a></li>
+        <li><a href='/patron'>Patron Lookup Tool</a></li>
 
       </ul>
     </ucd-theme-primary-nav>
