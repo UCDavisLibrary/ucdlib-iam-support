@@ -26,7 +26,7 @@ export default class UcdlibOrgChart extends window.Mixin(LitElement)
     this.hidden = true;
     this.message = '';
     this.brandColor = '';
-    this.fileType = "csv";
+    this.fileType = "";
 
     this._injectModel('AppStateModel', 'EmployeeModel');
   }
@@ -47,6 +47,7 @@ export default class UcdlibOrgChart extends window.Mixin(LitElement)
    */
   _downloadOrgChart(){
     const data = this.dataSource;
+    console.log(data);
     const fileName = this.fileType == "csv" ? 'orgChart_csv' : 'orgChart_excel';
     const exportType =  this.fileType == "csv" ? exportFromJSON.types.csv : exportFromJSON.types.xls; 
     exportFromJSON({ data, fileName, exportType });
@@ -68,7 +69,6 @@ export default class UcdlibOrgChart extends window.Mixin(LitElement)
    */
    async _onSubmit(){
     if ( this.isFetching ) return;
-
     // reset state
     this.wasError = false;
     this.isFetching = true;
