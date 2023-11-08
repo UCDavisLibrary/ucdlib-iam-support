@@ -34,6 +34,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
       lastName: {state: true},
       email: {state: true},
       employeeId: {state: true},
+      contactEmployee: {state: true},
+      employeeContactEmail: {state: true},
       userId: {state: true},
       manualFormDisabled: {state: true},
       skipSupervisor: {state: true},
@@ -84,6 +86,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.supervisorEmail = '';
     this.notes = '';
     this.transferEmployee = {};
+    this.contactEmployee = true;
+    this.employeeContactEmail = '';
   }
 
   /**
@@ -146,6 +150,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.firstName = record.firstName;
     this.lastName = record.lastName;
     this.email = record.email;
+    this.employeeContactEmail = record.email;
     this.employeeId = record.employeeId;
     this.userId = record.userId;
   }
@@ -185,6 +190,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.firstName = this.transferEmployee.firstName || '';
     this.lastName = this.transferEmployee.lastName || '';
     this.email = this.transferEmployee.email || '';
+    this.employeeContactEmail = this.transferEmployee.email || '';
     this.employeeId = this.transferEmployee.employeeId || '';
     this.userId = this.transferEmployee.userId || '';
     this.AppStateModel.setLocation('#submission');
@@ -203,7 +209,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
         this.iamRecord.allSupervisorEmployeeIds.forEach( async empId => {
           let emp = await this.PersonModel.getPersonById(empId, 'employeeId', false);
           emp = new IamPersonTransform(emp.payload);
-          if ( emp.employeeId == this.iamRecord.supervisorEmployeeId ){
+          if ( emp.employeeId == this.iamRecord.getSupervisorEmployeeId() ){
             this.supervisor = emp;
             this.supervisorEmail = this.supervisor.email;
           }
@@ -244,6 +250,7 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     this.appointmentIndex = i;
     const appt = this.appointments[i];
     this.startDate = appt.assocStartDate.split(' ')[0];
+    this.iamRecord.setPrimaryAssociationIndex(i);
 
     // set supervisor, if different.
     // personModel object should already be cached
@@ -385,7 +392,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     payload.skipSupervisor = this.skipSupervisor;
 
     additionalData.appointmentIndex = this.appointmentIndex;
-    additionalData.primaryAssociation = {deptCode: this.iamRecord.deptCode, titleCode: this.iamRecord.titleCode};
+    const primaryAssociation = this.iamRecord.getPrimaryAssociation();
+    additionalData.primaryAssociation = {deptCode: primaryAssociation.deptCode, titleCode: primaryAssociation.titleCode};
     additionalData.isDeptHead = this.isDeptHead;
     additionalData.employeeEmail = this.email;
     additionalData.supervisorEmail = this.supervisorEmail;
@@ -395,6 +403,8 @@ export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
     additionalData.employeeLastName = this.lastName;
     additionalData.employeeId = this.employeeId;
     additionalData.employeeUserId = this.userId;
+    additionalData.employeeContactEmail = this.employeeContactEmail;
+    additionalData.contactEmployee = this.contactEmployee;
     additionalData.isTransfer = this.hasTransferEmployee;
     payload.additionalData = additionalData;
 

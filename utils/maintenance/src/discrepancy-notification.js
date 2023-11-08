@@ -62,7 +62,7 @@ async function run() {
       thisJob.end();
       return;
     }
-    msg = `*${notifications.res.rows.length} IAM Record Discrepancies Found!*\n\n${msg}`;
+    msg = `*App/Script*:Library IAM Database\n*${notifications.res.rows.length} IAM Record Discrepancies Found!*\n\n${msg}`;
     await slack.send(msg);
     thisJob.end();
 

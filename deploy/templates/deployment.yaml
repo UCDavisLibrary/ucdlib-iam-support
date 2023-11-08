@@ -18,6 +18,8 @@ services:
       - .env
     depends_on:
       - db
+    volumes:
+      - ./utils/db-entrypoint:/cli/sql
     command: /cli/cli.sh
   backup:
     image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}

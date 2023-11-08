@@ -16,6 +16,8 @@ export default class UcdlibIamSeparationList extends window.Mixin(LitElement)
       panelIcon: {type: String, attribute: 'panel-icon'},
       brandColor: {type: String, attribute: 'brand-color'},
       noResultsMessage: {Type: String, attribute: 'no-results-message'},
+      statusId: {type: Number, attribute: 'status-id'},
+      openStatus: {type: String, attribute: 'open-status'},
       iamId: {type: String, attribute: 'iam-id'},
       rtTicketId: {type: String, attribute: 'rt-ticket-id'},
       supervisorId: {type: String, attribute: 'supervisor-id'},
@@ -37,10 +39,12 @@ export default class UcdlibIamSeparationList extends window.Mixin(LitElement)
 
     // query settings
     this.autoUpdate = false;
+    this.statusId = 0;
+    this.openStatus = '';
     this.iamId = '';
     this.rtTicketId = '';
     this.supervisorId = '';
-    this._queryProps = ['iamId', 'rtTicketId', 'supervisorId'];
+    this._queryProps = ['statusId', 'openStatus', 'iamId', 'rtTicketId', 'supervisorId'];
 
     // internal state
     this._records = [];
@@ -92,7 +96,14 @@ export default class UcdlibIamSeparationList extends window.Mixin(LitElement)
 
     if ( query ) {
       q = query;
-    } 
+    } else {
+      this._queryProps.forEach(p => {
+        if ( p != 'openStatus' && this[p] ) q[p] = this[p];
+      });
+      if ( this.openStatus ){
+        q['isOpen'] = this.openStatus == 'open';
+      }
+    }
 
     this._query = q;
 

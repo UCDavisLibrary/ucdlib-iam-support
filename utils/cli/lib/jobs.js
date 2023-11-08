@@ -7,7 +7,7 @@ class jobsCli {
 
   async list(options){
     const r = await ucdlibJobs.getRecent(options);
-    await pg.client.end();
+    await pg.pool.end();
     if ( r.err ) {
       console.error(`Error getting recent jobs\n${r.err.message}`);
       return;
@@ -27,7 +27,7 @@ class jobsCli {
 
   async names(){
     const r = await ucdlibJobs.getUniqueJobNames();
-    await pg.client.end();
+    await pg.pool.end();
     if ( r.err ) {
       console.error(`Error getting job names\n${r.err.message}`);
       return;
@@ -42,7 +42,7 @@ class jobsCli {
   async inspect(id){
     const jobResult = await ucdlibJobs.getById(id);
     const logCtResult = await ucdlibJobs.getJobLogCount(id);
-    await pg.client.end();
+    await pg.pool.end();
     const error = jobResult.err || logCtResult.err;
     if ( error ) {
       console.error(`Error getting job details\n${error.message}`);
@@ -71,7 +71,7 @@ class jobsCli {
 
   async getLogs(id, options){
     const r = await ucdlibJobs.getLogs(id, options);
-    await pg.client.end();
+    await pg.pool.end();
     if ( r.err ) {
       console.error(`Error getting job logs\n${r.err.message}`);
       return;

@@ -81,7 +81,8 @@ module.exports = (api) => {
     const action = req.body.action || 'onboarding';
     let canAccess = false;
     let onboardingStatus = 0;
-    let ucdRecord, employeeRecord;
+    let ucdIamResponse, employeeResponse;
+    let iamRecord = new IamPersonTransform({});
     let supervisorId = '';
     let userId = '';
     const data = {
@@ -135,26 +136,26 @@ module.exports = (api) => {
       }
 
       // Might need supervisor approval. lets check their records
-      [ucdRecord, employeeRecord] = await Promise.all([
+      [ucdIamResponse, employeeResponse] = await Promise.all([
         UcdIamModel.getPersonByIamId(data.iamId),
         UcdlibEmployees.getById(data.iamId, 'iamId')
       ]);
-      if ( employeeRecord.err ){
-        console.error(employeeRecord.err);
+      if ( employeeResponse.err ){
+        console.error(employeeResponse.err);
         return res.status(400).json({error: true, message: 'Unable to create permissions request.'});
       }
-      if ( ucdRecord.error ) {
-        console.error(ucdRecord.error);
+      if ( ucdIamResponse.error ) {
+        console.error(ucdIamResponse.error);
         return res.status(400).json({error: true, message: 'Unable to create permissions request. Person does not exist.'});
       }
-      ucdRecord = new IamPersonTransform(ucdRecord);
-      data.additionalData.employeeFirstName = ucdRecord.firstName;
-      data.additionalData.employeeLastName = ucdRecord.lastName;
+      iamRecord = new IamPersonTransform(ucdIamResponse);
+      data.additionalData.employeeFirstName = iamRecord.firstName;
+      data.additionalData.employeeLastName = iamRecord.lastName;
 
       // check if one of our employees. if not submitted by supervisor, needs approval
-      if ( employeeRecord.res && employeeRecord.res.rows.length ) {
+      if ( employeeResponse.res && employeeResponse.res.rows.length ) {
         data.needsSupervisorApproval = true;
-        const employee = employeeRecord.res.rows[0];
+        const employee = employeeResponse.res.rows[0];
         supervisorId = employee.supervisor_id;
         if ( supervisorId == req.auth.token.iamId ) data.needsSupervisorApproval = false;
 
@@ -231,15 +232,32 @@ module.exports = (api) => {
 
       // create new RT ticket
       const ticket = new UcdlibRtTicket();
-      ticket.addOwner(config.rt.user);
-      ticket.addSubject(`Permissions Request Update for ${ucdRecord.fullName}`);
+      if ( req.auth.token.email ) {
+        ticket.addRequestor(req.auth.token.email);
+      }
+      if ( config.rt.user ) {
+        ticket.addOwner(config.rt.user);
+      }
+      ticket.addSubject(`Permissions Request Update for ${iamRecord.fullName}`);
       if ( supervisor ) {
         if ( config.rt.forbidCc ){
           console.log(`Forbidden to cc supervisor ${supervisor.email} on permissions request`);
-        } else {
+        } else if ( supervisor.email != req.auth.token.email ) {
           ticket.addCc(supervisor.email);
         }
       }
+      if ( !iamRecord.isEmpty ){
+        ticket.addContent(`<h4>Employee</h4>`);
+        ticket.addContent({
+          'Name': iamRecord.fullName,
+          'Email': iamRecord.email || '????',
+          'Employee Id': iamRecord.employeeId || '????',
+          'User Id (kerberos)': iamRecord.userId || '????',
+          'UCD IAM ID': iamRecord.id || '????'
+        }, false);
+
+      }
+
       addPermissionRtBody(ticket, data, req, true);
       const rtResponse = await rtClient.createTicket(ticket);
       if ( rtResponse.err )  {
@@ -256,7 +274,7 @@ module.exports = (api) => {
         reply.addSubject(`Supervisor Action Required!`);
         reply.addContent(`Hi ${supervisor.first_name},`);
         reply.addContent(``);
-        reply.addContent(`Please approve this permissions request for ${ucdRecord.fullName}.`);
+        reply.addContent(`Please approve this permissions request for ${iamRecord.fullName}.`);
         reply.addContent(``);
         reply.addContent('Thank you,');
         reply.addContent('Library ITIS');

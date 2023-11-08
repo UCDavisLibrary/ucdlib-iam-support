@@ -4,6 +4,7 @@ import config from "./config.js";
 import { run as syncEmployees } from './iam-employee.js';
 import { run as syncKeycloak } from './keycloak-sync.js';
 import { run as checkOnboardingRecords } from './check-onboarding-records.js';
+import { run as checkSeparationRecords } from './check-separation-records.js';
 
 new CronJob(
 	config.cron.iamSync,
@@ -24,6 +25,9 @@ async function run() {
 
     console.log('Checking onboarding records against RT and UCD IAM...');
     await checkOnboardingRecords(false, true);
+
+    console.log('Checking separation records against RT and UCD IAM...');
+    await checkSeparationRecords(false, true);
 
   } catch (error) {
     console.error(error.message);

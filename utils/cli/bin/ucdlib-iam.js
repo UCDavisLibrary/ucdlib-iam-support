@@ -6,9 +6,11 @@ const program = new Command();
 program
   .name('ucdlib-iam')
   .version(config.version)
-  .command('person', 'commands for querying ucd people records')
-  .command('groups', 'queries and updates the pg database and displays all groups')
-  .command('employees', 'commands for interacting with library employees records, including onboarding and separation')
-  .command('jobs', 'query and inspect recent cron job runs')
+  .command('person', 'Query the UC Davis IAM API for an affiliated person')
+  .command('groups', 'Query and update library departments and groups')
+  .command('employees', 'Query and update employees records, including onboarding and separation')
+  .command('jobs', 'Query and inspect recent cron job runs')
+  .command('onboarding', 'Query and inspect onboarding records. To actually convert an onboarding record to an employee record, use the employees command.')
+  .command('separation', 'Query and inspect separation records. To actually separate an employee, use the employees command.')
 
 program.parse(process.argv);

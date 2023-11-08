@@ -9,6 +9,49 @@ export function render() {
   <div class='l-container u-space-pb'>
     <div class='l-basic--flipped'>
       <div class="l-content">
+        <div class="panel panel--icon panel--icon-custom o-box panel--icon-pinot">
+          <h2 class="panel__title"><span class="panel__custom-icon fas fa-user-tie"></span>Employee</h2>
+          <section ?hidden=${this.ucdIamRecord.isEmpty}>
+            <div><label class='u-inline'>Name:</label> ${this.ucdIamRecord.fullName}</div>
+            <div><label class='u-inline'>IAM Id:</label> ${this.ucdIamRecord.id}</div>
+            <div><label class='u-inline'>Employee Id:</label> ${this.ucdIamRecord.employeeId}</div>
+            <div><label class='u-inline'>Email:</label> ${this.ucdIamRecord.email}</div>
+            <div><label class='u-inline'>User Id (Kerberos):</label> ${this.ucdIamRecord.userId}</div>
+            <div ?hidden=${!this.ucdIamRecord.hasAppointment}>
+              <label>Appointments:</label>
+              <div class="responsive-table u-space-ml" role="region" aria-label="Scrollable Table" tabindex="0">
+                <table style='width:auto;font-size:.9rem;'>
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Department</th>
+                      <th>Start Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${this.ucdIamRecord.appointments.map(a => html`
+                      <tr>
+                        <td>${a.titleDisplayName} (${a.titleCode})</td>
+                        <td>${a.deptDisplayName} (${a.deptCode})</td>
+                        <td style='white-space:nowrap;'>${(a.assocStartDate || '').split(' ')[0] }</td>
+                      </tr>
+                    `)}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <a class='pointer icon icon--circle-arrow-right' @click=${this.openIamRecordModal}>View Entire Employee Record</a>
+          </section>
+          <section ?hidden=${!this.ucdIamRecord.isEmpty} class="brand-textbox category-brand__background category-brand--pinot">
+            <p>We are missing the UC Davis Identity and Access Management (IAM) record for this employee!</p>
+            <div ?hidden=${!this.missingUid}>
+              <p>This onboarding request was submitted prior to the UC Davis record existing.</p>
+              <p>
+                When the UC Davis record is created, you will need to <a class='pointer fw-bold' @click=${this.openReconModal}>match it to this request.</a>
+              </p>
+            </div>
+          </section>
+        </div>
         <div class="panel panel--icon panel--icon-custom o-box panel--icon-quad">
           <h2 class="panel__title"><span class="panel__custom-icon fas fa-briefcase"></span>Library Position</h2>
             <div><label class='u-inline'>Title:</label> ${this.libraryTitle}</div>
@@ -19,6 +62,7 @@ export function render() {
           <h2 class="panel__title"><span class="panel__custom-icon fas fa-sitemap"></span>Supervisor</h2>
           <div><label class='u-inline'>Name:</label> ${this.supervisorName}</div>
           <div><label class='u-inline'>IAM ID:</label> ${this.supervisorId}</div>
+          <div><label class='u-inline'>Email:</label> ${this.supervisorEmail}</div>
         </div>
         <div class="panel panel--icon panel--icon-custom o-box panel--icon-poppy" ?hidden=${!this.notes}>
           <h2 class="panel__title"><span class="panel__custom-icon fas fa-sticky-note"></span>Additional Information</h2>
@@ -120,6 +164,7 @@ export function render() {
               .disabled=${this.sentBackgroundCheck || !this.facilitiesRtTicketId}
               >
             <label class='u-inline' for='obs-send-facilities-rt'>Facilities RT Ticket ${this.backgroundCheck?.facilitiesRtSentTimestamp ? `(Sent ${(new Date(this.backgroundCheck?.facilitiesRtSentTimestamp)).toLocaleString()})` : ''}</label>
+            ${!this.facilitiesRtTicketId ? html`<div class='checkbox-detail'>There is no facilities RT ticket associated with this request.</div>` : html``}
           </li>
         </ul>
         <div class="field-container u-space-mt">
@@ -136,5 +181,8 @@ export function render() {
         ?disabled=${this.sentBackgroundCheck || (!this.backgroundCheck?.sendItisRt && !this.backgroundCheck?.sendFacilitiesRt)}>Send Notification
       </button>
     </div>
+  </ucdlib-iam-modal>
+  <ucdlib-iam-modal id='obs-employee-modal' dismiss-text='Close' content-title='Employee Record'>
+    <pre style='font-size:15px;margin:0;'>${JSON.stringify(this.ucdIamRecord.data, null, "  ")}</pre>
   </ucdlib-iam-modal>
 `;}
