@@ -21,6 +21,15 @@ services:
     volumes:
       - ./utils/db-entrypoint:/cli/sql
     command: /cli/cli.sh
+  api:
+    image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
+    env_file:
+      - .env
+    ports:
+      - ${UCDLIB_API_HOST_PORT:-3001}:3000
+    depends_on:
+      - db
+    command: /api/api.sh
   backup:
     image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
     restart: always

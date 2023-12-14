@@ -7,7 +7,10 @@ import groups from './groups.js';
 
 const router = express.Router();
 
+// must have at least 'read' role for api client
 protect(router);
+
+// routes
 employees(router);
 groups(router);
 

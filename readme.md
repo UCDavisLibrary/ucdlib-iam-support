@@ -34,6 +34,9 @@ Located in `utils/init`, this container will automatically hydrate the database 
 ### Maintenance Utility
 Located in `utils/maintenance`, this container runs a node cron service for performing needed maintenance tasks, such as keeping employee records in sync with campus data stores. `ENABLE_MAINTENANCE` must be set to true.
 
+### External API
+Located in `utils/api`, this is an express service that runs a JSON API designed to return personnel data to other applications.
+
 ### Shared Code
 Any code shared by the application and cli should be placed in the `/lib` directory. Both the app and cli docker images use the same base image that npm links this shared code as the `@ucd-lib/iam-support-lib` package.
 
