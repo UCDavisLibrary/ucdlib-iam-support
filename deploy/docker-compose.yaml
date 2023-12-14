@@ -23,6 +23,7 @@ services:
     command: /cli/cli.sh
   api:
     image: gcr.io/ucdlib-pubreg/itis-iam-support-utils:v1.5.0
+    restart: always
     env_file:
       - .env
     ports:

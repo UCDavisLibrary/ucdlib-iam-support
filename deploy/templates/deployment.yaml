@@ -23,6 +23,7 @@ services:
     command: /cli/cli.sh
   api:
     image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
+    restart: always
     env_file:
       - .env
     ports:
