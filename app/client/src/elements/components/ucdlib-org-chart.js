@@ -85,10 +85,12 @@ export default class UcdlibOrgChart extends window.Mixin(LitElement)
       this.results.map(emp => {
         let orgChart = new OrgChartTransform(emp);
         let dict = {
-          "Employee_No" : orgChart.unique_id,
+          "No." : orgChart.unique_id,
+          "Employee ID" : orgChart.iam_id,
+          "Supervisor ID" : orgChart.supervisor_id,
           "Name" : orgChart.name,
-          "Reports_to" : orgChart.supervisor,
-          "Title" : orgChart.title,
+          "Reports To" : orgChart.supervisor,
+          "Job Title" : orgChart.title,
           "Department" : orgChart.department,
           "Email" : orgChart.email,
         };
