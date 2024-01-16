@@ -1,5 +1,5 @@
 import { LitElement } from 'lit';
-import {render} from "./ucdlib-iam-page-orgchart.tpl.js";
+import {render} from "./ucdlib-iam-page-org-chart.tpl.js";
 import "../components/ucdlib-org-chart.js";
 
 /**
@@ -46,4 +46,4 @@ export default class UcdlibIamPageOrgChart extends window.Mixin(LitElement)
 
 }
 
-customElements.define('ucdlib-iam-page-orgchart', UcdlibIamPageOrgChart);
+customElements.define('ucdlib-iam-page-org-chart', UcdlibIamPageOrgChart);
