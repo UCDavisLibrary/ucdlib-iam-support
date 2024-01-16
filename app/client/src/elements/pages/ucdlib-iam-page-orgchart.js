@@ -3,7 +3,7 @@ import {render} from "./ucdlib-iam-page-orgchart.tpl.js";
 import "../components/ucdlib-org-chart.js";
 
 /**
- * @classdesc Xomponent for displaying the application home page
+ * @classdesc Xomponent for displaying the application Org chart page
  */
 export default class UcdlibIamPageOrgChart extends window.Mixin(LitElement)
   .with(window.LitCorkUtils) {

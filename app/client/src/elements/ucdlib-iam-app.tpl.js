@@ -20,7 +20,7 @@ export function render() {
         <li><a href='/separation/new'>New Request</a></li>
       </ul>
       <a href='/permissions'>Permissions</a>
-      <ul link-text='Support Tools'>
+      <ul link-text='Support Tools' href='/orgchart'>
         <li><a href='/orgchart'>Organizational Chart</a></li>
         <!-- <li><a href='/patron'>Patron Lookup Tool</a></li> -->
 
