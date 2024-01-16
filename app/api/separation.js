@@ -116,7 +116,7 @@ module.exports = (api) => {
         const rtFacilities = await rtClient.createTicket(ticketFacilities);
 
         if ( rtFacilities.err || !rtFacilities.res.id )  {
-          console.error(rtFacilities);
+          console.log(rtFacilities);
           await UcdlibSeparation.delete(output.id);
           res.json({error: true, message: 'Unable to create a Facilities RT ticket for this request.'});
           return;
