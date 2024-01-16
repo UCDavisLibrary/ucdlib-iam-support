@@ -53,7 +53,7 @@ export function render() {
   <ucdlib-iam-existing-search
       search-param='name'
       widget-title=''
-      @onboarding-select=${this.hideSearchModal}
+      @separation-select=${this.hideSearchModal}
       class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
     </ucdlib-iam-existing-search>
   </ucdlib-iam-modal>

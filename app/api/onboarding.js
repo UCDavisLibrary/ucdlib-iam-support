@@ -11,16 +11,31 @@ module.exports = (api) => {
       });
       return;
     }
+    const { default: RequestsIsoUtils } = await import('@ucd-lib/iam-support-lib/src/utils/requests-iso-utils.js');
     const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
     const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
     const { default: config } = await import('../lib/config.js');
     const { UcdlibRt, UcdlibRtTicket } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
     const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
+    const { UcdIamModel } = await import('@ucd-lib/iam-support-lib/index.js');
+    UcdIamModel.init(config.ucdIamApi);
+
     const payload = req.body;
     if ( !payload.additionalData ) payload.additionalData = {};
 
     payload.submittedBy = req.auth.token.id;
     payload.modifiedBy = req.auth.token.id;
+
+    // get ucd iam record
+    if ( payload.iamId ){
+      const iamResponse = await UcdIamModel.getPersonByIamId(payload.iamId);
+      if ( !iamResponse.error ){
+        payload.additionalData.ucdIamRecord = {
+          dateRetrieved: (new Date()).toISOString(),
+          record: iamResponse
+        }
+      }
+    }
 
     // special handling for an intra-library transfer
     const transfer = {
@@ -69,8 +84,9 @@ module.exports = (api) => {
     const output = r.res.rows[0];
 
     // needed variables for RT ticket
-    const ad = payload.additionalData;
+    const ad = payload.additionalData || {};
     const notifySupervisor = ad.supervisorEmail && !ad.skipSupervisor;
+    const notifyEmployee = ad.contactEmployee && ad.employeeContactEmail;
     let department =  await UcdlibGroups.getDepartmentsById(payload.groupIds || []);
     department = department.res && department.res.rows.length ? department.res.rows[0].name : '';
     const employeeName = `${ad.employeeLastName}, ${ad.employeeFirstName}`;
@@ -80,7 +96,9 @@ module.exports = (api) => {
     const ticket = new UcdlibRtTicket();
 
     ticket.addSubject(`Onboarding: ${employeeName}`);
-    ticket.addOwner(config.rt.user);
+    if ( config.rt.user ){
+      ticket.addOwner(config.rt.user);
+    }
 
     if ( !config.rt.forbidCc) {
       if ( notifySupervisor ) {
@@ -90,25 +108,22 @@ module.exports = (api) => {
           if ( e && e != ad.supervisorEmail ) ticket.addCc( e );
         }
       }
+      if ( notifyEmployee ) {
+        ticket.addCc( ad.employeeContactEmail );
+      }
+    } else {
+      if ( notifySupervisor ){
+        console.log(`Not adding supervisor email to RT ticket CC: ${ad.supervisorEmail}`);
+      }
+      if ( notifyEmployee ){
+        console.log(`Not adding employee email to RT ticket CC: ${ad.employeeContactEmail}`);
+      }
     }
 
     // ticket content
     ticket.addContent();
-    ticket.addContent(`<h4>Employee</h4>`);
-    ticket.addContent({
-      'Name': employeeName,
-      'Email': ad.employeeEmail || '????',
-      'Employee Id': ad.employeeId || '????',
-      'User Id (kerberos)': ad.employeeUserId || '????',
-      'UCD IAM ID': payload.iamId || '????'
-    }, false);
-    ticket.addContent(`<h4>Position</h4>`);
-    ticket.addContent({
-      'Title': payload.libraryTitle,
-      'Department': department,
-      'Start Date': payload.startDate,
-      'Supervisor': `${ad.supervisorLastName}, ${ad.supervisorFirstName}`
-    }, false);
+    ticket.addOnboardingEmployeeInfo(payload);
+    await ticket.addOnboardingPositionInfo(payload);
     if ( payload.notes ){
       ticket.addContent(`<h4>Notes</h4>`);
       ticket.addContent(payload.notes, false);
@@ -136,15 +151,28 @@ module.exports = (api) => {
 
     // send correspondence to supervisor
     if ( notifySupervisor ){
+      const obUtils = new RequestsIsoUtils(payload);
       const supervisorName = ad.supervisorFirstName && ad.supervisorLastName ? `${ad.supervisorFirstName} ${ad.supervisorLastName}` : 'Supervisor';
       const supervisorLink = `${config.baseUrl}/permissions/onboarding/${output.id}`;
+      const onboardingLink = `${config.baseUrl}/onboarding/${output.id}`;
       const reply = ticket.createReply();
-      reply.addSubject(`Supervisor Action Required!`);
+      reply.addSubject(`${transfer.isTransfer ? 'New ' : ''}Supervisor Action Required!`);
       reply.addContent(`Hi ${supervisorName},`);
       reply.addContent('');
       reply.addContent(`To proceed with your employee's onboarding, please describe the accounts and permissions required to perform their essential job duties using the following form:`);
       reply.addContent('');
       reply.addContent(`<a href='${supervisorLink}'>${supervisorLink}</a>`);
+      if ( !obUtils.hasUniqueIdentifier() ){
+        reply.addContent('');
+        reply.addContent('<b>IMPORTANT:</b> The employee is currently missing a record in UC Path, and most account provisioning requires this record to exist.' );
+        reply.addContent("While you may fill out the above form now, the employee will not be able to access most accounts until their record is created in UC Path and merged with the Library's record.");
+        reply.addContent(`To merge records, go to <a href='${onboardingLink}'>${onboardingLink}</a> and click the "Reconcile Manually" button in the "Status" box when their UC Path record has been created.`);
+      }
+      if ( transfer.isTransfer ) {
+        reply.addContent('');
+        reply.addContent('');
+        reply.addContent("Since this is an intra-library transfer, if any special existing permissions need to be removed, the former supervisor should just reply to this ticket.");
+      }
       const replyResponse = await rtClient.sendCorrespondence(reply);
       if ( replyResponse.err )  {
         console.error(replyResponse);
@@ -263,6 +291,10 @@ module.exports = (api) => {
     data.additionalData.employeeId = iamRecord.employeeId;
     data.additionalData.employeeEmail = iamRecord.email;
     data.additionalData.employeeUserId = iamRecord.userId;
+    data.additionalData.ucdIamRecord = {
+      dateRetrieved: (new Date()).toISOString(),
+      record: iamRecord.data
+    }
     if ( !iamRecord.userId ) {
       data.statusId = UcdlibOnboarding.statusCodes.userId;
     } else if ( onboardingRecord.skipSupervisor || !onboardingRecord.supervisorId ) {

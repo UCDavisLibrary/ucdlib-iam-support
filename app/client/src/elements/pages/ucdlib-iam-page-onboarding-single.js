@@ -1,6 +1,7 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-onboarding-single.tpl.js";
 import dtUtls from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
+import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform";
 
 import "../components/ucdlib-rt-history";
 import "../components/ucdlib-iam-search";
@@ -35,7 +36,9 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
       backgroundCheck: {state: true},
       hideBackgroundCheckButton: {state: true},
       sentBackgroundCheck: {state: true},
-      rtTicketId: {state: true}
+      rtTicketId: {state: true},
+      ucdIamRecord: {state: true},
+      supervisorEmail: {state: true}
     };
   }
 
@@ -56,6 +59,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.startDate = '';
     this.supervisorId = '';
     this.supervisorName = '';
+    this.supervisorEmail = '';
     this.notes = '';
     this.statusDescription = '';
     this.missingUid = false;
@@ -64,6 +68,7 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.backgroundCheck = {};
     this.hideBackgroundCheckButton = false;
     this.sentBackgroundCheck = false;
+    this.ucdIamRecord = new IamPersonTransform({});
 
     this._injectModel('AppStateModel', 'OnboardingModel', 'RtModel');
   }
@@ -132,13 +137,20 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
     this.statusDescription = payload.statusDescription || '';
     this.libraryTitle = payload.libraryTitle || '';
     this.department = payload.departmentName || '';
-    this.startDate = dtUtls.fmtDatetime(payload.startDate, true, true);
+    this.startDate = dtUtls.fmtDatetime(payload.startDate,  {dateOnly: true, UTC: true, includeDayOfWeek: true});
     this.supervisorId = payload.supervisorId || '';
     this.supervisorName = `${ad?.supervisorFirstName || ''} ${ad?.supervisorLastName || ''}`;
+    this.supervisorEmail = ad?.supervisorEmail || '';
     this.notes = payload.notes || '';
     this.previousPosition = ad?.previousPosition || {};
     this.facilitiesRtTicketId = ad?.facilitiesRtTicketId || '';
     this.backgroundCheck = ad?.backgroundCheck || {};
+
+    if ( ad?.ucdIamRecord?.record ){
+      this.ucdIamRecord = new IamPersonTransform(ad.ucdIamRecord.record);
+    } else {
+      this.ucdIamRecord = new IamPersonTransform({});
+    }
   }
 
   /**
@@ -170,6 +182,13 @@ export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitEleme
   openReconModal(){
     this.reconId = '';
     this.querySelector('#obs-recon-modal').show();
+  }
+
+  /**
+ * @description Opens the modal that displays the UC Davis IAM record. Attached to employee panel
+ */
+  openIamRecordModal(){
+    this.querySelector('#obs-employee-modal').show();
   }
 
   /**

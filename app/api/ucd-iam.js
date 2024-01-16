@@ -92,7 +92,7 @@ module.exports = (api) => {
   // query for a person by a unique identifier
   // returns a single record if successful
   api.get('/ucd-iam/person/:id', async (req, res) => {
-    if ( !req.auth.token.canCreateRequests ){
+    if ( !req.auth.token.canQueryUcdIam ){
       res.status(403).json({
         error: true,
         message: 'Not authorized to access this resource.'

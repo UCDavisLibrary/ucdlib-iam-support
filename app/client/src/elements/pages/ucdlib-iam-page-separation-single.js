@@ -51,9 +51,6 @@ export default class UcdlibIamPageSeparationSingle extends window.Mixin(LitEleme
     this.rtTicketId = '';
     this.employeeUserId = '';
     this.employeeId = '';
-    this.open = "The employee's former supervisor must finish to offboarding checklist in order to mark complete offboarding process.";
-    this.closed = "Former employees offboarding is now marked as complete.";
-
     this._injectModel('AppStateModel', 'SeparationModel', 'RtModel');
   }
 
@@ -95,20 +92,22 @@ export default class UcdlibIamPageSeparationSingle extends window.Mixin(LitEleme
    * @param {Object} payload from /api/separation/id:
    */
   async _setStateProperties(payload){
+    this.missingUid = payload.statusId == 9;
     const ad = payload.additionalData;
     this.request = payload;
     this.firstName = ad?.employeeFirstName || '';
     this.lastName = ad?.employeeLastName || '';
     this.employeeId = ad?.employeeId || '';
     this.employeeUserId = ad?.employeeUserId || '';
+    this.department = ad?.departmentName || '';
     this.rtTicketId = payload.rtTicketId || '';
-    this.separationDate = dtUtls.fmtDatetime(payload.separationDate, true, true);
+    this.separationDate = dtUtls.fmtDatetime(payload.separationDate, {dateOnly: true, UTC: true, includeDayOfWeek: true});
     this.supervisorId = payload.supervisorId || '';
     this.supervisorName = `${ad?.supervisorFirstName || ''} ${ad?.supervisorLastName || ''}`;
     this.notes = payload.notes || '';
-    this.isActiveStatus = true;
-    this.status = 'Awaiting Supervisor Response';
-    this.statusDescription = this.open;
+    this.isActiveStatus = payload.isActiveStatus;
+    this.status = payload.statusName || '';
+    this.statusDescription = payload.statusDescription || '';
   }
 
   /**

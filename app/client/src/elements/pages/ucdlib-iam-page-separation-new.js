@@ -51,7 +51,7 @@ export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
     this.firstName = '';
     this.lastName = '';
     this.middleName = '';
-    this.title = '';
+    this.employeeTitle = '';
     this.supervisorId = '';
     this.ucdDeptCode = '';
     this.userId = '';
@@ -63,9 +63,6 @@ export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
     this.employeeRecord = {};
     this.supervisor = {};
     this.notes = '';
-    this.open = true;
-    this.openStatus = 'Awaiting Supervisor Response';
-
   }
 
   /**
@@ -144,7 +141,7 @@ export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
     this.dbId = this.employeeRecord.id;
     this.middleName = this.employeeRecord.middleName;
     this.primaryAssociation = this.employeeRecord.primaryAssociation;
-    this.title = this.employeeRecord.title;
+    this.employeeTitle = this.employeeRecord.title;
     this.supervisor = this.employeeRecord.supervisor;
     this.supervisor_fullname =  this.supervisor.firstName + " " + this.supervisor.lastName;
     this.supervisorEmail = this.supervisor.email;
@@ -252,7 +249,7 @@ export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
     additionalData.id = this.dbId;
     additionalData.middleName = this.middleName;
     additionalData.primaryAssociation = this.primaryAssociation;
-    additionalData.title = this.title;
+    additionalData.title = this.employeeTitle;
     additionalData.types = this.types;
     additionalData.ucdDeptCode = this.ucdDeptCode;
     additionalData.supervisorEmail = this.supervisorEmail;

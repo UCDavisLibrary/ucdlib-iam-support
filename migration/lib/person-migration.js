@@ -4,7 +4,7 @@ import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTran
 import UcdlibEmployees from "@ucd-lib/iam-support-lib/src/utils/employees.js";
 import groupMigration from "./group-migration.js";
 
-import * as dotenv from 'dotenv' 
+import * as dotenv from 'dotenv'
 dotenv.config();
 
 class PersonMigration {
@@ -34,7 +34,7 @@ class PersonMigration {
         middleName: iamRecord.middleName,
         suffix: iamRecord.suffix,
         title: person.title,
-        ucdDeptCode: iamRecord.primaryAssociation.deptCode,
+        ucdDeptCode: iamRecord.getPrimaryAssociation().deptCode,
         types: iamRecord.types,
         primaryAssociation: person.appointment || {},
       };
@@ -43,7 +43,7 @@ class PersonMigration {
         personToWrite.supervisorId = person.reportsTo;
         personToWrite.customSupervisor = true;
       } else {
-        const supervisor = await this.getIamRecord(iamRecord.supervisorEmployeeId, 'employeeId');
+        const supervisor = await this.getIamRecord(iamRecord.getSupervisorEmployeeId(), 'employeeId');
         personToWrite.supervisorId = supervisor.id;
       }
       this.checkForMissingFields(personToWrite);
@@ -90,21 +90,21 @@ class PersonMigration {
         // this is the UL. We don't care who the UL reports to.
       }
 
-    } else if ( !iamRecord.supervisorEmployeeId ) {
+    } else if ( !iamRecord.getSupervisorEmployeeId() ) {
       throw new Error('No supervisor found for '+person.iamId);
     } else {
-      // check if supervisor is not in library - throw error if not 
-      const supervisor = await this.getIamRecord(iamRecord.supervisorEmployeeId, 'employeeId');
+      // check if supervisor is not in library - throw error if not
+      const supervisor = await this.getIamRecord(iamRecord.getSupervisorEmployeeId(), 'employeeId');
       if ( supervisor.error ){
         console.log(supervisor)
         throw new Error('Error getting iam record for supervisor of '+person.iamId);
       }
       if ( !supervisor.isLibraryEmployee ){
-        throw new Error('Supervisor '+iamRecord.supervisorEmployeeId +' of '+person.iamId+' is not a library employee');
+        throw new Error('Supervisor '+iamRecord.getSupervisorEmployeeId() +' of '+person.iamId+' is not a library employee');
       }
     }
 
-    
+
   }
 
   checkForMissingFields(personRecord){
@@ -124,7 +124,7 @@ class PersonMigration {
     for (const group of groups) {
       await UcdlibEmployees.addEmployeeToGroup(this.iamIdToTableId[person.iamId], group.id, group.deptHead);
     }
-  } 
+  }
 
   // get iam record, cache it, and return it
   async getIamRecord(id, idType='iamId') {
@@ -154,7 +154,7 @@ class PersonMigration {
       }
       iamId = iamRecord.iamId;
     }
-    
+
     // get iam record from iamId
     if ( iamId ) {
       iamRecord = await this.iam.getPersonByIamId(iamId);
@@ -162,7 +162,7 @@ class PersonMigration {
       console.log(iamRecord);
       throw new Error('No iamId found for employeeId '+employeeId);
     }
-    
+
     if ( iamRecord.error ){
       console.log(iamRecord)
       throw new Error('Error getting iam record for '+iamId);
