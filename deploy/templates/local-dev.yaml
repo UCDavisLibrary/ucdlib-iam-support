@@ -50,6 +50,25 @@ services:
       - ../../utils/cli/lib:/cli/lib
       - ../utils/db-entrypoint:/cli/sql
       - ../../lib:/iam-support-lib
+  api:
+    image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
+    env_file:
+      - .env
+    ports:
+      - ${UCDLIB_API_HOST_PORT:-3001}:3000
+    depends_on:
+      - db
+    environment:
+      PGUSER: 'postgres'
+      PGHOST: 'db'
+      PGDATABASE: 'postgres'
+      PGPASSWORD: 'localhost'
+      PGPORT: 5432
+    command: /api/api.sh
+    # command: /api/tail.sh
+    volumes:
+      - ../../utils/api:/api
+      - ../../lib:/iam-support-lib
   backup:
     image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
     env_file:

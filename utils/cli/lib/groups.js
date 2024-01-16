@@ -213,6 +213,27 @@ class GroupsCli {
   }
 
   /**
+   * @description Update a group property
+   * @param {String} id - Group id
+   * @param {String} property - Column name to update
+   * @param {String} value - New value
+   * @returns
+   */
+    async updateProperty(id, property, value ){
+      id = id.trim();
+      const data = {
+        [property]: value
+      };
+      const r = await UcdlibGroups.update(id, data);
+      await pg.pool.end();
+      if ( r.err ) {
+        console.error(`Error updating group record\n${r.err.message}`);
+        return;
+      }
+      console.log(`Updated ${r.res.rowCount} group records`);
+    }
+
+  /**
    * @description Validate group exists
    * @param {Int} group_id - Group id
    * @param {Object} args - Additional arguments to pass to UcdlibGroups.getById

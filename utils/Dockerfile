@@ -55,6 +55,20 @@ COPY cli/cli.sh cli.sh
 # make cli available as global command
 RUN npm link
 
+# API server - for external apps to use
+RUN mkdir /api
+WORKDIR /api
+
+COPY api/package.json package.json
+COPY api/package-lock.json package-lock.json
+RUN npm install
+RUN npm link @ucd-lib/iam-support-lib
+
+COPY api/lib lib
+COPY api/routes routes
+COPY api/index.js index.js
+COPY api/api.sh api.sh
+
 # build tags
 ARG APP_VERSION
 ENV APP_VERSION ${APP_VERSION}

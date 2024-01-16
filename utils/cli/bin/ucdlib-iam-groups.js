@@ -71,4 +71,15 @@ program
     groups.inspect(group_id);
   });
 
+  program
+  .command('update-property')
+  .description('Update a group property')
+  .argument('<id>', 'Group id')
+  .argument('<property>', 'Property to update')
+  .argument('<value>', 'New value')
+  .action((id, property, value) => {
+    groups.updateProperty(id, property, value);
+  }
+);
+
   program.parse(process.argv);
