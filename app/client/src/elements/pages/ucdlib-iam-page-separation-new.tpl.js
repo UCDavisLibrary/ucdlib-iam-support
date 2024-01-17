@@ -64,6 +64,26 @@ export function renderSubmissionForm(){
 
 
 
+
+      <div>
+        <div class="panel panel--icon panel--icon-custom o-box panel--icon-quad">
+          <h2 class="panel__title"><span class="panel__custom-icon fas fa-broom"></span>Facilities</h2>
+          <section>
+            <div class="checkbox">
+              <ul class="list--reset">
+                <li>
+                  <input id="sp-skip-facilities" type="checkbox" @input=${() => this.skipFacilities = !this.skipFacilities} .checked=${this.skipFacilities}>
+                  <label for="sp-skip-facilities">Do not notify Facilities of Separation</label>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </div>
+      </div>
+
+
+
+
       <div class="panel panel--icon panel--icon-custom o-box panel--icon-pinot">
         <h2 class="panel__title"><span class="panel__custom-icon fas fa-user-tie"></span>Employee</h2>
         <section>
