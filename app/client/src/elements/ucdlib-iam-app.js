@@ -162,8 +162,10 @@ export default class UcdlibIamApp extends window.Mixin(LitElement)
    */
   loadBundle(bundle) {
 
-    if( bundle == 'all' ) {
-      return import(/* webpackChunkName: "pages" */ "./pages/bundles/all");
+    if( bundle == 'main' ) {
+      return import(/* webpackChunkName: "pages-main" */ "./pages/bundles/main");
+    } else if ( bundle == 'tools' ) {
+      return import(/* webpackChunkName: "tools" */ "./pages/bundles/tools");
     }
     console.warn('No code chunk loaded for this page');
     return false;

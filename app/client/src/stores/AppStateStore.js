@@ -27,6 +27,7 @@ class AppStateStoreImpl extends AppStateStore {
       permissionsApplications: {text: 'Select Applications', link: '/permissions#applications'},
       permissionsEmployee: {text: 'Select a UC Davis Employee', link: '/permissions#employee'},
       patronLookup: {text: 'Search by Patron Lookup Tool', link: '/patron'},
+      tools: {text: 'Support Tools', link: '/tools'}
     };
 
     // static page title values
@@ -37,7 +38,8 @@ class AppStateStoreImpl extends AppStateStore {
       separationNew: 'New Separation Request',
       usersSearch: 'Alma Users Search',
       permissions: 'Employee Permissions',
-      patronLookup: 'Patron Lookup'
+      patronLookup: 'Patron Lookup',
+      tools: 'Support Tools'
     };
 
     this.userProfile = {};

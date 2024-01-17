@@ -20,7 +20,7 @@ export function render() {
         <li><a href='/separation/new'>New Request</a></li>
       </ul>
       <a href='/permissions'>Permissions</a>
-      <ul link-text='Support Tools' href='/'>
+      <ul link-text='Support Tools' href='/tools'>
         <li><a href='/patron'>Patron Lookup</a></li>
       </ul>
 
@@ -51,5 +51,6 @@ export function render() {
     <ucdlib-iam-page-separation-single id='separation-single'></ucdlib-iam-page-separation-single>
     <ucdlib-iam-page-permissions-single id='permissions-single'></ucdlib-iam-page-permissions-single>
     <ucdlib-iam-page-permissions id='permissions'></ucdlib-iam-page-permissions>
+    <ucdlib-iam-page-tools id='tools'></ucdlib-iam-page-tools>
   </ucdlib-pages>
 `;}

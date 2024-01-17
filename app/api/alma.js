@@ -1,8 +1,17 @@
 const config = require('../lib/config.js');
- 
+
 module.exports = (api) => {
 
   api.get('/users', async (req, res) => {
+
+    if ( !req.auth.token.canQueryUcdIam ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
+
     const { default: AlmaModel } = await import('@ucd-lib/iam-support-lib/src/models/AlmaModel.js');
     AlmaModel.init(config.alma);
 
@@ -12,6 +21,15 @@ module.exports = (api) => {
   });
 
   api.get('/users/search', async (req, res) => {
+
+    if ( !req.auth.token.canQueryUcdIam ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
+
     const { default: AlmaModel } = await import('@ucd-lib/iam-support-lib/src/models/AlmaModel.js');
     AlmaModel.init(config.alma);
 
@@ -26,12 +44,21 @@ module.exports = (api) => {
     // query for a people by bulk
   // returns a set of records
   api.get('/users/bulksearch', async (req, res) => {
+
+    if ( !req.auth.token.canQueryUcdIam ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
+
     const { default: AlmaModel } = await import('@ucd-lib/iam-support-lib/src/models/AlmaModel.js');
     AlmaModel.init(config.alma);
 
     const queryLimit = config.alma.queryLimit;
     const kerbIds = req.query.ids.split(',').map(id => id.trim()).slice(0, queryLimit);
-    
+
     const maxConcurrentRequests = config.alma.maxConcurrentRequests;
 
     while (kerbIds.length > 0) {
@@ -58,16 +85,34 @@ module.exports = (api) => {
   // query for a person by a unique identifier
   // returns a single record if successful
   api.get('/users/:id', async (req, res) => {
+
+    if ( !req.auth.token.canQueryUcdIam ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
+
     const { default: AlmaModel } = await import('@ucd-lib/iam-support-lib/src/models/AlmaModel.js');
     AlmaModel.init(config.alma);
     let response;
 
     response = await AlmaModel._getUsersById(req.params.id, config.alma.key);
     res.json(response);
-    
+
   });
 
   api.get('/roleTypes', async (req, res) => {
+
+    if ( !req.auth.token.canQueryUcdIam ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
+
       const { default: AlmaModel } = await import('@ucd-lib/iam-support-lib/src/models/AlmaModel.js');
       AlmaModel.init(config.alma);
 

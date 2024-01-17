@@ -7,8 +7,8 @@ import "../components/ucdlib-iam-modal";
 /**
  * @description Component element for querying the UC Davis IAM API
  */
- export default class UcdlibIamPagePatronLookup extends window.Mixin(LitElement)
- .with(window.LitCorkUtils) {
+export default class UcdlibIamPagePatronLookup extends window.Mixin(LitElement)
+  .with(window.LitCorkUtils) {
 
   static get properties() {
     return {
@@ -36,10 +36,6 @@ import "../components/ucdlib-iam-modal";
       selectedPersonId: {state: true},
       selectedPersonProfile: {state: true}
     };
-  }
-
-  static get styles() {
-    return Templates.styles();
   }
 
   constructor() {
@@ -101,7 +97,7 @@ import "../components/ucdlib-iam-modal";
     this.hideNavOptions = '';
     this.widgetTitle = 'UC Davis Patron Lookup Search';
 
-    
+
   }
   /**
    * @method _onAppStateUpdate
@@ -110,7 +106,13 @@ import "../components/ucdlib-iam-modal";
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-    this._setPage(e);
+    if (e.page != this.id ) return;
+    const token = this.AuthModel.getToken();
+    if ( token.canDoPatronSearch ){
+      this._setPage(e);
+    } else {
+      this.AppStateModel.showError('You do not have permission to use this tool.');
+    }
   }
 
 
@@ -127,9 +129,9 @@ import "../components/ucdlib-iam-modal";
     this.requestId = e.location.query.iamid;
 
     if(this.requestId && this.requestId != ""){
-      this.getInformation();
+      await this.getInformation();
     }
-    
+
 
     this.AppStateModel.showLoaded();
 
@@ -148,7 +150,6 @@ import "../components/ucdlib-iam-modal";
     if( r.state === this.PersonModel.store.STATE.LOADED ) {
       this.isFetching = false;
       this.selectedPersonProfile = r.payload;
-      console.log(this.selectedPersonProfile);
       await this._setStateProperties(r.payload);
       this.AppStateModel.setTitle({show: true, text: this.pageTitle()});
       this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs: this.breadcrumbs()});
@@ -157,7 +158,7 @@ import "../components/ucdlib-iam-modal";
       this.selectedPersonStdInfo = this.selectedPersonProfile.sisAssociations;
       this.informationHeaderID = this.selectedPersonProfile.iamId;
       this.page = 'information';
-        
+
     } else if( r.state === this.PersonModel.store.STATE.ERROR ) {
       this.isFetching = false;
       this.wasError = true;
@@ -284,7 +285,7 @@ import "../components/ucdlib-iam-modal";
     ];
   }
 
-  
+
 
   /**
    * @description Returns the 'searchParams' object for the active search form
@@ -321,7 +322,6 @@ import "../components/ucdlib-iam-modal";
    */
   async _onReturn(e){
     if ( this.isFetching ) return;
-    console.log(e);
     // reset state
     this.wasError = false;
     this.reset();
@@ -387,8 +387,8 @@ import "../components/ucdlib-iam-modal";
 
 
     this.AppStateModel.refresh();
-    
-    
+
+
 
   }
 

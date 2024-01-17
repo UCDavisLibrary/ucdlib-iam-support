@@ -1,132 +1,17 @@
-import { html, css } from 'lit';
-
-import normalizeStyles from "@ucd-lib/theme-sass/normalize.css.js";
-import headingStyles from "@ucd-lib/theme-sass/1_base_html/_headings.css";
-import headingClassesStyles from "@ucd-lib/theme-sass/2_base_class/_headings.css";
-import buttonStyles from "@ucd-lib/theme-sass/2_base_class/_buttons.css";
-import formStyles from "@ucd-lib/theme-sass/1_base_html/_forms.css.js";
-import listStyles from "@ucd-lib/theme-sass/1_base_html/_lists.css.js";
-import listClassesStyles from "@ucd-lib/theme-sass/2_base_class/_lists.css.js";
-import formsClassesStyles from "@ucd-lib/theme-sass/2_base_class/_forms.css.js";
-import alertStyles from "@ucd-lib/theme-sass/4_component/_messaging-alert.css.js";
-import breadcrumbStyles from "@ucd-lib/theme-sass/4_component/_nav-breadcrumbs.css.js";
-import mediaLinkStyles from "@ucd-lib/theme-sass/4_component/_wysiwyg-media-link.css.js";
-import layoutCss from "@ucd-lib/theme-sass/5_layout/_index.css.js";
-import base from "@ucd-lib/theme-sass/1_base_html/_index.css.js";
-import utility from "@ucd-lib/theme-sass/6_utility/_index.css.js";
+import { html } from 'lit';
 import dtUtls from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
 
-/**
- * @description shadow styles
- * @returns 
- */
-export function styles() {
-  const elementStyles = css`
-    :host {
-      display: block;
-      padding: 1rem 10rem;
-    }
-    [hidden] {
-      display: none !important;
-    }
-    nav {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-bottom: 1rem;
-    }
-    nav label {
-      min-width: 9ch;
-      padding-bottom: 0;
-    }
-    nav select {
-      padding-left: .25rem;
-      flex-grow: 1;
-      width: initial;
-    }
-    .text-input-container {
-      display: flex;
-    }
-    .btn--search {
-      margin-top: 1rem;
-    }
-    .alert--error {
-      padding: 1rem;
-    }
-    .link {
-      cursor: pointer;
-    }
-    .breadcrumbs {
-      padding-left: 0;
-    }
-    .results-list {
-      max-width: 1000px;
-      overflow-y: scroll;
-    }
-    .selected-person {
-      background-color: rgba(var(--category-brand-rgb, var(--media-link-background)), 0.1);
-      border: 1px solid #ffbf00;
-    }
-    .results-label {
-      margin-top: 0;
-      margin-bottom: .5rem;
-      font-weight: 700;
-    }
-    .tbl {
-      border: 1px solid #b0d0ed;
-    }
-    .tLeft {
-      float:left;
-    }
-    .tRight {
-      float:right;
-    }
-    .box {
-      float: left;
-      width: 50%;
-      padding: 10px;
-      border-top: 1px solid #b0d0ed;
-      box-sizing: border-box;
-    
-    }
-    
-    /* Clear floats after the columns */
-    .box-row:after {
-      content: "";
-      display: table;
-      clear: both;
-    }
-  `;
-
-  return [
-    normalizeStyles,
-    headingStyles,
-    headingClassesStyles,
-    buttonStyles,
-    formStyles,
-    listStyles,
-    listClassesStyles,
-    formsClassesStyles,
-    alertStyles,
-    breadcrumbStyles,
-    mediaLinkStyles,
-    elementStyles,
-    utility,
-    layoutCss,
-    base
-  ];
-}
 
 /**
  * @description Primary render function
  * @returns {TemplateResult}
  */
-export function render() { 
+export function render() {
   return html`
 <div class="l-3col l-3col--25-50-25">
   <div class="l-second panel o-box">
-    
-    <div class='header'>
+
+    <div>
         <h2 class='heading--underline' ?hidden=${!this.widgetTitle}>${this.widgetTitle}</h2>
       </div>
       <ucdlib-pages selected=${this.page}>
@@ -152,10 +37,10 @@ export function render() {
               ${this.renderEmailForm()}
               ${this.renderNameForm()}
             </ucdlib-pages>
-            <button 
-              ?disabled=${this.disableSearch} 
-              type='submit' 
-              class="btn btn--block btn--alt btn--search">Search${this.isFetching ? html`<span>ing</span>` : html``}</button>
+            <button
+              ?disabled=${this.disableSearch}
+              type='submit'
+              class="btn btn--block btn--alt btn--search u-space-mt">Search${this.isFetching ? html`<span>ing</span>` : html``}</button>
           </form>
         </div>
         <div  id='results'>
@@ -245,12 +130,12 @@ export function render() {
                   </div>
                   <br />
                 `:html`Student Status: <span style="color:red;">INACTIVE</span>`}
-              </div> 
+              </div>
             `:html`<h4>There is no information on this individual in the IAM Database.</h4>`}
           </div>
         </div>
       </ucdlib-pages>
-  
+
   </div>
 </div>
 
@@ -274,14 +159,14 @@ export function renderUserIdForm(){
       <div class="field-container">
         <label ?hidden=${!this.hideNav} for=${'inp-'+ view.attribute}>${view.label}</label>
         <div class='text-input-container'>
-          <input 
+          <input
             @input=${(e) => this.userId = e.target.value}
             .value=${this.userId}
-            id=${'inp-'+ view.attribute} 
-            type="text" 
+            id=${'inp-'+ view.attribute}
+            type="text"
             placeholder="Enter a UC Davis computing account...">
         </div>
-        
+
       </div>
     </div>
   `;
@@ -298,11 +183,11 @@ export function renderUserIdForm(){
       <div class="field-container">
         <label ?hidden=${!this.hideNav} for=${'inp-'+ view.attribute}>${view.label}</label>
         <div class='text-input-container'>
-          <input 
+          <input
             @input=${(e) => this.email = e.target.value}
             .value=${this.email}
-            id=${'inp-'+ view.attribute} 
-            type="email" 
+            id=${'inp-'+ view.attribute}
+            type="email"
             placeholder="Enter an email address">
         </div>
       </div>
@@ -321,12 +206,12 @@ export function renderEmployeeIdForm(){
       <div class="field-container">
         <label ?hidden=${!this.hideNav} for=${'inp-'+ view.attribute}>${view.label}</label>
         <div class='text-input-container'>
-          <input 
+          <input
             @input=${(e) => this.employeeId = e.target.value}
-            id=${'inp-'+ view.attribute} 
+            id=${'inp-'+ view.attribute}
             .value=${this.employeeId}
-            type="number" 
-            pattern="[0-9]*" 
+            type="number"
+            pattern="[0-9]*"
             placeholder="Enter a UC Path ID number...">
         </div>
       </div>
@@ -345,12 +230,12 @@ export function renderStudentIdForm(){
       <div class="field-container">
         <label ?hidden=${!this.hideNav} for=${'inp-'+ view.attribute}>${view.label}</label>
         <div class='text-input-container'>
-          <input 
+          <input
             @input=${(e) => this.studentId = e.target.value}
             .value=${this.studentId}
-            id=${'inp-'+ view.attribute} 
-            type="number" 
-            pattern="[0-9]*" 
+            id=${'inp-'+ view.attribute}
+            type="number"
+            pattern="[0-9]*"
             placeholder="Enter a student ID number...">
         </div>
       </div>
@@ -369,41 +254,41 @@ export function renderNameForm(){
       <div class="field-container">
         <label for='inp-first-name'>First Name</label>
         <div class='text-input-container'>
-          <input 
+          <input
             @input=${e => this.firstName = e.target.value}
             .value=${this.firstName}
-            id='inp-first-name' 
-            type="text" 
+            id='inp-first-name'
+            type="text"
             placeholder="Enter a first name">
         </div>
       </div>
       <div class="field-container">
         <label for='inp-middle-name'>Middle Name</label>
         <div class='text-input-container'>
-          <input 
+          <input
             @input=${e => this.middleName = e.target.value}
             .value=${this.middleName}
-            id='inp-middle-name' 
-            type="text" 
+            id='inp-middle-name'
+            type="text"
             placeholder="Enter a middle name">
         </div>
       </div>
       <div class="field-container">
         <label for='inp-last-name'>Last Name</label>
         <div class='text-input-container'>
-          <input 
+          <input
             @input=${e => this.lastName = e.target.value}
             .value=${this.lastName}
-            id='inp-last-name' 
-            type="text" 
+            id='inp-last-name'
+            type="text"
             placeholder="Enter a last name">
         </div>
       </div>
       <div class="checkbox">
-        <input 
-          @input=${() => this.isDName = !this.isDName} 
-          id="inp-isDName" 
-          type="checkbox" 
+        <input
+          @input=${() => this.isDName = !this.isDName}
+          id="inp-isDName"
+          type="checkbox"
           .checked=${this.isDName}>
         <label for="inp-isDName">Query Online Directory</label>
       </div>

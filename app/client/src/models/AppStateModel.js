@@ -93,7 +93,6 @@ class AppStateModelImpl extends AppStateModel {
       update.location.path[0] == 'patron' &&
       update.location.path.length > 1
     ) {
-      console.log(update.location);
       p = 'patron';
     } else {
       p = update.location.path[0];
@@ -135,6 +134,9 @@ class AppStateModelImpl extends AppStateModel {
     } else if ( update.page === 'patron' ){
       title.show = this.store.pageTitles.patronLookup ? true : false;
       title.text = this.store.pageTitles.patronLookup;
+    } else if ( update.page === 'tools' ){
+      title.show = this.store.pageTitles.tools ? true : false;
+      title.text = this.store.pageTitles.tools;
     }
 
 
@@ -214,6 +216,10 @@ class AppStateModelImpl extends AppStateModel {
     else if ( update.page === 'patron' ){
       breadcrumbs.show = true;
       breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.patronLookup);
+    }
+    else if ( update.page === 'tools' ){
+      breadcrumbs.show = true;
+      breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.tools);
     }
 
     this.store.emit('app-header-update', {breadcrumbs});

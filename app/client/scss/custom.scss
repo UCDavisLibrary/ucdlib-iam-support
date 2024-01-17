@@ -270,3 +270,8 @@ ucdlib-employee-search {
   color: #545454;
   font-size: .75rem;
 }
+@media (max-width: 767px) {
+  .u-width--100-in-tablet {
+    width: 100% !important;
+  }
+}
