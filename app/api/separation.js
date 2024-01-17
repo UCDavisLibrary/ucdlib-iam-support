@@ -44,8 +44,6 @@ module.exports = (api) => {
 
       const output = r.res.rows[0];
 
-
-
       // needed variables
       const ad = payload.additionalData;
       const notifyFacilities = payload.skipFacilities ? false: true;
@@ -55,8 +53,6 @@ module.exports = (api) => {
       // create rt ticket
       const rtClient = new UcdlibRt(config.rt);
       const ticket = new UcdlibRtTicket();
-
-
 
       ticket.addSubject(`Separation: ${employeeName}`);
       if ( config.rt.user ){
@@ -93,8 +89,6 @@ module.exports = (api) => {
       ticket.addContent('');
       ticket.addContent(`<a href='${config.baseUrl}/separation/${output.id}'>View entire separation record.</a>`)
 
-
-
       // // send ticket to RT for creation
       const rtResponse = await rtClient.createTicket(ticket);
       if ( rtResponse.err || !rtResponse.res.id )  {
@@ -116,15 +110,12 @@ module.exports = (api) => {
         const rtFacilities = await rtClient.createTicket(ticketFacilities);
 
         if ( rtFacilities.err || !rtFacilities.res.id )  {
-          console.log(rtFacilities);
-          await UcdlibSeparation.delete(output.id);
-          res.json({error: true, message: 'Unable to create a Facilities RT ticket for this request.'});
-          return;
+          console.error(rtFacilities);
         }
       }
 
-      // // send correspondence to supervisor
-      // // TODO: remove 'false' when HR supplys their separation todo list - sp 2023-08-10
+      // send correspondence to supervisor
+      // TODO: remove 'false' when HR supplys their separation todo list - sp 2023-08-10
       if ( notifySupervisor && false ){
         const supervisorName = ad.supervisorFirstName && ad.supervisorLastName ? `${ad.supervisorFirstName} ${ad.supervisorLastName}` : 'Supervisor';
         const supervisorLink = `${config.baseUrl}/separation/${output.id}`;
