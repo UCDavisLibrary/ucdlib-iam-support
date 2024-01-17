@@ -89,7 +89,13 @@ class AppStateModelImpl extends AppStateModel {
       update.location.path.length > 1
     ) {
       p = 'permissions-single';
-    }else {
+    } else if(
+      update.location.path[0] == 'patron' &&
+      update.location.path.length > 1
+    ) {
+      console.log(update.location);
+      p = 'patron';
+    } else {
       p = update.location.path[0];
     }
     update.page = p;
@@ -126,6 +132,9 @@ class AppStateModelImpl extends AppStateModel {
     } else if ( update.page === 'permissions' ){
       title.show = this.store.pageTitles.permissions ? true : false;
       title.text = this.store.pageTitles.permissions;
+    } else if ( update.page === 'patron' ){
+      title.show = this.store.pageTitles.patronLookup ? true : false;
+      title.text = this.store.pageTitles.patronLookup;
     }
 
 
@@ -202,6 +211,11 @@ class AppStateModelImpl extends AppStateModel {
       breadcrumbs.show = true;
       breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.permissions);
     }
+    else if ( update.page === 'patron' ){
+      breadcrumbs.show = true;
+      breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.patronLookup);
+    }
+
     this.store.emit('app-header-update', {breadcrumbs});
   }
 

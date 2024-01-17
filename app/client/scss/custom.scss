@@ -253,6 +253,17 @@ ucdlib-employee-search {
 .border-box {
   box-sizing: border-box !important;
 }
+.box {
+  padding: 5px;
+  display: table-cell;
+  width:50%;
+}
+
+.box-row{
+  border-bottom: 1px solid #00b2e3;
+  width:100%;
+  display:table;
+}
 .checkbox-detail {
   padding-left: 2.2rem;
   font-weight: 400;

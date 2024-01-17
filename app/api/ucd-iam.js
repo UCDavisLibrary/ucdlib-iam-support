@@ -47,6 +47,48 @@ module.exports = (api) => {
 
   });
 
+
+  
+  // query for a people by bulk
+  // returns a set of records
+  api.get('/ucd-iam/people/search', async (req, res) => {
+    if ( !req.auth.token.canQueryUcdIam ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
+
+    const { UcdIamModel } = await import('@ucd-lib/iam-support-lib/index.js');
+    UcdIamModel.init(config.ucdIamApi);
+
+    const queryLimit = config.ucdIamApi.queryLimit;
+    const iamIds = req.query.ids.split(',').map(id => id.trim()).slice(0, queryLimit);
+    
+    const maxConcurrentRequests = config.ucdIamApi.maxConcurrentRequests;
+
+    while (iamIds.length > 0) {
+        const chunk = iamIds.splice(0, maxConcurrentRequests);
+        res.push(chunk);
+    }
+    const chunks = res;
+
+    const people = [];
+    for (const chunk of chunks) {
+      const promises = chunk.map(id => UcdIamModel.getPersonByIamId(id));
+      await Promise.all(promises);
+      people.push(...promises);
+    }
+
+
+    res.json(people);
+
+
+  });
+
+
+
   // query for a person by a unique identifier
   // returns a single record if successful
   api.get('/ucd-iam/person/:id', async (req, res) => {
