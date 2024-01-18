@@ -17,6 +17,17 @@ export function render() {
             </div>
           </a>
         </section>
+        <section class='media-links u-space-mb o-box'>
+          <a href="/orgchart" class="media-link">
+            <div class="media-link__figure" style="max-width:135px;width:25%;">
+                <div class="aspect--1x1 u-background-image" style="background-image:url(/img/search-laptop-magnifyingglass_thumbnail-135x135.jpg)"></div>
+            </div>
+            <div class="media-link__body">
+              <h3 class="media-link__title">Organizational Chart</h3>
+              <p>Create a organizational data sheet from records in the UC Davis Identity Management records.</p>
+            </div>
+          </a>
+        </section>
       </div>
 
     </div>
