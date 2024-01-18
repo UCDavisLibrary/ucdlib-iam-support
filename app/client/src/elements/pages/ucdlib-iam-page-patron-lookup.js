@@ -115,14 +115,15 @@ export default class UcdlibIamPagePatronLookup extends window.Mixin(LitElement)
     }
   }
 
-
-
   /**
    * @description Sets subpage based on location hash
    * @param {Object} e
    */
   async _setPage(e){
-    if ( e.page != this.id ) return;
+    if ( e.location?.hash === 'results' && this.results?.length ){
+      this.page = 'results';
+      return;
+    }
     if (this.page == "information") this._onReturn();
     this.AppStateModel.showLoading(this.id);
 
@@ -136,7 +137,6 @@ export default class UcdlibIamPagePatronLookup extends window.Mixin(LitElement)
     this.AppStateModel.showLoaded();
 
   }
-
 
   /**
    * @description get information page data
@@ -278,11 +278,18 @@ export default class UcdlibIamPagePatronLookup extends window.Mixin(LitElement)
    * @returns {Array}
    */
   breadcrumbs(){
-    return [
+    const crumbs = [
       this.AppStateModel.store.breadcrumbs.home,
-      this.AppStateModel.store.breadcrumbs.patronLookup,
-      {text: this.pageTitle(), link: ''}
+      this.AppStateModel.store.breadcrumbs.patronLookup
     ];
+
+    if ( this.results?.length ) {
+      const link = this.AppStateModel.store.breadcrumbs.patronLookup.link + "#results";
+      crumbs.push({text: 'Search Results', link});
+    }
+
+    crumbs.push({text: this.pageTitle(), link: ''});
+    return crumbs;
   }
 
 
@@ -326,7 +333,6 @@ export default class UcdlibIamPagePatronLookup extends window.Mixin(LitElement)
     this.wasError = false;
     this.reset();
     this.AppStateModel.setLocation('/patron');
-
   }
 
   /**
