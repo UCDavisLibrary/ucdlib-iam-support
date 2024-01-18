@@ -1,16 +1,17 @@
-module.exports = (api) => {
+import config from '../lib/config.js';
+import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.js';
+import UcdlibOnboarding from '@ucd-lib/iam-support-lib/src/utils/onboarding.js';
+
+export default (api) => {
 
   /**
    * @description Get ticket history
    */
   api.get('/rt/history/:id', async (req, res) => {
-    const { default: config } = await import('../lib/config.js');
-    const { UcdlibRt } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
     const rtClient = new UcdlibRt(config.rt);
-    
+
     // auth
     if ( !req.auth.token.hasAdminAccess && !req.auth.token.hasHrAccess ){
-      const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
       const r = UcdlibOnboarding.query({rtTicketId: req.params.id, supervisorId: req.auth.token.iamId});
       if ( r.err || !r.res.rows.length ){
         console.error(r.err);

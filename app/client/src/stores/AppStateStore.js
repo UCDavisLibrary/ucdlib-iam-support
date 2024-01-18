@@ -26,7 +26,9 @@ class AppStateStoreImpl extends AppStateStore {
       permissionsReport: {text: 'Select a Direct Report', link: '/permissions#report'},
       permissionsApplications: {text: 'Select Applications', link: '/permissions#applications'},
       permissionsEmployee: {text: 'Select a UC Davis Employee', link: '/permissions#employee'},
-      orgchart: {text: 'Create Organizational Chart Tool', link: '/orgchart'}
+      orgchart: {text: 'Create Organizational Chart Tool', link: '/orgchart'},
+      patronLookup: {text: 'Search by Patron Lookup Tool', link: '/patron'},
+      tools: {text: 'Support Tools', link: '/tools'}
     };
 
     // static page title values
@@ -37,7 +39,9 @@ class AppStateStoreImpl extends AppStateStore {
       separationNew: 'New Separation Request',
       usersSearch: 'Alma Users Search',
       permissions: 'Employee Permissions',
-      orgchart: 'Organization Chart Tool'
+      orgchart: 'Organization Chart Tool',
+      patronLookup: 'Patron Lookup',
+      tools: 'Support Tools'
     };
 
     this.userProfile = {};

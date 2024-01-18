@@ -1,12 +1,13 @@
-module.exports = (api) => {
+import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
+import TextUtils from '@ucd-lib/iam-support-lib/src/utils/text.js';
+
+export default (api) => {
 
   /**
    * @description get all direct reports for a user, from local db
    * Returns blank array if no reports
    */
   api.get('/employees/direct-reports', async (req, res) => {
-    const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
-    const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js')
     const iamId = req.auth.token.iamId;
     if ( !iamId ) {
       res.json([]);
@@ -44,9 +45,6 @@ module.exports = (api) => {
    * - name: search by name
    */
   api.get('/employees/search', async (req, res) => {
-    const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
-    const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
-
     if ( !req.auth.token.canCreateRequests ){
       res.status(403).json({
         error: true,

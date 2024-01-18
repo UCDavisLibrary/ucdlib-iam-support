@@ -1,8 +1,11 @@
-const path = require('path');
-const spaMiddleware = require('@ucd-lib/spa-router-middleware');
-const config = require('./config');
+import path from 'path';
+import spaMiddleware from '@ucd-lib/spa-router-middleware';
+import config from './config.js';
+import { fileURLToPath } from 'url';
 
-module.exports = (app) => {
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export default (app) => {
   let assetsDir = path.join(__dirname, '../client/public');
   const bundle = `
     <link rel="stylesheet" href="/css/site.css?v=${config.version}">

@@ -26,6 +26,8 @@ export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
       notes: {state: true},
       employeeRecord: {state:true},
       skipSupervisor: {state: true},
+      skipFacilities: {state: true},
+
     };
   }
 
@@ -59,6 +61,7 @@ export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
     this.employeeId = '';
     this.userId = '';
     this.skipSupervisor = false;
+    this.skipFacilities = false;
     this.supervisorEmail = '';
     this.employeeRecord = {};
     this.supervisor = {};
@@ -244,6 +247,7 @@ export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
     payload.supervisorId = this.supervisorId;
     payload.notes = this.notes;
     payload.skipSupervisor = this.skipSupervisor;
+    payload.skipFacilities = this.skipFacilities;
     additionalData.employeeEmail = this.email;
     additionalData.groups = this.groups;
     additionalData.id = this.dbId;

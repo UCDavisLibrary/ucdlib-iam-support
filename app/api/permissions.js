@@ -1,11 +1,21 @@
-module.exports = (api) => {
+import PermissionsRequests from '@ucd-lib/iam-support-lib/src/utils/permissions.js';
+import TextUtils from '@ucd-lib/iam-support-lib/src/utils/text.js';
+import UcdlibOnboarding from '@ucd-lib/iam-support-lib/src/utils/onboarding.js';
+import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
+import iamAdmin from '@ucd-lib/iam-support-lib/src/utils/admin.js';
+import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.js';
+import config from '../lib/config.js';
+import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
+import IamPersonTransform from '@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js';
+
+UcdIamModel.init(config.ucdIamApi);
+
+export default (api) => {
 
   /**
    * @description Get a single permission request by either 'update' id or 'onboarding' id, denoted by idType url param
    */
   api.get('/permissions/:id', async (req, res) => {
-    const { default: PermissionsRequests } = await import('@ucd-lib/iam-support-lib/src/utils/permissions.js');
-    const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
 
     const idTypes = ['update', 'onboarding'];
     const idType = idTypes.includes(req.query.idType) ?  req.query.idType : 'update';
@@ -52,8 +62,6 @@ module.exports = (api) => {
    * @description Get all submitted permission requests (most recent version) made by current user
    */
   api.get('/submitted-permission-requests', async (req, res) => {
-    const { default: PermissionsRequests } = await import('@ucd-lib/iam-support-lib/src/utils/permissions.js');
-    const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
 
     const userId = req.auth.token.id;
     const pRes = await PermissionsRequests.getAllBySubmitter(userId);
@@ -68,15 +76,6 @@ module.exports = (api) => {
    * @description Create a new permissions request tied to an onboarding or update request.
    */
   api.post('/permissions', async (req, res) => {
-    const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
-    const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
-    const { default: iamAdmin } = await import('@ucd-lib/iam-support-lib/src/utils/admin.js');
-    const { default: PermissionsRequests } = await import('@ucd-lib/iam-support-lib/src/utils/permissions.js');
-    const { default: config } = await import('../lib/config.js');
-    const { UcdlibRt, UcdlibRtTicket } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
-    const { UcdIamModel } = await import('@ucd-lib/iam-support-lib/index.js');
-    const { default: IamPersonTransform } = await import('@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js');
-    UcdIamModel.init(config.ucdIamApi);
 
     const action = req.body.action || 'onboarding';
     let canAccess = false;

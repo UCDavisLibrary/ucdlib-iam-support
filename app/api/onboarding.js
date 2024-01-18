@@ -1,4 +1,19 @@
-module.exports = (api) => {
+import RequestsIsoUtils from '@ucd-lib/iam-support-lib/src/utils/requests-iso-utils.js';
+import UcdlibOnboarding from '@ucd-lib/iam-support-lib/src/utils/onboarding.js';
+import UcdlibGroups from '@ucd-lib/iam-support-lib/src/utils/groups.js';
+import PermissionsRequests from '@ucd-lib/iam-support-lib/src/utils/permissions.js';
+import config from '../lib/config.js';
+import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.js';
+import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
+import TextUtils from '@ucd-lib/iam-support-lib/src/utils/text.js';
+import getByName from '@ucd-lib/iam-support-lib/src/utils/getByName.js';
+import Pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
+import iamAdmin from '@ucd-lib/iam-support-lib/src/utils/admin.js';
+import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
+
+UcdIamModel.init(config.ucdIamApi);
+
+export default (api) => {
 
   /**
    * @description Create a new onboarding request
@@ -11,14 +26,6 @@ module.exports = (api) => {
       });
       return;
     }
-    const { default: RequestsIsoUtils } = await import('@ucd-lib/iam-support-lib/src/utils/requests-iso-utils.js');
-    const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
-    const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
-    const { default: config } = await import('../lib/config.js');
-    const { UcdlibRt, UcdlibRtTicket } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
-    const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
-    const { UcdIamModel } = await import('@ucd-lib/iam-support-lib/index.js');
-    UcdIamModel.init(config.ucdIamApi);
 
     const payload = req.body;
     if ( !payload.additionalData ) payload.additionalData = {};
@@ -193,13 +200,6 @@ module.exports = (api) => {
    * Someone must come back later and match the records
    */
   api.post('/onboarding/reconcile', async (req, res) => {
-    const { default: PermissionsRequests } = await import('@ucd-lib/iam-support-lib/src/utils/permissions.js');
-    const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
-    const { UcdIamModel } = await import('@ucd-lib/iam-support-lib/index.js');
-    const { default: IamPersonTransform } = await import('@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js');
-    const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
-    const { UcdlibRt, UcdlibRtTicket } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
-    const { default: config } = await import('../lib/config.js');
 
     // make sure request is formatted correctly
     const payload = req.body;
@@ -348,7 +348,6 @@ module.exports = (api) => {
       });
       return;
     }
-    const { default: getByName } = await import('@ucd-lib/iam-support-lib/src/utils/getByName.js');
 
     const r = await getByName.getByName("onboarding",req.query.firstName, req.query.lastName);
     if ( r.err ) {
@@ -369,10 +368,6 @@ module.exports = (api) => {
    * @description Get a single onboarding request by id
    */
   api.get('/onboarding/:id', async (req, res) => {
-    const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
-    const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
-    const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
-    const { default: Pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
 
     const r = await UcdlibOnboarding.getById(req.params.id);
     if ( r.err ) {
@@ -421,10 +416,6 @@ module.exports = (api) => {
    * Will not send if background check notification has already been sent
    */
     api.post('/onboarding/:id/background-check-notification', async (req, res) => {
-
-      const { default: iamAdmin } = await import('@ucd-lib/iam-support-lib/src/utils/admin.js');
-      const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
-      const { default: config } = await import('../lib/config.js');
 
       if (
         !req.auth.token.hasAdminAccess &&
@@ -517,10 +508,6 @@ module.exports = (api) => {
    * isOpen - boolean indicating whether request is open or closed
    */
   api.get('/onboarding', async (req, res) => {
-    const { default: UcdlibOnboarding } = await import('@ucd-lib/iam-support-lib/src/utils/onboarding.js');
-    const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
-    const { default: UcdlibGroups } = await import('@ucd-lib/iam-support-lib/src/utils/groups.js');
-    const { default: Pg } = await import('@ucd-lib/iam-support-lib/src/utils/pg.js');
 
     if (
       !req.auth.token.hasAdminAccess &&
