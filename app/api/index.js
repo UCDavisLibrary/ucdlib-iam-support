@@ -1,15 +1,15 @@
-const express = require('express');
-const router = express.Router();
+import express from 'express';
+import ucdIam from './ucd-iam.js';
+import groups from './groups.js';
+import onboarding from './onboarding.js';
+import permissions from './permissions.js';
+import separation from './separation.js';
+import rt from './rt.js';
+import auth from './auth.js';
+import alma from './alma.js';
+import employees from './employees.js';
 
-const ucdIam = require('./ucd-iam');
-const groups = require('./groups');
-const onboarding = require('./onboarding');
-const permissions = require('./permissions');
-const separation = require('./separation');
-const rt = require('./rt');
-const auth = require('./auth');
-const alma = require('./alma');
-const employees = require('./employees');
+const router = express.Router();
 
 // middleware
 auth(router);
@@ -24,6 +24,6 @@ rt(router);
 alma(router);
 employees(router);
 
-module.exports = (app) => {
+export default (app) => {
   app.use('/api', router);
 }

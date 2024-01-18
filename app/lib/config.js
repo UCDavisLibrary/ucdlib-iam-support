@@ -1,4 +1,4 @@
-const BaseConfig = require('@ucd-lib/iam-support-lib/src/utils/config.cjs');
+import BaseConfig from '@ucd-lib/iam-support-lib/src/utils/config.cjs';
 
 class AppConfig extends BaseConfig {
   constructor(){
@@ -11,4 +11,4 @@ class AppConfig extends BaseConfig {
   }
 }
 
-module.exports = new AppConfig();
+export default new AppConfig();

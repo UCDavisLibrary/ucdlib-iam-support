@@ -1,6 +1,9 @@
-const config = require('../lib/config.js');
+import config from '../lib/config.js';
+import AlmaModel from '@ucd-lib/iam-support-lib/src/models/AlmaModel.js';
 
-module.exports = (api) => {
+AlmaModel.init(config.alma);
+
+export default (api) => {
 
   api.get('/users', async (req, res) => {
 
@@ -11,9 +14,6 @@ module.exports = (api) => {
       });
       return;
     }
-
-    const { default: AlmaModel } = await import('@ucd-lib/iam-support-lib/src/models/AlmaModel.js');
-    AlmaModel.init(config.alma);
 
     let response = await AlmaModel.getUsers(config.alma.key);
     res.json(response);
@@ -29,9 +29,6 @@ module.exports = (api) => {
       });
       return;
     }
-
-    const { default: AlmaModel } = await import('@ucd-lib/iam-support-lib/src/models/AlmaModel.js');
-    AlmaModel.init(config.alma);
 
     const firstName = req.query.firstName;
     const lastName = req.query.lastName;
@@ -53,9 +50,6 @@ module.exports = (api) => {
       return;
     }
 
-    const { default: AlmaModel } = await import('@ucd-lib/iam-support-lib/src/models/AlmaModel.js');
-    AlmaModel.init(config.alma);
-
     const queryLimit = config.alma.queryLimit;
     const kerbIds = req.query.ids.split(',').map(id => id.trim()).slice(0, queryLimit);
 
@@ -74,9 +68,6 @@ module.exports = (api) => {
       people.push(...promises);
     }
 
-
-    console.log("People:", people);
-
     res.json(people);
 
 
@@ -94,8 +85,6 @@ module.exports = (api) => {
       return;
     }
 
-    const { default: AlmaModel } = await import('@ucd-lib/iam-support-lib/src/models/AlmaModel.js');
-    AlmaModel.init(config.alma);
     let response;
 
     response = await AlmaModel._getUsersById(req.params.id, config.alma.key);
@@ -112,9 +101,6 @@ module.exports = (api) => {
       });
       return;
     }
-
-      const { default: AlmaModel } = await import('@ucd-lib/iam-support-lib/src/models/AlmaModel.js');
-      AlmaModel.init(config.alma);
 
       let response = await AlmaModel.getRoles(config.alma.key);
       res.json(response);

@@ -1,15 +1,15 @@
-const jwt_decode = require('jwt-decode');
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+import fetch from 'node-fetch';
+import jwt_decode from "jwt-decode";
+import config from '../lib/config.js';
+import AccessToken from '@ucd-lib/iam-support-lib/src/utils/accessToken.js';
+import UcdlibCache from '@ucd-lib/iam-support-lib/src/utils/cache.js';
 
-module.exports = (api) => {
+export default (api) => {
 
   /**
    * @description Middleware to check for access token and parse it
    */
   api.use(async (req, res, next) => {
-    const { default: AccessToken } = await import('@ucd-lib/iam-support-lib/src/utils/accessToken.js');
-    const { default: UcdlibCache } = await import('@ucd-lib/iam-support-lib/src/utils/cache.js');
-    const { default: config } = await import('../lib/config.js');
 
     let token, oidcConfig, userInfo;
     // check for access token

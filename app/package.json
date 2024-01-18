@@ -9,6 +9,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "type": "module",
   "dependencies": {
     "@ucd-lib/spa-router-middleware": "^0.2.1",
     "express": "^4.18.2",

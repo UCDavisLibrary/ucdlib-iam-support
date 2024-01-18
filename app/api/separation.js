@@ -1,4 +1,11 @@
-module.exports = (api) => {
+import UcdlibSeparation from '@ucd-lib/iam-support-lib/src/utils/separation.js';
+import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
+import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.js';
+import getByName from '@ucd-lib/iam-support-lib/src/utils/getByName.js';
+import TextUtils from '@ucd-lib/iam-support-lib/src/utils/text.js';
+import config from '../lib/config.js';
+
+export default (api) => {
     api.post('/separation/new', async (req, res) => {
       if ( !req.auth.token.canCreateRequests ){
         res.status(403).json({
@@ -7,11 +14,6 @@ module.exports = (api) => {
         });
         return;
       }
-
-      const { default: UcdlibSeparation } = await import('@ucd-lib/iam-support-lib/src/utils/separation.js');
-      const { default: config } = await import('../lib/config.js');
-      const { UcdlibRt, UcdlibRtTicket } = await import('@ucd-lib/iam-support-lib/src/utils/rt.js');
-      const { default: UcdlibEmployees } = await import('@ucd-lib/iam-support-lib/src/utils/employees.js');
 
       const payload = req.body;
 
@@ -161,8 +163,6 @@ module.exports = (api) => {
         return;
       }
 
-      const { default: getByName } = await import('@ucd-lib/iam-support-lib/src/utils/getByName.js');
-
       const r = await getByName.getByName("separation",req.query.firstName, req.query.lastName);
       if ( r.err ) {
         console.error(r.err);
@@ -180,8 +180,6 @@ module.exports = (api) => {
     });
 
     api.post('/separation/:id?', async (req, res) => {
-      const { default: UcdlibSeparation } = await import('@ucd-lib/iam-support-lib/src/utils/separation.js');
-      const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
 
       if (
         !req.auth.token.hasAdminAccess &&
@@ -211,8 +209,6 @@ module.exports = (api) => {
     });
 
     api.get('/separation/:id', async (req, res) => {
-      const { default: UcdlibSeparation } = await import('@ucd-lib/iam-support-lib/src/utils/separation.js');
-      const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
 
       if (
         !req.auth.token.hasAdminAccess &&
@@ -241,8 +237,6 @@ module.exports = (api) => {
     });
 
     api.get('/separation', async (req, res) => {
-      const { default: UcdlibSeparation } = await import('@ucd-lib/iam-support-lib/src/utils/separation.js');
-      const { default: TextUtils } = await import('@ucd-lib/iam-support-lib/src/utils/text.js');
 
       if (
         !req.auth.token.hasAdminAccess &&

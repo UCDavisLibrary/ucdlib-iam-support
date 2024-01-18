@@ -1,13 +1,16 @@
-const express = require('express');
+import express from 'express';
+import setUpApiRoutes from "./api/index.js"
+import setUpStaticRoutes from './lib/static.js';
+
 const app = express();
 
 app.use(express.json());
 
 // setup api routes
-require('./api')(app);
+setUpApiRoutes(app);
 
 // setup static app routes including spa
-require('./lib/static')(app);
+setUpStaticRoutes(app);
 
 app.listen(3000, () => {
   console.log('server ready on port 3000');
