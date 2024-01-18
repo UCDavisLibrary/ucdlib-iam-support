@@ -64,7 +64,10 @@ export function render() {
           <br />
           <button @click=${() => this.page = 'form'} class="btn btn--block btn--alt btn--search">Back To Search</button>
           ` : html`
-            <div class="alert">No people matched your search.</div>
+            <div class="alert">
+              <p>No people matched your search.</p>
+              <p><a @click=${() => this._onReturn()} class='pointer'>Try another search term.</a></p>
+            </div>
           `}
         </div>
         <div id="information">
