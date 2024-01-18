@@ -1,11 +1,11 @@
 import { LitElement } from 'lit';
-import {render} from "./ucdlib-iam-page-home.tpl.js";
-import "../components/ucdlib-org-chart";
+import {render} from "./ucdlib-iam-page-org-chart.tpl.js";
+import "../components/ucdlib-org-chart.js";
 
 /**
- * @classdesc Xomponent for displaying the application home page
+ * @classdesc Xomponent for displaying the application Org chart page
  */
-export default class UcdlibIamPageHome extends window.Mixin(LitElement)
+export default class UcdlibIamPageOrgChart extends window.Mixin(LitElement)
   .with(window.LitCorkUtils) {
 
   static get properties() {
@@ -22,7 +22,6 @@ export default class UcdlibIamPageHome extends window.Mixin(LitElement)
       supervisors: 'redwood',
       employees: 'redbud'
     };
-
     this._injectModel('AppStateModel');
   }
 
@@ -47,4 +46,4 @@ export default class UcdlibIamPageHome extends window.Mixin(LitElement)
 
 }
 
-customElements.define('ucdlib-iam-page-home', UcdlibIamPageHome);
+customElements.define('ucdlib-iam-page-org-chart', UcdlibIamPageOrgChart);
