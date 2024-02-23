@@ -1,5 +1,5 @@
 import { LitElement } from 'lit';
-import {render} from "./ucdlib-org-chart.tpl.js";
+import {render} from "./ucdlib-orgchart.tpl.js";
 import exportFromJSON from 'export-from-json';
 import OrgChartTransform from "@ucd-lib/iam-support-lib/src/utils/orgChart.js";
 
@@ -109,4 +109,4 @@ export default class UcdlibOrgChart extends window.Mixin(LitElement)
 
 }
 
-customElements.define('ucdlib-org-chart', UcdlibOrgChart);
+customElements.define('ucdlib-orgchart', UcdlibOrgChart);

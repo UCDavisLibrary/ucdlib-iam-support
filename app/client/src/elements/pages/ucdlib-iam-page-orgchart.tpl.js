@@ -8,7 +8,7 @@ export function render() {
   return html`
   <div class="l-3col">
       <div class='l-second'>
-        <ucdlib-org-chart></ucdlib-org-chart>
+        <ucdlib-orgchart></ucdlib-orgchart>
       </div> 
   </div>
 
