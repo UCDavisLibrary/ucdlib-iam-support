@@ -77,6 +77,9 @@ export default class UcdlibOrgChart extends window.Mixin(LitElement)
     r = await this.EmployeeModel.getAll();     // } else {
 
     if ( r.state === this.EmployeeModel.store.STATE.LOADED ) {
+      // style="pointer-events:none;opacity:0.6;"
+      document.querySelector("#fileList").style.opacity = 0.6;
+      document.querySelector("#fileList").style.pointerEvents = "none";
       document.querySelector("#loading-orgchart").style.display = "block";
       this.isFetching = false;
       this.results = Array.isArray(r.payload) ? r.payload : [r.payload];
@@ -105,6 +108,10 @@ export default class UcdlibOrgChart extends window.Mixin(LitElement)
         console.log("Data Recieved:",this.dataSource);
         document.querySelector("#loading-orgchart").style.display = "none";
         document.querySelector("#download-orgchart").disabled = false;
+        document.querySelector("#fileList").style.opacity = 1;
+        document.querySelector("#fileList").style.pointerEvents = "auto";
+
+
       });
       
     } else if( r.state === this.EmployeeModel.store.STATE.ERROR ) {
