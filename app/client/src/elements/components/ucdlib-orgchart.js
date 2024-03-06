@@ -77,7 +77,6 @@ export default class UcdlibOrgChart extends window.Mixin(LitElement)
     r = await this.EmployeeModel.getAll();     // } else {
 
     if ( r.state === this.EmployeeModel.store.STATE.LOADED ) {
-      console.log(document.querySelector("#loading-orgchart"));
       document.querySelector("#loading-orgchart").style.display = "block";
       this.isFetching = false;
       this.results = Array.isArray(r.payload) ? r.payload : [r.payload];
