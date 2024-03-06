@@ -15,6 +15,7 @@ export function render() {
             </ul>
         </fieldset>
     </form>
-    <button type='button' @click=${this._downloadOrgChart} class="btn btn--block btn--alt">Download Data Source</button>
+    <h5 id="loading-orgchart" style="display:none;">Loading Data...</h5>
+    <button id="download-orgchart" type='button' @click=${this._downloadOrgChart} class="btn btn--block btn--alt" disabled>Download Data Source</button>
 
 `;}
