@@ -47,7 +47,6 @@ export default class UcdlibOrgChart extends window.Mixin(LitElement)
    */
   async _downloadOrgChart(){
     const data = await this.dataSource;
-    console.log(data);
     const fileName = this.fileType == "csv" ? 'orgchart_csv' : 'orgchart_excel';
     const exportType =  this.fileType == "csv" ? exportFromJSON.types.csv : exportFromJSON.types.xls; 
     exportFromJSON({ data, fileName, exportType });
@@ -104,7 +103,7 @@ export default class UcdlibOrgChart extends window.Mixin(LitElement)
         this.dataSource.push(dict);
       });
       Promise.all(promise).then(() => {
-        console.log("Finished:",this.dataSource);
+        console.log("Data Recieved:",this.dataSource);
         document.querySelector("#loading-orgchart").style.display = "none";
         document.querySelector("#download-orgchart").disabled = false;
       });
