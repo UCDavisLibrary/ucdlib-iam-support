@@ -209,7 +209,7 @@ export class IamEmployees {
             newEmployeeRecord.supervisorId = supervisorIamRecord.iamId;
           }
         } else {
-          newEmployeeRecord.supervisorId = null;
+          newEmployeeRecord.supervisorId = employee.supervisor_id;
         }
       }
       try {
