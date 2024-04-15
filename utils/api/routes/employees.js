@@ -1,4 +1,5 @@
 import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
+import UcdlibGroups from '@ucd-lib/iam-support-lib/src/utils/groups.js';
 import utils from "../lib/utils.js";
 import protect from '../lib/protect.js';
 
@@ -15,6 +16,11 @@ export default ( api ) => {
     {
       urlQuery: 'supervisor',
       dbArg: 'returnSupervisor',
+      type: 'boolean'
+    },
+    {
+      urlQuery: 'department-head',
+      dbArg: 'returnDepartmentHead',
       type: 'boolean'
     }
   ];
@@ -37,19 +43,49 @@ export default ( api ) => {
     }
     const employeeIdentifierType = utils.getEmployeeIdType(req);
     const queryOptions = getQueryOptions(req);
-    const employee = await UcdlibEmployees.getById(employeeIdentifier, employeeIdentifierType, queryOptions);
-    if ( employee.err ) {
+
+    const groupReq = queryOptions.returnGroups;
+    if ( queryOptions.returnDepartmentHead ) {
+      queryOptions.returnGroups = true;
+    }
+
+    const results = await UcdlibEmployees.getById(employeeIdentifier, employeeIdentifierType, queryOptions);
+    if ( results.err ) {
       return res.status(400).json({
         error: 'Error getting employee'
       });
     }
-    if ( !employee.res.rowCount ){
+    if ( !results.res.rowCount ){
       return res.status(404).json({
         error: 'Employee not found'
       });
     }
 
-    res.json(employee.res.rows[0]);
+    const employee = results.res.rows[0];
+
+    // get supervisor if requested
+    if ( queryOptions.returnDepartmentHead ) {
+      employee.departmentHead = null;
+      const department = (employee.groups || []).find(group => group.partOfOrg);
+      if ( department && !department.isHead ) {
+        const headResult = await UcdlibGroups.getGroupHead(department.id);
+        if ( headResult.err ) {
+          return res.status(400).json({
+            error: 'Error getting department head'
+          });
+        }
+        if ( headResult.res.rowCount ) {
+          employee.departmentHead = UcdlibEmployees.toBriefObject(headResult.res.rows[0]);
+        }
+      }
+    }
+
+    // remove groups if not requested
+    if ( queryOptions.returnGroups && !groupReq ) {
+      delete employee.groups;
+    }
+
+    res.json(employee);
   });
 
 
