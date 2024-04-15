@@ -35,12 +35,13 @@ export default ( api ) => {
   api.get(`${route}/:id`, async (req, res) => {
 
     // query for employee
-    const employeeIdentifier = req.params.id;
-    if ( !employeeIdentifier ) {
+    if ( !req.params.id ) {
       return res.status(400).json({
         error: 'Missing employee identifier'
       });
     }
+    const employeeIdentifier = req.params.id.split(',').map(id => id.trim());
+    const returnSingle = employeeIdentifier.length === 1;
     const employeeIdentifierType = utils.getEmployeeIdType(req);
     const queryOptions = getQueryOptions(req);
 
@@ -55,37 +56,41 @@ export default ( api ) => {
         error: 'Error getting employee'
       });
     }
-    if ( !results.res.rowCount ){
+    if ( !results.res.rowCount && returnSingle ){
       return res.status(404).json({
         error: 'Employee not found'
       });
     }
 
-    const employee = results.res.rows[0];
+    const employees = results.res.rows;
 
-    // get supervisor if requested
-    if ( queryOptions.returnDepartmentHead ) {
-      employee.departmentHead = null;
-      const department = (employee.groups || []).find(group => group.partOfOrg);
-      if ( department && !department.isHead ) {
-        const headResult = await UcdlibGroups.getGroupHead(department.id);
-        if ( headResult.err ) {
-          return res.status(400).json({
-            error: 'Error getting department head'
-          });
-        }
-        if ( headResult.res.rowCount ) {
-          employee.departmentHead = UcdlibEmployees.toBriefObject(headResult.res.rows[0]);
+    for (const employee of employees) {
+
+      // get supervisor if requested
+      if ( queryOptions.returnDepartmentHead ) {
+        employee.departmentHead = null;
+        const department = (employee.groups || []).find(group => group.partOfOrg);
+        if ( department && !department.isHead ) {
+          const headResult = await UcdlibGroups.getGroupHead(department.id);
+          if ( headResult.err ) {
+            return res.status(400).json({
+              error: 'Error getting department head'
+            });
+          }
+          if ( headResult.res.rowCount ) {
+            employee.departmentHead = UcdlibEmployees.toBriefObject(headResult.res.rows[0]);
+          }
         }
       }
+
+      // remove groups if not requested
+      if ( queryOptions.returnGroups && !groupReq ) {
+        delete employee.groups;
+      }
+
     }
 
-    // remove groups if not requested
-    if ( queryOptions.returnGroups && !groupReq ) {
-      delete employee.groups;
-    }
-
-    res.json(employee);
+    returnSingle ? res.json(employees[0]) : res.json(employees);
   });
 
 
