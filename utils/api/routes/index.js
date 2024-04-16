@@ -2,6 +2,7 @@ import express from 'express';
 import config from "../lib/config.js";
 import protect from '../lib/protect.js';
 
+import activeTitles from './active-titles.js';
 import employees from './employees.js';
 import groups from './groups.js';
 
@@ -11,6 +12,7 @@ const router = express.Router();
 protect(router);
 
 // routes
+activeTitles(router);
 employees(router);
 groups(router);
 

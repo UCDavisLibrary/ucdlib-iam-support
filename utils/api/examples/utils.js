@@ -13,7 +13,12 @@ class utils {
   url(path, params={}){
     params = new URLSearchParams(params);
     path = path.replace(/^\//, '');
-    return `${this._url}/json/${path}?${params.toString()}`;
+    const urlParams = params.toString();
+    let url = `${this._url}/json/${path}`;
+    if(urlParams){
+      url = `${url}?${urlParams}`;
+    }
+    return url;
   }
 
   log(msg){
