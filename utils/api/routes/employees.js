@@ -22,8 +22,39 @@ export default ( api ) => {
       urlQuery: 'department-head',
       dbArg: 'returnDepartmentHead',
       type: 'boolean'
+    },
+    {
+      urlQuery: 'name',
+      dbArg: 'name',
+      type: 'string'
+    },
+    {
+      urlQuery: 'department',
+      dbArg: 'department',
+      type: 'comma-list'
+    },
+    {
+      urlQuery: 'title-code',
+      dbArg: 'titleCode',
+      type: 'comma-list'
     }
   ];
+
+  api.get(`${route}`, async (req, res) => {
+
+    const queryOptions = getQueryOptions(req);
+    const employeeName = queryOptions.name || '';
+
+    const results = await UcdlibEmployees.searchByName(employeeName, queryOptions);
+    if ( results.err ) {
+      return res.status(400).json({
+        error: 'Error getting employees'
+      });
+    }
+
+    res.json(results.res.rows);
+
+  });
 
   /**
    * @description Get an employee by identifier
@@ -98,7 +129,14 @@ export default ( api ) => {
     const options = {};
     queryOptions.forEach(option => {
       if ( req.query[option.urlQuery] ) {
-        options[option.dbArg] = queryOptions.type === 'boolean' ? true : req.query[option.urlQuery];
+        if ( option.type === 'boolean' ) {
+          options[option.dbArg] = true;
+        } else if ( option.type === 'comma-list' ) {
+          options[option.dbArg] = (req.query[option.urlQuery] || '').split(',').map(item => item.trim());
+        } else {
+          options[option.dbArg] = req.query[option.urlQuery];
+
+        }
       }
     });
     return options;
