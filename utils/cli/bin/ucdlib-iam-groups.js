@@ -64,6 +64,15 @@ program
   });
 
 program
+  .command('move-all-members')
+  .description('Move all members from one group to another')
+  .argument('<from_group_id>', 'From group id')
+  .argument('<to_group_id>', 'To group id')
+  .action((from_group_id, to_group_id) => {
+    groups.moveAllMembers(from_group_id, to_group_id);
+  });
+
+program
   .command('inspect')
   .description('Retrieve all group information')
   .argument('<group_id...>', 'A group id or ids')

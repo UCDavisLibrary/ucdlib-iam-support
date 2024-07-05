@@ -92,6 +92,29 @@ class GroupsCli {
     await pg.pool.end();
   }
 
+  async moveAllMembers(from_group_id, to_group_id){
+    // validate from group exists
+    let fromGroup = await this._validateGroup(from_group_id);
+    if ( !fromGroup ) return;
+
+    // validate to group exists
+    let toGroup = await this._validateGroup(to_group_id);
+    if ( !toGroup ) return;
+
+    // move all members from one group to another
+    const res = await UcdlibGroups.moveAllMembers(from_group_id, to_group_id);
+    if ( res.err ) {
+      console.log(res.err);
+      await pg.pool.end();
+      return;
+    }
+
+    const count = res.res?.rows?.[0]?.count || 0;
+    console.log(`Moved ${count} members from ${fromGroup.name} to ${toGroup.name}`);
+
+    await pg.pool.end();
+  }
+
   async addMember(group_id, employee_id, options){
     const idType = options.idtype;
     const force = options.force;
