@@ -3,6 +3,8 @@ import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
 import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
 import utils from './utils.js';
 
+import * as fs from 'node:fs/promises';
+
 class GroupsCli {
 
   async list(options){
@@ -255,6 +257,44 @@ class GroupsCli {
       }
       console.log(`Updated ${r.res.rowCount} group records`);
     }
+
+  async createTemplate(name){
+    const template = {
+      type: 1,
+      name: '',
+      nameShort: '',
+      parentId: null,
+      siteId: null,
+      archived: false,
+      rtName: ''
+    };
+
+    // write template to json file
+    if ( !name.endsWith('.json') ) name += '.json';
+    await fs.writeFile(name, JSON.stringify(template, null, 2));
+  }
+
+  async create(file){
+
+    // Read group template file
+    const fileContents = await fs.readFile(file, 'utf8');
+    const group = JSON.parse(fileContents);
+    if ( !group.name ) {
+      console.error(`A name is required to create a group`);
+      return;
+    }
+
+    // Create group
+    const r = await UcdlibGroups.create(group);
+    if ( r.err ) {
+      console.error(`Error creating group\n${r.err.message}`);
+      await pg.pool.end();
+      return;
+    }
+    console.log(`Created group: ${group.name} with id ${r.res.rows[0].id}`);
+    await pg.pool.end();
+
+  }
 
   /**
    * @description Validate group exists

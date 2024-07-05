@@ -73,6 +73,23 @@ program
   });
 
 program
+  .command('create-template')
+  .description('Make a json template for a group record. Should be used in conjunction with the create command')
+  .argument('<name>', 'File name')
+  .action((name) => {
+    groups.createTemplate(name);
+  });
+
+program
+  .command('create')
+  .description('Create a new group')
+  .argument('<file>', 'File with group data')
+  .action((file) => {
+    groups.create(file);
+  });
+
+
+program
   .command('inspect')
   .description('Retrieve all group information')
   .argument('<group_id...>', 'A group id or ids')
