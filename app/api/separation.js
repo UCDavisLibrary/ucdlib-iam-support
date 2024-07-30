@@ -63,7 +63,7 @@ export default (api) => {
 
       if ( !config.rt.forbidCc) {
         if ( notifySupervisor ) {
-          ticket.addCc( ad.supervisorEmail );
+          ticket.addRequestor( ad.supervisorEmail );
         }
       }
 

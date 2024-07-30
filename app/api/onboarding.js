@@ -109,7 +109,7 @@ export default (api) => {
 
     if ( !config.rt.forbidCc) {
       if ( notifySupervisor ) {
-        ticket.addCc( ad.supervisorEmail );
+        ticket.addRequestor( ad.supervisorEmail );
         if ( transfer.isTransfer ) {
           const e = transfer.employeeRecord.supervisor.email;
           if ( e && e != ad.supervisorEmail ) ticket.addCc( e );
