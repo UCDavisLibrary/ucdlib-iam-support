@@ -1,11 +1,12 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-rt-history.tpl.js";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 /**
  * @classdesc Element for displaying the history of an RT ticket
  */
-export default class UcdlibRtHistory extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils)  {
+export default class UcdlibRtHistory extends Mixin(LitElement)
+  .with(LitCorkUtils)  {
 
   static get properties() {
     return {

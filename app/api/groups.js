@@ -9,9 +9,7 @@ export default (api) => {
     const r = await UcdlibGroups.getAll();
     if ( r.err ) {
       console.error(r.err);
-      res.status(500);
-      res.json({error: true});
-      return;
+      return res.status(500).json({error: true});
     }
     res.json(r.res.rows.map(row => TextUtils.camelCaseObject(row)));
   });

@@ -1,5 +1,6 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-permissions.tpl.js";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 /**
  * @classdesc Page that displays options for requesting permissions
@@ -10,8 +11,8 @@ import * as Templates from "./ucdlib-iam-page-permissions.tpl.js";
  *
  * And then can pick specific applications to update
  */
-export default class UcdlibIamPagePermissions extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibIamPagePermissions extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     return {

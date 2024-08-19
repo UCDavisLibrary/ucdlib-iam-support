@@ -11,7 +11,6 @@ import '@ucd-lib/theme-elements/brand/ucd-theme-slim-select/ucd-theme-slim-selec
 // import font awesome
 import '@fortawesome/fontawesome-free/js/all.js';
 
-
 // app config
 import AppConfig from "@ucd-lib/iam-support-lib/src/config";
 
@@ -19,7 +18,7 @@ import AppConfig from "@ucd-lib/iam-support-lib/src/config";
 import Keycloak from 'keycloak-js';
 
 // global event bus and model registry
-import "@ucd-lib/cork-app-utils";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 import {AuthModel} from "../models";
 
 // global components
@@ -33,8 +32,8 @@ import bundles from "./pages/bundles";
  * @description The main custom element
  * Handles application-level stuff, such as routing.
  */
-export default class UcdlibIamApp extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibIamApp extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     return {

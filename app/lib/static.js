@@ -26,7 +26,8 @@ export default (app) => {
       next({
         appRoutes : config.routes,
         keycloak: config.keycloak,
-        version: config.version
+        version: config.version,
+        logger: config.logger
       });
     },
 

@@ -1,13 +1,14 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-separation-list.tpl.js";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 /**
  * @description Component for rendering a list of Separation requests
  * Performs query based on attribute values.
  * Either on change with 'auto-update' attribute, or manually with doQuery method
  */
-export default class UcdlibIamSeparationList extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils)  {
+export default class UcdlibIamSeparationList extends Mixin(LitElement)
+  .with(LitCorkUtils)  {
 
   static get properties() {
     return {
@@ -53,7 +54,7 @@ export default class UcdlibIamSeparationList extends window.Mixin(LitElement)
 
   /**
    * @description Disables the shadowdom
-   * @returns 
+   * @returns
    */
   createRenderRoot() {
     return this;
@@ -89,7 +90,7 @@ export default class UcdlibIamSeparationList extends window.Mixin(LitElement)
   /**
    * @description Retrieves separation requesting based on element attributes, updates view.
    * @param {Boolean} ignoreCache - Will not use cache if it exists.
-   * @param {query} query - Manually set query instead of doing 
+   * @param {query} query - Manually set query instead of doing
    */
   async doQuery(ignoreCache, query){
     let q = {};

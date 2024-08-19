@@ -1,5 +1,6 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-onboarding-new.tpl.js";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 import "../components/ucdlib-iam-search";
 import "../components/ucdlib-iam-alma";
@@ -10,8 +11,8 @@ import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTran
 /**
  * @description Displays onboarding request form
  */
-export default class UcdlibIamPageOnboardingNew extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     return {

@@ -1,5 +1,6 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-separation-single.tpl.js";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 import dtUtls from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
 import "../components/ucdlib-rt-history";
 import "../components/ucdlib-iam-search";
@@ -7,8 +8,8 @@ import "../components/ucdlib-iam-modal";
 /**
  * @description Page element for displaying a single separation request
  */
-export default class UcdlibIamPageSeparationSingle extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     return {

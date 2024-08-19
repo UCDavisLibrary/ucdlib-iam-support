@@ -1,5 +1,6 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-permissions-single.tpl.js";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 import DtUtils from "@ucd-lib/iam-support-lib/src/utils/dtUtils.js";
 import selectOptions from "../../utils/permissionsFormOptions.js";
@@ -14,8 +15,8 @@ import "../components/ucdlib-rt-history";
 /**
  * @classdesc Page for displaying a single permissions request form
  */
-export default class UcdlibIamPagePermissionsSingle extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     const elementState = {

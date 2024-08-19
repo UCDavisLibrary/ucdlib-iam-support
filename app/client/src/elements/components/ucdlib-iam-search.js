@@ -1,11 +1,12 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-search.tpl.js";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 /**
  * @description Component element for querying the UC Davis IAM API
  */
-export default class UcdlibIamSearch extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibIamSearch extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     return {

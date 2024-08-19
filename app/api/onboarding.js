@@ -85,8 +85,7 @@ export default (api) => {
     const r = await UcdlibOnboarding.create(payload);
     if ( r.err ) {
       console.error(r.err);
-      res.json({error: true, message: 'Unable to create onboarding request.'});
-      return;
+      return res.status(500).json({error: true, message: 'Unable to create onboarding request.'});
     }
     const output = r.res.rows[0];
 
@@ -152,8 +151,7 @@ export default (api) => {
     if ( rtResponse.err || !rtResponse.res.id )  {
       console.error(rtResponse);
       await UcdlibOnboarding.delete(output.id);
-      res.json({error: true, message: 'Unable to create an RT ticket for this request.'});
-      return;
+      return res.status(500).json({error: true, message: 'Unable to create an RT ticket for this request.'});
     }
 
     // send correspondence to supervisor
@@ -184,8 +182,7 @@ export default (api) => {
       if ( replyResponse.err )  {
         console.error(replyResponse);
         await UcdlibOnboarding.delete(output.id);
-        res.json({error: true, message: 'Unable to send RT request to supervisor.'});
-        return;
+        return res.status(500).json({error: true, message: 'Unable to send RT request to supervisor.'});
       }
     }
 
@@ -352,8 +349,7 @@ export default (api) => {
     const r = await getByName.getByName("onboarding",req.query.firstName, req.query.lastName);
     if ( r.err ) {
       console.error(r.err);
-      res.json({error: true, message: 'Unable to retrieve SEARCH onboarding request'});
-      return;
+      return res.status(500).json({error: true, message: 'Unable to retrieve SEARCH onboarding request'});
     }
     if ( !r.res.rows.length ){
       res.status(404).json({error: true, message: 'No requests match your search.'});
@@ -372,8 +368,7 @@ export default (api) => {
     const r = await UcdlibOnboarding.getById(req.params.id);
     if ( r.err ) {
       console.error(r.err);
-      res.json({error: true, message: 'Unable to retrieve onboarding request'});
-      return;
+      return res.status(500).json({error: true, message: 'Unable to retrieve onboarding request'});
     }
     if ( !r.res.rows.length ){
       console.error(r.err);
@@ -396,8 +391,7 @@ export default (api) => {
     let groups = await UcdlibGroups.getAll();
     if ( groups.err ){
       console.error(groups.err);
-      res.json({error: true, message: errorMsg});
-      return;
+      return res.status(500).json({error: true, message: errorMsg});
     }
     groups = Pg.recordsById(groups.res.rows);
     obReq.departmentName = '';
@@ -532,14 +526,12 @@ export default (api) => {
     const r = await UcdlibOnboarding.query(q);
     if ( r.err ) {
       console.error(r.err);
-      res.json({error: true, message: errorMsg});
-      return;
+      return res.status(500).json({error: true, message: errorMsg});
     }
     let groups = await UcdlibGroups.getAll();
     if ( groups.err ){
       console.error(groups.err);
-      res.json({error: true, message: errorMsg});
-      return;
+      return res.status(500).json({error: true, message: errorMsg});
     }
     groups = Pg.recordsById(groups.res.rows);
 

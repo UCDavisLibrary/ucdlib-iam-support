@@ -2,6 +2,7 @@ import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-onboarding-single.tpl.js";
 import dtUtls from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
 import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 import "../components/ucdlib-rt-history";
 import "../components/ucdlib-iam-search";
@@ -10,8 +11,8 @@ import "../components/ucdlib-iam-modal";
 /**
  * @description Page element for displaying a single onboarding request
  */
-export default class UcdlibIamPageOnboardingSingle extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     return {

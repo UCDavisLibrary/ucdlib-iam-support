@@ -2,6 +2,7 @@ import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-alma.tpl.js";
 import "../components/ucdlib-iam-modal";
 import AlmaTransform from "@ucd-lib/iam-support-lib/src/utils/AlmaTransform";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 /**
  * @description Component element for querying the UC Davis Alma API
@@ -16,8 +17,8 @@ import AlmaTransform from "@ucd-lib/iam-support-lib/src/utils/AlmaTransform";
         </div>
       </div>
  */
-export default class UcdlibIamAlma extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibIamAlma extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     return {

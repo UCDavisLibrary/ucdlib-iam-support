@@ -96,8 +96,7 @@ export default (api) => {
       if ( rtResponse.err || !rtResponse.res.id )  {
         console.error(rtResponse);
         await UcdlibSeparation.delete(output.id);
-        res.json({error: true, message: 'Unable to create an RT ticket for this request.'});
-        return;
+        return res.status(500).json({error: true, message: 'Unable to create an RT ticket for this request.'});
       }
 
       // send a ticket to RT for facilities
@@ -166,8 +165,7 @@ export default (api) => {
       const r = await getByName.getByName("separation",req.query.firstName, req.query.lastName);
       if ( r.err ) {
         console.error(r.err);
-        res.json({error: true, message: 'Unable to retrieve SEARCH separation request'});
-        return;
+        return res.status(500).json({error: true, message: 'Unable to retrieve SEARCH separation request'});
       }
       if ( !r.res.rows.length ){
         console.error(r.err);
@@ -194,8 +192,7 @@ export default (api) => {
       const r = await UcdlibSeparation.update(req.params.id, req.body);
       if ( r.err ) {
         console.error(r.err);
-        res.json({error: true, message: 'Unable to retrieve separation request'});
-        return;
+        return res.status(500).json({error: true, message: 'Unable to retrieve separation request'});
       }
       if ( !r.res.rows.length ){
         console.error(r.err);
@@ -223,8 +220,7 @@ export default (api) => {
       const r = await UcdlibSeparation.getById(req.params.id);
       if ( r.err ) {
         console.error(r.err);
-        res.json({error: true, message: 'Unable to retrieve separation request'});
-        return;
+        return res.status(500).json({error: true, message: 'Unable to retrieve separation request'});
       }
       if ( !r.res.rows.length ){
         console.error(r.err);
@@ -262,8 +258,7 @@ export default (api) => {
       const r = await UcdlibSeparation.query(q);
       if ( r.err ) {
         console.error(r.err);
-        res.json({error: true, message: errorMsg});
-        return;
+        return res.status(500).json({error: true, message: errorMsg});
       }
 
 
