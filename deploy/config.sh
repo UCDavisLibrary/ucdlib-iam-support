@@ -13,12 +13,12 @@ fi
 
 # Main version number we are tagging the app with. Always update
 # this when you cut a new version of the app!
-APP_VERSION=v1.8.2.${BUILD_NUM}
+APP_VERSION=v1.9.0.${BUILD_NUM}
 
 # Repository tags/branchs
 # Tags should always be used for production deployments
 # Branches can be used for development deployments
-REPO_TAG=sandbox
+REPO_TAG=v1.9.0
 POSTGRES_TAG=15.3
 
 DEPLOY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
