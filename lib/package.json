@@ -11,8 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@keycloak/keycloak-admin-client": "^21.0.2",
-    "@ucd-lib/cork-app-utils": "^5.1.0",
+    "@keycloak/keycloak-admin-client": "^23.0.4",
+    "@ucd-lib/cork-app-utils": "^6.0.5",
     "@ucd-lib/rt-api": "^1.2.2",
     "fs": "^0.0.1-security",
     "net": "^1.0.2",

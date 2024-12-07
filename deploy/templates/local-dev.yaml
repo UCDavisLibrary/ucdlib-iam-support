@@ -127,9 +127,11 @@ services:
       PGPASSWORD: 'localhost'
       PGPORT: 5432
       KEYCLOAK_ADMIN_BASE_URL: https://sandbox.auth.library.ucdavis.edu
-    command: /maintenance/entrypoint.sh
+    # command: /maintenance/entrypoint.sh
+    command: /maintenance/tail.sh
     volumes:
       - ../../utils/maintenance/src:/maintenance/src
+      - ../../utils/maintenance/tail.sh:/maintenance/tail.sh
       - ../../lib:/iam-support-lib
   db:
     image: postgres:{{POSTGRES_TAG}}

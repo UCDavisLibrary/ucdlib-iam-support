@@ -1,5 +1,6 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-onboarding.tpl.js";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 import "../components/ucdlib-iam-onboarding-list";
 import "../components/ucdlib-iam-existing-search";
@@ -8,8 +9,8 @@ import "../components/ucdlib-iam-modal";
 /**
  * @classdesc Lists active onboarding requests and provides navigation to additional onboarding actions
  */
-export default class UcdlibIamPageOnboarding extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibIamPageOnboarding extends Mixin(LitElement)
+  .with(LitCorkUtils) {
   static get properties() {
     return {
       canViewActiveList: {state: true},

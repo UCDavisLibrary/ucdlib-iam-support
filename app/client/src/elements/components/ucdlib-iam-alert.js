@@ -1,11 +1,13 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-alert.tpl.js";
 
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
+
 /**
  * @description Component for temporarily displaying a site alert
  */
-export default class UcdlibIamAlert extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibIamAlert extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     return {
@@ -27,7 +29,7 @@ export default class UcdlibIamAlert extends window.Mixin(LitElement)
 
   /**
    * @description Disables the shadowdom
-   * @returns 
+   * @returns
    */
   createRenderRoot() {
     return this;
@@ -49,7 +51,7 @@ export default class UcdlibIamAlert extends window.Mixin(LitElement)
     setTimeout(() => {
       this.message = options.message;
       this.brandColor = options.brandColor || '';
-  
+
       this.hidden = false;
     }, options.timeout || 200);
 

@@ -1,11 +1,12 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-existing-search.tpl.js";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 /**
  * @description Component element for querying existing onboarding and separation records
  */
-export default class UcdlibIamExistingSearch extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibIamExistingSearch extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     return {

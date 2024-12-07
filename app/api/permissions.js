@@ -262,7 +262,7 @@ export default (api) => {
       if ( rtResponse.err )  {
         console.error(rtResponse);
         await PermissionsRequests.delete(output.id);
-        return res.json({error: true, message: 'Unable to send RT request.'});
+        return res.status(500).json({error: true, message: 'Unable to send RT request.'});
       }
       await PermissionsRequests.setRtId(output.id, rtResponse.res.id);
 
@@ -281,7 +281,7 @@ export default (api) => {
         if ( replyResponse.err )  {
           console.error(replyResponse);
           await PermissionsRequests.delete(output.id);
-          return res.json({error: true, message: 'Unable to send RT request.'});
+          return res.status(500).json({error: true, message: 'Unable to send RT request.'});
         }
       }
 

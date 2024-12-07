@@ -1,5 +1,6 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-separation-new.tpl.js";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 import "../components/ucdlib-iam-alma";
 import "../components/ucdlib-iam-modal";
@@ -8,8 +9,8 @@ import "../components/ucdlib-employee-search";
 /**
  * @description Displays onboarding request form
  */
-export default class UcdlibIamPageSeparationNew extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     return {

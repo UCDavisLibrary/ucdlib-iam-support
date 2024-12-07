@@ -1,12 +1,13 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-home.tpl.js";
-import "../components/ucdlib-orgchart-upload";
+//import "../components/ucdlib-orgchart-upload";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 /**
- * @classdesc Xomponent for displaying the application home page
+ * @classdesc Component for displaying the application home page
  */
-export default class UcdlibIamPageHome extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibIamPageHome extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     return {

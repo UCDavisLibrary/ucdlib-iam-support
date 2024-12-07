@@ -2,13 +2,14 @@ import { LitElement, html } from 'lit';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import {render} from "./ucdlib-employee-search.tpl.js";
 
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 /**
  * @classdesc Element for searching for library employees
  * Uses local database, not UCD IAM API
  */
-export default class UcdlibEmployeeSearch extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibEmployeeSearch extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     return {

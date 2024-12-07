@@ -32,8 +32,7 @@ export default (api) => {
     const rtResponse = await rtClient.getTicketHistory(req.params.id, params);
     if ( rtResponse.err )  {
       console.error(rtResponse);
-      res.json({error: true, message: 'Unable to fetch ticket history'});
-      return;
+      return res.status(500).json({error: true, message: 'Unable to fetch ticket history'});
     }
 
     res.json(rtResponse.res);

@@ -26,8 +26,51 @@ export default ( api ) => {
       urlQuery: 'children',
       dbArg: 'returnChildren',
       type: 'boolean'
+    },
+    {
+      urlQuery: 'filter-id',
+      dbArg: 'filterById',
+      type: 'comma-list'
+    },
+    {
+      urlQuery: 'filter-active',
+      dbArg: 'filterActive',
+      type: 'boolean'
+    },
+    {
+      urlQuery: 'filter-archived',
+      dbArg: 'filterArchived',
+      type: 'boolean'
+    },
+    {
+      urlQuery: 'filter-group-type',
+      dbArg: 'filterByGroupType',
+      type: 'comma-list'
+    },
+    {
+      urlQuery: 'filter-part-of-org',
+      dbArg: 'filterPartOfOrg',
+      type: 'boolean'
+    },
+    {
+      urlQuery: 'filter-not-part-of-org',
+      dbArg: 'filterNotPartOfOrg',
+      type: 'boolean'
     }
   ];
+
+  api.get(`${route}`, async (req, res) => {
+
+    const results = await UcdlibGroups.getById([], getQueryOptions(req));
+    if ( results.err ) {
+      return res.status(400).json({
+        error: 'Error getting groups'
+      });
+    }
+
+    res.json(results.res.rows);
+
+  });
 
   /**
    * @description Get all groups an employee directly (no inheritance) belongs to
@@ -83,7 +126,14 @@ export default ( api ) => {
     const options = {};
     queryOptions.forEach(option => {
       if ( req.query[option.urlQuery] ) {
-        options[option.dbArg] = queryOptions.type === 'boolean' ? true : req.query[option.urlQuery];
+        if ( option.type === 'boolean' ) {
+          options[option.dbArg] = true;
+        } else if ( option.type === 'comma-list' ) {
+          options[option.dbArg] = (req.query[option.urlQuery] || '').split(',').map(item => item.trim());
+        } else {
+          options[option.dbArg] = req.query[option.urlQuery];
+
+        }
       }
     });
     return options;

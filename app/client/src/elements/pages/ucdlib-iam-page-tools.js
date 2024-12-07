@@ -1,11 +1,12 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-tools.tpl.js";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 /**
  * @description Landing page for support tools
  */
-export default class UcdlibIamPageTools extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibIamPageTools extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     return {

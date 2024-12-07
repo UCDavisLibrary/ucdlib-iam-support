@@ -196,6 +196,8 @@ export class IamEmployees {
         suffix: iamRecord.suffix,
         types: iamRecord.types,
       };
+
+      // compare supervisor ids
       if ( !employee.custom_supervisor ){
         existingEmployeeRecord.supervisorId = employee.supervisor_id;
 
@@ -209,9 +211,21 @@ export class IamEmployees {
             newEmployeeRecord.supervisorId = supervisorIamRecord.iamId;
           }
         } else {
-          newEmployeeRecord.supervisorId = null;
+          newEmployeeRecord.supervisorId = employee.supervisor_id;
         }
       }
+
+      // compare appointment
+      if ( iamRecord.appointments.length === 1 ) {
+        existingEmployeeRecord.primaryAssociation = employee.primary_association;
+        const pa = iamRecord.getPrimaryAssociation();
+        newEmployeeRecord.primaryAssociation = {
+          deptCode: pa.deptCode,
+          titleCode: pa.titleCode
+        };
+      }
+
+
       try {
         assert.deepStrictEqual(existingEmployeeRecord, newEmployeeRecord);
       } catch (error) {

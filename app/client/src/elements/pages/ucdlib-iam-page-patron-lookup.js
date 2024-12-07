@@ -1,14 +1,15 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-patron-lookup.tpl.js";
 import dtUtls from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 import "../components/ucdlib-iam-modal";
 
 /**
  * @description Component element for querying the UC Davis IAM API
  */
-export default class UcdlibIamPagePatronLookup extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     return {
