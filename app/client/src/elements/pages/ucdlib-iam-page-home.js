@@ -1,6 +1,6 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-home.tpl.js";
-import "../components/ucdlib-orgchart";
+import "../components/ucdlib-orgchart-upload";
 
 /**
  * @classdesc Xomponent for displaying the application home page

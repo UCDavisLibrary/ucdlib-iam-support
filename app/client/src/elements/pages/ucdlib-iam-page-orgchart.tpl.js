@@ -6,10 +6,8 @@ import { html } from 'lit';
  */
 export function render() {
   return html`
-  <div class="l-3col">
-      <div class='l-second'>
-        <ucdlib-orgchart></ucdlib-orgchart>
-      </div> 
-  </div>
+
+    <ucdlib-orgchart-upload></ucdlib-orgchart-upload>
+
 
 `;}
