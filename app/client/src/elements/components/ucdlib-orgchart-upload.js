@@ -1,8 +1,5 @@
 import { LitElement} from 'lit';
 import {render} from "./ucdlib-orgchart-upload.tpl.js";
-// import exportFromJSON from 'export-from-json';
-// import OrgChartTransform from "@ucd-lib/iam-support-lib/src/utils/orgChart.js";
-import "./chart.js";
 
 /**
  * @description Component for generating the organization chart datasheet
@@ -32,9 +29,7 @@ export default class UcdlibOrgChartUpload extends window.Mixin(LitElement)
     this.fileType = "";
     this.data;
     this.uploadWidgetTitle =  'Upload File for Organizational Chart';
-    this.downloadWidgetTitle = 'Download IAM CSV File';
     this.csvData = null;
-    this.shouldRenderChart = false;
     this._injectModel('AppStateModel', 'EmployeeModel', 'PersonModel', 'OrgchartModel');
 
   }
@@ -167,8 +162,6 @@ export default class UcdlibOrgChartUpload extends window.Mixin(LitElement)
 
     this.AppStateModel.showAlertBanner({message: successMessage, brandColor: 'quad'});
 
-    // Delete this when finished
-    this.shouldRenderChart = true;
 
     this.requestUpdate();
   }
@@ -276,7 +269,6 @@ export default class UcdlibOrgChartUpload extends window.Mixin(LitElement)
     
       this.csvData = parseCSV(content); // Use  parseCSV
 
-      // this.renderRoot.querySelector('#uploadButton').disabled = false;
     };
 
     this.reader.readAsText(file);
@@ -284,93 +276,6 @@ export default class UcdlibOrgChartUpload extends window.Mixin(LitElement)
     this.requestUpdate();
 
   }
-
-
-  // /**
-  //  * @description Download the FileType dictionary
-  //  * @returns 
-  //  * @param {String} v
-  //  */
-  // async _downloadOrgChart(){
-  //   const data = await this.dataSource;
-  //   const fileName = this.fileType == "csv" ? 'orgchart_csv' : 'orgchart_excel';
-  //   const exportType =  this.fileType == "csv" ? exportFromJSON.types.csv : exportFromJSON.types.xls; 
-  //   exportFromJSON({ data, fileName, exportType });
-  // }
-
-  // /**
-  //  * @description Inputs the filetype
-  //  * @returns 
-  //  * @param {String} v
-  //  */
-  // onInput(v){
-  //   this.fileType = v;
-  //   this._onSubmit();
-  // }
-
-  // /**
-  //  * @description Attached to submit event on element form
-  //  * @param {*} e - Submit event
-  //  */
-  // async _onSubmit(){
-  //   if ( this.isFetching ) return;
-  //   // reset state
-  //   this.wasError = false;
-  //   this.isFetching = true;
-    
-  //   let r;
-  //   r = await this.EmployeeModel.getAll();     // } else {
-
-  //   if ( r.state === this.EmployeeModel.store.STATE.LOADED ) {
-  //     // style="pointer-events:none;opacity:0.6;"
-  //     document.querySelector("#fileList").style.opacity = 0.6;
-  //     document.querySelector("#fileList").style.pointerEvents = "none";
-  //     document.querySelector("#loading-orgchart").style.display = "block";
-  //     this.isFetching = false;
-  //     this.results = Array.isArray(r.payload) ? r.payload : [r.payload];
-  //     this.dataSource = [];
-
-  //     const promise = this.results.map(async (emp) => {
-
-  //       let position = await this.PersonModel.getPersonById(emp.iamId);
-
-  //       if(position) {
-  //         let orgChart = new OrgChartTransform(emp, position);
-  //         let dict = {
-  //           "No." : orgChart.unique_id,
-  //           "External ID" : orgChart.iam_id,
-  //           "External ID Reports To" : orgChart.supervisor_id,
-  //           "Lived Name" : orgChart.name,
-  //           "Supervisor Name" : orgChart.supervisor,
-  //           "Working Title" : orgChart.title,
-  //           "Department Name" : orgChart.department,
-  //           "Appointment Type Code" : orgChart.jobType,
-  //           "Full-Time Percentage" : orgChart.jobPercentage,
-  //           "Email" : orgChart.email,
-  //         };
-  
-  //         this.dataSource.push(dict);
-  //       }
-
-  //     });
-
-  //     Promise.all(promise).then(() => {
-  //       console.log("Data Recieved:",this.dataSource);
-  //       document.querySelector("#loading-orgchart").style.display = "none";
-  //       document.querySelector("#download-orgchart").disabled = false;
-  //       document.querySelector("#fileList").style.opacity = 1;
-  //       document.querySelector("#fileList").style.pointerEvents = "auto";
-  //     });
-      
-  //   } else if( r.state === this.EmployeeModel.store.STATE.ERROR ) {
-  //     this.isFetching = false;
-  //     if ( r.error.payload && r.error.payload.response && r.error.payload.response.status == 404) {
-  //       this.results = [];
-  //     } else {
-  //       this.wasError = true;
-  //     }
-  //   }
-  // }
 
 }
 
