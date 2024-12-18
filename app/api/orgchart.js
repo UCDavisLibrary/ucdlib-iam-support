@@ -9,6 +9,16 @@ export default (api) => {
     // console.log("W", req.body);
     let jsonOrgData = req.body;
 
+    if (!req.auth.token.hasAdminAccess && 
+        !req.auth.token.hasHrAccess &&
+        !req.auth.token.canUploadOrgChart ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
+
     let sftpConfig = {
         host: config.sftp.server,
         port: 22,
@@ -36,6 +46,9 @@ export default (api) => {
         await sftpConnect.sendJsonToSftp(jsonOrgData)
 
     }
+
+    return res.json({submit:"Success"});
+
 
 
   });

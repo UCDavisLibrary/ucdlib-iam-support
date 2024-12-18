@@ -113,6 +113,8 @@ export default class UcdlibOrgChartUpload extends window.Mixin(LitElement)
     this.csvData = this.reader.csvData;
     let errorMessage = 'Error with headers in CSV. Headers:(Lived Name, External ID, Email, Notes, Department Name, Working Title, Appointment Type Code, External ID Reports To)';
     let successMessage = 'File Successfully Uploaded!';
+    let permissionErrorMessage = 'User does not have permission to upload orgchart file.  Contact Admin to gain permission access.';
+
 
     const keyMap = {
       "Lived Name": "fullName",
@@ -156,11 +158,14 @@ export default class UcdlibOrgChartUpload extends window.Mixin(LitElement)
     this.csvData = this.anonymizeData(updatedData);
 
 
-    let x = this.OrgchartModel.orgPush(this.csvData);
+    let res = await this.OrgchartModel.orgPush(this.csvData);
+    
+    if(res.error) {
+      this.AppStateModel.showAlertBanner({message: permissionErrorMessage, brandColor: 'double-decker'});
+    } else {
+      this.AppStateModel.showAlertBanner({message: successMessage, brandColor: 'quad'});
+    }
 
-    console.log(x);
-
-    this.AppStateModel.showAlertBanner({message: successMessage, brandColor: 'quad'});
 
 
     this.requestUpdate();
