@@ -19,12 +19,10 @@ export function render() {
                 columns: <br />(Lived Name, EE ID, Email, Notes, Department Name, Working Title, Appointment Type Code, Supervisor ID).
                 </p>
 
-
                 <form style="margin:85px 0px 85px 0;" id="csvForm" @submit=${this._onSubmitCSV}>
                     <input type="file" style="margin-bottom:70px;" id="UploadFile"  class="btn btn--input" accept=".csv" @change=${e => this._onCSV(e.target.files[0])} />
                     <input id="uploadButton" class="btn btn--block btn--alt" type="submit" value="submit" />
                 </form>
-
 
                 </div>
             </div>

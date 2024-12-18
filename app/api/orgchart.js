@@ -6,7 +6,6 @@ export default (api) => {
 
   // posts org chart from files
   api.post('/orgchart', async (req, res) => {
-    // console.log("W", req.body);
     let jsonOrgData = req.body;
 
     if (!req.auth.token.hasAdminAccess && 
@@ -23,7 +22,7 @@ export default (api) => {
         host: config.sftp.server,
         port: 22,
         username: config.sftp.user,
-        password: config.sftp.password, // Use token as a password if the SFTP server supports Keycloak
+        password: config.sftp.password,
     }
 
     const timestamp = Date.now();
