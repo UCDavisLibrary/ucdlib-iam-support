@@ -93,7 +93,6 @@ class AppStateModelImpl extends AppStateModel {
       update.location.path[0] == 'orgchart' &&
       update.location.path.length > 1
     ) {
-      console.log(update.location);
       p = 'orgchart';
     } else if(
       update.location.path[0] == 'patron' &&

@@ -1,6 +1,5 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-home.tpl.js";
-//import "../components/ucdlib-orgchart-upload";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 /**

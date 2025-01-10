@@ -1,11 +1,12 @@
 import { LitElement} from 'lit';
 import {render} from "./ucdlib-orgchart-upload.tpl.js";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 /**
  * @description Component for generating the organization chart datasheet
  */
-export default class UcdlibOrgChartUpload extends window.Mixin(LitElement)
-  .with(window.LitCorkUtils) {
+export default class UcdlibOrgChartUpload extends Mixin(LitElement)
+  .with(LitCorkUtils) {
 
   static get properties() {
     return {

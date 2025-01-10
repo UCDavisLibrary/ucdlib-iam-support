@@ -15,7 +15,8 @@ export default (api) => {
         error: true,
         message: 'Not authorized to access this resource.'
       });
-      return;
+      return res.json({error:'Not authorized to access this resource.'})
+      ;
     }
 
     let sftpConfig = {
@@ -25,26 +26,33 @@ export default (api) => {
         password: config.sftp.password,
     }
 
+    let filepath = config.sftp.filepath;
+
     const timestamp = Date.now();
 
     
-    let sftpConnect = new sftp(sftpConfig);
+    let sftpConnect = new sftp(sftpConfig, filepath);
 
     if(await sftpConnect.isFolderEmpty()){
         
-        //Run sendJsontoSftp with new data
-        await sftpConnect.sendJsonToSftp(jsonOrgData)
+        //Run sendJsontoSftp
+        let sendSFTP = await sftpConnect.sendJsonToSftp(jsonOrgData);
+        if(sendSFTP && sendSFTP.error) return res.json({error: sendSFTP.error});;
+
 
     } else {
         let newName = 'prev_org_' + timestamp;
 
-        //Run renameJsonWithSftp with timestamp replacement
-        await sftpConnect.renameJsonWithSftp(newName)
+        //Run renameJsonWithSftp
+        let renameResult = await sftpConnect.renameJsonWithSftp(newName);
+        if(renameResult && renameResult.error) return res.json({error: renameResult.error});
 
-        //Run sendJsontoSftp with new data
-        await sftpConnect.sendJsonToSftp(jsonOrgData)
+        //Run sendJsontoSftp
+        let sendSFTP = await sftpConnect.sendJsonToSftp(jsonOrgData);
+        if(sendSFTP && sendSFTP.error) return res.json({error: sendSFTP.error});;
 
-    }
+
+    }    
 
     return res.json({submit:"Success"});
 

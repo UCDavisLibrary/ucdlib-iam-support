@@ -12,8 +12,6 @@
   "type": "module",
   "dependencies": {
     "@ucd-lib/spa-router-middleware": "^0.2.1",
-    "d3-org-chart": "^3.1.1",
-    "export-from-json": "^1.7.4",
     "express": "^4.18.2",
     "jwt-decode": "^3.1.2",
     "node-fetch": "^3.3.0",
