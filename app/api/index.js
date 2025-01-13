@@ -8,6 +8,7 @@ import rt from './rt.js';
 import auth from './auth.js';
 import alma from './alma.js';
 import employees from './employees.js';
+import orgchart from './orgchart.js'
 
 const router = express.Router();
 
@@ -22,6 +23,7 @@ separation(router);
 permissions(router);
 rt(router);
 alma(router);
+orgchart(router);
 employees(router);
 
 export default (app) => {

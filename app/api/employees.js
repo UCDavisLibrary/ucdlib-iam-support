@@ -21,7 +21,6 @@ export default (api) => {
     res.json(r.res.rows.map(row => TextUtils.camelCaseObject(row)));
   });
 
-
   /**
    * @description search for library employees from local db. Can use the following url query parameters:
    * - name: search by name

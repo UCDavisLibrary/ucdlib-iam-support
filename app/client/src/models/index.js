@@ -4,6 +4,7 @@ import {
   OnboardingModel,
   AuthModel,
   EmployeeModel,
+  OrgchartModel,
   SeparationModel,
   RtModel,
   PermissionsModel,
@@ -18,6 +19,7 @@ export {
   PersonModel,
   RtModel,
   PermissionsModel,
+  OrgchartModel,
   AlmaUserModel,
-  EmployeeModel
+  EmployeeModel,
 };

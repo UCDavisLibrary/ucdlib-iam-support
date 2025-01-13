@@ -89,7 +89,6 @@ export default class UcdlibIamApp extends Mixin(LitElement)
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-
     const bundle = this._getBundleName(e.page);
     let bundleAlreadyLoaded = true;
 

@@ -22,6 +22,7 @@ export function render() {
       <a href='/permissions'>Permissions</a>
       <ul link-text='Support Tools' href='/tools'>
         <li><a href='/patron'>Patron Lookup</a></li>
+        <li><a href='/orgchart'>Organizational Chart</a></li>
       </ul>
 
     </ucd-theme-primary-nav>
@@ -46,6 +47,7 @@ export function render() {
     <ucdlib-iam-page-patron-lookup id='patron'></ucdlib-iam-page-patron-lookup>
     <ucdlib-iam-page-onboarding-single id='onboarding-single'></ucdlib-iam-page-onboarding-single>
     <ucdlib-iam-page-home id='home'></ucdlib-iam-page-home>
+    <ucdlib-iam-page-orgchart id='orgchart'></ucdlib-iam-page-orgchart>
     <ucdlib-iam-page-separation id='separation'></ucdlib-iam-page-separation>
     <ucdlib-iam-page-separation-new id='separation-new'></ucdlib-iam-page-separation-new>
     <ucdlib-iam-page-separation-single id='separation-single'></ucdlib-iam-page-separation-single>
