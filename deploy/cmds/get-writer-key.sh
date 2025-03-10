@@ -5,7 +5,8 @@
 ###
 
 set -e
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-cd $SCRIPT_DIR/../..
+CMDS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $CMDS_DIR/..
 
-gcloud secrets versions access latest --secret=itis-iam-support-writer-key > gc-itis-iam-writer-key.json
+mkdir -p ./secrets
+gcloud --project=digital-ucdavis-edu secrets versions access latest --secret=itis-iam-support-writer-key > ./secrets/gc-itis-iam-writer-key.json

@@ -1,5 +1,5 @@
-ARG NODEJS_BASE
-FROM ${NODEJS_BASE}
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
 
 RUN apt-get update && apt-get install -y apt-transport-https ca-certificates gnupg curl cron procps
 
