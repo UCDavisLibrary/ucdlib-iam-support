@@ -1,19 +1,13 @@
 #! /bin/bash
 
-VERSION=$1
-if [ -z "$VERSION" ]; then
-  echo "Please provide a version number"
-  exit 1
-fi
+###
+# Build images for local development.  They will be tagged with local-dev and are
+# meant to be used with iam-support/docker-compose.yaml
+# Note: these images should never be pushed to docker hub 
+###
 
-DEPTH=$2
-if [ -z "$DEPTH" ]; then
-  DEPTH=ALL
-fi
+set -e
+DEPLOY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $DEPLOY_DIR
 
-cork-kube build exec \
-  --project ucdlib-iam-support \
-  --version $VERSION \
-  --override-tag local-dev \
-  --depth $DEPTH \
-  --no-cache-from
+LOCAL_BUILD=true ./build.sh

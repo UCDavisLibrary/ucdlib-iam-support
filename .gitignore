@@ -8,4 +8,3 @@ migration/data
 gc-itis-iam-writer-key.json
 gc-itis-iam-reader-key.json
 .DS_Store
-secrets

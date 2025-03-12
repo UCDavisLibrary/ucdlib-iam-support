@@ -37,18 +37,6 @@ Located in `utils/maintenance`, this container runs a node cron service for perf
 ### External API
 Located in `utils/api`, this is an express service that runs a JSON API designed to return personnel data to other applications.
 
-You can view some example queries and responses in `utils/api/examples`.
-
-Before you can use the service (either locally or in prod), you will need to mint an API key by:
-1. Go to keycloak. Make sure you are in the `internal` realm
-2. Create a user, and try to be descriptive in the name e.g. `sa-intranet` would be a service account used by the intranet.
-3. Create a passord in the credentials section. Make sure it is very long.
-4. In the Role Mapping section,
-   1. Click Assign Role
-   2. Select Filter by Clients
-   3. Search `iam-api`
-   4. Select either `read` or `write` access depending on access level needed.
-
 ### Shared Code
 Any code shared by the application and cli should be placed in the `/lib` directory. Both the app and cli docker images use the same base image that npm links this shared code as the `@ucd-lib/iam-support-lib` package.
 
@@ -56,29 +44,53 @@ Technical documentation created at the start of the project can be found in this
 
 ## Deployment
 
-### Local Development
-To get this application up and running for the first time:
-1. Clone this repository
-2. Checkout the branch you want to work on.
-3. Run `./deploy/cmds/init-local-dev.sh` to download gc key, env, and build js
-4. Review the env file downloaded to `./deploy/compose/ucdlib-iam-support-local-dev`
-5. Run `./deploy/cmds/build-local-dev.sh` to build images
-6. Enter `./deploy/compose/ucdlib-iam-support-local-dev`, and run `docker compose up -d`
+### Environmental Variables
 
-### Production Deployment
+Most relevant env variables:
+
+| Name | Notes |
+| ---- | ----- |
+| `UCDLIB_APP_HOST_PORT` | |
+| `UCDLIB_APP_ENV` | 'prod' or 'dev'. By default, local development starts with 'dev' |
+| `UCD_IAM_API_KEY` | API key for `https://iet-ws.ucdavis.edu/api/iam`. Required for much functionality |
+| `UCDLIB_RT_KEY` | Access token required for interacting with RT. By default, associated RT user is set to `pmanager`. |
+| `UCDLIB_RT_FORBID_WRITE` | Will not create or edit RT tickets |
+| `NIGHTLY_BACKUPS` | If set to `true`, database will be backed up nightly to `BACKUP_ENV` GC bucket |
+| `RUN_INIT` | If set, init container will run its process |
+| `DATA_ENV` | Data init container will pull if local db is empty |
+| `ENABLE_MAINTENANCE` | Maintenance container will do its regularly scheduled work |
+| `SLACK_WEBHOOK_URL_FOR_ERRORS` | If you want to write to the `itis-error-notifications` slack channel | 
+| `KEYCLOAK_ADMIN_PASSWORD` | Required to manipulate keycloak data - user lists, groups, etc |
+
+For a complete list, see `config.js`.
+
+## Production Deployment
 
 On your machine:
-1. Merge your changes into main, tag, and push
-2. Update production compose.yaml file with new tag
-3. Update the cork-build-registry with your new tag
-4. Build images with with `deploy/cmds/build.sh <tag>`
+1. Merge your changes into main.
+2. Update `APP_VERSION` and `REPO_TAG` in deploy/config.sh
+3. Run `generate-deployment-files.sh`
+4. Check in your changes and tag your release.
+5. Build images in Google Cloud with `submit.sh`
 
 On the production server (currently veers.library)
-1. cd `/opt/ucdlib-iam-support/deploy/ucdlib-iam-support-prod` and git pull
+1. cd `/opt/ucdlib-iam-support/deploy`
+2. git pull && git checkout <tag>
 3. `docker compose pull` to download images from Google Cloud
 4. `docker compose down` then `docker compose up -d`
 
 There will be a brief service outage as the containers start up, so try to schedule deployents accordingly. If something goes wrong, you can always revert to the previously tagged images.
+
+### Local Development
+
+To get this application up and running for the first time:
+1. Clone this repository
+2. Checkout the branch you want to work on.
+3. Run `./deploy/cmds/init-local-dev.sh` to install npm dependencies and generate dev bundles
+4. Run `./deploy/cmds/build-local-dev.sh` to build custom docker images used by this project
+5. Run `./deploy/cmds/generate-deployment-files.sh` to create the docker-compose file for local development
+6. Download an env file in `./deploy/iam-support-local-dev` by running `./deploy/cmds/get-env-file-dev.sh`and then cd into the directory
+7. Run `docker compose up`
 
 ## Using the Application
 

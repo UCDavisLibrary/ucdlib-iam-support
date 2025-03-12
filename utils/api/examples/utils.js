@@ -7,7 +7,7 @@ class utils {
 
   constructor(){
 
-    this._url = process.env.URL || 'http://localhost:3002';
+    this._url = process.env.URL || 'http://localhost:3001';
   }
 
   url(path, params={}){

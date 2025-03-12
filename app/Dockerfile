@@ -1,5 +1,5 @@
-ARG BASE_IMAGE
-FROM ${BASE_IMAGE}
+ARG NODEJS_BASE
+FROM ${NODEJS_BASE}
 
 RUN mkdir /app
 WORKDIR /app
@@ -35,5 +35,13 @@ COPY lib lib
 
 # client build
 RUN cd client && npm run dist
+
+# build tags
+ARG APP_VERSION
+ENV APP_VERSION ${APP_VERSION}
+ARG BUILD_NUM
+ENV BUILD_NUM ${BUILD_NUM}
+ARG BUILD_TIME
+ENV BUILD_TIME ${BUILD_TIME}
 
 CMD node index.js

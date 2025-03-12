@@ -16,7 +16,6 @@
     "@ucd-lib/cork-app-state": "^2.0.1",
     "@ucd-lib/cork-app-utils": "^6.0.5",
     "@ucd-lib/theme-elements": "^1.2.1",
-    "@ucd-lib/iam-support-lib": "file:../../lib",
     "breakpoint-sass": "^3.0.0",
     "keycloak-js": "^22.0.0",
     "lit": "^2.6.1",
