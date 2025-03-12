@@ -1,7 +1,9 @@
-version: '3'
+x-variables:
+  main-image: &main-image localhost/local-dev/ucdlib-iam-support:local-dev
+  utils-image: &utils-image localhost/local-dev/ucdlib-iam-support-utils:local-dev
 services:
   app:
-    image: {{APP_IMAGE_NAME}}:{{REPO_TAG}}
+    image: *main-image
     env_file:
       - .env
     ports:
@@ -11,25 +13,24 @@ services:
     environment:
       UCDLIB_APP_ENV: ${UCDLIB_APP_ENV:-dev}
       UCDLIB_RT_QUEUE: ${UCDLIB_RT_QUEUE:-test}
-      UCDLIB_RT_USER: ${UCDLIB_RT_USER:-pmanager}
       UCDLIB_RT_FACILITIES_QUEUE: ${UCDLIB_RT_FACILITIES_QUEUE:-test}
       UCDLIB_BASE_URL: ${UCDLIB_BASE_URL:-http://localhost:3000}
       UCDLIB_RT_FORBID_WRITE: ${UCDLIB_RT_FORBID_WRITE:-true}
-      KEYCLOAK_ADMIN_BASE_URL: https://sandbox.auth.library.ucdavis.edu
+      APP_REPORT_ERRORS_URL: https://client-error-reporter-akwemh35fa-uw.a.run.app
       PGUSER: 'postgres'
       PGHOST: 'db'
       PGDATABASE: 'postgres'
       PGPASSWORD: 'localhost'
       PGPORT: 5432
     volumes:
-      - ../../app/api:/app/api
-      - ../../app/client:/app/client
-      - ../../app/lib:/app/lib
-      - ../../lib:/iam-support-lib
+      - ../../../app:/app
+      - /app/node_modules
+      - ../../../lib:/iam-support-lib
+      - /iam-support-lib/node_modules
     # command: bash -c "tail -f /dev/null"
     command: node index.js
   cli:
-    image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
+    image: *utils-image
     env_file:
       - .env
     depends_on:
@@ -38,7 +39,7 @@ services:
       UCDLIB_APP_ENV: ${UCDLIB_APP_ENV:-dev}
       UCDLIB_RT_FORBID_WRITE: ${UCDLIB_RT_FORBID_WRITE:-true}
       UCDLIB_RT_QUEUE: ${UCDLIB_RT_QUEUE:-test}
-      KEYCLOAK_ADMIN_BASE_URL: https://sandbox.auth.library.ucdavis.edu
+      UCDLIB_RT_FACILITIES_QUEUE: ${UCDLIB_RT_FACILITIES_QUEUE:-test}
       PGUSER: 'postgres'
       PGHOST: 'db'
       PGDATABASE: 'postgres'
@@ -46,16 +47,16 @@ services:
       PGPORT: 5432
     command: /cli/cli.sh
     volumes:
-      - ../../utils/cli/bin:/cli/bin
-      - ../../utils/cli/lib:/cli/lib
-      - ../utils/db-entrypoint:/cli/sql
-      - ../../lib:/iam-support-lib
+      - ../../../utils/cli:/cli
+      - /cli/node_modules
+      - ../../../lib:/iam-support-lib
+      - /iam-support-lib/node_modules
   api:
-    image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
+    image: *utils-image
     env_file:
       - .env
     ports:
-      - ${UCDLIB_API_HOST_PORT:-3001}:3000
+      - ${UCDLIB_API_HOST_PORT:-3002}:3000
     depends_on:
       - db
     environment:
@@ -67,10 +68,12 @@ services:
     command: /api/api.sh
     # command: /api/tail.sh
     volumes:
-      - ../../utils/api:/api
-      - ../../lib:/iam-support-lib
+      - ../../../utils/api:/api
+      - /api/node_modules
+      - ../../../lib:/iam-support-lib
+      - /iam-support-lib/node_modules
   backup:
-    image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
+    image: *utils-image
     env_file:
       - .env
     depends_on:
@@ -78,7 +81,6 @@ services:
     environment:
       UCDLIB_APP_ENV: ${UCDLIB_APP_ENV:-dev}
       BACKUP_ENV: ${BACKUP_ENV:-localhost}
-      KEYCLOAK_ADMIN_BASE_URL: https://sandbox.auth.library.ucdavis.edu
       PGUSER: 'postgres'
       PGHOST: 'db'
       PGDATABASE: 'postgres'
@@ -89,17 +91,16 @@ services:
       SQL_FILE_NAME: 'itis-iam.sql.gz'
     command: /backup/entrypoint.sh
     volumes:
-      - ../../utils/backup:/backup
-      - ../../gc-itis-iam-writer-key.json:/etc/service-account.json
+      - ../../../utils/backup:/backup
+      - ../../secrets/gc-itis-iam-writer-key.json:/etc/service-account.json
   init:
-    image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
+    image: *utils-image
     env_file:
       - .env
     depends_on:
       - db
     environment:
       UCDLIB_APP_ENV: ${UCDLIB_APP_ENV:-dev}
-      KEYCLOAK_ADMIN_BASE_URL: https://sandbox.auth.library.ucdavis.edu
       RUN_INIT: true
       DATA_ENV: 'prod'
       PGUSER: 'postgres'
@@ -112,10 +113,10 @@ services:
       SQL_FILE_NAME: 'itis-iam.sql.gz'
     command: /init/init.sh
     volumes:
-      - ../../utils/init:/init
-      - ../../gc-itis-iam-reader-key.json:/etc/service-account.json
+      - ../../../utils/init:/init
+      - ../../secrets/gc-itis-iam-reader-key.json:/etc/service-account.json
   maintenance:
-    image: {{UTILS_IMAGE_NAME}}:{{REPO_TAG}}
+    image: *utils-image
     env_file:
       - .env
     depends_on:
@@ -126,15 +127,15 @@ services:
       PGDATABASE: 'postgres'
       PGPASSWORD: 'localhost'
       PGPORT: 5432
-      KEYCLOAK_ADMIN_BASE_URL: https://sandbox.auth.library.ucdavis.edu
     # command: /maintenance/entrypoint.sh
     command: /maintenance/tail.sh
     volumes:
-      - ../../utils/maintenance/src:/maintenance/src
-      - ../../utils/maintenance/tail.sh:/maintenance/tail.sh
-      - ../../lib:/iam-support-lib
+      - ../../../utils/maintenance:/maintenance
+      - /maintenance/node_modules
+      - ../../../lib:/iam-support-lib
+      - /iam-support-lib/node_modules
   db:
-    image: postgres:{{POSTGRES_TAG}}
+    image: postgres:15.3
     environment:
       POSTGRES_PASSWORD: localhost
     ports:

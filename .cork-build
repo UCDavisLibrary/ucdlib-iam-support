@@ -1,0 +1,25 @@
+{
+  "registry" : "us-west1-docker.pkg.dev/digital-ucdavis-edu/pub",
+
+  "images" : {
+    "ucdlib-iam-support-lib" : {
+      "contextPath" : "./lib"
+    },
+    "ucdlib-iam-support" : {
+      "contextPath" : "./app",
+      "options" : {
+        "build-arg" : [
+          "BASE_IMAGE=${ucdlib-iam-support.ucdlib-iam-support-lib}"
+        ]
+      }
+    },
+    "ucdlib-iam-support-utils" : {
+      "contextPath" : "./utils",
+      "options" : {
+        "build-arg" : [
+          "BASE_IMAGE=${ucdlib-iam-support.ucdlib-iam-support-lib}"
+        ]
+      }
+    }
+  }
+}

@@ -1,16 +1,20 @@
 #! /bin/bash
 
 ###
-# Generates dev js bundles for site - aka watch process without the watch
+# npm i and generates dev js bundles for site - aka watch process without the watch
 ###
 
 set -e
-ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-cd $ROOT_DIR/../..
+CMDS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$( cd $CMDS_DIR/../.. && pwd )"
+cd $ROOT_DIR
 
-source ./deploy/config.sh
+# shared lib
+echo "Installing shared lib"
+cd lib && npm i
 
-cd lib && npm link
-cd ../app/client/
-$NPM link @ucd-lib/iam-support-lib
-$NPM run create-dev-bundle
+# client
+echo "Installing client"
+cd $ROOT_DIR/app/client/
+npm i
+npm run create-dev-bundle

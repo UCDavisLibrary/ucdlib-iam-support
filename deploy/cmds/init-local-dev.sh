@@ -5,9 +5,9 @@
 ###
 
 set -e
-DEPLOY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-cd $DEPLOY_DIR/..
+CMDS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $CMDS_DIR
 
-./cmds/install-npm-dependencies.sh
-./cmds/generate-dev-bundle.sh
-./cmds/get-reader-key.sh
+./get-reader-key.sh
+./get-env-file.sh local-dev
+./generate-dev-bundle.sh
