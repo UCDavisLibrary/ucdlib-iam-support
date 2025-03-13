@@ -168,7 +168,7 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
 
 
 
-    this.requestUpdate();
+    // this.requestUpdate();
   }
 
   /**
@@ -186,6 +186,7 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
     this.reader.onload = function (e) {
 
       const content = e.target.result;
+
       if (!content.trim()) {
         console.error('File is empty.');
         return;
@@ -194,6 +195,7 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
       let parseData = [];
       Papa.parse(content, {
         header:true,
+        skipEmptyLines: true,
         complete: function(results) {
           let data = results.data;
           return data.map(record => {
