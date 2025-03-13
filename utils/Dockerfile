@@ -1,5 +1,5 @@
-ARG NODEJS_BASE
-FROM ${NODEJS_BASE}
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
 
 RUN apt-get update && apt-get install -y apt-transport-https ca-certificates gnupg curl cron procps
 
@@ -68,14 +68,6 @@ COPY api/lib lib
 COPY api/routes routes
 COPY api/index.js index.js
 COPY api/api.sh api.sh
-
-# build tags
-ARG APP_VERSION
-ENV APP_VERSION ${APP_VERSION}
-ARG BUILD_NUM
-ENV BUILD_NUM ${BUILD_NUM}
-ARG BUILD_TIME
-ENV BUILD_TIME ${BUILD_TIME}
 
 ENTRYPOINT [ "bash", "-c" ]
 CMD ["echo 'Use command arg to specify a script to run.'"]
