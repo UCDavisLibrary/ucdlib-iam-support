@@ -167,8 +167,7 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
     }
 
 
-
-    // this.requestUpdate();
+    this.requestUpdate();
   }
 
   /**
