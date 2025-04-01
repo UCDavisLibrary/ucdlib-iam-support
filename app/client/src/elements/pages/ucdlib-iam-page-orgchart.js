@@ -2,6 +2,7 @@ import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-orgchart.tpl.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 import Papa from 'papaparse';
+import jschardet from 'jschardet';
 
 /**
  * @classdesc Xomponent for displaying the application Org chart page
@@ -109,8 +110,12 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
   async _onSubmitCSV(e) {
     e.preventDefault();
 
-    this.data = this.reader.result;
-    this.csvData = this.reader.csvData;
+    if (!this.csvData) {
+      console.error("CSV Data is missing or not yet processed.");
+      return;
+    }
+
+
     let errorMessage = 'Error with headers in CSV. Headers:(Lived Name, External ID, Email, Notes, Department Name, Working Title, Appointment Type Code, External ID Reports To)';
     let successMessage = 'File Successfully Uploaded!';
     let permissionErrorMessage = 'User does not have permission to upload orgchart file.  Contact Admin to gain permission access.';
@@ -175,57 +180,71 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
   * @param {File} file csv file
   */
   async _onCSV(file){
+
     this.file = file;
     this.csvData = null;
-    
-
     if (!this.file) return;
+
     this.reader = new FileReader();
 
-    this.reader.onload = function (e) {
+    this.reader.onload = async (e) => {
+      let arrayBuffer = e.target.result;
 
-      const content = e.target.result;
-
-      if (!content.trim()) {
+      if (!arrayBuffer.byteLength) {
         console.error('File is empty.');
         return;
       }
 
+      // Convert ArrayBuffer to Uint8Array for processing
+      const uint8Array = new Uint8Array(arrayBuffer);
+
+      // Detect encoding
+      const detectedEncoding = jschardet.detect(new TextDecoder().decode(uint8Array)).encoding;
+      console.log("Detected Encoding:", detectedEncoding);
+
+      // Decode content using detected encoding
+      let decodedContent;
+      try {
+        const encoding = detectedEncoding ? detectedEncoding.toLowerCase() : "utf-8"; // Default to UTF-8
+        const decoder = new TextDecoder(encoding, { fatal: false }); // Avoid crashes
+        decodedContent = decoder.decode(uint8Array);
+      } catch (error) {
+        console.warn("Failed to decode, defaulting to UTF-8:", error);
+        decodedContent = new TextDecoder("utf-8").decode(uint8Array); // Fallback to UTF-8
+      }
+
+      if (!decodedContent.trim()) {
+        console.error('File is empty after decoding.');
+        return;
+      }
+
+      // Parse CSV with PapaParse
       let parseData = [];
-      Papa.parse(content, {
-        header:true,
+      Papa.parse(decodedContent, {
+        header: true,
         skipEmptyLines: true,
-        complete: function(results) {
-          let data = results.data;
-          return data.map(record => {
+        complete: function (results) {
+          parseData = results.data.map(record => {
             const cleanedRecord = {};
             for (const [key, value] of Object.entries(record)) {
               if (typeof value === 'string') {
-                const trimmedValue = value.trim(); // Remove leading and trailing spaces
+                let trimmedValue = value.trim();
                 cleanedRecord[key] = trimmedValue === '' ? null : trimmedValue;
               } else {
                 cleanedRecord[key] = value;
               }
             }
-            parseData.push(cleanedRecord);
-
             return cleanedRecord;
           });
-
         }
-
       });
 
-      this.csvData = parseData; // Use  parseCSV
-
-
-
+      this.csvData = parseData;
+      this.requestUpdate();
     };
 
-    this.reader.readAsText(file);
-
-
-
+    // Use readAsArrayBuffer instead of readAsBinaryString
+    this.reader.readAsArrayBuffer(file);
     this.requestUpdate();
 
   }
