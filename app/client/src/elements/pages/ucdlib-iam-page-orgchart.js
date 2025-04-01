@@ -195,22 +195,20 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
         return;
       }
 
-      // Convert ArrayBuffer to Uint8Array for processing
       const uint8Array = new Uint8Array(arrayBuffer);
 
       // Detect encoding
       const detectedEncoding = jschardet.detect(new TextDecoder().decode(uint8Array)).encoding;
       console.log("Detected Encoding:", detectedEncoding);
 
-      // Decode content using detected encoding
       let decodedContent;
       try {
-        const encoding = detectedEncoding ? detectedEncoding.toLowerCase() : "utf-8"; // Default to UTF-8
-        const decoder = new TextDecoder(encoding, { fatal: false }); // Avoid crashes
+        const encoding = detectedEncoding ? detectedEncoding.toLowerCase() : "utf-8";
+        const decoder = new TextDecoder(encoding, { fatal: false }); 
         decodedContent = decoder.decode(uint8Array);
       } catch (error) {
         console.warn("Failed to decode, defaulting to UTF-8:", error);
-        decodedContent = new TextDecoder("utf-8").decode(uint8Array); // Fallback to UTF-8
+        decodedContent = new TextDecoder("utf-8").decode(uint8Array);
       }
 
       if (!decodedContent.trim()) {
@@ -243,7 +241,6 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
       this.requestUpdate();
     };
 
-    // Use readAsArrayBuffer instead of readAsBinaryString
     this.reader.readAsArrayBuffer(file);
     this.requestUpdate();
 
