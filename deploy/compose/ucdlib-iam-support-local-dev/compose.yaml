@@ -51,6 +51,7 @@ services:
       - /cli/node_modules
       - ../../../lib:/iam-support-lib
       - /iam-support-lib/node_modules
+      - ../../utils/db-entrypoint:/app-sql
   api:
     image: *utils-image
     env_file:

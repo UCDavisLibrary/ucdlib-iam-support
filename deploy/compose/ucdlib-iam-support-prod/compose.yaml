@@ -32,6 +32,8 @@ services:
       PGPORT: 5432
     depends_on:
       - db
+    volumes:
+      - ../../utils/db-entrypoint:/app-sql
     command: /cli/cli.sh
   api:
     image: *utils-image
