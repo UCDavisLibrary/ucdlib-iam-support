@@ -130,6 +130,12 @@ CREATE TABLE job_logs (
     data jsonb NOT NULL DEFAULT '{}'::jsonb,
     created timestamp DEFAULT NOW()
 );
+CREATE TABLE metadata (
+    id SERIAL PRIMARY KEY,
+    metadata_key varchar(50) NOT NULL,
+    metadata_value text NOT NULL,
+    employee_id varchar(20)
+);
 
 -- Request Statuses
 --1

@@ -56,6 +56,45 @@ export default ( api ) => {
 
   });
 
+
+  api.get(`${route}/metadata/:id`, async (req, res) => {
+
+    // query for employee
+    if ( !req.params.id ) {
+      return res.status(400).json({
+        error: 'Missing employee identifier'
+      });
+    }
+ 
+  });
+
+
+  api.post(`${route}/metadata/:id?`, async (req, res) => {
+
+    // query for employee
+    if ( !req.params.id ) {
+      return res.status(400).json({
+        error: 'Missing employee identifier'
+      });
+    }
+
+    console.log(req.query);
+    
+    // const queryOptions = getQueryOptions(req);
+    // const employeeName = queryOptions.name || '';
+
+    // const results = await UcdlibEmployees.searchByName(employeeName, queryOptions);
+    // if ( results.err ) {
+    //   return res.status(400).json({
+    //     error: 'Error getting employees'
+    //   });
+    // }
+
+    // res.json(results.res.rows);
+
+  });
+
+
   /**
    * @description Get an employee by identifier
    * url params:
