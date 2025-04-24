@@ -1,6 +1,6 @@
 x-variables:
-  main-image: &main-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support:v1.11.1
-  utils-image: &utils-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support-utils:v1.11.1
+  main-image: &main-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support:v1.11.2
+  utils-image: &utils-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support-utils:v1.11.2
 services:
   app:
     image: *main-image
@@ -32,6 +32,8 @@ services:
       PGPORT: 5432
     depends_on:
       - db
+    volumes:
+      - ../../utils/db-entrypoint:/app-sql
     command: /cli/cli.sh
   api:
     image: *utils-image
