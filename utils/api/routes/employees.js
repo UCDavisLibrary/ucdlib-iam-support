@@ -65,11 +65,23 @@ export default ( api ) => {
         error: 'Missing employee identifier'
       });
     }
+
+    const out = {
+      total: 0,
+      results: [],
+    }
+
+    const r = await UcdlibEmployees.getById(req.params.id, "employeeId", {includeMetadata:true})
+
+    out.total = r.res.rowCount;
+    out.results = r.res.rows;
+
+    return res.json(out);
  
   });
 
 
-  api.post(`${route}/metadata/:id?`, async (req, res) => {
+  api.post(`${route}/metadata/:id`, async (req, res) => {
 
     // query for employee
     if ( !req.params.id ) {
@@ -78,19 +90,23 @@ export default ( api ) => {
       });
     }
 
-    console.log(req.query);
+    const out = {
+      total: 0,
+      results: [],
+    }
+
+    const id = req.body[0].id;
+    const employee_id = req.body[0].employeeId;
+    const metadataKey = req.body[0].metadataKey;
+    const metadataValue = req.body[0].metadataValue;
+
+
+    const results = await UcdlibEmployees.updateMetadata(id, metadataKey, metadataValue, employee_id)
     
-    // const queryOptions = getQueryOptions(req);
-    // const employeeName = queryOptions.name || '';
+    out.total = results.res.rowCount;
+    out.results = results.res.rows;
 
-    // const results = await UcdlibEmployees.searchByName(employeeName, queryOptions);
-    // if ( results.err ) {
-    //   return res.status(400).json({
-    //     error: 'Error getting employees'
-    //   });
-    // }
-
-    // res.json(results.res.rows);
+    return res.json(out);
 
   });
 
