@@ -16,7 +16,7 @@ export function render() {
 
                 <p style="margin-bottom:30px;">Upload the most recent csv for the organizational chart here.  
                 Make sure to use the format which includes headers and the required 
-                columns: <br />(Lived Name, EE ID, Email, Notes, Department Name, Working Title, Appointment Type Code, Supervisor ID).
+                columns: <br >(Lived Name, External ID, Email, Notes, Department Name, Working Title, Appointment Type Code, External ID Reports To).<br />
                 </p>
 
                 <form style="margin:85px 0px 85px 0;" id="csvForm" @submit=${this._onSubmitCSV}>
