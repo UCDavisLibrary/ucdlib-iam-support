@@ -7,3 +7,4 @@ import "../ucdlib-iam-page-permissions-single";
 import "../ucdlib-iam-page-separation";
 import "../ucdlib-iam-page-separation-new";
 import "../ucdlib-iam-page-separation-single";
+import "../ucdlib-iam-page-user-settings";

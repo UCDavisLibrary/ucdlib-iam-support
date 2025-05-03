@@ -9,6 +9,7 @@ export function render() {
   <ucd-theme-header>
     <ucdlib-branding-bar slogan='Identity and Access Management'>
       <a href='/logout'>Logout</a>
+      <a href='/settings'>User Settings</a>
     </ucdlib-branding-bar>
     <ucd-theme-primary-nav>
       <ul link-text='Onboarding' href='/onboarding'>
@@ -54,5 +55,6 @@ export function render() {
     <ucdlib-iam-page-permissions-single id='permissions-single'></ucdlib-iam-page-permissions-single>
     <ucdlib-iam-page-permissions id='permissions'></ucdlib-iam-page-permissions>
     <ucdlib-iam-page-tools id='tools'></ucdlib-iam-page-tools>
+    <ucdlib-iam-page-user-settings id='settings'></ucdlib-iam-page-user-settings>
   </ucdlib-pages>
 `;}

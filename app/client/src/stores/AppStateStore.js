@@ -28,6 +28,7 @@ class AppStateStoreImpl extends AppStateStore {
       permissionsEmployee: {text: 'Select a UC Davis Employee', link: '/permissions#employee'},
       orgchart: {text: 'Create Organizational Chart Tool', link: '/orgchart'},
       patronLookup: {text: 'Search by Patron Lookup Tool', link: '/patron'},
+      userSettings: {text: 'User Settings', link: '/settings'},
       tools: {text: 'Support Tools', link: '/tools'}
     };
 
@@ -41,6 +42,7 @@ class AppStateStoreImpl extends AppStateStore {
       permissions: 'Employee Permissions',
       orgchart: 'Organization Chart Tool',
       patronLookup: 'Patron Lookup',
+      userSettings: 'User Settings',
       tools: 'Support Tools'
     };
 

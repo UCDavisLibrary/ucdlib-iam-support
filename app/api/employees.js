@@ -62,4 +62,67 @@ export default (api) => {
 
     return res.json(out);
   });
+
+/**
+   * @description get the metadata for the employee
+   * - id: search by employee id
+*/
+  api.get(`/employees/:id/metadata`, async (req, res) => {
+
+    // query for employee
+    if ( !req.params.id ) {
+      return res.status(400).json({
+        error: 'Missing employee identifier'
+      });
+    }
+
+    const id_type = req.query.idType;
+
+    let person = await UcdlibEmployees.getById(req.params.id, id_type);
+    let employeeId = person.res.rows[0].id;
+
+    const out = {
+      total: 0,
+      results: [],
+    }
+
+    const r = await UcdlibEmployees.getById(employeeId, "id", {includeMetadata:true})
+
+    out.total = r.res.rowCount;
+    out.results = r.res.rows;
+
+    return res.json(out);
+
+  });
+
+  /**
+   * @description post the updated metadata for the employee
+   * - id: search by employee id
+  */
+  api.post(`/employees/:id/metadata/`, async (req, res) => {
+
+    // query for employee
+    if ( !req.params.id ) {
+      return res.status(400).json({
+        error: 'Missing employee identifier'
+      });
+    }
+
+    const out = {
+      total: 0,
+      results: [],
+    }
+
+    const id = req.body.id;
+    const metadataValue = req.body.metadataValue;
+
+
+    const results = await UcdlibEmployees.updateMetadata(id, metadataValue)
+    
+    out.total = results.res.rowCount;
+    out.results = results.res.rows;
+
+    return res.json(out);
+
+  });
 }

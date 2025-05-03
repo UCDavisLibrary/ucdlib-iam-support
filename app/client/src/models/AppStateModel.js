@@ -95,6 +95,11 @@ class AppStateModelImpl extends AppStateModel {
     ) {
       p = 'orgchart';
     } else if(
+      update.location.path[0] == 'settings' &&
+      update.location.path.length > 1
+    ) {
+      p = 'settings';
+    } else if(
       update.location.path[0] == 'patron' &&
       update.location.path.length > 1
     ) {
@@ -142,6 +147,9 @@ class AppStateModelImpl extends AppStateModel {
     } else if ( update.page === 'patron' ){
       title.show = this.store.pageTitles.patronLookup ? true : false;
       title.text = this.store.pageTitles.patronLookup;
+    } else if ( update.page === 'settings' ){
+      title.show = this.store.pageTitles.userSettings ? true : false;
+      title.text = this.store.pageTitles.userSettings;
     } else if ( update.page === 'tools' ){
       title.show = this.store.pageTitles.tools ? true : false;
       title.text = this.store.pageTitles.tools;
@@ -228,6 +236,10 @@ class AppStateModelImpl extends AppStateModel {
     else if ( update.page === 'patron' ){
       breadcrumbs.show = true;
       breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.patronLookup);
+    }
+    else if ( update.page === 'settings' ){
+      breadcrumbs.show = true;
+      breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.userSettings);
     }
     else if ( update.page === 'tools' ){
       breadcrumbs.show = true;
