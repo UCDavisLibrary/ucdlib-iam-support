@@ -63,7 +63,11 @@ export default (api) => {
     return res.json(out);
   });
 
-  api.get(`/employees/metadata/:id`, async (req, res) => {
+/**
+   * @description get the metadata for the employee
+   * - id: search by employee id
+*/
+  api.get(`/employees/:id/metadata`, async (req, res) => {
 
     // query for employee
     if ( !req.params.id ) {
@@ -72,12 +76,17 @@ export default (api) => {
       });
     }
 
+    const id_type = req.query.idType;
+
+    let person = await UcdlibEmployees.getById(req.params.id, id_type);
+    let employeeId = person.res.rows[0].id;
+
     const out = {
       total: 0,
       results: [],
     }
 
-    const r = await UcdlibEmployees.getById(req.params.id, "employeeId", {includeMetadata:true})
+    const r = await UcdlibEmployees.getById(employeeId, "id", {includeMetadata:true})
 
     out.total = r.res.rowCount;
     out.results = r.res.rows;
@@ -86,7 +95,11 @@ export default (api) => {
 
   });
 
-  api.post(`/employees/metadata/:id`, async (req, res) => {
+  /**
+   * @description post the updated metadata for the employee
+   * - id: search by employee id
+  */
+  api.post(`/employees/:id/metadata/`, async (req, res) => {
 
     // query for employee
     if ( !req.params.id ) {
@@ -100,13 +113,11 @@ export default (api) => {
       results: [],
     }
 
-    const id = req.body[0].id;
-    const employee_id = req.body[0].employeeId;
-    const metadataKey = req.body[0].metadataKey;
-    const metadataValue = req.body[0].metadataValue;
+    const id = req.body.id;
+    const metadataValue = req.body.metadataValue;
 
 
-    const results = await UcdlibEmployees.updateMetadata(id, metadataKey, metadataValue, employee_id)
+    const results = await UcdlibEmployees.updateMetadata(id, metadataValue)
     
     out.total = results.res.rowCount;
     out.results = results.res.rows;

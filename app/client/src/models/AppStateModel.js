@@ -98,7 +98,6 @@ class AppStateModelImpl extends AppStateModel {
       update.location.path[0] == 'settings' &&
       update.location.path.length > 1
     ) {
-      console.log("S:", update.location.path);
       p = 'settings';
     } else if(
       update.location.path[0] == 'patron' &&

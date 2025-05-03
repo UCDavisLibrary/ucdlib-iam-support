@@ -20,14 +20,14 @@ export default class UcdlibIamPageUserSettings extends Mixin(LitElement)
     super();
     this.render = render.bind(this);
     this._injectModel('AppStateModel','AuthModel', 'EmployeeModel');
-    this.token = this.AuthModel.getToken().token || null;
-    this.employeeId = this.AuthModel.getToken().token.employeeId || null;
-    this.firstName = this.AuthModel.getToken().token.given_name || null;
-    this.lastName = this.AuthModel.getToken().token.family_name || null;
+    this.token = null;
+    this.firstName = null;
+    this.lastName = null;
     this.metadata = [];
     this.updateList = [];
     this.noChange = true;
-
+    this.enableDirectReportNotification = null;
+    this.initialDirectReportNotification = null;
   }
 
   /**
@@ -42,13 +42,16 @@ export default class UcdlibIamPageUserSettings extends Mixin(LitElement)
   /* Add the check for the new user_setting enable flag */
   
   /**
-   * @method handleCheckboxChange
-   * @description handle the checkbox changing
+   * @method handleDirectReportChange
+   * @description handle the checkbox changing direct report
    *
    * @param {Object} e
    */
   handleDirectReportChange(e) {
-    this.noChange = e.target.checked === this.enableDirectReportNotification;
+
+    this.enableDirectReportNotification = e.target.checked;
+    this.noChange = this.initialDirectReportNotification === this.enableDirectReportNotification;
+
     this.requestUpdate();
   }
 
@@ -62,8 +65,15 @@ export default class UcdlibIamPageUserSettings extends Mixin(LitElement)
   async _onAppStateUpdate(e) {
     if ( e.page != this.id ) return;
     this.AppStateModel.showLoaded(this.id);
+    
+    this.token = this.AuthModel.getToken().token || null;
+    this.firstName = this.token.given_name || null;
+    this.lastName = this.token.family_name || null;
+    this.iamId = this.token.iamId || null;
+    this.ccReportsToolTip = "By default, only DIRECT supervisors are CCed on their employee's RT tickets. Checking this box will ensure you are CCed on RT tickets submitted by anyone below you in your reporting line.";
 
-    const r = await this.EmployeeModel.getMetadata(this.employeeId);
+    const r = await this.EmployeeModel.getMetadata(this.iamId, "iamId");
+
     this.metadata = r.payload.results[0].metadata;
 
     this.currentDirectReportStatus();
@@ -77,10 +87,17 @@ export default class UcdlibIamPageUserSettings extends Mixin(LitElement)
    * @description get the current Direct Report Status
    */
   async currentDirectReportStatus(){
-    let meta = this.metadata.find(m => m.metadataKey === "direct_reports_notification");
-    this.directReportsId = meta.id;
-    meta = meta ? meta.metadataValue.toLowerCase() : false;
-    this.enableDirectReportNotification = meta === "true" ? true: false;
+    let meta = this.metadata.find(m => m.metadataKey === "cc_notification");
+    this.directReportsId = meta.metadataId;
+    if(typeof meta.metadataValue === 'string') {
+      meta = meta ? meta.metadataValue.toLowerCase() : false;
+      this.initialDirectReportNotification = meta === "true" ? true: false;
+
+    } else {
+      meta = meta.metadataValue;
+      this.initialDirectReportNotification = meta;
+    }
+    this.enableDirectReportNotification =  this.initialDirectReportNotification;
 
     this.requestUpdate();
   }
@@ -96,27 +113,28 @@ export default class UcdlibIamPageUserSettings extends Mixin(LitElement)
     if ( this.updateInProgress ) return;
     this.updateInProgress = true;
 
-    const checkboxes = this.renderRoot.querySelectorAll('input[type="checkbox"]');
-
-    checkboxes.forEach(checkbox => {
       
-      if(checkbox.name == "direct-reports") {
-        this.updateList.push({
-          id: this.directReportsId,
-          employeeId: this.employeeId,
-          metadataKey: "direct_reports_notification",
-          metadataValue: String(checkbox.checked)
-        });
-      }
-      
-      /* Add future if statements for metadata here */
+    this.updateList.push({
+      id: this.directReportsId,
+      metadataValue: this.enableDirectReportNotification
     });
+      
+    /* Add future object statements for metadata here */
 
-    const r = await this.EmployeeModel.updateMetadata(this.updateList, this.employeeId);
+    let r = [];
+
+    for(let element of this.updateList){
+      let res = await this.EmployeeModel.updateMetadata(element, this.iamId);
+      r.push(res);
+    }
+
+    const allLoaded = r.every(item => item.state === 'loaded');
+    const hasIs400 = r.some(item => item.error?.payload?.is400 === true);
+
 
     let successText = `${this.firstName} ${this.lastName}'s User Settings has been updated.`;
 
-    if ( r.state === 'loaded' ) {
+    if (allLoaded) {
       this.AppStateModel.refresh();
       setTimeout(() => {
         this.AppStateModel.showAlertBanner({message: successText, brandColor: 'quad'});
@@ -124,7 +142,7 @@ export default class UcdlibIamPageUserSettings extends Mixin(LitElement)
       this.updateInProgress = false;
 
     } else {
-      if ( r.error?.payload?.is400 ) {
+      if ( hasIs400) {
         this.requestUpdate();
         this.AppStateModel.showAlertBanner({message: 'Error when updating the user settings. Form data needs fixing.', brandColor: 'double-decker'});
         this.logger.error('Error in form updating user settings', r);

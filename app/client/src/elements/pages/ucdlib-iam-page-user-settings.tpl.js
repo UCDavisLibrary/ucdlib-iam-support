@@ -1,7 +1,11 @@
 import { html } from 'lit';
 
+/**
+ * @description Main render function for this element
+ * @returns {TemplateResult}
+ */
 export function render() { 
-return html`
+  return html`
   <form @submit=${this._onEditSubmit}>
     <div class="l-container">
       <div class="l-shrink panel o-box">
@@ -15,7 +19,9 @@ return html`
                 ?disabled=${this.updateInProgress}
                 ?checked=${this.enableDirectReportNotification}
                 @change=${this.handleDirectReportChange}>
-              <label for="direct-reports">All Direct Reports Notification</label>
+              <label for="direct-reports">All Direct Reports Notification 
+                <abbr title=${this.ccReportsToolTip}>*</abbr>
+              </label>
             </li>
           </ul>
         </fieldset>
