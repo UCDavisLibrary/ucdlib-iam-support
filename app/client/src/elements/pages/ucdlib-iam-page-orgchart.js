@@ -177,7 +177,6 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
     if(this.formatError) {
       this.AppStateModel.showAlertBanner({message: formatErrorMessage, brandColor: 'double-decker'});
     } else {
-      console.log("there");
       this.csvData = this.anonymizeData(updatedData);
       let res = await this.OrgchartModel.orgPush(this.csvData);
       
