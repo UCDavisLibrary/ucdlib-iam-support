@@ -33,8 +33,8 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
     this.data;
     this.uploadWidgetTitle =  'Upload File for Organizational Chart';
     this.csvData = null;
+    this.formatError = false;
     this._injectModel('AppStateModel', 'EmployeeModel', 'PersonModel', 'OrgchartModel');
-
   }
 
   /**
@@ -118,7 +118,7 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
 
     let errorMessage = 'Error with headers in CSV. Headers:(Lived Name, External ID, Email, Notes, Department Name, Working Title, Appointment Type Code, External ID Reports To)';
     let successMessage = 'File Successfully Uploaded!';
-    let permissionErrorMessage = 'User does not have permission to upload orgchart file.  Contact Admin to gain permission access.';
+    let serverErrorMessage = 'Permisson/Server Error: Contact Admin to Fix Possible Error.';
 
 
     const keyMap = {
@@ -145,8 +145,22 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
     this.csvData = Object.values(this.renameKeys(this.csvData, keyMap));
 
     let updatedData = [];
+    let formatErrorMessage;
 
     for (const item of this.csvData) {
+      if(item.fullName == null){
+        formatErrorMessage = "Formatting Error; Missing a column entry: Lived Name.";
+        this.formatError = true;
+      }
+
+      if(item.id == null){
+        formatErrorMessage = "Formatting Error; Missing a column entry: External ID.";
+        this.formatError = true;      }
+
+      if(item.parentId == null){
+        formatErrorMessage = "Formatting Error; Missing a column entry: External ID Reports To.";
+        this.formatError = true;        }
+
       const updatedItem = {
         fullName: item.fullName,
         id: Number(item.id),
@@ -160,16 +174,23 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
       updatedData.push(updatedItem);
     }
 
-    this.csvData = this.anonymizeData(updatedData);
-
-
-    let res = await this.OrgchartModel.orgPush(this.csvData);
-    
-    if(res.error) {
-      this.AppStateModel.showAlertBanner({message: permissionErrorMessage, brandColor: 'double-decker'});
+    if(this.formatError) {
+      this.AppStateModel.showAlertBanner({message: formatErrorMessage, brandColor: 'double-decker'});
     } else {
-      this.AppStateModel.showAlertBanner({message: successMessage, brandColor: 'quad'});
+      console.log("there");
+      this.csvData = this.anonymizeData(updatedData);
+      let res = await this.OrgchartModel.orgPush(this.csvData);
+      
+      if(res.error) {
+        this.AppStateModel.showAlertBanner({message: serverErrorMessage, brandColor: 'double-decker'});
+      } else {
+        this.AppStateModel.showAlertBanner({message: successMessage, brandColor: 'quad'});
+      }
     }
+
+
+
+
 
 
     this.requestUpdate();
