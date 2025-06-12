@@ -155,11 +155,13 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
 
       if(item.id == null){
         formatErrorMessage = "Formatting Error; Missing a column entry: External ID.";
-        this.formatError = true;      }
+        this.formatError = true;      
+      }
 
       if(item.parentId == null){
         formatErrorMessage = "Formatting Error; Missing a column entry: External ID Reports To.";
-        this.formatError = true;        }
+        this.formatError = true;        
+      }
 
       const updatedItem = {
         fullName: item.fullName,

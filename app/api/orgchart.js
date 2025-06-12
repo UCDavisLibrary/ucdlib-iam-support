@@ -30,7 +30,7 @@ export default (api) => {
 
     const timestamp = Date.now();
 
-    
+    console.log("Made it");
     let sftpConnect = new sftp(sftpConfig, filepath);
 
     if(await sftpConnect.isFolderEmpty()){
