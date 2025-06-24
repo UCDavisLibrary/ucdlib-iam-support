@@ -9,7 +9,7 @@ import "../components/ucdlib-iam-search";
 /**
  * @description Employee Update Tool
  */
-export default class UcdlibIamPageUpdateTool extends Mixin(LitElement) 
+export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
   .with(LitCorkUtils) {
 
   static get properties() {
@@ -22,7 +22,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
       isHead: {state: true},
     };
   }
-  
+
   constructor() {
     super();
     this.render = Templates.render.bind(this);
@@ -37,7 +37,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this.deptHeadConflict = false;
     this.departmentName = 'department';
 
-    this._injectModel('EmployeeModel','AppStateModel', 'AuthModel', 'GroupModel', 'PersonModel');    
+    this._injectModel('EmployeeModel','AppStateModel', 'AuthModel', 'GroupModel', 'PersonModel');
   }
 
   /**
@@ -48,7 +48,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
   createRenderRoot() {
     return this;
   }
-  
+
   /**
    * @method _onGroupsFetched
    * @description attached to GroupModel GROUPS_FETCHED event
@@ -147,12 +147,11 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     if (e.page != this.id ) return;
 
     const token = this.AuthModel.getToken();
-
-    if(!token.hasAdminAccess || !token.hasHrAccess){
-      this._setPage(e);
-    } else {
+    if(!token.hasAdminAccess && !token.hasHrAccess) {
       this.AppStateModel.showError('You do not have permission to use this tool.');
-    }    
+      return;
+    }
+    this._setPage(e);
 
     const promises = [];
     promises.push(this.GroupModel.getAll());
@@ -279,7 +278,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
       return;
     }
 
-    
+
 
     if(this.isHead) this.alertDepartmentHead(this.isHead);
     this.requestUpdate();
