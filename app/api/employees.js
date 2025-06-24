@@ -62,4 +62,83 @@ export default (api) => {
 
     return res.json(out);
   });
+
+    /**
+   * @description update employee information to local db
+   * Returns array of upload
+   */
+    api.post('/employees/:id', async (req, res) => {
+      if (
+        !req.auth.token.hasAdminAccess &&
+        !req.auth.token.hasHrAccess ){
+        res.status(403).json({
+          error: true,
+          message: 'Not authorized to access this resource.'
+        });
+        return;
+      }
+      
+      const r = await UcdlibEmployees.update(req.params.id, req.body);
+      if ( r.err ) {
+        console.error(r.err);
+        return res.status(500).json({error: true});
+      }
+
+      res.json(true);
+
+    });
+
+
+  /**
+   * @description add employee to groups to local db
+   * Returns array of upload
+   */
+    api.post('/employees/addgroup/:id', async (req, res) => {
+
+      if (
+        !req.auth.token.hasAdminAccess &&
+        !req.auth.token.hasHrAccess ){
+        res.status(403).json({
+          error: true,
+          message: 'Not authorized to access this resource.'
+        });
+        return;
+      }
+      
+      let isHead = false;
+      if(req.body.isHead) isHead = true;
+      
+      const r = await UcdlibEmployees.addEmployeeToGroup(req.params.id, req.body.departmentId, isHead);
+      if ( r.err ) {
+        console.error(r.err);
+        return res.status(500).json({error: true});
+      }
+      res.json(true);
+
+    });
+
+  /**
+   * @description remove employee to groups to local db
+   * Returns array of upload
+   */
+    api.post('/employees/removegroup/:id', async (req, res) => {
+     
+      if (
+        !req.auth.token.hasAdminAccess &&
+        !req.auth.token.hasHrAccess ){
+        res.status(403).json({
+          error: true,
+          message: 'Not authorized to access this resource.'
+        });
+        return;
+      }
+
+      const r = await UcdlibEmployees.removeEmployeeFromGroup(req.params.id, req.body.departmentId);
+      if ( r.err ) {
+        console.error(r.err);
+        return res.status(500).json({error: true});
+      }
+      res.json(true);
+
+    });
 }

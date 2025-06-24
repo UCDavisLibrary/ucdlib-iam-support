@@ -290,7 +290,6 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
    * @param {Object} e
    */
   async _setPage(e){
-
     this.AppStateModel.showLoading('onboarding-new');
     await this._getRequiredPageData(e.location.hash);
     this.AppStateModel.showLoaded();
