@@ -43,11 +43,11 @@ export function renderEmployeeSelect(){
         <div>
           <span class='fw-bold primary'>Supervisor: </span>
           ${this.employeeRecord.supervisor?.firstName || ''} ${this.employeeRecord.supervisor?.lastName || ''}
-          </div>    
+          </div>
         </div>
         <br />
       <button type='button' @click=${this._onEmployeeSelect} ?disabled=${!this.hasEmployeeRecord} class="btn btn--block btn--alt">Next</button>
-    </div> 
+    </div>
   `;
 }
 
@@ -57,36 +57,41 @@ export function renderEmployeeSelect(){
  */
 export function renderEmployeeEdit(){
   return html`
-  
+
   <div class='form-single-col' id='employee-edit'>
-    <h2 class="panel__title"><span class="panel__custom-icon fas fa-user-tie"></span>Employee Information</h2>
 
-    <div class="field-container">
-      <label for="update-first-name">First Name</label>
-      <input id='update-first-name' type="text" .value=${this.firstName} disabled>
-    </div>
-    <div class="field-container">
-      <label for="update-last-name">Last Name</label>
-      <input id='update-last-name' type="text" .value=${this.lastName} disabled>
-    </div>
-    <div class="field-container">
-      <label for="update-employee-id">IAM ID</label>
-      <input id='update-employee-id' type="text" .value=${this.iamId} disabled>
-    </div>
-    <div class="field-container">
-      <label for="update-iam-id">Employee ID</label>
-      <input id='update-iam-id' type="text" .value=${this.employeeId} disabled>
-    </div>
-    <div class="field-container">
-      <label for="update-user-id">Kerberos</label>
-      <input id='update-user-id' type="text" .value=${this.userId} disabled>
-    </div>
-    <div class="field-container">
-      <label for="update-email">UC Davis Email</label>
-      <input id='update-email' type="text" .value=${this.email} disabled>
-    </div>  
+    <h2 class='u-space-mb--medium'>Employee Information</h2>
+    <div class='u-space-mb--large'>
+      <h3 class="panel__title u-space-mb--small"><span class="panel__custom-icon fas fa-address-card"></span>UCPath</h3>
+      <p>The following information is populated from UCPath and cannot be edited from this application.</p>
 
-    <h2 class="panel__title"><span class="panel__custom-icon fas fa-user-tie"></span>Edit Employee Information</h2>
+      <div class="field-container">
+        <label for="update-first-name">First Name</label>
+        <input id='update-first-name' type="text" .value=${this.firstName} disabled>
+      </div>
+      <div class="field-container">
+        <label for="update-last-name">Last Name</label>
+        <input id='update-last-name' type="text" .value=${this.lastName} disabled>
+      </div>
+      <div class="field-container">
+        <label for="update-employee-id">IAM ID</label>
+        <input id='update-employee-id' type="text" .value=${this.iamId} disabled>
+      </div>
+      <div class="field-container">
+        <label for="update-iam-id">Employee ID</label>
+        <input id='update-iam-id' type="text" .value=${this.employeeId} disabled>
+      </div>
+      <div class="field-container">
+        <label for="update-user-id">Kerberos</label>
+        <input id='update-user-id' type="text" .value=${this.userId} disabled>
+      </div>
+      <div class="field-container">
+        <label for="update-email">UC Davis Email</label>
+        <input id='update-email' type="text" .value=${this.email} disabled>
+      </div>
+    </div>
+
+    <h3 class="panel__title u-space-mb--medium"><span class="panel__custom-icon fas fa-user-tie"></span>Library Position</h3>
       <div class="field-container">
         <label for="update-employee-id">Working Title</label>
         <input id='update-employee-id' type="text" .value=${this.employeeTitle} @input=${e => this.employeeTitle = e.target.value}>
@@ -107,15 +112,16 @@ export function renderEmployeeEdit(){
           <ul class="list--reset">
             <li>
               <input id="update-head-department" type="checkbox" @change=${(e) => e.target.checked ? this.alertDepartmentHead(e.target.checked) :  this.unassignDepartmentHead()}  .checked=${this.isHead}>
-              <label for="update-head-department">Marked as Department Head</label>
+              <label for="update-head-department">Is Department Head</label>
             </li>
           </ul>
         </div>
-        <div style="color:red;" ?hidden=${!this.deptHeadConflict} >${this.conflictMessage}</div>
+        <div class='double-decker' ?hidden=${!this.deptHeadConflict} >${this.conflictMessage}</div>
       </div>
-      <button type='button' @click=${this.reset} class="btn btn--block btn">Back To Search</button>
-      <button type='button' @click=${this.updateEmployee} ?disabled=${this.disabledSubmit} class="btn btn--block btn--alt">Submit</button>
-
+      <div class='l-2col'>
+        <button type='button' @click=${this.reset} class="l-first u-space-mt btn btn--block btn">Back To Search</button>
+        <button type='button' @click=${this.updateEmployee} ?disabled=${this.disabledSubmit} class="l-second u-space-mt btn btn--block btn--alt">Submit</button>
+      </div>
   </div>
 
   `;
@@ -142,7 +148,7 @@ export function renderEmployeeResult(){
         <div>
           <span class='fw-bold primary'>Supervisor: </span>
           ${this.employeeRecord.supervisor?.firstName || ''} ${this.employeeRecord.supervisor?.lastName || ''}
-          </div>    
+          </div>
         </div>
         <div>
           <div><span class='fw-bold primary'>Is Department Head: </span>${this.isHead ? "True": "False"}</div>
