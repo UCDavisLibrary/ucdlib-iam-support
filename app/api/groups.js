@@ -68,8 +68,6 @@ export default (api) => {
       console.error(r.err);
       return res.status(500).json({error: true});
     }
-    console.log(r);
-
     res.json(true);
 
   });
