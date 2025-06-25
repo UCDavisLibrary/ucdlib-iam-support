@@ -342,46 +342,43 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
    */
   async updateEmployee() {
     const promises = [];
-    let message;
 
-    try {
-      message = `Employee ${this.firstName} ${this.lastName} updated successfully.`;
-      // Update title if changed
-      if (this.employeeTitle !== this.employeeRecord.title) {
-        let updateEmployeeTitle = { title: this.employeeTitle };
-        promises.push(await this.EmployeeModel.update(this.dbId, updateEmployeeTitle));
-      }
+    if (this.employeeTitle !== this.employeeRecord.title) {
+      let updateEmployeeTitle = { title: this.employeeTitle };
+      promises.push(this.EmployeeModel.update(this.dbId, updateEmployeeTitle));
+    }
 
-      // Handle department change
-      if (this.departmentId !== this.department.id) {
-        promises.push(await this.EmployeeModel.removeFromGroup(this.dbId, { departmentId: this.department.id }));
-        promises.push(await this.EmployeeModel.addToGroup(this.dbId, {
-          departmentId: this.departmentId,
-          isHead: this.isHead
-        }));
-      } else {
-        // Handle only head status change
-        if (this.isHead !== this.department.isHead) {
-          if (!this.isHead) {
-            promises.push(await this.GroupModel.removeGroupHead(this.departmentId));
-          } else {
-            promises.push(await this.GroupModel.setGroupHead(this.departmentId, { employeeRowID: this.dbId }));
-          }
+    // Handle department change
+    if (this.departmentId !== this.department.id) {
+      promises.push(this.EmployeeModel.removeFromGroup(this.dbId, { departmentId: this.department.id }));
+      promises.push(this.EmployeeModel.addToGroup(this.dbId, {
+        departmentId: this.departmentId,
+        isHead: this.isHead
+      }));
+    } else {
+      // Handle only head status change
+      if (this.isHead !== this.department.isHead) {
+        if (!this.isHead) {
+          promises.push(this.GroupModel.removeGroupHead(this.departmentId));
+        } else {
+          promises.push(this.GroupModel.setGroupHead(this.departmentId, { employeeRowID: this.dbId }));
         }
       }
-
-      // Await promises
-      await Promise.all(promises);
-
-      this.AppStateModel.showAlertBanner({message: message, brandColor: 'quad'});
-
-      this.requestUpdate();
-      this._onRenderResult();
-
-    } catch (error) {
-      message ='An error occurred while updating the employee record.';
-      this.AppStateModel.showAlertBanner({message: message, brandColor: 'double-decker'});
     }
+
+    const resolvedPromises = await Promise.allSettled(promises);
+    for ( const i in resolvedPromises ){
+      const resolvedPromise = resolvedPromises[i];
+      if ( resolvedPromise.status === 'rejected'  || resolvedPromise.value.state === 'error'){
+        this.AppStateModel.showAlertBanner({message: 'An error occurred while updating the employee record.', brandColor: 'double-decker'});
+        return;
+      }
+    }
+    this.AppStateModel.showAlertBanner({message: `Employee ${this.firstName} ${this.lastName} updated successfully.`, brandColor: 'quad'});
+
+    this.requestUpdate();
+    this._onRenderResult();
+
   }
 
 
