@@ -63,6 +63,58 @@ export default (api) => {
     return res.json(out);
   });
 
+
+
+      /**
+   * @description get employees by id from local db
+   * Returns array of employee information
+   */
+    api.get('/employees/:id', async (req, res) => {
+      if (
+        !req.auth.token.hasAdminAccess &&
+        !req.auth.token.hasHrAccess ){
+        res.status(403).json({
+          error: true,
+          message: 'Not authorized to access this resource.'
+        });
+        return;
+      }
+
+      if (!req.params.id ) {
+        res.status(400).json({
+          error: true,
+          message: 'Missing id.  Must include the id of employee'
+        });
+        return;
+      }
+
+      const idType = req.query.idType || 'id';
+
+      const options = {
+        returnGroups: true,
+        returnSupervisor: true
+      };
+      
+      const limit = 10;
+      const out = {
+        total: 0,
+        results: [],
+      }
+
+      const r = await UcdlibEmployees.getById(req.params.id, idType, options);
+      if ( r.err ) {
+        console.error(r.err);
+        res.status(500).json({error: true});
+        return;
+      }
+
+      out.total = r.res.rowCount;
+      out.results = r.res.rows.slice(0, limit).map(row => TextUtils.camelCaseObject(row));
+
+      return res.json(out);
+
+    });
+
     /**
    * @description update employee information to local db
    * Returns array of upload

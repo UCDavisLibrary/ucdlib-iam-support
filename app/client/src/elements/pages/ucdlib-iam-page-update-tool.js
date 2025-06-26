@@ -60,7 +60,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
 
     } else if ( e.state === this.GroupModel.store.STATE.ERROR ) {
       console.error('Cannot display page. Groups not loaded!');
-      this.AppStateModel.showError('Unable to load department list.');
     }
   }
 
@@ -74,7 +73,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
       console.log("Update Finished: ",e);
     } else if ( e.state === this.EmployeeModel.store.STATE.ERROR ) {
       console.error('Cannot display page. Something wrong with update');
-      this.AppStateModel.showError('Unable to update employee.');
     }
   }
 
@@ -88,7 +86,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
       console.log("Add Employee Finished: ",e);
     } else if ( e.state === this.EmployeeModel.store.STATE.ERROR ) {
       console.error('Cannot display page. Employee not added.');
-      this.AppStateModel.showError('Unable to add employee.');
     }
   }
 
@@ -102,7 +99,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
       console.log("Remove Employee Finished:",e);
     } else if ( e.state === this.EmployeeModel.store.STATE.ERROR ) {
       console.error('Cannot display page. Employee not removed');
-      this.AppStateModel.showError('Unable to remove employee.');
     }
   }
 
@@ -117,7 +113,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
 
     } else if ( e.state === this.GroupModel.store.STATE.ERROR ) {
       console.error('Cannot display page. Group Head not added.');
-      this.AppStateModel.showError('Unable to add group head.');
     }
   }
 
@@ -132,7 +127,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
 
     } else if ( e.state === this.GroupModel.store.STATE.ERROR ) {
       console.error('Cannot display page. Group Head not removed.');
-      this.AppStateModel.showError('Unable to remove group head.');
     }
   }
 
@@ -340,31 +334,45 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
    * @method updateEmployee
    * @description saves updates to employee title, department, and head status
    */
-  async updateEmployee(){
+  async updateEmployee() {
     const promises = [];
 
-    if(this.employeeTitle != this.employeeRecord.title){
+    if (this.employeeTitle !== this.employeeRecord.title) {
       let updateEmployeeTitle = { title: this.employeeTitle };
-      promises.push(await this.EmployeeModel.update(this.dbId, updateEmployeeTitle));
+      promises.push(this.EmployeeModel.update(this.dbId, updateEmployeeTitle));
     }
 
-    if(this.departmentId != this.department.id){
-      promises.push(await this.EmployeeModel.removeFromGroup(this.dbId, {departmentId:this.department.id}));
-      promises.push(await this.EmployeeModel.addToGroup(this.dbId, {departmentId:this.departmentId, isHead:this.isHead}));
+    // Handle department change
+    if (this.departmentId !== this.department.id) {
+      promises.push(this.EmployeeModel.removeFromGroup(this.dbId, { departmentId: this.department.id }));
+      promises.push(this.EmployeeModel.addToGroup(this.dbId, {
+        departmentId: this.departmentId,
+        isHead: this.isHead
+      }));
     } else {
-      if(this.isHead != this.department.isHead){ // if change is made
-        if(this.isHead == false){
-          promises.push(await this.GroupModel.removeGroupHead(this.departmentId));
+      // Handle only head status change
+      if (this.isHead !== this.department.isHead) {
+        if (!this.isHead) {
+          promises.push(this.GroupModel.removeGroupHead(this.departmentId));
         } else {
-          promises.push(await this.GroupModel.setGroupHead(this.departmentId, {employeeRowID:this.dbId}));
+          promises.push(this.GroupModel.setGroupHead(this.departmentId, { employeeRowID: this.dbId }));
         }
       }
-
     }
 
-    await Promise.all(promises);
+    const resolvedPromises = await Promise.allSettled(promises);
+    for ( const i in resolvedPromises ){
+      const resolvedPromise = resolvedPromises[i];
+      if ( resolvedPromise.status === 'rejected'  || resolvedPromise.value.state === 'error'){
+        this.AppStateModel.showAlertBanner({message: 'An error occurred while updating the employee record.', brandColor: 'double-decker'});
+        return;
+      }
+    }
+    this.AppStateModel.showAlertBanner({message: `Employee ${this.firstName} ${this.lastName} updated successfully.`, brandColor: 'quad'});
+
     this.requestUpdate();
     this._onRenderResult();
+
   }
 
 
@@ -373,13 +381,9 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
    * @description refreshes UI with updated employee info
   */
   async _onRenderResult(){
-    let fName = this.firstName;
-    let lName = this.lastName;
+    let id = this.iamId;
 
-    let name = fName + " " + lName;
-
-
-    let res = await this.EmployeeModel.searchByName(name);
+    let res = await this.EmployeeModel.searchById(id, 'iamId');
     res = res.payload.results[0];
     this.employeeRecord = {};
 
