@@ -3,7 +3,7 @@ const defs = {
     'home', 'onboarding', 'separation', 'separation-new', 'separation-single', 'onboarding-new',
     'onboarding-single', 'permissions-single', 'permissions'
   ],
-  tools: ['patron', 'orgchart', 'tools']
+  tools: ['patron', 'orgchart', 'emupdate', 'tools']
 };
 
 export default defs;

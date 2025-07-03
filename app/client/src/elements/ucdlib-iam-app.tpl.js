@@ -23,6 +23,7 @@ export function render() {
       <ul link-text='Support Tools' href='/tools'>
         <li><a href='/patron'>Patron Lookup</a></li>
         <li><a href='/orgchart'>Organizational Chart</a></li>
+        <li><a href='/emupdate'>Employee Update Tool</a></li>
       </ul>
 
     </ucd-theme-primary-nav>
@@ -54,5 +55,6 @@ export function render() {
     <ucdlib-iam-page-permissions-single id='permissions-single'></ucdlib-iam-page-permissions-single>
     <ucdlib-iam-page-permissions id='permissions'></ucdlib-iam-page-permissions>
     <ucdlib-iam-page-tools id='tools'></ucdlib-iam-page-tools>
+    <ucdlib-iam-page-update-tool id='emupdate'></ucdlib-iam-page-update-tool>
   </ucdlib-pages>
 `;}

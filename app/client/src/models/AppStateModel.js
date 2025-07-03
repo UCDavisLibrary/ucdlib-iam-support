@@ -99,6 +99,11 @@ class AppStateModelImpl extends AppStateModel {
       update.location.path.length > 1
     ) {
       p = 'patron';
+    } else if(
+      update.location.path[0] == 'emupdate' &&
+      update.location.path.length > 1
+    ) {
+      p = 'emupdate';
     } else {
       p = update.location.path[0];
     }
@@ -139,6 +144,9 @@ class AppStateModelImpl extends AppStateModel {
     } else if ( update.page === 'orgchart' ){
       title.show = this.store.pageTitles.orgchart ? true : false;
       title.text = this.store.pageTitles.orgchart;
+    } else if ( update.page === 'emupdate' ){
+      title.show = this.store.pageTitles.emupdate ? true : false;
+      title.text = this.store.pageTitles.emupdate;
     } else if ( update.page === 'patron' ){
       title.show = this.store.pageTitles.patronLookup ? true : false;
       title.text = this.store.pageTitles.patronLookup;
@@ -224,6 +232,10 @@ class AppStateModelImpl extends AppStateModel {
     else if ( update.page === 'orgchart' ){
       breadcrumbs.show = true;
       breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.orgchart);
+    }
+    else if ( update.page === 'emupdate' ){
+      breadcrumbs.show = true;
+      breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.emupdate);
     }
     else if ( update.page === 'patron' ){
       breadcrumbs.show = true;
