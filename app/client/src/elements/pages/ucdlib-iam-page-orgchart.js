@@ -102,7 +102,7 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
     return result;
   }
 
- /**
+  /**
    * @description on the submit of the csv
    * @param {e} e event files
    * @returns 
@@ -175,6 +175,8 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
       };
       updatedData.push(updatedItem);
     }
+
+
 
     if(this.formatError) {
       this.AppStateModel.showAlertBanner({message: formatErrorMessage, brandColor: 'double-decker'});
