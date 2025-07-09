@@ -153,7 +153,7 @@ export class IamEmployees {
       // since TES employees do not have a library appointment, check that TES employees appointments are still active
       if ( !UcdlibEmployees.libDeptCodes.includes(employee.ucd_dept_code)) {
         let libApptStart = new Date(employee.created);
-        libApptStart.setDate(libApptStart.getDate()-5); // grace period of 5 days
+        libApptStart.setDate(libApptStart.getDate()+14); // grace period of 14 days
         const iamAppStart = new Date(iamRecord.getPrimaryAssociation().assocStartDate);
         if ( libApptStart < iamAppStart ) {
           this.discrepancies.push({
