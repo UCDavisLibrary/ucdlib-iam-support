@@ -22,13 +22,14 @@ services:
       PGDATABASE: 'postgres'
       PGPASSWORD: 'localhost'
       PGPORT: 5432
+      BACKUP_LOG_TABLE: ${BACKUP_LOG_TABLE:-backup_log}
     volumes:
       - ../../../app:/app
       - /app/node_modules
       - ../../../lib:/iam-support-lib
       - /iam-support-lib/node_modules
-    # command: bash -c "tail -f /dev/null"
-    command: node index.js
+    command: bash -c "tail -f /dev/null"
+    # command: node index.js
   cli:
     image: *utils-image
     env_file:
@@ -90,7 +91,9 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /etc/service-account.json
       GOOGLE_CLOUD_BUCKET: 'itis-iam'
       SQL_FILE_NAME: 'itis-iam.sql.gz'
-    command: /backup/entrypoint.sh
+      BACKUP_LOG_TABLE: ${BACKUP_LOG_TABLE:-backup_log}
+    # command: /backup/entrypoint.sh
+    command: /backup/tail.sh
     volumes:
       - ../../../utils/backup:/backup
       - ../../secrets/gc-itis-iam-writer-key.json:/etc/service-account.json

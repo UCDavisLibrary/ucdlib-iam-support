@@ -24,4 +24,19 @@ gsutil cp $DATA_DIR/$SQL_FILE_NAME "gs://${GOOGLE_CLOUD_BUCKET}/${BACKUP_ENV}/${
 
 rm $DATA_DIR/$SQL_FILE_NAME
 
+if [[ -n $BACKUP_LOG_TABLE ]]; then
+  echo "BACKUP_LOG_TABLE is set to $BACKUP_LOG_TABLE"
+  psql -c "CREATE TABLE IF NOT EXISTS $BACKUP_LOG_TABLE (
+    id SERIAL PRIMARY KEY,
+    backup_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    backup_bucket TEXT,
+    backup_env TEXT
+  );"
+  psql -c "INSERT INTO $BACKUP_LOG_TABLE (backup_bucket, backup_env) VALUES ('${GOOGLE_CLOUD_BUCKET}', '${BACKUP_ENV}');"
+
+  echo "Backup log entry created in table $BACKUP_LOG_TABLE"
+else
+  echo "BACKUP_LOG_TABLE is not set, skipping log entry creation."
+fi
+
 echo "backup complete"
