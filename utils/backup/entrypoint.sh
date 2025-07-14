@@ -28,5 +28,6 @@ echo "export PGPASSWORD=$PGPASSWORD" >> $BACKUP_PROFILE
 echo "export PGHOST=$PGHOST" >> $BACKUP_PROFILE
 echo "export PGPORT=$PGPORT" >> $BACKUP_PROFILE
 echo "export PGDATABASE=$PGDATABASE" >> $BACKUP_PROFILE
+echo "export BACKUP_LOG_TABLE=$BACKUP_LOG_TABLE" >> $BACKUP_PROFILE
 
 cron && tail -f /var/log/cron.log
