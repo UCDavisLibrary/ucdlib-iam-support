@@ -4,10 +4,13 @@ import { html } from 'lit';
  * @description Main render function
  * @returns {TemplateResult}
  */
-export function render() { 
+export function render() {
   return html`
   <div class="panel panel--icon panel--icon-custom o-box panel--icon-${this.brandColor}">
-    <h2 class="panel__title"><span class="panel__custom-icon fas ${this.panelIcon}"></span>${this.panelTitle}</h2>
+    <h2 class="panel__title">
+      <span class="panel__custom-icon fas ${this.panelIcon}"></span>
+      <span>${this.panelTitle}</span>
+    </h2>
     ${this._records.length ? html`
       <div>
         ${this._records.map(r => html`
@@ -30,7 +33,7 @@ export function render() {
       <div class='no-results'>
         <i class="fas fa-exclamation-circle ${this.brandColor} u-space-mr--small"></i>
         <div>${this.noResultsMessage}</div>
-      
+
       </div>
     `}
   </div>

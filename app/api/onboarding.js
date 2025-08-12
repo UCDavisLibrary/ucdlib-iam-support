@@ -523,6 +523,10 @@ export default (api) => {
     };
     if ( req.query.isOpen != undefined ) q['isOpen'] = req.query.isOpen;
 
+    if ( !isNaN(parseInt(req.query.limit))) {
+      q.limit = parseInt(req.query.limit);
+    }
+
     const r = await UcdlibOnboarding.query(q);
     if ( r.err ) {
       console.error(r.err);

@@ -65,6 +65,8 @@ To get this application up and running for the first time:
 5. Run `./deploy/cmds/build-local-dev.sh` to build images
 6. Enter `./deploy/compose/ucdlib-iam-support-local-dev`, and run `docker compose up -d`
 
+To start the client watch process: `cd ./app/client && npm run watch`
+
 ### Production Deployment
 
 On your machine:

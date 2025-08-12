@@ -254,6 +254,10 @@ export default (api) => {
       };
       if ( req.query.isOpen != undefined ) q['isOpen'] = req.query.isOpen;
 
+      if ( !isNaN(parseInt(req.query.limit))) {
+        q.limit = parseInt(req.query.limit);
+      }
+
 
       const r = await UcdlibSeparation.query(q);
       if ( r.err ) {

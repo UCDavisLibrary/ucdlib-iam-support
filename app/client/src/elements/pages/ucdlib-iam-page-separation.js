@@ -13,7 +13,8 @@ export default class UcdlibIamPageSeparation extends Mixin(LitElement)
 
   static get properties() {
     return {
-      canViewActiveList: {state: true},
+      canViewAll: {state: true},
+      tabView: {state: true},
       userIamId: {state: true}
     };
   }
@@ -25,9 +26,11 @@ export default class UcdlibIamPageSeparation extends Mixin(LitElement)
     this._injectModel('AppStateModel', 'SeparationModel', 'AuthModel');
 
     this.activeId = 'sp-list-active'; //only show if hr or admin
+    this.recentId = 'sp-list-recent'; //only show if hr or admin
     this.supervisorId = 'sp-list-supervisor';
-    this.canViewActiveList = false;
+    this.canViewAll = false;
     this.userIamId = '';
+    this.tabView = 'active'; // active or recent
   }
 
   /**
@@ -44,7 +47,7 @@ export default class UcdlibIamPageSeparation extends Mixin(LitElement)
    * @param {AccessToken} token
    */
   _onTokenRefreshed(token){
-    this.canViewActiveList = token.hasAdminAccess || token.hasHrAccess;
+    this.canViewAll = token.hasAdminAccess || token.hasHrAccess;
     this.userIamId = token.iamId;
     if ( this.AppStateModel.currentPage == this.id ) this. _getRequiredPageData();
   }
@@ -71,11 +74,15 @@ export default class UcdlibIamPageSeparation extends Mixin(LitElement)
   async _getRequiredPageData(){
     const activeListEle = this.querySelector(`#${this.activeId}`);
     const supervisorEle = this.querySelector(`#${this.supervisorId}`);
-    if ( !activeListEle || !supervisorEle ){
+    const recentListEle = this.querySelector(`#${this.recentId}`);
+    if ( !activeListEle || !supervisorEle || !recentListEle ){
       return; // page not fully loaded yet. wait for next app-state-update.
     }
     const promises = [];
-    if ( this.canViewActiveList ) promises.push(activeListEle.doQuery());
+    if ( this.canViewAll ) {
+      promises.push(activeListEle.doQuery());
+      promises.push(recentListEle.doQuery());
+    }
     if ( this.userIamId ) promises.push(supervisorEle.doQuery(false, {supervisorId: this.userIamId}));
     await new Promise(resolve => {requestAnimationFrame(resolve);});
   }
