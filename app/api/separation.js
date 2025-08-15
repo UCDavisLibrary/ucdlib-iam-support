@@ -4,6 +4,7 @@ import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.
 import getByName from '@ucd-lib/iam-support-lib/src/utils/getByName.js';
 import TextUtils from '@ucd-lib/iam-support-lib/src/utils/text.js';
 import config from '../lib/config.js';
+import SystemAccessRecord from '@ucd-lib/iam-support-lib/src/utils/SystemAccessRecord.js';
 
 export default (api) => {
     api.post('/separation/new', async (req, res) => {
@@ -20,6 +21,8 @@ export default (api) => {
       if ( !payload.additionalData ) payload.additionalData = {};
 
       payload.submittedBy = req.auth.token.id;
+      payload.additionalData[SystemAccessRecord.separationRecordProp] = [];
+
 
       // department info for ticket
       const options = {returnSupervisor: true, returnGroups: true};
