@@ -24,6 +24,15 @@ export function render() {
                 <li>${r.departmentName}</li>
               </ul>
               <div class="text--smaller"><strong>Start Date: </strong>${this.fmtDate(r.startDate)}</div>
+              <div ?hidden=${!(this.AuthModel.isAdmin && r?.additionalData?.addedToSystems?.length)}>
+                <div class="text--smaller"><strong>Provisioned: </strong>
+                  <ul class="list--pipe" style="display: inline-block">
+                    ${r?.additionalData?.addedToSystems?.map?.(s => html`
+                      <li>${s.label}</li>
+                    `)}
+                  </ul>
+                </div>
+              </div>
             </div>
             <div class='ob-status'>${r.statusName}</div>
           </div>

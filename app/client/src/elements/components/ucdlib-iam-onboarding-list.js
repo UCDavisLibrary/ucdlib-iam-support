@@ -31,7 +31,7 @@ export default class UcdlibIamOnboardingList extends Mixin(LitElement)
   constructor() {
     super();
     this.render = render.bind(this);
-    this._injectModel('OnboardingModel');
+    this._injectModel('OnboardingModel', 'AuthModel');
 
     // view settings
     this.panelTitle = 'Onboarding Requests';
