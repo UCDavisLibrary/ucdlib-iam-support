@@ -31,7 +31,7 @@ export default class UcdlibIamSeparationList extends Mixin(LitElement)
   constructor() {
     super();
     this.render = render.bind(this);
-    this._injectModel('SeparationModel');
+    this._injectModel('SeparationModel', 'AuthModel');
 
     // view settings
     this.panelTitle = 'Separation Requests';

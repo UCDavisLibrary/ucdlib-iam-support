@@ -26,6 +26,15 @@ export function render() {
                   ${r.separationDate ? html`
                     <div class="text--smaller"><strong>Separation Date: </strong>${DtUtils.fmtDatetime(r.separationDate, {dateOnly: true, UTC: true})}</div>
                   ` : html``}
+                  <div ?hidden=${!(this.AuthModel.isAdmin && r?.additionalData?.removedFromSystems?.length)}>
+                    <div class="text--smaller"><strong>Deprovisioned: </strong>
+                      <ul class="list--pipe" style="display: inline-block">
+                        ${r?.additionalData?.removedFromSystems?.map?.(s => html`
+                          <li>${s.label}</li>
+                        `)}
+                      </ul>
+                    </div>
+                  </div>
                 </div>
 
                 <div class='sp-status'>${r.statusName}</div>
