@@ -10,6 +10,7 @@ import getByName from '@ucd-lib/iam-support-lib/src/utils/getByName.js';
 import Pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
 import iamAdmin from '@ucd-lib/iam-support-lib/src/utils/admin.js';
 import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
+import SystemAccessRecord from '@ucd-lib/iam-support-lib/src/utils/SystemAccessRecord.js';
 
 UcdIamModel.init(config.ucdIamApi);
 
@@ -32,6 +33,7 @@ export default (api) => {
 
     payload.submittedBy = req.auth.token.id;
     payload.modifiedBy = req.auth.token.id;
+    payload.additionalData[SystemAccessRecord.onboardingRecordProp] = [];
 
     // get ucd iam record
     if ( payload.iamId ){
@@ -401,6 +403,52 @@ export default (api) => {
       }
     });
     return res.json(obReq);
+
+  });
+
+  /**
+   * @description Adopt an employee into the library's IAM system.
+   */
+  api.post('/onboarding/:id/adopt', async (req, res) => {
+    if ( !req.auth.token.hasAdminAccess ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to perform this action.'
+      });
+      return;
+    }
+    const systemAccessRecord = new SystemAccessRecord();
+
+    // add to database
+    const addToDb = await iamAdmin.adoptEmployee(req.params.id, {ucdIamConfig: config.ucdIamApi});
+    if ( addToDb.error ){
+      console.error(`Error adding employee to database. Onboarding Id: ${req.params.id}`, addToDb);
+      return res.status(400).json({
+        ...addToDb
+      });
+    }
+    systemAccessRecord.add('ucdlib-iam-db', req.auth.token.id);
+
+    // add to keycloak
+    const addToKc = await iamAdmin.provisionKcAccount(addToDb.employeeId, {keycloakConfig: {...config.keycloakAdmin, refreshInterval: 58000}});
+    if ( addToKc.error ){
+      console.error(`Error provisioning keycloak account. Onboarding Id: ${req.params.id}`, addToKc);
+      await iamAdmin.deleteEmployee(addToDb.employeeId);
+      return res.status(400).json({
+        ...addToKc
+      });
+    }
+    systemAccessRecord.add('ucdlib-keycloak', req.auth.token.id);
+
+    await systemAccessRecord.writeToOnboardingRequest(req.params.id);
+
+    // send RT ticket
+    const sendRt = await iamAdmin.sendAdoptionRtNotification(addToDb.onboardingRecord.rt_ticket_id);
+
+    return res.json({
+      success: true,
+      rtSent: !sendRt.error
+    });
 
   });
 

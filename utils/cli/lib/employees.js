@@ -8,6 +8,7 @@ import IamPersonTransform from '@ucd-lib/iam-support-lib/src/utils/IamPersonTran
 import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
 import UcdlibSeparation from '@ucd-lib/iam-support-lib/src/utils/separation.js';
 import keycloakClient from "@ucd-lib/iam-support-lib/src/utils/keycloakAdmin.js";
+import SystemAccessRecord from '@ucd-lib/iam-support-lib/src/utils/SystemAccessRecord.js';
 import * as fs from 'node:fs/promises';
 
 UcdIamModel.init(config.ucdIamApi);
@@ -230,6 +231,7 @@ class employeesCli {
     console.log(`Adopting employee from onboarding record ${onboardingId} with options:`, options);
 
     const forceMessage = 'Use --force to override this check.';
+    const systemAccessRecord = new SystemAccessRecord();
 
     const adoptParams = {
       ucdIamConfig: config.ucdIamApi,
@@ -248,6 +250,7 @@ class employeesCli {
       await pg.pool.end();
       return;
     }
+    systemAccessRecord.add('ucdlib-iam-db', 'cli');
 
     if ( options.provision ) {
       const kcParams = {
@@ -262,21 +265,15 @@ class employeesCli {
         await pg.pool.end();
         return;
       }
+      systemAccessRecord.add('ucdlib-keycloak', 'cli');
 
     }
 
+    await systemAccessRecord.writeToOnboardingRequest(onboardingId);
+
     // comment on rt ticket
-    if ( options.rt && !config.rt.forbidWrite && result.onboardingRecord.rt_ticket_id) {
-      const rtClient = new UcdlibRt(config.rt);
-      const ticket = new UcdlibRtTicket(false, {id: result.onboardingRecord.rt_ticket_id});
-      const reply = ticket.createReply();
-      reply.addSubject('Employee Record Added');
-      reply.addContent('This employee was adopted into the UC Davis Library Identity and Access Management System');
-      const rtResponse = await rtClient.sendCorrespondence(reply);
-      if ( rtResponse.err )  {
-        console.error('Error sending RT correspondence');
-        console.error(rtResponse);
-      }
+    if ( options.rt ) {
+      await iamAdmin.sendAdoptionRtNotification(result.onboardingRecord.rt_ticket_id);
     }
 
     console.log(result.message);
