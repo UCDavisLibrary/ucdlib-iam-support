@@ -27,12 +27,14 @@ export function render() {
         </div>
       </div>
       <div class="l-sidebar-second">
-        <!-- <div class='category-brand__background-light-gold o-box u-space-mb'>
-          <div class="panel panel--icon panel--icon-custom panel--icon-delta o-box background-transparent">
-            <h2 class="panel__title u-space-mb"><span class="panel__custom-icon fas fa-tasks></span><strong>Off-Boarding Checklist (TO-DO)</strong> </h2>
-            <div class='primary'>Put todo list here</div>
+        <a class="focal-link category-brand--putah-creek u-space-mb pointer" ?hidden=${ !this.showDeprovisionButton } @click=${this.openDeprovisionEmployeeConfirmModal}>
+          <div class="focal-link__figure focal-link__icon">
+            <i class="fas fa-database fa-2x"></i>
           </div>
-        </div> -->
+          <div class="focal-link__body">
+            <strong>Deprovision From Library IAM Database</strong>
+          </div>
+        </a>
         <div class='category-brand__background-light-gold o-box u-space-mb'>
           <div class="panel panel--icon panel--icon-custom ${this.isActiveStatus ? 'panel--icon-secondary' : 'panel--icon-quad'} o-box background-transparent">
             <h2 class="panel__title u-space-mb"><span class="panel__custom-icon fas ${this.isActiveStatus ? 'fa-check-circle' : 'fa-spinner'}"></span>Status</h2>
@@ -44,5 +46,17 @@ export function render() {
       </div>
     </div>
   </div>
+  <ucdlib-iam-modal id='ss-iam-deprovision-modal' dismiss-text='Close' content-title='Deprovision Employee' auto-width hide-footer>
+    <p>Are you sure you want to deprovision this employee from the library IAM system?</p>
+    <p>This will delete their record in the database and their Keycloak account.</p>
+    <div>
+      <button
+        @click=${this._onDeprovisionEmployeeConfirm}
+        type='button'
+        class="btn btn--alt btn--block u-space-mt border-box"
+      >Deprovision Employee
+      </button>
+    </div>
+  </ucdlib-iam-modal>
 
 `;}

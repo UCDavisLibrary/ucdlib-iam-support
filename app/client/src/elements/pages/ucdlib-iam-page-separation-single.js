@@ -28,6 +28,7 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
       notes: {state: true},
       missingUid: {state: true},
       reconId: {state: true},
+      showDeprovisionButton: {state: true}
     };
   }
 
@@ -52,7 +53,8 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     this.rtTicketId = '';
     this.employeeUserId = '';
     this.employeeId = '';
-    this._injectModel('AppStateModel', 'SeparationModel', 'RtModel');
+    this.showDeprovisionButton = false;
+    this._injectModel('AppStateModel', 'SeparationModel', 'RtModel', 'AuthModel');
   }
 
   /**
@@ -109,6 +111,9 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     this.isActiveStatus = payload.isActiveStatus;
     this.status = payload.statusName || '';
     this.statusDescription = payload.statusDescription || '';
+
+    this.showDeprovisionButton = this.AuthModel.isAdmin &&
+      (Array.isArray(ad?.removedFromSystems) && !ad.removedFromSystems.find(s => s?.value === 'ucdlib-iam-db'));
   }
 
   /**
@@ -132,6 +137,37 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
       this.AppStateModel.store.breadcrumbs.separation,
       {text: this.pageTitle(), link: ''}
     ];
+  }
+
+  /**
+   * @description Opens the deprovision employee confirmation modal. Attached to button in side panel
+   */
+  openDeprovisionEmployeeConfirmModal(){
+    this.querySelector('#ss-iam-deprovision-modal').show();
+  }
+
+  /**
+   * @description Called after user confirms deprovisioning of employee from library iam system
+   */
+  async _onDeprovisionEmployeeConfirm(){
+    const modal = this.querySelector('#ss-iam-deprovision-modal');
+    modal.hide();
+    this.AppStateModel.showLoading();
+    const r = await this.SeparationModel.deprovision(this.requestId);
+    if ( r.state == 'error' ){
+      let msg = 'Unable to deprovision employee';
+      if ( r.error?.payload?.message ) msg = r.error.payload.message;
+      console.error(r);
+      requestAnimationFrame(() => this.AppStateModel.showError(msg));
+    } else {
+      this.SeparationModel.clearIdCache(this.requestId);
+      this.SeparationModel.clearQueryCache();
+      if ( this.rtTicketId ){
+        this.RtModel.clearHistoryCache(this.rtTicketId);
+      }
+      this.AppStateModel.refresh();
+      this.AppStateModel.showAlertBanner({message: 'Employee account deprovisioned', brandColor: 'farmers-market'});
+    }
   }
 }
 
