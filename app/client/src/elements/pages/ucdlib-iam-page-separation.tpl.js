@@ -16,7 +16,7 @@ export function render() {
           <strong>Make a New Request</strong><br>(HR Only)
         </div>
       </a>
-      <div ?hidden=${!this.canViewActiveList}>
+      <div ?hidden=${!this.canViewAll}>
         <a class="focal-link category-brand--putah-creek pointer" @click=${this.showSearchModal}>
           <div class="focal-link__figure focal-link__icon">
             <i class="fas fa-search fa-2x"></i>
@@ -28,16 +28,33 @@ export function render() {
       </div>
     </div>
     <div class="l-content">
-      <ucdlib-iam-separation-list
-        id=${this.activeId}
-        panel-title='All Active Requests'
-        panel-icon='fa-folder-open'
-        brand-color='arboretum'
-        open-status='open'
-        no-results-message='There are no active separation requests at this time.'
-        ?hidden=${!this.canViewActiveList}
-      >
-    </ucdlib-iam-separation-list>
+      <div ?hidden=${!this.canViewAll}>
+        <ul class="tabs tabs--secondary">
+          <li><button class="tabs__item ${this.tabView === 'active' ? 'tabs__item--active' : ''}" @click=${() => this.tabView = 'active'}>Active</button></li>
+          <li><button class="tabs__item ${this.tabView === 'recent' ? 'tabs__item--active' : ''}" @click=${() => this.tabView = 'recent'}>Recent</button></li>
+        </ul>
+        <ucdlib-iam-separation-list
+          id=${this.activeId}
+          panel-title='All Active Requests'
+          panel-icon='fa-folder-open'
+          brand-color='arboretum'
+          open-status='open'
+          no-results-message='There are no active separation requests at this time.'
+          ?hidden=${this.tabView !== 'active'}
+        >
+        </ucdlib-iam-separation-list>
+        <ucdlib-iam-separation-list
+          id=${this.recentId}
+          panel-title='Recently Submitted Requests'
+          panel-icon='fa-clock'
+          brand-color='pinot'
+          limit="10"
+          no-results-message='There are no recently submitted separation requests at this time.'
+          ?hidden=${this.tabView !== 'recent'}
+        >
+        </ucdlib-iam-separation-list>
+      </div>
+
     <ucdlib-iam-separation-list
         id=${this.supervisorId}
         panel-title='Your Employees'

@@ -2,7 +2,7 @@
 This is a monorepo that contains applications and utilities for managing the [IAM system](https://github.com/UCDavisLibrary/keycloak-deployment) at the UC Davis Library.
 
 - [App Components](#app-components)
-- [Deployment](#deployment)
+- [Devops](#devops)
 - [Using the Application](#using-the-application)
 
 ## App Components
@@ -54,7 +54,7 @@ Any code shared by the application and cli should be placed in the `/lib` direct
 
 Technical documentation created at the start of the project can be found in this [Google Doc](https://docs.google.com/document/d/129KuqatZVwj7Fl_am4E3eTJgq6Fj1MNjo66MbI5mMok/edit?usp=sharing).
 
-## Deployment
+## Devops
 
 ### Local Development
 To get this application up and running for the first time:
@@ -64,6 +64,8 @@ To get this application up and running for the first time:
 4. Review the env file downloaded to `./deploy/compose/ucdlib-iam-support-local-dev`
 5. Run `./deploy/cmds/build-local-dev.sh` to build images
 6. Enter `./deploy/compose/ucdlib-iam-support-local-dev`, and run `docker compose up -d`
+
+To start the client watch process: `cd ./app/client && npm run watch`
 
 ### Production Deployment
 
@@ -79,6 +81,14 @@ On the production server (currently veers.library)
 4. `docker compose down` then `docker compose up -d`
 
 There will be a brief service outage as the containers start up, so try to schedule deployents accordingly. If something goes wrong, you can always revert to the previously tagged images.
+
+### Testing with Keycloak
+A primary function of this application is the maintenance of the `internal` realm in our keycloak instance, which handles auth for most of our internal-facing applications. When updating keycloak it is important to test out this functionality.
+
+- Add `KEYCLOAK_ADMIN_BASE_URL=https://sandbox.auth.library.ucdavis.edu` to your local-dev env, to use the sandbox keycloak environment, which should be running the new version of keycloak. You must restart your docker compose cluster for this change to take effect.
+- Separate an employee in the GUI, and then remove them from keycloak by entering the cli container and running `ucdlib-iam employees separate <separation-record-id>`
+- Onboard an employee in the GUI, and then adopt them into keycloak by entering the cli container and running `ucdlib-iam employees adopt <onboarding-record-id>`
+- While in the cli container, run the keycloak sync script: `cd /maintenance/src` and `node run-keycloak-sync.js`
 
 ## Using the Application
 

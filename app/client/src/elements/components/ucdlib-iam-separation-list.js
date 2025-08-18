@@ -22,6 +22,7 @@ export default class UcdlibIamSeparationList extends Mixin(LitElement)
       iamId: {type: String, attribute: 'iam-id'},
       rtTicketId: {type: String, attribute: 'rt-ticket-id'},
       supervisorId: {type: String, attribute: 'supervisor-id'},
+      limit: {type: Number, attribute: 'limit'},
       _query: {state: true},
       _records: {state: true}
     };
@@ -30,7 +31,7 @@ export default class UcdlibIamSeparationList extends Mixin(LitElement)
   constructor() {
     super();
     this.render = render.bind(this);
-    this._injectModel('SeparationModel');
+    this._injectModel('SeparationModel', 'AuthModel');
 
     // view settings
     this.panelTitle = 'Separation Requests';
@@ -45,7 +46,8 @@ export default class UcdlibIamSeparationList extends Mixin(LitElement)
     this.iamId = '';
     this.rtTicketId = '';
     this.supervisorId = '';
-    this._queryProps = ['statusId', 'openStatus', 'iamId', 'rtTicketId', 'supervisorId'];
+    this.limit = null;
+    this._queryProps = ['statusId', 'openStatus', 'iamId', 'rtTicketId', 'supervisorId', 'limit'];
 
     // internal state
     this._records = [];

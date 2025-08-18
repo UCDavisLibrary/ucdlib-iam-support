@@ -162,6 +162,9 @@ export function renderSubmissionForm(){
             <div class="field-container u-space-ml" ?hidden=${!this.contactEmployee}>
               <label for="obn-employee-contact-email">Employee Email for RT Ticket CC</label>
               <input id='obn-employee-contact-email' type="text" @input=${e => this.employeeContactEmail = e.target.value} .value=${this.employeeContactEmail} >
+              <div ?hidden=${!(this.employeeContactEmail?.trim?.() && !this.employeeContactEmail?.endsWith('@ucdavis.edu'))}>
+                <p class="double-decker">When using a non-UCD email address, the employee will receive RT notification emails, but will not be able to reply.</p>
+              </div>
             </div>
           </div>
         </section>

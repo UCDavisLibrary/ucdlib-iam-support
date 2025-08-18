@@ -4,6 +4,8 @@ import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.
 import getByName from '@ucd-lib/iam-support-lib/src/utils/getByName.js';
 import TextUtils from '@ucd-lib/iam-support-lib/src/utils/text.js';
 import config from '../lib/config.js';
+import SystemAccessRecord from '@ucd-lib/iam-support-lib/src/utils/SystemAccessRecord.js';
+import iamAdmin from '@ucd-lib/iam-support-lib/src/utils/admin.js';
 
 export default (api) => {
     api.post('/separation/new', async (req, res) => {
@@ -20,6 +22,8 @@ export default (api) => {
       if ( !payload.additionalData ) payload.additionalData = {};
 
       payload.submittedBy = req.auth.token.id;
+      payload.additionalData[SystemAccessRecord.separationRecordProp] = [];
+
 
       // department info for ticket
       const options = {returnSupervisor: true, returnGroups: true};
@@ -232,6 +236,71 @@ export default (api) => {
 
     });
 
+    api.post('/separation/:id/deprovision', async (req, res) => {
+      if ( !req.auth.token.hasAdminAccess ){
+        res.status(403).json({
+          error: true,
+          message: 'Not authorized to access this resource.'
+        });
+        return;
+      }
+
+      const systemAccessRecord = new SystemAccessRecord();
+      const separationId = req.params.id;
+
+      // make sure separation request and employee record exist
+      const {
+        error: recordExistsError,
+        message: recordExistsMessage,
+        separationRecord,
+        employeeRecord
+      } = await UcdlibSeparation.getEmployeeRecord(separationId);
+      if ( recordExistsError ) {
+        console.error(recordExistsMessage);
+        return res.status(400).json({
+          error: true,
+          message: recordExistsMessage
+        });
+      }
+
+      // remove employee from keycloak
+      const userId = employeeRecord.user_id || separationRecord.additional_data?.employeeUserId;
+      const { error: deprovisionError, message: deprovisionMessage, keycloakUser } = await iamAdmin.deprovisionKcAccount(userId);
+      if ( deprovisionError ) {
+        console.error(deprovisionMessage);
+        return res.status(400).json({
+          error: true,
+          message: deprovisionMessage
+        });
+      }
+      systemAccessRecord.add('ucdlib-keycloak', req.auth.token.id);
+
+      // remove employee from library iam db
+      const {
+        error: rmError,
+        message: rmMessage,
+        directReports,
+        isHeadOf
+      } = await iamAdmin.deleteEmployeeRecord(employeeRecord.iam_id);
+      if ( rmError ) {
+        console.error(rmMessage);
+        return res.status(400).json({
+          error: true,
+          message: rmMessage
+        });
+      }
+      systemAccessRecord.add('ucdlib-iam-db', req.auth.token.id);
+
+      await systemAccessRecord.writeToSeparationRequest(separationId);
+
+      const { rtSent } = await iamAdmin.sendSeparationNotification(separationRecord.rt_ticket_id);
+
+      return res.json({
+        success: true,
+        rtSent
+      });
+    });
+
     api.get('/separation', async (req, res) => {
 
       if (
@@ -253,6 +322,10 @@ export default (api) => {
         supervisorId: req.query.supervisorId
       };
       if ( req.query.isOpen != undefined ) q['isOpen'] = req.query.isOpen;
+
+      if ( !isNaN(parseInt(req.query.limit))) {
+        q.limit = parseInt(req.query.limit);
+      }
 
 
       const r = await UcdlibSeparation.query(q);
