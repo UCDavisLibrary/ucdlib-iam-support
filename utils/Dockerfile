@@ -11,6 +11,7 @@ RUN apt-get update \
       lsb-release \
       curl \
       procps \
+      cron \
  && rm -rf /var/lib/apt/lists/*
 
 # Prep work for gsutil
