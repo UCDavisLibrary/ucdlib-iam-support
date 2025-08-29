@@ -80,7 +80,13 @@ export function render() {
                   ${this.selectedPersonProfile.employeeId ? html`<div class="box-row"><div class="box"><strong>Employee ID</strong></div><div class="box">${this.selectedPersonProfile.employeeId}</div></div>`:html``}
                   ${this.selectedPersonProfile.userID ? html`<div class="box-row"><div class="box"><strong>Kerberos ID</strong></div><div class="box">${this.selectedPersonProfile.userID}</div></div>`:html``}
                   ${this.selectedPersonProfile.email ? html`<div class="box-row"><div class="box"><strong>Email</strong></div><div class="box">${this.selectedPersonProfile.email}</div></div>`:html``}
+                  ${this.ldap?.ucdpersonaffiliation ? html`
+                    <div class="box-row">
+                      <div class="box"><strong>UCD Affiliation</strong></div><div class="box">${this.ldap.ucdpersonaffiliation}</div>
+                    </div>`: html``}                  
                   ${this.alma ? html`<div class="box-row"><div class="box"><strong>Alma</strong></div><div class="box"><a class='pointer icon icon--circle-arrow-right' @click=${this.openAlmaInfoModal}>Alma Record: <strong>${this.alma.id}</strong></a></div></div>`:html``}
+
+
                 <br />
 
                   <div class="box-row"><div class="box"><h6>Affiliation for IAM ${this.informationHeaderID}</h6></div><div class="box hide"></div></div>
@@ -135,6 +141,8 @@ export function render() {
                 `:html`Student Status: <span style="color:red;">INACTIVE</span>`}
               </div>
             `:html`<h4>There is no information on this individual in the IAM Database.</h4>`}
+
+            
           </div>
         </div>
       </ucdlib-pages>
@@ -147,6 +155,10 @@ export function render() {
 
 <ucdlib-iam-modal id='alma-modal' dismiss-text='Close' content-title='Alma Record'>
   ${this.alma ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.alma.payload, null, "  ")}</pre>` : html``}
+</ucdlib-iam-modal>
+
+<ucdlib-iam-modal id='ldap-modal' dismiss-text='Close' content-title='LDAPs Record'>
+  ${this.ldap ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.ldap, null, "  ")}</pre>` : html``}
 </ucdlib-iam-modal>
 `;}
 

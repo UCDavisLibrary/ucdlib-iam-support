@@ -7,6 +7,7 @@ import separation from './separation.js';
 import rt from './rt.js';
 import auth from './auth.js';
 import alma from './alma.js';
+import ldap from './ldap.js'
 import employees from './employees.js';
 import orgchart from './orgchart.js'
 import health from './health.js';
@@ -24,6 +25,7 @@ separation(router);
 permissions(router);
 rt(router);
 alma(router);
+ldap(router);
 orgchart(router);
 employees(router);
 
