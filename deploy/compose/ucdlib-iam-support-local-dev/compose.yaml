@@ -29,8 +29,8 @@ services:
       - /app/node_modules
       - ../../../lib:/iam-support-lib
       - /iam-support-lib/node_modules
-    command: bash -c "tail -f /dev/null"
-    # command: node index.js
+    # command: bash -c "tail -f /dev/null"
+    command: node index.js
   cli:
     image: *utils-image
     env_file:
