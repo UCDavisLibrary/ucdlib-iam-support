@@ -270,6 +270,44 @@ ucdlib-employee-search {
   color: #545454;
   font-size: .75rem;
 }
+.discrepancyList {
+  background-color: #ebf3fa;
+  padding: .75rem;
+  color: #022851;
+
+}
+
+.discrepancyItem {
+  padding: .75rem;
+
+}
+
+.discrepancyItem:hover {
+  background-color: #cce0f3;
+  color: #022851;
+  cursor: pointer;
+}
+
+.discrepancyItem.active{
+  background-color: #cce0f3;
+  color: #022851;
+}
+
+.discrepancyItem:hover h6 {
+  color: #022851;
+}
+
+.discrepancyItem.active h6 {
+  color: #022851;
+}
+
+.discrepancyItem.no-hover:hover {
+  background-color: inherit;
+  cursor: default;
+}
+
+
+
 @media (max-width: 767px) {
   .u-width--100-in-tablet {
     width: 100% !important;

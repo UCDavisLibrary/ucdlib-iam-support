@@ -328,7 +328,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
    * @description return to lookup page
    * @param {*} e - Submit event
    */
-  async _onReturn(e){
+  async _onReturn(){
     if ( this.isFetching ) return;
     // reset state
     this.wasError = false;

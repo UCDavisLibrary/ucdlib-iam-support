@@ -19,6 +19,8 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
       supervisorId: {state: true},
       employeeTitle: {state: true},
       departmentId: {state: true},
+      dismissDiscrepancyList: { type: Array },
+      discrepancy: { type: Array },
       isHead: {state: true},
     };
   }
@@ -29,15 +31,19 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this.renderEmployeeSelect = Templates.renderEmployeeSelect.bind(this);
     this.renderEmployeeEdit = Templates.renderEmployeeEdit.bind(this);
     this.renderEmployeeResult = Templates.renderEmployeeResult.bind(this);
+    this.renderEmployeeDiscrepancy = Templates.renderEmployeeDiscrepancy.bind(this);
+    this.admin = false;
     this.hasEmployeeRecord = false;
     this.employeeRecord = {};
     this.page = 'employee-select';
     this.groups = [];
+    this.discrepancy = [];
+    this.dismissDiscrepancyList = [];
     this.disabledSubmit = false;
     this.deptHeadConflict = false;
     this.departmentName = 'department';
 
-    this._injectModel('EmployeeModel','AppStateModel', 'AuthModel', 'GroupModel', 'PersonModel');
+    this._injectModel('EmployeeModel','AppStateModel', 'AuthModel', 'GroupModel', 'PersonModel', 'EmployeeModel');
   }
 
   /**
@@ -145,6 +151,8 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
       this.AppStateModel.showError('You do not have permission to use this tool.');
       return;
     }
+
+    if(token.hasAdminAccess) this.admin = true;
     this._setPage(e);
 
     const promises = [];
@@ -247,9 +255,81 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this.page = "employee-edit";
     this.departmentName = this.department.name;
 
+    await this.EmployeeModel.getActiveDiscrepancy(this.iamId);
+
+
     this.checkDepartmentHead(this.departmentId);
 
     this.requestUpdate();
+  }
+
+  /**
+   * @method _onGetActiveDiscrepancies
+   * @description attached to EmployeeModel GET_ACTIVE_DISCREPANCIES event
+   * @param {Object} e
+   */
+  _onGetActiveDiscrepancies(e){
+    if ( e.state === this.EmployeeModel.store.STATE.LOADED ){
+      this.discrepancy = e.payload;
+      this.EmployeeModel.clearDiscrepancyCache();
+
+    } else if ( e.state === this.EmployeeModel.store.STATE.ERROR ) {
+      this.discrepancy = [];
+    }
+
+    this.requestUpdate();
+  }
+
+  /**
+   * @method _addToDismissDiscrepanciesList
+   * @description add discrepancies to the list
+   * @param {Object} discrepancy
+   */
+  _addToDismissDiscrepanciesList(discrepancy){
+
+    const id = discrepancy.id;
+
+    if (this.dismissDiscrepancyList.includes(id)) {
+      this.dismissDiscrepancyList = this.dismissDiscrepancyList.filter(i => i !== id);
+    } else {
+      this.dismissDiscrepancyList = [...this.dismissDiscrepancyList, id];
+    }
+
+    this.requestUpdate();
+
+  } 
+
+  /**
+   * @method _dismissDiscrepancies
+   * @description dismiss the discepancies listed
+   * @param {Object} e
+   */
+  async _dismissDiscrepancies(){
+    await this.EmployeeModel.removeActiveDiscrepancy(this.iamId, this.dismissDiscrepancyList)
+      .then(() => this.EmployeeModel.getActiveDiscrepancy(this.iamId))
+      .then(() => {
+        this.dismissDiscrepancyList = [];
+        this.requestUpdate();
+      })
+      .catch(err => {
+        console.error('Error:', err);
+      });
+  }
+
+  /**
+   * @method _onRemoveActiveDiscrepancies
+   * @description attached to EmployeeModel REMOVE_ACTIVE_DISCREPANCIES event
+   * @param {Object} e
+   */
+  async _onRemoveActiveDiscrepancies(e){
+    if ( e.state === this.EmployeeModel.store.STATE.LOADED ){
+      this.AppStateModel.showAlertBanner({message: 'Discrepancies are successfully deleted.', brandColor: 'farmers-market'});
+    } else if( e.state === this.EmployeeModel.store.STATE.ERROR ) {
+      this.AppStateModel.showAlertBanner({message: 'Error occurred when deleting discrepancies.', brandColor: 'double-decker'});
+    }
+    this.dismissDiscrepancyList = [];
+    this.requestUpdate();
+
   }
 
   /**
@@ -327,8 +407,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this.isHead = false;
     this.requestUpdate();
   }
-
-
 
   /**
    * @method updateEmployee
