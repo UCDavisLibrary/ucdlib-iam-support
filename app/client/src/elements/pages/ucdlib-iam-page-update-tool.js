@@ -43,7 +43,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this.deptHeadConflict = false;
     this.departmentName = 'department';
 
-    this._injectModel('EmployeeModel','AppStateModel', 'AuthModel', 'GroupModel', 'PersonModel', 'EmployeeModel');
+    this._injectModel('EmployeeModel','AppStateModel', 'AuthModel', 'GroupModel', 'PersonModel');
   }
 
   /**
@@ -209,6 +209,8 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this.wasError = false;
     this.page = 'employee-select';
     this.hideResults = false;
+    this.discrepancy = [];
+    this.dismissDiscrepancyList = [];
     this.results = [];
     this.selectedPersonId = '';
     this.selectedPersonProfile = {};
@@ -254,6 +256,8 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this.isHead = this.department.isHead || false;
     this.page = "employee-edit";
     this.departmentName = this.department.name;
+    this.discrepancy = [];
+    this.dismissDiscrepancyList = [];
 
     await this.EmployeeModel.getActiveDiscrepancy(this.iamId);
 
@@ -271,9 +275,8 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
   _onGetActiveDiscrepancies(e){
     if ( e.state === this.EmployeeModel.store.STATE.LOADED ){
       this.discrepancy = e.payload;
-      this.EmployeeModel.clearDiscrepancyCache();
-
     } else if ( e.state === this.EmployeeModel.store.STATE.ERROR ) {
+      this.AppStateModel.showAlertBanner({message: 'Error occurred when retrieving discrepancies. Employee may have discrepancies not listed.', brandColor: 'double-decker'});
       this.discrepancy = [];
     }
 
@@ -282,7 +285,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
 
   /**
    * @method _addToDismissDiscrepanciesList
-   * @description add discrepancies to the list
+   * @description toggles discrepancies to/from the list
    * @param {Object} discrepancy
    */
   _addToDismissDiscrepanciesList(discrepancy){
@@ -305,15 +308,22 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
    * @param {Object} e
    */
   async _dismissDiscrepancies(){
-    await this.EmployeeModel.removeActiveDiscrepancy(this.iamId, this.dismissDiscrepancyList)
-      .then(() => this.EmployeeModel.getActiveDiscrepancy(this.iamId))
-      .then(() => {
-        this.dismissDiscrepancyList = [];
-        this.requestUpdate();
-      })
-      .catch(err => {
-        console.error('Error:', err);
-      });
+    try {
+      await this.EmployeeModel.removeActiveDiscrepancy(this.iamId, this.dismissDiscrepancyList);
+      await this.EmployeeModel.getActiveDiscrepancy(this.iamId);
+      this.requestUpdate();
+    } catch (err) {
+      console.error('Error:', err);
+    }
+    // await this.EmployeeModel.removeActiveDiscrepancy(this.iamId, this.dismissDiscrepancyList)
+    //   .then(() => this.EmployeeModel.getActiveDiscrepancy(this.iamId))
+    //   .then(() => {
+    //     // this.dismissDiscrepancyList = [];
+    //     this.requestUpdate();
+    //   })
+    //   .catch(err => {
+    //     console.error('Error:', err);
+    //   });
   }
 
   /**
@@ -453,6 +463,12 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
 
   }
 
+  updated(changedProperties) {
+    if (changedProperties.has('discrepancy')) {
+      this.EmployeeModel.clearDiscrepancyCache();
+    }
+  }
+  
 
   /**
    * @method _onRenderResult

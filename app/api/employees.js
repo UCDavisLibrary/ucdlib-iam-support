@@ -201,15 +201,19 @@ export default (api) => {
    */
   api.get('/employees/:id/discrepancies', async (req, res) => {
 
+    if (
+      !req.auth.token.hasAdminAccess &&
+      !req.auth.token.hasHrAccess ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
 
     let interval = '';
-    let intervalLength = '30';
-    let intervalUnit = 'days';
     const id = req.params.id;
 
-    if ( intervalLength && intervalUnit ) {
-      interval = `${intervalLength} ${intervalUnit}`;
-    }
     const r = await UcdlibEmployees.getActiveRecordDiscrepancyNotifications(interval, id);
 
     if ( r.err ) {
@@ -243,9 +247,7 @@ export default (api) => {
    */
   api.post('/employees/:id/discrepancies', async (req, res) => {
      
-    if (
-      !req.auth.token.hasAdminAccess &&
-      !req.auth.token.hasHrAccess ){
+    if (!req.auth.token.hasAdminAccess ){
       res.status(403).json({
         error: true,
         message: 'Not authorized to access this resource.'
@@ -254,9 +256,9 @@ export default (api) => {
     }
 
     const id = req.params.id;
-    const discepanciesList = req.body;
+    const discrepanciesList = req.body;
     
-    const r = await UcdlibEmployees.dismissRecordDiscrepancyNotifications(id, discepanciesList);
+    const r = await UcdlibEmployees.dismissRecordDiscrepancyNotifications(id, discrepanciesList);
 
 
     if ( r.err ) {
