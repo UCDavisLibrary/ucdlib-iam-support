@@ -9,6 +9,7 @@ import auth from './auth.js';
 import alma from './alma.js';
 import employees from './employees.js';
 import orgchart from './orgchart.js'
+import health from './health.js';
 
 const router = express.Router();
 
@@ -27,5 +28,6 @@ orgchart(router);
 employees(router);
 
 export default (app) => {
+  health(app);
   app.use('/api', router);
 }

@@ -4,10 +4,13 @@ import { html } from 'lit';
  * @description Main render function
  * @returns {TemplateResult}
  */
-export function render() { 
+export function render() {
   return html`
   <div class="panel panel--icon panel--icon-custom o-box panel--icon-${this.brandColor}">
-    <h2 class="panel__title"><span class="panel__custom-icon fas ${this.panelIcon}"></span>${this.panelTitle}</h2>
+    <h2 class="panel__title">
+      <span class="panel__custom-icon fas ${this.panelIcon}"></span>
+      <span>${this.panelTitle}</span>
+    </h2>
     ${this._records.length ? html`
       <div>
         ${this._records.map(r => html`
@@ -21,6 +24,15 @@ export function render() {
                 <li>${r.departmentName}</li>
               </ul>
               <div class="text--smaller"><strong>Start Date: </strong>${this.fmtDate(r.startDate)}</div>
+              <div ?hidden=${!(this.AuthModel.isAdmin && r?.additionalData?.addedToSystems?.length)}>
+                <div class="text--smaller"><strong>Provisioned: </strong>
+                  <ul class="list--pipe" style="display: inline-block">
+                    ${r?.additionalData?.addedToSystems?.map?.(s => html`
+                      <li>${s.label}</li>
+                    `)}
+                  </ul>
+                </div>
+              </div>
             </div>
             <div class='ob-status'>${r.statusName}</div>
           </div>
@@ -30,7 +42,7 @@ export function render() {
       <div class='no-results'>
         <i class="fas fa-exclamation-circle ${this.brandColor} u-space-mr--small"></i>
         <div>${this.noResultsMessage}</div>
-      
+
       </div>
     `}
   </div>

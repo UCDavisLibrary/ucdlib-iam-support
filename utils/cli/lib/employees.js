@@ -8,6 +8,7 @@ import IamPersonTransform from '@ucd-lib/iam-support-lib/src/utils/IamPersonTran
 import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
 import UcdlibSeparation from '@ucd-lib/iam-support-lib/src/utils/separation.js';
 import keycloakClient from "@ucd-lib/iam-support-lib/src/utils/keycloakAdmin.js";
+import SystemAccessRecord from '@ucd-lib/iam-support-lib/src/utils/SystemAccessRecord.js';
 import * as fs from 'node:fs/promises';
 
 UcdIamModel.init(config.ucdIamApi);
@@ -37,141 +38,73 @@ class employeesCli {
     console.log(`Updated ${r.res.rowCount} employee records`);
   }
 
+  /**
+   * @description Remove an employee from the system
+   * @param {*} separationId - Separation request id
+   * @param {*} options - Options object from commander
+   * @returns
+   */
   async separate(separationId, options){
-    let separationRecord = await UcdlibSeparation.getById(separationId);
-    if ( !separationRecord.res.rowCount ) {
-      console.error(`Separation request ${separationId} not found`);
+    const systemAccessRecord = new SystemAccessRecord();
+
+    // make sure separation request and employee record exist
+    const {
+      error: recordExistsError,
+      message: recordExistsMessage,
+      separationRecord,
+      employeeRecord
+    } = await UcdlibSeparation.getEmployeeRecord(separationId);
+    if ( recordExistsError ) {
+      console.error(recordExistsMessage);
       await pg.pool.end();
       return;
     }
-    separationRecord = separationRecord.res.rows[0];
-    const iamId = separationRecord.iam_id;
-    if ( !iamId ) {
-      console.error(`Separation request ${separationId} does not have an IAM id`);
-      await pg.pool.end();
-      return;
-    }
-    let userId = separationRecord.additional_data?.employeeUserId;
 
-    if ( options.rm ) {
-      let employeeRecord = await UcdlibEmployees.getById(iamId, 'iamId');
-      if ( !employeeRecord.res.rowCount ) {
-        console.error(`Employee ${iamId} not found in employee table`);
-        await pg.pool.end();
-        return;
-      }
-      employeeRecord = employeeRecord.res.rows[0];
-      if ( !employeeRecord.user_id ){
-        console.error(`Employee ${iamId} does not have a user_id, which is the keycloak id`);
-        await pg.pool.end();
-        return;
-      }
-      userId = employeeRecord.user_id;
-    }
-
+    // deprovision keycloak account
     if ( options.deprovision ){
-      await keycloakClient.init({...config.keycloakAdmin, refreshInterval: 58000});
-      let keycloakUser = await keycloakClient.getUserByUserName(userId);
-      if ( !keycloakUser ) {
-        console.error(`Employee ${userId} not found in keycloak`);
+      const userId = employeeRecord.user_id || separationRecord.additional_data?.employeeUserId;
+      const { error: deprovisionError, message: deprovisionMessage, keycloakUser } = await iamAdmin.deprovisionKcAccount(userId);
+      if ( deprovisionError ) {
+        console.error(deprovisionMessage);
         await pg.pool.end();
-        keycloakClient.stopRefreshInterval();
         return;
       }
-      keycloakUser = keycloakUser[0];
-      await keycloakClient.client.users.del({id: keycloakUser.id});
-      keycloakClient.stopRefreshInterval();
-      console.log(`User ${keycloakUser.id} removed from ${config.keycloakAdmin.baseUrl}`);
+      systemAccessRecord.add('ucdlib-keycloak', 'cli');
+      console.log(`User removed from ${config.keycloakAdmin.baseUrl}`);
+      utils.logObject(keycloakUser);
     }
 
+    // remove employee record from local database
     if ( options.rm ) {
-      await this.removeEmployee(iamId, {keepPoolOpen: true});
+      const {
+        error: rmError,
+        message: rmMessage,
+        directReports,
+        isHeadOf
+      } = await iamAdmin.deleteEmployeeRecord(employeeRecord.iam_id, options);
+      if ( rmError ) {
+        console.error(rmMessage);
+        if ( rmError === 'directReports') {
+          utils.printTable(directReports, ['id', 'iam_id', 'first_name', 'last_name']);
+        } else if ( rmError === 'isHeadOf' ) {
+          utils.printTable(isHeadOf);
+        }
+        await pg.pool.end();
+        return;
+      }
+      systemAccessRecord.add('ucdlib-iam-db', 'cli');
+      console.log(`Employee record removed:`);
+      utils.logObject(employeeRecord);
     }
 
-    if ( options.rt && separationRecord.rt_ticket_id ) {
-      const rtClient = new UcdlibRt(config.rt);
-      const ticket = new UcdlibRtTicket(false, {id: separationRecord.rt_ticket_id});
-      const reply = ticket.createReply();
-      reply.addSubject('Employee Access Was Removed');
-      reply.addContent('This employee was removed from the UC Davis Library Identity and Access Management System.');
-      const rtResponse = await rtClient.sendCorrespondence(reply);
-      if ( rtResponse.err )  {
-        console.error('Error sending RT correspondence');
-        console.error(rtResponse);
-      }
+    await systemAccessRecord.writeToSeparationRequest(separationId);
+
+    // comment on rt ticket
+    if ( options.rt ) {
+      await iamAdmin.sendSeparationNotification(separationRecord.rt_ticket_id);
     }
 
     await pg.pool.end();
-  }
-
-  async removeEmployee(id, options){
-    const idType = options.idtype ? options.idtype : 'iamId';
-    id = id.trim();
-
-    // check if employee exists
-    let employee = await UcdlibEmployees.getById(id, idType, {returnGroups: true, returnSupervisor: true});
-    if ( !employee.res.rowCount ) {
-      console.error(`Employee ${id} not found`);
-      await pg.pool.end();
-      return;
-    }
-    employee = employee.res.rows[0];
-    const iamId = employee.iam_id;
-    if ( !iamId ) {
-      console.error(`Error retrieving employee IAM id`);
-      await pg.pool.end();
-      return;
-    }
-
-    // check if employee has direct reports
-    const directReports = await UcdlibEmployees.getDirectReports(iamId);
-    if ( directReports.res.rowCount ) {
-      console.error(`Employee has direct reports. Please remove direct reports first.`);
-      const colsToShow = ['id', 'iam_id', 'first_name', 'last_name'];
-      utils.printTable(directReports.res.rows, colsToShow);
-      await pg.pool.end();
-      return;
-    }
-
-    // check if employee is a head of any groups
-    const isHeadOf = employee.groups.filter(g => g.isHead);
-    if ( isHeadOf.length && !options.force ) {
-      console.error(`Employee is head of the following groups. You might want to set a new head first, but you can use --force to override this check.`);
-      utils.printTable(isHeadOf);
-      await pg.pool.end();
-      return;
-    }
-
-    // remove groups
-    const rmGroups = await UcdlibEmployees.removeAllGroupMemberships(employee.id);
-    if ( rmGroups.err ) {
-      console.error(`Error removing employee from groups\n${rmGroups.err.message}`);
-      await pg.pool.end();
-      return;
-    }
-
-    // remove employee
-    const rmEmployee = await UcdlibEmployees.delete(id, idType);
-    if ( rmEmployee.err ) {
-      console.error(`Error removing employee\n${rmEmployee.err.message}`);
-      await pg.pool.end();
-      return;
-    }
-
-    // mark any notifications as dismissed
-    const dismissNotifications = await UcdlibEmployees.dismissRecordDiscrepancyNotifications(iamId);
-    if ( dismissNotifications.err ) {
-      console.error(`Error dismissing record discrepancy notifications\n${dismissNotifications.err.message}`);
-      await pg.pool.end();
-      return;
-    }
-
-    console.log(`Record removed:`);
-    utils.logObject(employee);
-
-    if ( !options.keepPoolOpen ){
-      await pg.pool.end();
-    }
   }
 
   /**
@@ -230,6 +163,7 @@ class employeesCli {
     console.log(`Adopting employee from onboarding record ${onboardingId} with options:`, options);
 
     const forceMessage = 'Use --force to override this check.';
+    const systemAccessRecord = new SystemAccessRecord();
 
     const adoptParams = {
       ucdIamConfig: config.ucdIamApi,
@@ -248,6 +182,7 @@ class employeesCli {
       await pg.pool.end();
       return;
     }
+    systemAccessRecord.add('ucdlib-iam-db', 'cli');
 
     if ( options.provision ) {
       const kcParams = {
@@ -262,21 +197,15 @@ class employeesCli {
         await pg.pool.end();
         return;
       }
+      systemAccessRecord.add('ucdlib-keycloak', 'cli');
 
     }
 
+    await systemAccessRecord.writeToOnboardingRequest(onboardingId);
+
     // comment on rt ticket
-    if ( options.rt && !config.rt.forbidWrite && result.onboardingRecord.rt_ticket_id) {
-      const rtClient = new UcdlibRt(config.rt);
-      const ticket = new UcdlibRtTicket(false, {id: result.onboardingRecord.rt_ticket_id});
-      const reply = ticket.createReply();
-      reply.addSubject('Employee Record Added');
-      reply.addContent('This employee was adopted into the UC Davis Library Identity and Access Management System');
-      const rtResponse = await rtClient.sendCorrespondence(reply);
-      if ( rtResponse.err )  {
-        console.error('Error sending RT correspondence');
-        console.error(rtResponse);
-      }
+    if ( options.rt ) {
+      await iamAdmin.sendAdoptionRtNotification(result.onboardingRecord.rt_ticket_id);
     }
 
     console.log(result.message);

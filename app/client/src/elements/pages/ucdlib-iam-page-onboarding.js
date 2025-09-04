@@ -13,7 +13,8 @@ export default class UcdlibIamPageOnboarding extends Mixin(LitElement)
   .with(LitCorkUtils) {
   static get properties() {
     return {
-      canViewActiveList: {state: true},
+      canViewAll: {state: true},
+      tabView: {state: true},
       userIamId: {state: true}
     };
   }
@@ -25,9 +26,11 @@ export default class UcdlibIamPageOnboarding extends Mixin(LitElement)
     this._injectModel('AppStateModel', 'OnboardingModel', 'AuthModel');
 
     this.activeId = 'ob-list-active';
+    this.recentId = 'ob-list-recent';
     this.supervisorId = 'ob-list-supervisor';
-    this.canViewActiveList = false;
+    this.canViewAll = false;
     this.userIamId = '';
+    this.tabView = 'active'; // active or recent
   }
 
   /**
@@ -71,7 +74,7 @@ export default class UcdlibIamPageOnboarding extends Mixin(LitElement)
    * @param {AccessToken} token
    */
   _onTokenRefreshed(token){
-    this.canViewActiveList = token.hasAdminAccess || token.hasHrAccess;
+    this.canViewAll = token.hasAdminAccess || token.hasHrAccess;
     this.userIamId = token.iamId;
     if ( this.AppStateModel.currentPage == this.id ) this. _getRequiredPageData();
   }
@@ -82,11 +85,15 @@ export default class UcdlibIamPageOnboarding extends Mixin(LitElement)
   async _getRequiredPageData(){
     const activeListEle = this.querySelector(`#${this.activeId}`);
     const supervisorEle = this.querySelector(`#${this.supervisorId}`);
-    if ( !activeListEle || !supervisorEle ){
+    const recentEle = this.querySelector(`#${this.recentId}`);
+    if ( !activeListEle || !supervisorEle || !recentEle ) {
       return; // page not fully loaded yet. wait for next app-state-update.
     }
     const promises = [];
-    if ( this.canViewActiveList ) promises.push(activeListEle.doQuery());
+    if ( this.canViewAll ) {
+      promises.push(activeListEle.doQuery());
+      promises.push(recentEle.doQuery());
+    }
     if ( this.userIamId ) promises.push(supervisorEle.doQuery(false, {supervisorId: this.userIamId}));
     await new Promise(resolve => {requestAnimationFrame(resolve);});
   }

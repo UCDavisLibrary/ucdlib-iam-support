@@ -1,6 +1,6 @@
 x-variables:
-  main-image: &main-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support:v1.12.0
-  utils-image: &utils-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support-utils:v1.12.0
+  main-image: &main-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support:v1.14.1
+  utils-image: &utils-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support-utils:v1.14.1
 services:
   app:
     image: *main-image
@@ -14,6 +14,7 @@ services:
       PGHOST: 'db'
       PGDATABASE: 'postgres'
       PGPORT: 5432
+      BACKUP_LOG_TABLE: ${BACKUP_LOG_TABLE:-backup_log}
     ports:
       - ${UCDLIB_APP_HOST_PORT:-3000}:3000
     restart: always
@@ -67,6 +68,7 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /etc/service-account.json
       GOOGLE_CLOUD_BUCKET: 'itis-iam'
       SQL_FILE_NAME: 'itis-iam.sql.gz'
+      BACKUP_LOG_TABLE: ${BACKUP_LOG_TABLE:-backup_log}
     command: /backup/entrypoint.sh
     volumes:
       - ../../secrets/gc-itis-iam-writer-key.json:/etc/service-account.json

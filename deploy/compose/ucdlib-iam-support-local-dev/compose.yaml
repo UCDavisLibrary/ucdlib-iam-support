@@ -22,6 +22,8 @@ services:
       PGDATABASE: 'postgres'
       PGPASSWORD: 'localhost'
       PGPORT: 5432
+      BACKUP_LOG_TABLE: ${BACKUP_LOG_TABLE:-backup_log}
+      KEYCLOAK_ADMIN_BASE_URL: ${KEYCLOAK_ADMIN_BASE_URL:-https://sandbox.auth.library.ucdavis.edu}
     volumes:
       - ../../../app:/app
       - /app/node_modules
@@ -45,6 +47,7 @@ services:
       PGDATABASE: 'postgres'
       PGPASSWORD: 'localhost'
       PGPORT: 5432
+      KEYCLOAK_ADMIN_BASE_URL: ${KEYCLOAK_ADMIN_BASE_URL:-https://sandbox.auth.library.ucdavis.edu}
     command: /cli/cli.sh
     volumes:
       - ../../../utils/cli:/cli
@@ -66,6 +69,7 @@ services:
       PGDATABASE: 'postgres'
       PGPASSWORD: 'localhost'
       PGPORT: 5432
+      KEYCLOAK_ADMIN_BASE_URL: ${KEYCLOAK_ADMIN_BASE_URL:-https://sandbox.auth.library.ucdavis.edu}
     command: /api/api.sh
     # command: /api/tail.sh
     volumes:
@@ -90,7 +94,10 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /etc/service-account.json
       GOOGLE_CLOUD_BUCKET: 'itis-iam'
       SQL_FILE_NAME: 'itis-iam.sql.gz'
-    command: /backup/entrypoint.sh
+      BACKUP_LOG_TABLE: ${BACKUP_LOG_TABLE:-backup_log}
+      KEYCLOAK_ADMIN_BASE_URL: ${KEYCLOAK_ADMIN_BASE_URL:-https://sandbox.auth.library.ucdavis.edu}
+    # command: /backup/entrypoint.sh
+    command: /backup/tail.sh
     volumes:
       - ../../../utils/backup:/backup
       - ../../secrets/gc-itis-iam-writer-key.json:/etc/service-account.json
@@ -112,6 +119,7 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /etc/service-account.json
       GOOGLE_CLOUD_BUCKET: 'itis-iam'
       SQL_FILE_NAME: 'itis-iam.sql.gz'
+      KEYCLOAK_ADMIN_BASE_URL: ${KEYCLOAK_ADMIN_BASE_URL:-https://sandbox.auth.library.ucdavis.edu}
     command: /init/init.sh
     volumes:
       - ../../../utils/init:/init
@@ -128,6 +136,7 @@ services:
       PGDATABASE: 'postgres'
       PGPASSWORD: 'localhost'
       PGPORT: 5432
+      KEYCLOAK_ADMIN_BASE_URL: ${KEYCLOAK_ADMIN_BASE_URL:-https://sandbox.auth.library.ucdavis.edu}
     # command: /maintenance/entrypoint.sh
     command: /maintenance/tail.sh
     volumes:

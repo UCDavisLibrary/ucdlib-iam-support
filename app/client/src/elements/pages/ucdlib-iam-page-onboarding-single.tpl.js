@@ -85,6 +85,14 @@ export function render() {
         </div>
       </div>
       <div class="l-sidebar-second">
+        <a class="focal-link category-brand--putah-creek u-space-mb pointer" ?hidden=${ !this.showAdoptButton } @click=${this.openAdoptEmployeeConfirmModal}>
+          <div class="focal-link__figure focal-link__icon">
+            <i class="fas fa-database fa-2x"></i>
+          </div>
+          <div class="focal-link__body">
+            <strong>Add To Library IAM Database</strong>
+          </div>
+        </a>
         <a href="/permissions/onboarding/${this.requestId}" class="focal-link category-brand--poppy u-space-mb">
           <div class="focal-link__figure focal-link__icon">
             <i class="fas fa-lock-open fa-2x"></i>
@@ -185,4 +193,17 @@ export function render() {
   <ucdlib-iam-modal id='obs-employee-modal' dismiss-text='Close' content-title='Employee Record'>
     <pre style='font-size:15px;margin:0;'>${JSON.stringify(this.ucdIamRecord.data, null, "  ")}</pre>
   </ucdlib-iam-modal>
-`;}
+  <ucdlib-iam-modal id='obs-iam-adopt-modal' dismiss-text='Close' content-title='Adopt Employee' auto-width hide-footer>
+    <p>Are you sure you want to adopt this employee into the library IAM system?</p>
+    <p>This will create new record in the database in addition to creating a new Keycloak account with base permissions.</p>
+    <div>
+      <button
+        @click=${this._onAdoptEmployeeConfirm}
+        type='button'
+        class="btn btn--alt btn--block u-space-mt border-box"
+      >Adopt Employee
+      </button>
+    </div>
+  </ucdlib-iam-modal>
+  `;
+}

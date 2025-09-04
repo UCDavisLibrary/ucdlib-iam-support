@@ -39,7 +39,8 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
       sentBackgroundCheck: {state: true},
       rtTicketId: {state: true},
       ucdIamRecord: {state: true},
-      supervisorEmail: {state: true}
+      supervisorEmail: {state: true},
+      showAdoptButton: {state: true}
     };
   }
 
@@ -70,8 +71,9 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
     this.hideBackgroundCheckButton = false;
     this.sentBackgroundCheck = false;
     this.ucdIamRecord = new IamPersonTransform({});
+    this.showAdoptButton = false;
 
-    this._injectModel('AppStateModel', 'OnboardingModel', 'RtModel');
+    this._injectModel('AppStateModel', 'OnboardingModel', 'RtModel', 'AuthModel');
   }
 
   /**
@@ -152,6 +154,11 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
     } else {
       this.ucdIamRecord = new IamPersonTransform({});
     }
+
+    this.showAdoptButton = this.AuthModel.store.token.hasAdminAccess &&
+      (Array.isArray(ad?.addedToSystems) && !ad.addedToSystems.find(s => s?.value === 'ucdlib-iam-db')) &&
+      this.ucdIamRecord.userId;
+
   }
 
   /**
@@ -198,6 +205,39 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
    */
   _onReconEmployeeSelect(e){
     this.reconId = e.id;
+  }
+
+  /**
+   * @description Opens the adopt employee confirmation modal. Attached to button in side panel
+   */
+  openAdoptEmployeeConfirmModal(){
+    this.querySelector('#obs-iam-adopt-modal').show();
+  }
+
+  /**
+   * @description Called after user confirms adoption of employee into library iam system
+   */
+  async _onAdoptEmployeeConfirm(){
+    const modal = this.querySelector('#obs-iam-adopt-modal');
+    modal.hide();
+
+    this.AppStateModel.showLoading();
+    const r = await this.OnboardingModel.adoptEmployee(this.requestId);
+    if ( r.state == 'error' ){
+      let msg = 'Unable to adopt employee';
+      if ( r.error?.payload?.message ) msg = r.error.payload.message;
+      console.error(r);
+      requestAnimationFrame(() => this.AppStateModel.showError(msg));
+    } else {
+      this.OnboardingModel.clearIdCache(this.requestId);
+      this.OnboardingModel.clearQueryCache();
+      if ( this.rtTicketId ){
+        this.RtModel.clearHistoryCache(this.rtTicketId);
+      }
+      this.AppStateModel.refresh();
+      this.AppStateModel.showAlertBanner({message: 'Employee adopted', brandColor: 'farmers-market'});
+    }
+
   }
 
   /**
