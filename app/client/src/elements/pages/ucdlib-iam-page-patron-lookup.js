@@ -156,13 +156,19 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
       this.AppStateModel.setTitle({show: true, text: this.pageTitle()});
       this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs: this.breadcrumbs()});
       this.alma = await this.AlmaUserModel.getAlmaUserById(this.selectedPersonProfile.userID, "almaId");
+      if(!this.alma.id) this.alma = null;
       const ldap = await this.LdapModel.getLdapData({iamId: this.selectedPersonProfile.iamId});
-      await this.LdapModel.clearLdapCache();
-      this.ldap = ldap?.payload?.[0];
+      if(ldap.error){
+        this.ldap = [];
+        this.AppStateModel.showAlertBanner({message: 'An error when accessing the LDAP database. Check with admin for further assistance.', brandColor: 'double-decker'});
+      } else {
+        this.ldap = ldap?.payload?.[0];
+      }
       this.selectedPersonDepInfo = this.selectedPersonProfile.ppsAssociations;
       this.selectedPersonStdInfo = this.selectedPersonProfile.sisAssociations;
       this.informationHeaderID = this.selectedPersonProfile.iamId;
       this.page = 'information';
+
     } else if( r.state === this.PersonModel.store.STATE.ERROR ) {
       this.isFetching = false;
       this.wasError = true;
@@ -330,7 +336,6 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
   }
   /**
    * @description return to lookup page
-   * @param {*} e - Submit event
    */
   async _onReturn(){
     if ( this.isFetching ) return;
@@ -410,14 +415,6 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     const ele = this.renderRoot.querySelector('#alma-modal');
     if ( ele ) ele.show();
   }
-
-    /**
-   * @description Opens the employee info modal
-   */
-    openLDAPInfoModal(){
-      const ele = this.renderRoot.querySelector('#ldap-modal');
-      if ( ele ) ele.show();
-    }
 
 }
 

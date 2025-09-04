@@ -3,9 +3,8 @@ import ldap from '@ucd-lib/iam-support-lib/src/utils/ldap.js'
 
 export default (api) => {
 
-    // posts org chart from files
     api.get('/ldap', async (req, res) => {   
-        
+
         if ( !req.auth.token.canQueryUcdIam ){
             res.status(403).json({
               error: true,
@@ -25,9 +24,9 @@ export default (api) => {
         let ldapConnect = new ldap(ldapConfig);
         let ldapResponse = await ldapConnect.search(req.query);
 
-        if ( ldapResponse.err )  {
+        if ( ldapResponse.error )  {
             console.error(ldapResponse);
-            return res.json([]);;
+            return res.json({"error":true});
         }
 
         return res.json(ldapResponse);
