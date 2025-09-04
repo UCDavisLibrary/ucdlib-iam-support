@@ -3,7 +3,7 @@ import ldap from '@ucd-lib/iam-support-lib/src/utils/ldap.js'
 
 export default (api) => {
 
-    api.get('/ldap', async (req, res) => {   
+    api.get('/ldap', async (req, res) => {
 
         if ( !req.auth.token.canQueryUcdIam ){
             res.status(403).json({
@@ -19,19 +19,19 @@ export default (api) => {
             password: config.ldap.key,
             port: config.ldap.port,
             base: config.ldap.base
-        } 
+        }
 
         let ldapConnect = new ldap(ldapConfig);
         let ldapResponse = await ldapConnect.search(req.query);
 
         if ( ldapResponse.error )  {
-            console.error(ldapResponse);
+            console.error('Error fetching LDAP data:', ldapResponse);
             return res.json({"error":true});
         }
 
         return res.json(ldapResponse);
 
-    }); 
-    
-  
+    });
+
+
   }

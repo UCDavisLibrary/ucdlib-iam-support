@@ -83,7 +83,7 @@ export function render() {
                   ${this.ldap?.ucdpersonaffiliation ? html`
                     <div class="box-row">
                       <div class="box"><strong>UCD Affiliation</strong></div><div class="box">${this.ldap.ucdpersonaffiliation}</div>
-                    </div>`: html``}                  
+                    </div>`: html``}
                   ${this.alma ? html`<div class="box-row"><div class="box"><strong>Alma</strong></div><div class="box"><a class='pointer icon icon--circle-arrow-right' @click=${this.openAlmaInfoModal}>Alma Record: <strong>${this.alma.id}</strong></a></div></div>`:html``}
 
 
@@ -142,7 +142,7 @@ export function render() {
               </div>
             `:html`<h4>There is no information on this individual in the IAM Database.</h4>`}
 
-            
+
           </div>
         </div>
       </ucdlib-pages>
@@ -155,10 +155,6 @@ export function render() {
 
 <ucdlib-iam-modal id='alma-modal' dismiss-text='Close' content-title='Alma Record'>
   ${this.alma ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.alma.payload, null, "  ")}</pre>` : html``}
-</ucdlib-iam-modal>
-
-<ucdlib-iam-modal id='ldap-modal' dismiss-text='Close' content-title='LDAPs Record'>
-  ${this.ldap ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.ldap, null, "  ")}</pre>` : html``}
 </ucdlib-iam-modal>
 `;}
 
