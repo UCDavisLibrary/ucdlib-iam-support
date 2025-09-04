@@ -14,6 +14,7 @@
     "@keycloak/keycloak-admin-client": "^23.0.4",
     "@ucd-lib/cork-app-utils": "^6.0.5",
     "@ucd-lib/rt-api": "^1.2.2",
+    "ldapts": "^7.4.0",
     "openid-client": "^5.4.0",
     "pg": "^8.9.0",
     "ssh2-sftp-client": "^11.0.0"
