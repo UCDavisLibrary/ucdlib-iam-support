@@ -184,12 +184,12 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
       this.csvData = this.anonymizeData(updatedData);
       let singleRoots = this.notSingleRootPasses();
       if(singleRoots) {
-        let multipleNodeErrorMessage = `Several entries lack a valid supervisor reference: the Reports To External ID does not correspond to any 
-                                        External ID in this worksheet. With the exception of the University Librarian, which is also listed below, all 
-                                        employees should have a  Reports To External ID listed that corresponds to someone on the excel sheet. \n\n 
-                                        Please update the following names:
-                                        ${singleRoots.map(n => ` ${n.fullName}`)}
-                                       `;
+        let multipleNodeErrorMessage = `Several entries lack a valid supervisor reference: the Reports To External ID does not correspond to any
+External ID in this worksheet. With the exception of the University Librarian, which is also listed below, all
+employees should have a Reports To External ID listed that corresponds to someone on the excel sheet.
+Please update the following names:
+${singleRoots.map(n => ` ${n.fullName}`)}`;
+
         this.AppStateModel.showAlertBanner({message: multipleNodeErrorMessage, brandColor: 'double-decker'});
         return;
       }
@@ -223,7 +223,6 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
   
   /**
   * @description node single root check
-  * @param 
   * @returns {Array || Boolean} nodes
   */
   notSingleRootPasses() {
