@@ -182,6 +182,17 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
       this.AppStateModel.showAlertBanner({message: formatErrorMessage, brandColor: 'double-decker'});
     } else {
       this.csvData = this.anonymizeData(updatedData);
+      let singleRoots = this.notSingleRootPasses();
+      if(singleRoots) {
+        let multipleNodeErrorMessage = `Several entries lack a valid supervisor reference: the Reports To External ID does not correspond to any 
+                                        External ID in this worksheet. With the exception of the University Librarian, which is also listed below, all 
+                                        employees should have a  Reports To External ID listed that corresponds to someone on the excel sheet. \n\n 
+                                        Please update the following names:
+                                        ${singleRoots.map(n => ` ${n.fullName}`)}
+                                       `;
+        this.AppStateModel.showAlertBanner({message: multipleNodeErrorMessage, brandColor: 'double-decker'});
+        return;
+      }
       let res = await this.OrgchartModel.orgPush(this.csvData);
       
       if(res.error) {
@@ -197,6 +208,28 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
 
 
     this.requestUpdate();
+  }
+
+  /**
+  * @description checks if there is multiple nodes and if so then who
+  * @param {Array} nodes an array of node objects
+  * @returns {Array} nodes
+  */
+  listRoots(nodes) {
+    return nodes
+      .filter(n => n.parentId == null)
+      .map(n => ({ id: n.id, fullName: n.fullName }));
+  }
+  
+  /**
+  * @description node single root check
+  * @param 
+  * @returns {Array || Boolean} nodes
+  */
+  notSingleRootPasses() {
+    let notSingleRoots = this.listRoots(this.csvData);
+    if(notSingleRoots.length === 1) return false;
+    return notSingleRoots;
   }
 
   /**
