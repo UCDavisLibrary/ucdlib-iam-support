@@ -102,7 +102,7 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
     return result;
   }
 
- /**
+  /**
    * @description on the submit of the csv
    * @param {e} e event files
    * @returns 
@@ -155,11 +155,13 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
 
       if(item.id == null){
         formatErrorMessage = "Formatting Error; Missing a column entry: External ID.";
-        this.formatError = true;      }
+        this.formatError = true;      
+      }
 
       if(item.parentId == null){
         formatErrorMessage = "Formatting Error; Missing a column entry: External ID Reports To.";
-        this.formatError = true;        }
+        this.formatError = true;        
+      }
 
       const updatedItem = {
         fullName: item.fullName,
@@ -174,10 +176,23 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
       updatedData.push(updatedItem);
     }
 
+
+
     if(this.formatError) {
       this.AppStateModel.showAlertBanner({message: formatErrorMessage, brandColor: 'double-decker'});
     } else {
       this.csvData = this.anonymizeData(updatedData);
+      let singleRoots = this.notSingleRootPasses();
+      if(singleRoots) {
+        let multipleNodeErrorMessage = `Several entries lack a valid supervisor reference: the Reports To External ID does not correspond to any
+External ID in this worksheet. With the exception of the University Librarian, which is also listed below, all
+employees should have a Reports To External ID listed that corresponds to someone on the excel sheet.
+Please update the following names:
+${singleRoots.map(n => ` ${n.fullName}`)}`;
+
+        this.AppStateModel.showAlertBanner({message: multipleNodeErrorMessage, brandColor: 'double-decker'});
+        return;
+      }
       let res = await this.OrgchartModel.orgPush(this.csvData);
       
       if(res.error) {
@@ -193,6 +208,27 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
 
 
     this.requestUpdate();
+  }
+
+  /**
+  * @description checks if there is multiple nodes and if so then who
+  * @param {Array} nodes an array of node objects
+  * @returns {Array} nodes
+  */
+  listRoots(nodes) {
+    return nodes
+      .filter(n => n.parentId == null)
+      .map(n => ({ id: n.id, fullName: n.fullName }));
+  }
+  
+  /**
+  * @description node single root check
+  * @returns {Array || Boolean} nodes
+  */
+  notSingleRootPasses() {
+    let notSingleRoots = this.listRoots(this.csvData);
+    if(notSingleRoots.length === 1) return false;
+    return notSingleRoots;
   }
 
   /**
