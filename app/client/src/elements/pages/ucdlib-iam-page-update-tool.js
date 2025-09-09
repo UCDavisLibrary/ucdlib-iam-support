@@ -274,6 +274,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
    */
   _onGetActiveDiscrepancies(e){
     if ( e.state === this.EmployeeModel.store.STATE.LOADED ){
+      this.EmployeeModel.clearDiscrepancyCache();
       this.discrepancy = e.payload;
     } else if ( e.state === this.EmployeeModel.store.STATE.ERROR ) {
       this.AppStateModel.showAlertBanner({message: 'Error occurred when retrieving discrepancies. Employee may have discrepancies not listed.', brandColor: 'double-decker'});
@@ -284,11 +285,11 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
   }
 
   /**
-   * @method _addToDismissDiscrepanciesList
+   * @method _toggleToDismissDiscrepanciesList
    * @description toggles discrepancies to/from the list
    * @param {Object} discrepancy
    */
-  _addToDismissDiscrepanciesList(discrepancy){
+  _toggleToDismissDiscrepanciesList(discrepancy){
 
     const id = discrepancy.id;
 
@@ -304,7 +305,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
 
   /**
    * @method _dismissDiscrepancies
-   * @description dismiss the discepancies listed
+   * @description dismiss the discrepancies listed
    * @param {Object} e
    */
   async _dismissDiscrepancies(){
@@ -315,15 +316,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     } catch (err) {
       console.error('Error:', err);
     }
-    // await this.EmployeeModel.removeActiveDiscrepancy(this.iamId, this.dismissDiscrepancyList)
-    //   .then(() => this.EmployeeModel.getActiveDiscrepancy(this.iamId))
-    //   .then(() => {
-    //     // this.dismissDiscrepancyList = [];
-    //     this.requestUpdate();
-    //   })
-    //   .catch(err => {
-    //     console.error('Error:', err);
-    //   });
+
   }
 
   /**
@@ -462,13 +455,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this._onRenderResult();
 
   }
-
-  updated(changedProperties) {
-    if (changedProperties.has('discrepancy')) {
-      this.EmployeeModel.clearDiscrepancyCache();
-    }
-  }
-  
 
   /**
    * @method _onRenderResult

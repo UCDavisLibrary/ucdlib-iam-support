@@ -218,8 +218,7 @@ export default (api) => {
 
     if ( r.err ) {
       console.error(`Error getting active record discrepancy notifications\n${r.err.message}`);
-      
-      return res.json([]);
+      return res.status(500).json({error: true});
     }
     if ( r.res.rowCount === 0 ){
       console.log('No active record discrepancy notifications found');

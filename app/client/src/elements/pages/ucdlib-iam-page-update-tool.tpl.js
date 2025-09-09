@@ -23,7 +23,6 @@ export function render() {
  */
 export function renderEmployeeSelect(){
   return html`
- 
     <div class='form-single-col' id='employee-select'> 
       <h2 class="panel__title"><span class="panel__custom-icon fas fa-user-tie"></span>Search for Current Employee</h2>
       <ucdlib-employee-search
@@ -64,7 +63,7 @@ export function renderEmployeeDiscrepancy(){
         <div class="discrepancyItem
            ${this.dismissDiscrepancyList.includes(dis.id) ? 'active' : ''}
            ${!this.admin ? 'no-hover' : ''}" 
-           @click=${this.admin ? () => this._addToDismissDiscrepanciesList(dis) : null}>
+           @click=${this.admin ? () => this._toggleToDismissDiscrepanciesList(dis) : null}>
            <div class="discrepancy-row">
               <span>
                 <h6>${dis.label}</h6>
