@@ -51,7 +51,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     this.renderNameForm = Templates.renderNameForm.bind(this);
 
     this.reset();
-    this._injectModel('PersonModel','AppStateModel', 'AuthModel', 'AlmaUserModel');
+    this._injectModel('PersonModel','AppStateModel', 'AuthModel', 'AlmaUserModel', 'LdapModel');
 
     this.navItems = [];
     this.searchParams = [
@@ -90,6 +90,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     this.searchParams.forEach(o => {
       this.searchParamsByKey[o.key] = o;
     });
+    this.ldap = {};
 
     this.searchParam = 'name';
     this.informationHeader = "Sample ID";
@@ -155,6 +156,14 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
       this.AppStateModel.setTitle({show: true, text: this.pageTitle()});
       this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs: this.breadcrumbs()});
       this.alma = await this.AlmaUserModel.getAlmaUserById(this.selectedPersonProfile.userID, "almaId");
+      if(!this.alma.id) this.alma = null;
+      const ldap = await this.LdapModel.getLdapData({iamId: this.selectedPersonProfile.iamId});
+      if(ldap.error){
+        this.ldap = null;
+        this.AppStateModel.showAlertBanner({message: 'There was an error when accessing the UC Davis LDAP. Some fields may be missing. Check with admin for further assistance.', brandColor: 'double-decker'});
+      } else {
+        this.ldap = ldap?.payload?.[0];
+      }
       this.selectedPersonDepInfo = this.selectedPersonProfile.ppsAssociations;
       this.selectedPersonStdInfo = this.selectedPersonProfile.sisAssociations;
       this.informationHeaderID = this.selectedPersonProfile.iamId;
@@ -168,6 +177,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     this.dispatchEvent(new CustomEvent('select', {detail: {status: r}}));
     if ( this.resetOnSelect ) this.reset();
   }
+
 
 
   /**
@@ -326,9 +336,8 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
   }
   /**
    * @description return to lookup page
-   * @param {*} e - Submit event
    */
-  async _onReturn(e){
+  async _onReturn(){
     if ( this.isFetching ) return;
     // reset state
     this.wasError = false;

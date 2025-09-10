@@ -19,6 +19,8 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
       supervisorId: {state: true},
       employeeTitle: {state: true},
       departmentId: {state: true},
+      dismissDiscrepancyList: { type: Array },
+      discrepancy: { type: Array },
       isHead: {state: true},
     };
   }
@@ -29,10 +31,14 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this.renderEmployeeSelect = Templates.renderEmployeeSelect.bind(this);
     this.renderEmployeeEdit = Templates.renderEmployeeEdit.bind(this);
     this.renderEmployeeResult = Templates.renderEmployeeResult.bind(this);
+    this.renderEmployeeDiscrepancy = Templates.renderEmployeeDiscrepancy.bind(this);
+    this.admin = false;
     this.hasEmployeeRecord = false;
     this.employeeRecord = {};
     this.page = 'employee-select';
     this.groups = [];
+    this.discrepancy = [];
+    this.dismissDiscrepancyList = [];
     this.disabledSubmit = false;
     this.deptHeadConflict = false;
     this.departmentName = 'department';
@@ -145,6 +151,8 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
       this.AppStateModel.showError('You do not have permission to use this tool.');
       return;
     }
+
+    if(token.hasAdminAccess) this.admin = true;
     this._setPage(e);
 
     const promises = [];
@@ -201,6 +209,8 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this.wasError = false;
     this.page = 'employee-select';
     this.hideResults = false;
+    this.discrepancy = [];
+    this.dismissDiscrepancyList = [];
     this.results = [];
     this.selectedPersonId = '';
     this.selectedPersonProfile = {};
@@ -246,10 +256,82 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this.isHead = this.department.isHead || false;
     this.page = "employee-edit";
     this.departmentName = this.department.name;
+    this.discrepancy = [];
+    this.dismissDiscrepancyList = [];
+
+    await this.EmployeeModel.getActiveDiscrepancy(this.iamId);
+
 
     this.checkDepartmentHead(this.departmentId);
 
     this.requestUpdate();
+  }
+
+  /**
+   * @method _onGetActiveDiscrepancies
+   * @description attached to EmployeeModel GET_ACTIVE_DISCREPANCIES event
+   * @param {Object} e
+   */
+  _onGetActiveDiscrepancies(e){
+    if ( e.state === this.EmployeeModel.store.STATE.LOADED ){
+      this.discrepancy = e.payload;
+    } else if ( e.state === this.EmployeeModel.store.STATE.ERROR ) {
+      this.AppStateModel.showAlertBanner({message: 'Error occurred when retrieving discrepancies. Employee may have discrepancies not listed.', brandColor: 'double-decker'});
+      this.discrepancy = [];
+    }
+
+    this.requestUpdate();
+  }
+
+  /**
+   * @method _toggleToDismissDiscrepanciesList
+   * @description toggles discrepancies to/from the list
+   * @param {Object} discrepancy
+   */
+  _toggleToDismissDiscrepanciesList(discrepancy){
+
+    const id = discrepancy.id;
+
+    if (this.dismissDiscrepancyList.includes(id)) {
+      this.dismissDiscrepancyList = this.dismissDiscrepancyList.filter(i => i !== id);
+    } else {
+      this.dismissDiscrepancyList = [...this.dismissDiscrepancyList, id];
+    }
+
+    this.requestUpdate();
+
+  }
+
+  /**
+   * @method _dismissDiscrepancies
+   * @description dismiss the discrepancies listed
+   * @param {Object} e
+   */
+  async _dismissDiscrepancies(){
+    try {
+      await this.EmployeeModel.removeActiveDiscrepancy(this.iamId, this.dismissDiscrepancyList);
+      await this.EmployeeModel.getActiveDiscrepancy(this.iamId);
+      this.requestUpdate();
+    } catch (err) {
+      console.error('Error:', err);
+    }
+
+  }
+
+  /**
+   * @method _onRemoveActiveDiscrepancies
+   * @description attached to EmployeeModel REMOVE_ACTIVE_DISCREPANCIES event
+   * @param {Object} e
+   */
+  async _onRemoveActiveDiscrepancies(e){
+    if ( e.state === this.EmployeeModel.store.STATE.LOADED ){
+      this.AppStateModel.showAlertBanner({message: 'Discrepancies are successfully deleted.', brandColor: 'farmers-market'});
+    } else if( e.state === this.EmployeeModel.store.STATE.ERROR ) {
+      this.AppStateModel.showAlertBanner({message: 'Error occurred when deleting discrepancies.', brandColor: 'double-decker'});
+    }
+    this.dismissDiscrepancyList = [];
+    this.requestUpdate();
+
   }
 
   /**
@@ -328,8 +410,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this.requestUpdate();
   }
 
-
-
   /**
    * @method updateEmployee
    * @description saves updates to employee title, department, and head status
@@ -374,7 +454,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this._onRenderResult();
 
   }
-
 
   /**
    * @method _onRenderResult

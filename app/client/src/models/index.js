@@ -8,6 +8,7 @@ import {
   SeparationModel,
   RtModel,
   PermissionsModel,
+  LdapModel,
   AlmaUserModel } from "@ucd-lib/iam-support-lib";
 AppStateModel.init(window.APP_CONFIG.appRoutes);
 
@@ -20,6 +21,7 @@ export {
   RtModel,
   PermissionsModel,
   OrgchartModel,
+  LdapModel,
   AlmaUserModel,
   EmployeeModel,
 };

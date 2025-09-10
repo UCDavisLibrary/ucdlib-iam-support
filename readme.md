@@ -99,10 +99,12 @@ The steps for onboarding an employee are as follows:
 - When they fill out the permissions request form, the response is written to the RT ticket.
 - Provisioning proceeds as normal with the RT ticket being passed around ITIS personnel.
 - An ITIS programmer has to manually add the employee to the local database and Keycloak by doing the following:
-  - `ssh veers.library.ucdavis.edu`
-  - `cd /opt/ucdlib-iam-support/deploy && docker compose exec cli bash`
-  - `ucdlib-iam onboarding ls` to get the onboarding-record-id.
-  - `ucdlib-iam employees adopt <onboarding-record-id>`
+  - Clicking the `Add To Library IAM Database` on the GUI
+  - Or using the cli:
+    - `ssh veers.library.ucdavis.edu`
+    - `cd /opt/ucdlib-iam-support/deploy && docker compose exec cli bash`
+    - `ucdlib-iam onboarding ls` to get the onboarding-record-id.
+    - `ucdlib-iam employees adopt <onboarding-record-id>`
 - Depending on the permissions requested, you might have to log into Keycloak and assign special permissions to clients.
 - The onboarding record will be marked as resolved three days after the RT ticket is resolved.
 
@@ -113,17 +115,21 @@ Occasionally, HR will submit an onboarding request before a UCD IAM/UC Path reco
 The steps for separating an employee are as follows:
 - HR uses the separation endpoint to submit a request, which generates a separation record and an associated RT ticket.
 - When the separation date has passed, an ITIS programmer will need to manually remove the employee from the local database and Keycloak by doing the following:
-  - `ssh veers.library.ucdavis.edu`
-  - `cd /opt/ucdlib-iam-support/deploy && docker compose exec cli bash`
-  - `ucdlib-iam separation ls` to get the separation record id
-  - `ucdlib-iam employees separate <separation-record-id>`
+  - Clicking the `Deprovision From Library IAM Database` on the GUI
+  - Or using the cli:
+    - `ssh veers.library.ucdavis.edu`
+    - `cd /opt/ucdlib-iam-support/deploy && docker compose exec cli bash`
+    - `ucdlib-iam separation ls` to get the separation record id
+    - `ucdlib-iam employees separate <separation-record-id>`
 - The system will send a reminder to the RT ticket when the separation date has passed.
 
 ### Discrepancy Notifications
 When possible, the system will update local employee records when the UCD IAM record is updated - for example, when an employee changes their preferred name in the UC Davis directory. However, there are some cases where an automatic update isn't possible or is ill-advised, in which case a discrepancy notification is created. These notifications are bundled and sent to the ITIS error notification slack channel once a week. It is contingent on an ITIS programmer to resolve them:
-- `ssh veers.library.ucdavis.edu`
-- `cd /opt/ucdlib-iam-support/deploy && docker compose exec cli bash`
-- `ucdlib-iam employees list-active-notifications` gets a list of active discrepancy notifications
-- Then you would fix the records it points out. The exact command varies depending on the notification, but they can all be found in `ucdlib-iam employees`. The `--help` flag will list available commands.
-- When complete run `ucdlib-iam employees dismiss-notifications <iamId of employee notification is regarding>`. Otherwise, you will get the same notification sent to slack next week.
+- Going to the employee update page, and dismissing them with the widget
+- Or using the cli:
+  - `ssh veers.library.ucdavis.edu`
+  - `cd /opt/ucdlib-iam-support/deploy && docker compose exec cli bash`
+  - `ucdlib-iam employees list-active-notifications` gets a list of active discrepancy notifications
+  - Then you would fix the records it points out. The exact command varies depending on the notification, but they can all be found in `ucdlib-iam employees`. The `--help` flag will list available commands.
+  - When complete run `ucdlib-iam employees dismiss-notifications <iamId of employee notification is regarding>`. Otherwise, you will get the same notification sent to slack next week.
 
