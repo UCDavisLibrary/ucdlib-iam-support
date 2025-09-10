@@ -111,6 +111,7 @@ export default (api) => {
       out.total = r.res.rowCount;
       out.results = r.res.rows.slice(0, limit).map(row => TextUtils.camelCaseObject(row));
 
+
       return res.json(out);
 
     });
@@ -146,7 +147,6 @@ export default (api) => {
    * Returns array of upload
    */
     api.post('/employees/addgroup/:id', async (req, res) => {
-
       if (
         !req.auth.token.hasAdminAccess &&
         !req.auth.token.hasHrAccess ){
@@ -193,4 +193,80 @@ export default (api) => {
       res.json(true);
 
     });
+
+
+  /**
+   * @description get active discrepancies for a employee, from local db
+   * Returns blank array if no discrepancies
+   */
+  api.get('/employees/:id/discrepancies', async (req, res) => {
+
+    if (
+      !req.auth.token.hasAdminAccess &&
+      !req.auth.token.hasHrAccess ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
+
+    let interval = '';
+    const id = req.params.id;
+
+    const r = await UcdlibEmployees.getActiveRecordDiscrepancyNotifications(interval, id);
+
+    if ( r.err ) {
+      console.error(`Error getting active record discrepancy notifications\n${r.err.message}`);
+      return res.status(500).json({error: true});
+    }
+    if ( r.res.rowCount === 0 ){
+      console.log('No active record discrepancy notifications found');
+      return res.json([]);
+    }
+  
+    const result = r.res.rows;
+
+    for(let res of result){
+      const reasonMatch = Object.values(UcdlibEmployees.outdatedReasons).find(
+        r => r.slug === res.reason
+      );
+
+      Object.assign(res, reasonMatch || {});
+      delete res.slug;
+    }
+
+    res.json(result);
+  });
+
+
+  /**
+   * @description remove active discrepancies of employee from local db
+   * Returns array of removal
+   */
+  api.post('/employees/:id/discrepancies', async (req, res) => {
+     
+    if (!req.auth.token.hasAdminAccess ){
+      res.status(403).json({
+        error: true,
+        message: 'Not authorized to access this resource.'
+      });
+      return;
+    }
+
+    const id = req.params.id;
+    const discrepanciesList = req.body;
+    
+    const r = await UcdlibEmployees.dismissRecordDiscrepancyNotifications(id, discrepanciesList);
+
+
+    if ( r.err ) {
+      console.error(r.err);
+      return res.status(500).json({error: true});
+    }
+
+    res.json(true);
+
+  });
+
 }
