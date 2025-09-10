@@ -1,6 +1,6 @@
 x-variables:
-  main-image: &main-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support:v1.14.1
-  utils-image: &utils-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support-utils:v1.14.1
+  main-image: &main-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support:v1.15.0
+  utils-image: &utils-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support-utils:v1.15.0
 services:
   app:
     image: *main-image
