@@ -274,7 +274,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
    */
   _onGetActiveDiscrepancies(e){
     if ( e.state === this.EmployeeModel.store.STATE.LOADED ){
-      this.EmployeeModel.clearDiscrepancyCache();
       this.discrepancy = e.payload;
     } else if ( e.state === this.EmployeeModel.store.STATE.ERROR ) {
       this.AppStateModel.showAlertBanner({message: 'Error occurred when retrieving discrepancies. Employee may have discrepancies not listed.', brandColor: 'double-decker'});
@@ -301,7 +300,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
 
     this.requestUpdate();
 
-  } 
+  }
 
   /**
    * @method _dismissDiscrepancies

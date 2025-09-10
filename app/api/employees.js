@@ -94,7 +94,7 @@ export default (api) => {
         returnGroups: true,
         returnSupervisor: true
       };
-      
+
       const limit = 10;
       const out = {
         total: 0,
@@ -130,7 +130,7 @@ export default (api) => {
         });
         return;
       }
-      
+
       const r = await UcdlibEmployees.update(req.params.id, req.body);
       if ( r.err ) {
         console.error(r.err);
@@ -156,10 +156,10 @@ export default (api) => {
         });
         return;
       }
-      
+
       let isHead = false;
       if(req.body.isHead) isHead = true;
-      
+
       const r = await UcdlibEmployees.addEmployeeToGroup(req.params.id, req.body.departmentId, isHead);
       if ( r.err ) {
         console.error(r.err);
@@ -174,7 +174,7 @@ export default (api) => {
    * Returns array of upload
    */
     api.post('/employees/removegroup/:id', async (req, res) => {
-     
+
       if (
         !req.auth.token.hasAdminAccess &&
         !req.auth.token.hasHrAccess ){
@@ -221,10 +221,9 @@ export default (api) => {
       return res.status(500).json({error: true});
     }
     if ( r.res.rowCount === 0 ){
-      console.log('No active record discrepancy notifications found');
       return res.json([]);
     }
-  
+
     const result = r.res.rows;
 
     for(let res of result){
@@ -245,7 +244,7 @@ export default (api) => {
    * Returns array of removal
    */
   api.post('/employees/:id/discrepancies', async (req, res) => {
-     
+
     if (!req.auth.token.hasAdminAccess ){
       res.status(403).json({
         error: true,
@@ -256,7 +255,7 @@ export default (api) => {
 
     const id = req.params.id;
     const discrepanciesList = req.body;
-    
+
     const r = await UcdlibEmployees.dismissRecordDiscrepancyNotifications(id, discrepanciesList);
 
 
