@@ -164,6 +164,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
       } else {
         this.ldap = ldap?.payload?.[0];
       }
+
       this.selectedPersonDepInfo = this.selectedPersonProfile.ppsAssociations;
       this.selectedPersonStdInfo = this.selectedPersonProfile.sisAssociations;
       this.informationHeaderID = this.selectedPersonProfile.iamId;
@@ -176,6 +177,26 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
 
     this.dispatchEvent(new CustomEvent('select', {detail: {status: r}}));
     if ( this.resetOnSelect ) this.reset();
+  }
+
+  /**
+   * @description format LDAP date string to readable format
+   * @param {String} dateString - LDAP date string
+   * @returns {String} - formatted date string
+   */
+  formatLDAPDate(dateString) {
+    const noFractionsDate = dateString.replace(/[.,]\d+/, "");
+    const isoDate = noFractionsDate.replace(
+      /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})Z$/,
+      "$1-$2-$3T$4:$5:$6Z"
+    );
+  
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short", day: "numeric", year: "numeric",
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+      hour12: false, timeZone: "UTC"
+    }).format(new Date(isoDate));
+  
   }
 
 
@@ -194,7 +215,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     this.employeeId = payload.employeeId || '';
     this.uuid = payload.uuid || '';
     this.mothraId = payload.mothraId || '';
-    this.modifyDate = dtUtls.fmtDatetime(payload.modifyDate, true, true);
+    this.modifyDate = dtUtls.fmtDatetime(payload.modifyDate,{dateOnly: true, UTC: true});
   }
 
   /**

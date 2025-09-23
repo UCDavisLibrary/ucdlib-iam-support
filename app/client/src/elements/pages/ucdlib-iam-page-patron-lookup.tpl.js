@@ -84,19 +84,12 @@ export function render() {
                     <div class="box-row">
                       <div class="box"><strong>UCD Affiliation</strong></div><div class="box">${this.ldap.ucdpersonaffiliation}</div>
                     </div>`: html``}
+                  ${(typeof this.ldap?.ucdpersonsponsorexpirationdate === 'string') ? html`
+                    <div class="box-row">
+                      <div class="box"><strong>Sponsor Expiration Date</strong></div><div class="box">${this.formatLDAPDate(this.ldap.ucdpersonsponsorexpirationdate)}</div>
+                    </div>`: html``}
                   ${this.alma ? html`<div class="box-row"><div class="box"><strong>Alma</strong></div><div class="box"><a class='pointer icon icon--circle-arrow-right' @click=${this.openAlmaInfoModal}>Alma Record: <strong>${this.alma.id}</strong></a></div></div>`:html``}
 
-
-                <br />
-
-                  <div class="box-row"><div class="box"><h6>Affiliation for IAM ${this.informationHeaderID}</h6></div><div class="box hide"></div></div>
-
-                  ${this.selectedPersonProfile.isStudent ? html`<div class="box-row"><div class="box"><strong>Is Student</strong></div><div class="box">${this.selectedPersonProfile.isStudent ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile.isEmployee ? html`<div class="box-row"><div class="box"><strong>Is Employee</strong></div><div class="box">${this.selectedPersonProfile.isEmployee ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`} </div></div>`:html``}
-                  ${this.selectedPersonProfile.isExternal ? html`<div class="box-row"><div class="box"><strong>Is External</strong></div><div class="box">${this.selectedPersonProfile.isExternal ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile.isFaculty ? html`<div class="box-row"><div class="box"><strong>Is Faculty</strong></div><div class="box">${this.selectedPersonProfile.isFaculty ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile.isStaff ? html`<div class="box-row"><div class="box"><strong>Is Staff</strong></div><div class="box">${this.selectedPersonProfile.isStaff ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile.isHSEmployee ? html`<div class="box-row"><div class="box"><strong>Is HS Employee</strong></div><div class="box">${this.selectedPersonProfile.isHSEmployee ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
 
                 <br />
 
@@ -133,12 +126,27 @@ export function render() {
                           <div class="box-row"><div class="box"><strong>Class</strong></div><div class="box">${std.className ? html`${std.className}`: html`<p>Not Listed</p>`}</div></div>
                           <div class="box-row"><div class="box"><strong>Level</strong></div><div class="box">${std.levelName ? html`${std.levelName}`: html`<p>Not Listed</p>`}</div></div>
                           <div class="box-row"><div class="box"><strong>Major</strong></div><div class="box">${std.classdesc ? html`${std.classdesc}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${std.createDate ? html`${dtUtls.fmtDatetime(std.createDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Modify Date</strong></div><div class="box">${std.modifyDate ? html`${dtUtls.fmtDatetime(std.modifyDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${std.createDate ? html`${dtUtls.fmtDatetime(std.createDate)}`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Modify Date</strong></div><div class="box">${std.modifyDate ? html`${dtUtls.fmtDatetime(std.modifyDate)}`: html`<p>Not Listed</p>`}</div></div>
                     `)}
                   </div>
                   <br />
                 `:html`Student Status: <span style="color:red;">INACTIVE</span>`}
+
+                <br />
+                <br />
+
+                  <div class="box-row"><div class="box"><h6>Affiliation for IAM ${this.informationHeaderID}</h6></div><div class="box hide"></div></div>
+
+                  ${this.selectedPersonProfile.isStudent ? html`<div class="box-row"><div class="box"><strong>Is Student</strong></div><div class="box">${this.selectedPersonProfile.isStudent ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile.isEmployee ? html`<div class="box-row"><div class="box"><strong>Is Employee</strong></div><div class="box">${this.selectedPersonProfile.isEmployee ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`} </div></div>`:html``}
+                  ${this.selectedPersonProfile.isExternal ? html`<div class="box-row"><div class="box"><strong>Is External</strong></div><div class="box">${this.selectedPersonProfile.isExternal ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile.isFaculty ? html`<div class="box-row"><div class="box"><strong>Is Faculty</strong></div><div class="box">${this.selectedPersonProfile.isFaculty ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile.isStaff ? html`<div class="box-row"><div class="box"><strong>Is Staff</strong></div><div class="box">${this.selectedPersonProfile.isStaff ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
+                  ${this.selectedPersonProfile.isHSEmployee ? html`<div class="box-row"><div class="box"><strong>Is HS Employee</strong></div><div class="box">${this.selectedPersonProfile.isHSEmployee ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
+
+                <br />
+                
               </div>
             `:html`<h4>There is no information on this individual in the IAM Database.</h4>`}
 
