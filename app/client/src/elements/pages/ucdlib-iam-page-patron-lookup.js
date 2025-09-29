@@ -1,6 +1,6 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-patron-lookup.tpl.js";
-import dtUtls from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
+import dtUtils from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 import "../components/ucdlib-iam-modal";
@@ -164,6 +164,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
       } else {
         this.ldap = ldap?.payload?.[0];
       }
+
       this.selectedPersonDepInfo = this.selectedPersonProfile.ppsAssociations;
       this.selectedPersonStdInfo = this.selectedPersonProfile.sisAssociations;
       this.informationHeaderID = this.selectedPersonProfile.iamId;
@@ -177,8 +178,6 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     this.dispatchEvent(new CustomEvent('select', {detail: {status: r}}));
     if ( this.resetOnSelect ) this.reset();
   }
-
-
 
   /**
    * @description Sets element state properties from onboarding request api payload
@@ -194,7 +193,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     this.employeeId = payload.employeeId || '';
     this.uuid = payload.uuid || '';
     this.mothraId = payload.mothraId || '';
-    this.modifyDate = dtUtls.fmtDatetime(payload.modifyDate, true, true);
+    this.modifyDate = dtUtils.fmtDatetime(payload.modifyDate, true, true);
   }
 
   /**
