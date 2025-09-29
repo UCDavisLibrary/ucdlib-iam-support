@@ -84,9 +84,11 @@ export function render() {
                     <div class="box-row">
                       <div class="box"><strong>UCD Affiliation</strong></div><div class="box">${this.ldap.ucdpersonaffiliation}</div>
                     </div>`: html``}
-                  ${(typeof this.ldap?.ucdpersonsponsorexpirationdate === 'string') ? html`
+                    
+                  
+                  ${this.ldap?.ucdpersonsponsorexpirationdate && !Array.isArray(this.ldap?.ucdpersonsponsorexpirationdate) ? html`
                     <div class="box-row">
-                      <div class="box"><strong>Sponsor Expiration Date</strong></div><div class="box">${this.formatLDAPDate(this.ldap.ucdpersonsponsorexpirationdate)}</div>
+                      <div class="box"><strong>Sponsor Expiration Date</strong></div><div class="box">${dtUtls.formatLDAPDate(this.ldap.ucdpersonsponsorexpirationdate)}</div>
                     </div>`: html``}
                   ${this.alma ? html`<div class="box-row"><div class="box"><strong>Alma</strong></div><div class="box"><a class='pointer icon icon--circle-arrow-right' @click=${this.openAlmaInfoModal}>Alma Record: <strong>${this.alma.id}</strong></a></div></div>`:html``}
 
@@ -126,8 +128,8 @@ export function render() {
                           <div class="box-row"><div class="box"><strong>Class</strong></div><div class="box">${std.className ? html`${std.className}`: html`<p>Not Listed</p>`}</div></div>
                           <div class="box-row"><div class="box"><strong>Level</strong></div><div class="box">${std.levelName ? html`${std.levelName}`: html`<p>Not Listed</p>`}</div></div>
                           <div class="box-row"><div class="box"><strong>Major</strong></div><div class="box">${std.classdesc ? html`${std.classdesc}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${std.createDate ? html`${dtUtls.fmtDatetime(std.createDate)}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Modify Date</strong></div><div class="box">${std.modifyDate ? html`${dtUtls.fmtDatetime(std.modifyDate)}`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${std.createDate ? html`${dtUtls.fmtDatetime(std.createDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Modify Date</strong></div><div class="box">${std.modifyDate ? html`${dtUtls.fmtDatetime(std.modifyDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
                     `)}
                   </div>
                   <br />

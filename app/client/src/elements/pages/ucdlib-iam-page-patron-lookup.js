@@ -162,7 +162,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
         this.ldap = null;
         this.AppStateModel.showAlertBanner({message: 'There was an error when accessing the UC Davis LDAP. Some fields may be missing. Check with admin for further assistance.', brandColor: 'double-decker'});
       } else {
-        this.ldap = ldap?.payload?.[0];
+        this.ldap = ldap[this.selectedPersonProfile.iamId]?.payload?.[0];
       }
 
       this.selectedPersonDepInfo = this.selectedPersonProfile.ppsAssociations;
@@ -180,28 +180,6 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
   }
 
   /**
-   * @description format LDAP date string to readable format
-   * @param {String} dateString - LDAP date string
-   * @returns {String} - formatted date string
-   */
-  formatLDAPDate(dateString) {
-    const noFractionsDate = dateString.replace(/[.,]\d+/, "");
-    const isoDate = noFractionsDate.replace(
-      /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})Z$/,
-      "$1-$2-$3T$4:$5:$6Z"
-    );
-  
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short", day: "numeric", year: "numeric",
-      hour: "2-digit", minute: "2-digit", second: "2-digit",
-      hour12: false, timeZone: "UTC"
-    }).format(new Date(isoDate));
-  
-  }
-
-
-
-  /**
    * @description Sets element state properties from onboarding request api payload
    * @param {Object} payload from /api/onboarding/id:
    */
@@ -215,7 +193,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     this.employeeId = payload.employeeId || '';
     this.uuid = payload.uuid || '';
     this.mothraId = payload.mothraId || '';
-    this.modifyDate = dtUtls.fmtDatetime(payload.modifyDate,{dateOnly: true, UTC: true});
+    this.modifyDate = dtUtls.fmtDatetime(payload.modifyDate, true, true);
   }
 
   /**
