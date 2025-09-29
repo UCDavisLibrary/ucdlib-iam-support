@@ -1,6 +1,6 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-patron-lookup.tpl.js";
-import dtUtls from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
+import dtUtils from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 import "../components/ucdlib-iam-modal";
@@ -162,7 +162,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
         this.ldap = null;
         this.AppStateModel.showAlertBanner({message: 'There was an error when accessing the UC Davis LDAP. Some fields may be missing. Check with admin for further assistance.', brandColor: 'double-decker'});
       } else {
-        this.ldap = ldap[this.selectedPersonProfile.iamId]?.payload?.[0];
+        this.ldap = ldap?.payload?.[0];
       }
 
       this.selectedPersonDepInfo = this.selectedPersonProfile.ppsAssociations;
@@ -193,7 +193,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     this.employeeId = payload.employeeId || '';
     this.uuid = payload.uuid || '';
     this.mothraId = payload.mothraId || '';
-    this.modifyDate = dtUtls.fmtDatetime(payload.modifyDate, true, true);
+    this.modifyDate = dtUtils.fmtDatetime(payload.modifyDate, true, true);
   }
 
   /**

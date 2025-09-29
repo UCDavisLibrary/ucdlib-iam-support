@@ -1,5 +1,5 @@
 import { html } from 'lit';
-import dtUtls from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
+import dtUtils from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
 
 
 /**
@@ -88,7 +88,7 @@ export function render() {
                   
                   ${this.ldap?.ucdpersonsponsorexpirationdate && !Array.isArray(this.ldap?.ucdpersonsponsorexpirationdate) ? html`
                     <div class="box-row">
-                      <div class="box"><strong>Sponsor Expiration Date</strong></div><div class="box">${dtUtls.formatLDAPDate(this.ldap.ucdpersonsponsorexpirationdate)}</div>
+                      <div class="box"><strong>Sponsor Expiration Date</strong></div><div class="box">${dtUtils.formatLDAPDate(this.ldap.ucdpersonsponsorexpirationdate)}</div>
                     </div>`: html``}
                   ${this.alma ? html`<div class="box-row"><div class="box"><strong>Alma</strong></div><div class="box"><a class='pointer icon icon--circle-arrow-right' @click=${this.openAlmaInfoModal}>Alma Record: <strong>${this.alma.id}</strong></a></div></div>`:html``}
 
@@ -106,8 +106,8 @@ export function render() {
                           <div class="box-row"><div class="box"><strong>Title</strong></div><div class="box">${dep.titleOfficialName ? html`${dep.titleOfficialName} (${dep.titleCode})`: html`<p>Not Listed</p>`}</div></div>
                           <div class="box-row"><div class="box"><strong>Position Type</strong></div><div class="box">${dep.positionType ? html`${dep.positionType} (${dep.positionTypeCode})`: html`<p>Not Listed</p>`}</div></div>
                           <div class="box-row"><div class="box"><strong>Department</strong></div><div class="box">${dep.deptOfficialName ? html`${dep.deptOfficialName} (${dep.deptCode})`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${dep.assocStartDate ? html`${dtUtls.fmtDatetime(dep.assocStartDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>End Date</strong></div><div class="box">${dep.assocEndDate ? html`${dtUtls.fmtDatetime(dep.assocEndDate, true, true)}`: html`<p>Indefinite</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${dep.assocStartDate ? html`${dtUtils.fmtDatetime(dep.assocStartDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>End Date</strong></div><div class="box">${dep.assocEndDate ? html`${dtUtils.fmtDatetime(dep.assocEndDate, true, true)}`: html`<p>Indefinite</p>`}</div></div>
                           <div class="box-row"><div class="box"><strong>Admin Title</strong></div><div class="box">${dep.adminDeptOfficialName ? html`${dep.adminDeptOfficialName} (${dep.adminDept})`: html`<p>Not Listed</p>`}</div></div>
                           <div class="box-row"><div class="box"><strong>Appointment</strong></div><div class="box">${dep.apptDeptOfficialName ? html`${dep.apptDeptOfficialName} (${dep.apptDeptCode})`: html`<p>Not Listed</p>`}</div></div>
                     `)}
@@ -128,8 +128,8 @@ export function render() {
                           <div class="box-row"><div class="box"><strong>Class</strong></div><div class="box">${std.className ? html`${std.className}`: html`<p>Not Listed</p>`}</div></div>
                           <div class="box-row"><div class="box"><strong>Level</strong></div><div class="box">${std.levelName ? html`${std.levelName}`: html`<p>Not Listed</p>`}</div></div>
                           <div class="box-row"><div class="box"><strong>Major</strong></div><div class="box">${std.classdesc ? html`${std.classdesc}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${std.createDate ? html`${dtUtls.fmtDatetime(std.createDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Modify Date</strong></div><div class="box">${std.modifyDate ? html`${dtUtls.fmtDatetime(std.modifyDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${std.createDate ? html`${dtUtils.fmtDatetime(std.createDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Modify Date</strong></div><div class="box">${std.modifyDate ? html`${dtUtils.fmtDatetime(std.modifyDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
                     `)}
                   </div>
                   <br />
