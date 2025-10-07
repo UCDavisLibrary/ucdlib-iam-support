@@ -146,18 +146,19 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
    */
   async getInformation(){
     let id = this.requestId;
-
     const r = await this.PersonModel.getPersonById(id, 'iamId', 'select');
 
     if( r.state === this.PersonModel.store.STATE.LOADED ) {
       this.isFetching = false;
       this.selectedPersonProfile = r.payload;
+
       await this._setStateProperties(r.payload);
       this.AppStateModel.setTitle({show: true, text: this.pageTitle()});
       this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs: this.breadcrumbs()});
       this.alma = await this.AlmaUserModel.getAlmaUserById(this.selectedPersonProfile.userID, "almaId");
       if(!this.alma.id) this.alma = null;
       const ldap = await this.LdapModel.getLdapData({iamId: this.selectedPersonProfile.iamId});
+      
       if(ldap.error){
         this.ldap = null;
         this.AppStateModel.showAlertBanner({message: 'There was an error when accessing the UC Davis LDAP. Some fields may be missing. Check with admin for further assistance.', brandColor: 'double-decker'});
@@ -169,6 +170,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
       this.selectedPersonStdInfo = this.selectedPersonProfile.sisAssociations;
       this.informationHeaderID = this.selectedPersonProfile.iamId;
       this.page = 'information';
+      this.requestUpdate();
 
     } else if( r.state === this.PersonModel.store.STATE.ERROR ) {
       this.isFetching = false;
@@ -293,6 +295,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
       this.AppStateModel.store.breadcrumbs.patronLookup
     ];
 
+
     if ( this.results?.length ) {
       const link = this.AppStateModel.store.breadcrumbs.patronLookup.link + "#results";
       crumbs.push({text: 'Search Results', link});
@@ -337,11 +340,11 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
    * @description return to lookup page
    */
   async _onReturn(){
+
     if ( this.isFetching ) return;
     // reset state
     this.wasError = false;
     this.reset();
-    this.AppStateModel.setLocation('/patron');
   }
 
   /**
@@ -391,19 +394,16 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
    * @returns
    */
   async _onPersonClick(id){
+
     if ( this.isFetching ) return;
 
     this.wasError = false;
     this.isFetching = true;
 
-    // this.AppStateModel.setLocation('/patron#' + id);
     /* This is for when the query option works */
     this.AppStateModel.setLocation('/patron?iamid=' + id);
 
-
     this.AppStateModel.refresh();
-
-
 
   }
 
