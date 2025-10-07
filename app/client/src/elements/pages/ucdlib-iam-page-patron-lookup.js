@@ -146,7 +146,6 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
    */
   async getInformation(){
     let id = this.requestId;
-
     const r = await this.PersonModel.getPersonById(id, 'iamId', 'select');
 
     if( r.state === this.PersonModel.store.STATE.LOADED ) {
@@ -164,12 +163,10 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
       } else {
         this.ldap = ldap?.payload?.[0];
       }
-
       this.selectedPersonDepInfo = this.selectedPersonProfile.ppsAssociations;
       this.selectedPersonStdInfo = this.selectedPersonProfile.sisAssociations;
       this.informationHeaderID = this.selectedPersonProfile.iamId;
       this.page = 'information';
-
     } else if( r.state === this.PersonModel.store.STATE.ERROR ) {
       this.isFetching = false;
       this.wasError = true;
@@ -341,7 +338,6 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     // reset state
     this.wasError = false;
     this.reset();
-    this.AppStateModel.setLocation('/patron');
   }
 
   /**
@@ -396,14 +392,10 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     this.wasError = false;
     this.isFetching = true;
 
-    // this.AppStateModel.setLocation('/patron#' + id);
     /* This is for when the query option works */
     this.AppStateModel.setLocation('/patron?iamid=' + id);
 
-
     this.AppStateModel.refresh();
-
-
 
   }
 
