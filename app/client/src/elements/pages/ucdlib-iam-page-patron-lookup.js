@@ -394,9 +394,6 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
 
     /* This is for when the query option works */
     this.AppStateModel.setLocation('/patron?iamid=' + id);
-
-    this.AppStateModel.refresh();
-
   }
 
   /**
