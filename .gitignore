@@ -1,10 +1,11 @@
 node_modules
 .env
 iam-support-local-dev
-app/client/public/js/dev
-app/client/public/js/dist
-app/client/public/css
-migration/data
+services/app/client/public/js/dev
+services/app/client/public/js/dist
+services/app/client/public/css
+services/migration/data
+/migration/data
 gc-itis-iam-writer-key.json
 gc-itis-iam-reader-key.json
 .DS_Store

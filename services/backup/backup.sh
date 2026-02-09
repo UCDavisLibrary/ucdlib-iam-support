@@ -1,7 +1,7 @@
 #! /bin/bash
 
 source /etc/profile
-DATA_DIR=/utils-data/backup
+DATA_DIR=/services/utils-data/backup
 
 if [[ -z $BACKUP_ENV ]]; then
   echo "BACKUP_ENV variable is required."

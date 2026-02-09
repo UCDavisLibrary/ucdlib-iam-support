@@ -1,1 +1,0 @@
-Any js code shared by services of this project (app, cli, etc) should be placed here.

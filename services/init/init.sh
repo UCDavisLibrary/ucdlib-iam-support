@@ -1,6 +1,6 @@
 #! /bin/bash
 
-DATA_DIR=/utils-data/init
+DATA_DIR=/services/utils-data/init
 
 # wait for db to start up
 echo "Waiting for db to start up"
