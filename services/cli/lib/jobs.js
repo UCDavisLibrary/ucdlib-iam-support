@@ -1,4 +1,3 @@
-import config from './cli-config.js';
 import { printTable } from 'console-table-printer';
 import ucdlibJobs from '@ucd-lib/iam-support-lib/src/utils/jobs.js';
 import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';

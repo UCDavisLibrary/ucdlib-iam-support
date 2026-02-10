@@ -1,4 +1,4 @@
-import config from '../lib/config.js';
+import config from "#lib/utils/config.js";
 import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.js';
 import UcdlibOnboarding from '@ucd-lib/iam-support-lib/src/utils/onboarding.js';
 

@@ -1,5 +1,5 @@
 import slack from './slack.js';
-import config from "./config.js";
+import config from "#lib/utils/config.js";
 import { CronJob } from 'cron';
 import UcdlibEmployees from "@ucd-lib/iam-support-lib/src/utils/employees.js";
 import UcdlibJobs from "@ucd-lib/iam-support-lib/src/utils/jobs.js";

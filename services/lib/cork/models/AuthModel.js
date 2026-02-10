@@ -1,7 +1,7 @@
 import {BaseModel} from '@ucd-lib/cork-app-utils';
 import AuthService from '../services/AuthService.js';
 import AuthStore from '../stores/AuthStore.js';
-import AppConfig from "../config.js";
+import AppConfig from "#lib/utils/app-config.js";
 
 class AuthModel extends BaseModel {
 

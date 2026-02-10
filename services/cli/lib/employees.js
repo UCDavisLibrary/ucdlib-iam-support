@@ -1,4 +1,4 @@
-import config from './cli-config.js';
+import config from "#lib/utils/config.js";
 import utils from './utils.js';
 import iamAdmin from '@ucd-lib/iam-support-lib/src/utils/admin.js';
 import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';

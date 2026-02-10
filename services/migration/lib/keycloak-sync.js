@@ -1,5 +1,5 @@
 import keycloakClient from "@ucd-lib/iam-support-lib/src/utils/keycloakAdmin.js";
-import config from "./config.js";
+import config from "#lib/utils/config.js";
 
 const run = async () => {
   await keycloakClient.init({...config.keycloakAdmin, refreshInterval: 58000});

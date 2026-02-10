@@ -3,7 +3,7 @@ import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
 import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.js';
 import getByName from '@ucd-lib/iam-support-lib/src/utils/getByName.js';
 import TextUtils from '@ucd-lib/iam-support-lib/src/utils/text.js';
-import config from '../lib/config.js';
+import config from "#lib/utils/config.js";
 import SystemAccessRecord from '@ucd-lib/iam-support-lib/src/utils/SystemAccessRecord.js';
 import iamAdmin from '@ucd-lib/iam-support-lib/src/utils/admin.js';
 
@@ -93,7 +93,7 @@ export default (api) => {
         ticket.addContent(payload.notes, false);
       }
       ticket.addContent('');
-      ticket.addContent(`<a href='${config.baseUrl}/separation/${output.id}'>View entire separation record.</a>`)
+      ticket.addContent(`<a href='${config.app.baseUrl}/separation/${output.id}'>View entire separation record.</a>`)
 
       // // send ticket to RT for creation
       const rtResponse = await rtClient.createTicket(ticket);
@@ -123,7 +123,7 @@ export default (api) => {
       // TODO: remove 'false' when HR supplys their separation todo list - sp 2023-08-10
       if ( notifySupervisor && false ){
         const supervisorName = ad.supervisorFirstName && ad.supervisorLastName ? `${ad.supervisorFirstName} ${ad.supervisorLastName}` : 'Supervisor';
-        const supervisorLink = `${config.baseUrl}/separation/${output.id}`;
+        const supervisorLink = `${config.app.baseUrl}/separation/${output.id}`;
         const reply = ticket.createReply();
         reply.addSubject(`Supervisor Action Required!`);
         reply.addContent(`Hi ${supervisorName},`);

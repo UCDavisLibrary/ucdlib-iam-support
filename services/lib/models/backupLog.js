@@ -1,6 +1,5 @@
 import pg from "./pg.js";
-import BaseConfig from './config.cjs';
-const config = new BaseConfig();
+import config from "#lib/utils/config.js";
 
 class BackupLog {
 

@@ -1,4 +1,4 @@
-import config from '../lib/config.js';
+import config from "#lib/utils/config.js";
 import backupLog from '@ucd-lib/iam-support-lib/src/utils/backupLog.js';
 import jobs from '@ucd-lib/iam-support-lib/src/utils/jobs.js';
 import fetch from 'node-fetch';

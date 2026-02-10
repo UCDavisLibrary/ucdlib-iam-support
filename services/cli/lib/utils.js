@@ -1,5 +1,5 @@
 import util from 'util';
-import config from './cli-config.js';
+import config from "#lib/utils/config.js";
 import { printTable } from 'console-table-printer';
 import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
 import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';

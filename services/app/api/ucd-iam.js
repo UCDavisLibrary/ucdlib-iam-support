@@ -1,4 +1,4 @@
-import config from '../lib/config.js';
+import config from "#lib/utils/config.js";
 import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
 
 UcdIamModel.init(config.ucdIamApi);

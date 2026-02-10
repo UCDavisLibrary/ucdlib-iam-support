@@ -1,5 +1,5 @@
 import express from 'express';
-import config from "../lib/config.js";
+import config from "#lib/utils/config.js";
 import protect from '../lib/protect.js';
 
 import activeTitles from './active-titles.js';
@@ -17,5 +17,5 @@ employees(router);
 groups(router);
 
 export default (app) => {
-  app.use(config.apiPrefix, router);
+  app.use(config.api.prefix, router);
 }

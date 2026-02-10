@@ -2,7 +2,7 @@ import RequestsIsoUtils from '@ucd-lib/iam-support-lib/src/utils/requests-iso-ut
 import UcdlibOnboarding from '@ucd-lib/iam-support-lib/src/utils/onboarding.js';
 import UcdlibGroups from '@ucd-lib/iam-support-lib/src/utils/groups.js';
 import PermissionsRequests from '@ucd-lib/iam-support-lib/src/utils/permissions.js';
-import config from '../lib/config.js';
+import config from "#lib/utils/config.js";
 import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.js';
 import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
 import TextUtils from '@ucd-lib/iam-support-lib/src/utils/text.js';
@@ -146,7 +146,7 @@ export default (api) => {
       }, false);
     }
     ticket.addContent('');
-    ticket.addContent(`<a href='${config.baseUrl}/onboarding/${output.id}'>View entire onboarding record.</a>`)
+    ticket.addContent(`<a href='${config.app.baseUrl}/onboarding/${output.id}'>View entire onboarding record.</a>`)
 
     // send ticket to RT for creation
     const rtResponse = await rtClient.createTicket(ticket);
@@ -160,8 +160,8 @@ export default (api) => {
     if ( notifySupervisor ){
       const obUtils = new RequestsIsoUtils(payload);
       const supervisorName = ad.supervisorFirstName && ad.supervisorLastName ? `${ad.supervisorFirstName} ${ad.supervisorLastName}` : 'Supervisor';
-      const supervisorLink = `${config.baseUrl}/permissions/onboarding/${output.id}`;
-      const onboardingLink = `${config.baseUrl}/onboarding/${output.id}`;
+      const supervisorLink = `${config.app.baseUrl}/permissions/onboarding/${output.id}`;
+      const onboardingLink = `${config.app.baseUrl}/onboarding/${output.id}`;
       const reply = ticket.createReply();
       reply.addSubject(`${transfer.isTransfer ? 'New ' : ''}Supervisor Action Required!`);
       reply.addContent(`Hi ${supervisorName},`);

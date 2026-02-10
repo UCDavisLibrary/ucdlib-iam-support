@@ -1,5 +1,5 @@
 import express from 'express';
-import config from "./lib/config.js";
+import config from "#lib/utils/config.js";
 
 import routes from './routes/index.js';
 
@@ -11,8 +11,8 @@ routes(app);
 app.listen(3000, () => {
   console.log('server ready on port 3000');
 
-  if ( config.apiHostPort ) {
-    console.log('publishing to port: ', config.apiHostPort);
+  if ( config.api.hostPort ) {
+    console.log('publishing to port: ', config.api.hostPort);
   }
 
 });

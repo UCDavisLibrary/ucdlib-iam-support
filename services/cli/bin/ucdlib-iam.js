@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 import { Command } from 'commander';
-import config from '../lib/cli-config.js';
+import config from "#lib/utils/config.js";
 
 const program = new Command();
 program

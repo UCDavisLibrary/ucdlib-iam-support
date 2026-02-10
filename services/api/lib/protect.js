@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { jwtDecode } from "jwt-decode";
 import { Issuer } from 'openid-client';
 
-import config from './config.js';
+import config from '#lib/utils/config.js';
 import UcdlibCache from '@ucd-lib/iam-support-lib/src/utils/cache.js';
 
 export default ( api ) => {

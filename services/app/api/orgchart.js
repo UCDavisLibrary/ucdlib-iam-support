@@ -1,4 +1,4 @@
-import config from '../lib/config.js';
+import config from "#lib/utils/config.js";
 import sftp from '@ucd-lib/iam-support-lib/src/utils/sftp.js';
 
 

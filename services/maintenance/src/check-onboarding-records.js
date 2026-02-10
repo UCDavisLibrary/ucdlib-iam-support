@@ -1,7 +1,7 @@
 import iamAdmin from "@ucd-lib/iam-support-lib/src/utils/admin.js";
 import UcdlibOnboarding from "@ucd-lib/iam-support-lib/src/utils/onboarding.js";
 import UcdlibJobs from "@ucd-lib/iam-support-lib/src/utils/jobs.js";
-import config from "./config.js";
+import config from "#lib/utils/config.js";
 
 function OnboardingStatusError(error) {
   this.error = error;

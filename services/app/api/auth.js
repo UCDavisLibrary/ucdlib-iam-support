@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import jwt_decode from "jwt-decode";
-import config from '../lib/config.js';
+import config from "#lib/utils/config.js";
 import AccessToken from '@ucd-lib/iam-support-lib/src/utils/accessToken.js';
 import UcdlibCache from '@ucd-lib/iam-support-lib/src/utils/cache.js';
 

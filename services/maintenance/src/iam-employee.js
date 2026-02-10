@@ -3,7 +3,7 @@ import UcdlibCache from '@ucd-lib/iam-support-lib/src/utils/cache.js';
 import { UcdIamModel } from "@ucd-lib/iam-support-lib/index.js";
 import UcdlibJobs from "@ucd-lib/iam-support-lib/src/utils/jobs.js";
 import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js";
-import config from "./config.js";
+import config from "#lib/utils/config.js";
 import assert from 'node:assert/strict';
 
 export class IamEmployees {

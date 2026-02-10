@@ -1,7 +1,7 @@
 import iamAdmin from "@ucd-lib/iam-support-lib/src/utils/admin.js";
 import UcdlibSeparation from "@ucd-lib/iam-support-lib/src/utils/separation.js";
 import UcdlibJobs from "@ucd-lib/iam-support-lib/src/utils/jobs.js";
-import config from "./config.js";
+import config from "#lib/utils/config.js";
 
 function SeparationStatusError(error) {
   this.error = error;

@@ -1,4 +1,4 @@
-import config from '../lib/config.js';
+import config from "#lib/utils/config.js";
 import AlmaModel from '@ucd-lib/iam-support-lib/src/models/AlmaModel.js';
 
 AlmaModel.init(config.alma);

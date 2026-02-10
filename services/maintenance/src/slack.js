@@ -1,5 +1,5 @@
 import { IncomingWebhook } from '@slack/webhook';
-import config from './config.js';
+import config from "#lib/utils/config.js";
 
 class Slack {
   constructor() {

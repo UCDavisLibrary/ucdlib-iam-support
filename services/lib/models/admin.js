@@ -9,8 +9,7 @@ import PermissionsRequests from "./permissions.js"
 import RequestsIsoUtils from "./requests-iso-utils.js";
 import permissionsFormProperties from "./permissionsFormProperties.js";
 import { UcdlibRt, UcdlibRtTicket } from "./rt.js";
-import Config from "./config.cjs";
-const config = new Config();
+import config from "#lib/utils/config.js";
 
 const rtClient = new UcdlibRt(config.rt);
 

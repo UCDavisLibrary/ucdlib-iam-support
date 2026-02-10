@@ -11,7 +11,7 @@ class CorkBuild {
     if (this.file) {
       return this.file;
     }
-    const filePath = path.resolve('/cork-build-info', 'ucdlib-iam-support-lib.json');
+    const filePath = path.resolve('/cork-build-info', 'ucdlib-iam-support.json');
     if (fs.existsSync(filePath)) {
       this.file = JSON.parse(fs.readFileSync(filePath, 'utf8'));
     }

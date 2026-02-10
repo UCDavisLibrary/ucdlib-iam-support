@@ -1,6 +1,6 @@
 import path from 'path';
 import spaMiddleware from '@ucd-lib/spa-router-middleware';
-import config from './config.js';
+import config from '#lib/utils/config.js';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -16,7 +16,7 @@ export default (app) => {
     app,
     htmlFile : path.join(assetsDir, 'index.html'),
     isRoot : true,
-    appRoutes : config.routes,
+    appRoutes : config.app.routes,
     static : {
       dir : assetsDir
     },
@@ -24,7 +24,7 @@ export default (app) => {
 
     getConfig : async (req, res, next) => {
       next({
-        appRoutes : config.routes,
+        appRoutes : config.app.routes,
         keycloak: config.keycloak,
         version: config.version,
         logger: config.logger
@@ -33,7 +33,7 @@ export default (app) => {
 
     template : (req, res, next) => {
       next({
-        title: config.title,
+        title: config.app.title,
         bundle
       });
     }

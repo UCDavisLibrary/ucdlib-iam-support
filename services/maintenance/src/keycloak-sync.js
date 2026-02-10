@@ -1,6 +1,6 @@
 import keycloakClient from "@ucd-lib/iam-support-lib/src/utils/keycloakAdmin.js";
 import UcdlibJobs from "@ucd-lib/iam-support-lib/src/utils/jobs.js";
-import config from "./config.js";
+import config from "#lib/utils/config.js";
 
 function KeycloakSyncError(error) {
   this.error = error;
