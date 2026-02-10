@@ -1,5 +1,5 @@
 import {AppStateModel} from '@ucd-lib/cork-app-state';
-import AppStateStore from '../stores/AppStateStore';
+import AppStateStore from '../stores/AppStateStore.js';
 
 /**
  * @description Model for handling generic app state, such as routing

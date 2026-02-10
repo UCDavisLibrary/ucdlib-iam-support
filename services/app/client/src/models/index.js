@@ -1,4 +1,4 @@
-import AppStateModel from "./AppStateModel";
+import AppStateModel from "./AppStateModel.js";
 
 import '#lib/cork/models/AlmaUserModel.js';
 import '#lib/cork/models/AuthModel.js';
@@ -13,17 +13,3 @@ import '#lib/cork/models/RtModel.js';
 import '#lib/cork/models/SeparationModel.js';
 
 AppStateModel.init(window.APP_CONFIG.appRoutes);
-
-export {
-  AppStateModel,
-  AuthModel,
-  OnboardingModel,
-  SeparationModel,
-  PersonModel,
-  RtModel,
-  PermissionsModel,
-  OrgchartModel,
-  LdapModel,
-  AlmaUserModel,
-  EmployeeModel,
-};

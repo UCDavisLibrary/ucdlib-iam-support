@@ -15,9 +15,9 @@
     "#components/*": "./app/client/src/elements/components/*"
   },
   "scripts": {
-    "client-watch": "cd ./app/build && webpack --config webpack-watch.config.js --watch",
-    "client-build-dev": "cd ./app/build && webpack --config webpack-watch.config.js",
-    "client-build-dist": "cd ./app/build && webpack --config webpack-dist.config.js",
+    "client-watch": "cd ./app/client/build && webpack --config webpack-watch.config.js --watch",
+    "client-build-dev": "cd ./app/client/build && webpack --config webpack-watch.config.js",
+    "client-build-dist": "cd ./app/client/build && webpack --config webpack-dist.config.js",
     "start-client": "node ./app/index.js"
   },
   "dependencies": {

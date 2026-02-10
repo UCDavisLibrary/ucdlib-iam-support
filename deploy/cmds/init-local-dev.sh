@@ -10,4 +10,3 @@ cd $CMDS_DIR
 
 ./get-reader-key.sh
 ./get-env-file.sh local-dev
-./generate-dev-bundle.sh

@@ -1,6 +1,6 @@
 import { html, css, svg } from 'lit';
-import headingStyles from "@ucd-lib/theme-sass/1_base_html/_headings.css";
-import headingClassesStyles from "@ucd-lib/theme-sass/2_base_class/_headings.css";
+import headingStyles from "@ucd-lib/theme-sass/1_base_html/_headings.css.js";
+import headingClassesStyles from "@ucd-lib/theme-sass/2_base_class/_headings.css.js";
 
 /**
  * @description Element styles

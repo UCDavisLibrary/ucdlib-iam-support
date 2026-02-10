@@ -28,7 +28,7 @@ import "./components/ucdlib-iam-state.js";
 import "./components/ucdlib-iam-alert.js";
 
 // pages
-import bundles from "./pages/bundles";
+import bundles from "./pages/bundles/index.js";
 
 /**
  * @description The main custom element
@@ -163,9 +163,9 @@ export default class UcdlibIamApp extends Mixin(LitElement)
   loadBundle(bundle) {
 
     if( bundle == 'main' ) {
-      return import(/* webpackChunkName: "pages-main" */ "./pages/bundles/main");
+      return import(/* webpackChunkName: "pages-main" */ "./pages/bundles/main.js");
     } else if ( bundle == 'tools' ) {
-      return import(/* webpackChunkName: "tools" */ "./pages/bundles/tools");
+      return import(/* webpackChunkName: "tools" */ "./pages/bundles/tools.js");
     }
     console.warn('No code chunk loaded for this page');
     return false;

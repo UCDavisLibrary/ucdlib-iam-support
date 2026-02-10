@@ -1,6 +1,6 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-alma.tpl.js";
-import "../components/ucdlib-iam-modal";
+import "../components/ucdlib-iam-modal.js";
 import AlmaTransform from "#lib/utils/AlmaTransform.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 

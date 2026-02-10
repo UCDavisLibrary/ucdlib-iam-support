@@ -62,14 +62,24 @@ class WebpackUtils {
       test: /\.s[ac]ss$/i,
       use: [
         { loader: MiniCssExtractPlugin.loader},
-        buildConfig.loaderOptions.css,
-        buildConfig.loaderOptions.scss,
+        { loader: 'css-loader', options : {url: false} },
+        {
+          loader: 'sass-loader',
+          options: {
+            sassOptions: {
+              includePaths: [
+                path.join(__dirname, "../../../node_modules/@ucd-lib/theme-sass"),
+                path.join(__dirname, "../../../node_modules/breakpoint-sass/stylesheets"),
+                path.join(__dirname, "../../../node_modules/sass-toolkit/stylesheets")]
+            }
+          }
+        }
       ]
     });
 
     conf.plugins = [
       new MiniCssExtractPlugin({
-        filename: path.join(this.cssDir(isDist), this.stylesheetName)
+        filename: `../../css/${isDist ? 'dist' : 'dev'}/${this.stylesheetName}`
       })
     ];
   }

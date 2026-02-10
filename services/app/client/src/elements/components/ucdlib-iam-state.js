@@ -1,6 +1,6 @@
 import { LitElement } from 'lit';
 import {render, styles} from "./ucdlib-iam-state.tpl.js";
-import {MutationObserverController} from "@ucd-lib/theme-elements/utils/controllers";
+import {MutationObserverController} from "@ucd-lib/theme-elements/utils/controllers/index.js";
 
 /**
  * @description Component class for displaying a loading or error state

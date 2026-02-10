@@ -5,7 +5,7 @@ import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 import DtUtils from "#lib/utils/dtUtils.js";
 import selectOptions from "../../utils/permissionsFormOptions.js";
 import formProperties from '#lib/utils/permissionsFormProperties.js';
-import IamPersonTransform from "#lib/utils/IamPersonTransform";
+import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
 
 import "#components/ucdlib-iam-modal.js";
 import "#components/ucdlib-iam-alma.js";

@@ -1,5 +1,5 @@
 import {BaseService, getLogger} from '@ucd-lib/cork-app-utils';
-import AppConfig from '../config.js';
+import AppConfig from '#lib/utils/app-config.js';
 
 export default class BaseServiceImp extends BaseService {
   constructor() {

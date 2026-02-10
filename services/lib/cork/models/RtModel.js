@@ -1,7 +1,7 @@
 import {BaseModel} from '@ucd-lib/cork-app-utils';
 import RtService from '../services/RtService.js';
 import RtStore from '../stores/RtStore.js';
-import DtUtils from "../utils/dtUtils.js"
+import DtUtils from "#lib/utils/dtUtils.js"
 
 /**
  * @class RtModel

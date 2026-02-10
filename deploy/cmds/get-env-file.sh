@@ -4,12 +4,14 @@
 # Downloads env from google cloud secret manager and places in specified deployment directory
 # Usage: ./cmds/get-env.sh [-f] <deployment-dir>
 # -f: force overwrite of existing .env file
-# deployment-dir: required. e.g. local-dev gets placed in compose/ucdlib-iam-support-local-dev/.env
+# deployment-dir: required. the suffix of the deployment directory in deploy/compose
 ###
 
 set -e
 CMDS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-cd $CMDS_DIR
+source "$CMDS_DIR/config.sh"
+
+cd $COMPOSE_DIR
 
 FORCE_OVERWRITE=false
 
@@ -33,7 +35,7 @@ if [ -z "$DEPLOYMENT_DIR" ]; then
   exit 1
 fi
 
-DEPLOYMENT_DIR="../compose/ucdlib-iam-support-$DEPLOYMENT_DIR"
+DEPLOYMENT_DIR="$COMPOSE_DIR/$PROJECT_NAME-$DEPLOYMENT_DIR"
 
 if [ ! -d "$DEPLOYMENT_DIR" ]; then
   echo "Deployment directory does not exist: $DEPLOYMENT_DIR"
@@ -44,9 +46,10 @@ ENV_FILE="$DEPLOYMENT_DIR/.env"
 
 if [ -f "$ENV_FILE" ] && [ "$FORCE_OVERWRITE" = false ]; then
   echo ".env file already exists. Use -f to force overwrite."
-  exit 1
+  exit 0
 fi
 
+touch "$ENV_FILE"
 gcloud --project=digital-ucdavis-edu secrets versions access latest --secret=itis-iam-support-env > "$ENV_FILE"
 
 echo ".env file has been downloaded to $DEPLOYMENT_DIR"
