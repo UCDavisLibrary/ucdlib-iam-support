@@ -2,9 +2,8 @@ import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-update-tool.tpl.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
-
-import "../components/ucdlib-employee-search";
-import "../components/ucdlib-iam-search";
+import "#components/ucdlib-employee-search.js";
+import "#components/ucdlib-iam-search.js";
 
 /**
  * @description Employee Update Tool

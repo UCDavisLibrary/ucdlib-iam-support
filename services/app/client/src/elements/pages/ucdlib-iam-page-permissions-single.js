@@ -2,14 +2,14 @@ import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-permissions-single.tpl.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
-import DtUtils from "@ucd-lib/iam-support-lib/src/utils/dtUtils.js";
+import DtUtils from "#lib/utils/dtUtils.js";
 import selectOptions from "../../utils/permissionsFormOptions.js";
-import formProperties from '@ucd-lib/iam-support-lib/src/utils/permissionsFormProperties.js';
-import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform";
+import formProperties from '#lib/utils/permissionsFormProperties.js';
+import IamPersonTransform from "#lib/utils/IamPersonTransform";
 
-import "../components/ucdlib-iam-modal";
-import "../components/ucdlib-iam-alma";
-import "../components/ucdlib-rt-history";
+import "#components/ucdlib-iam-modal.js";
+import "#components/ucdlib-iam-alma.js";
+import "#components/ucdlib-rt-history.js";
 
 
 /**

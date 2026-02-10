@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import config from "#lib/utils/config.js";
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -10,13 +11,26 @@ class WebpackUtils {
   constructor(){
     this.publicDir = path.join(__dirname, '../public');
     this.root = __dirname;
-    this.entry = path.join(__dirname, '../dev/elements/ref-stats-app.js');
+    this.entry = path.join(__dirname, '../src/elements/ucdlib-iam-app.js');
+    this.scssEntry = path.join(__dirname, '../scss/style.scss');
     this.bundleName = config.app.bundleName;
+    this.stylesheetName = config.app.stylesheetName;
     this.clientModules = [];
   }
 
   jsDir(isDist){
     return path.join(this.publicDir, 'js', isDist ? 'dist' : 'dev');
+  }
+
+  cssDir(isDist){
+    return path.join(this.publicDir, 'css', isDist ? 'dist' : 'dev');
+  }
+
+  removeCssDir(isDist){
+    const cssDir = this.cssDir(isDist);
+    if (fs.existsSync(cssDir)) {
+      fs.rmSync(cssDir, { recursive: true, force: true });
+    }
   }
 
   removeJsDir(isDist){
@@ -26,8 +40,8 @@ class WebpackUtils {
     }
   }
 
-  addCssLoader(config){
-    let cssModule = config.module.rules.find(rule => {
+  addCssLoader(conf){
+    let cssModule = conf.module.rules.find(rule => {
     if( !Array.isArray(rule.use) ) return false;
       return rule.use.includes('css-loader');
     });
@@ -39,6 +53,25 @@ class WebpackUtils {
         url : false
       }
     }
+  }
+
+  addScssLoader(conf, isDist){
+    if( !Array.isArray(conf.entry) ) conf.entry = [conf.entry];
+    conf.entry.push(this.scssEntry);
+    conf.module.rules.push({
+      test: /\.s[ac]ss$/i,
+      use: [
+        { loader: MiniCssExtractPlugin.loader},
+        buildConfig.loaderOptions.css,
+        buildConfig.loaderOptions.scss,
+      ]
+    });
+
+    conf.plugins = [
+      new MiniCssExtractPlugin({
+        filename: path.join(this.cssDir(isDist), this.stylesheetName)
+      })
+    ];
   }
 
 }

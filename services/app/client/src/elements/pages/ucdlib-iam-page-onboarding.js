@@ -2,9 +2,9 @@ import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-onboarding.tpl.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
-import "../components/ucdlib-iam-onboarding-list";
-import "../components/ucdlib-iam-existing-search";
-import "../components/ucdlib-iam-modal";
+import "#components/ucdlib-iam-onboarding-list.js";
+import "#components/ucdlib-iam-existing-search.js";
+import "#components/ucdlib-iam-modal.js";
 
 /**
  * @classdesc Lists active onboarding requests and provides navigation to additional onboarding actions

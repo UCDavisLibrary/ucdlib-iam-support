@@ -1,6 +1,5 @@
 import { html } from 'lit';
-import dtUtils from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
-
+import dtUtils from '#lib/utils/dtUtils.js';
 
 /**
  * @description Primary render function

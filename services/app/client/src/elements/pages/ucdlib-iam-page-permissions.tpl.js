@@ -1,5 +1,5 @@
 import { html } from 'lit';
-import applicationList from "../../utils/applications";
+import applicationList from "../../utils/applications.js";
 
 /**
  * @description Main template for the element

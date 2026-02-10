@@ -1,5 +1,5 @@
 import { LitElement } from 'lit';
-import {render} from "./ucdlib-iam-app.tpl.js";
+import { render } from "./ucdlib-iam-app.tpl.js";
 
 // brand components
 import '@ucd-lib/theme-elements/brand/ucd-theme-primary-nav/ucd-theme-primary-nav.js';
@@ -12,18 +12,20 @@ import '@ucd-lib/theme-elements/brand/ucd-theme-slim-select/ucd-theme-slim-selec
 import '@fortawesome/fontawesome-free/js/all.js';
 
 // app config
-import AppConfig from "@ucd-lib/iam-support-lib/src/config";
+import AppConfig from "#lib/utils/app-config.js";
 
 // auth
 import Keycloak from 'keycloak-js';
 
 // global event bus and model registry
-import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
-import {AuthModel} from "../models";
+import { LitCorkUtils, Mixin, Registry } from '@ucd-lib/cork-app-utils';
+import '../models/index.js';
+const AuthModel = Registry.getModel('AuthModel');
+Registry.ready();
 
 // global components
-import "./components/ucdlib-iam-state";
-import "./components/ucdlib-iam-alert";
+import "./components/ucdlib-iam-state.js";
+import "./components/ucdlib-iam-alert.js";
 
 // pages
 import bundles from "./pages/bundles";

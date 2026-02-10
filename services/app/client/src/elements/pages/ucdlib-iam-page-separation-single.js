@@ -1,10 +1,10 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-separation-single.tpl.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
-import dtUtls from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
-import "../components/ucdlib-rt-history";
-import "../components/ucdlib-iam-search";
-import "../components/ucdlib-iam-modal";
+import dtUtls from '#lib/utils/dtUtils.js';
+import "#components/ucdlib-rt-history.js";
+import "#components/ucdlib-iam-search.js";
+import "#components/ucdlib-iam-modal.js";
 /**
  * @description Page element for displaying a single separation request
  */

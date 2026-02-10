@@ -97,7 +97,10 @@ class Config {
     this.app = {
       routes: ['onboarding', 'separation', 'logout', 'permissions', 'orgchart', 'emupdate', 'patron', 'tools'],
       title: 'UC Davis Library Identity and Access Management',
-      baseUrl: this.getEnv('UCDLIB_BASE_URL', 'https://iam.staff.library.ucdavis.edu')
+      baseUrl: this.getEnv('UCDLIB_BASE_URL', 'https://iam.staff.library.ucdavis.edu'),
+      bundleName: this.getEnv('UCDLIB_APP_BUNDLE_NAME', 'ucdlib-iam-support.js'),
+      stylesheetName: this.getEnv('UCDLIB_APP_STYLESHEET_NAME', 'ucdlib-iam-support.css'),
+      bundleVersion: this.env == 'dev' ? (new Date()).toISOString() : this.version
     };
 
     this.backup = {

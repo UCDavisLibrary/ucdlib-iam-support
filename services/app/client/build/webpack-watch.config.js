@@ -2,6 +2,7 @@ import corkAppBuild from '@ucd-lib/cork-app-build';
 import webpackUtils from './webpack-utils.js';
 
 webpackUtils.removeJsDir(false);
+webpackUtils.removeCssDir(false);
 
 let configs = corkAppBuild.watch({
   root : webpackUtils.root,
@@ -14,7 +15,8 @@ let configs = corkAppBuild.watch({
 if( !Array.isArray(configs) ) configs = [configs];
 
 configs.forEach((config, index) => {
-  webpackUtils.addCssLoader(config);
+  // webpackUtils.addCssLoader(config);
+  webpackUtils.addScssLoader(config, false);
 });
 
 export default configs;

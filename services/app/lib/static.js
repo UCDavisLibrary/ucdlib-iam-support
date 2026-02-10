@@ -8,8 +8,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default (app) => {
   let assetsDir = path.join(__dirname, '../client/public');
   const bundle = `
-    <link rel="stylesheet" href="/css/site.css?v=${config.version}">
-    <script src='/js/${config.env == 'dev' ? 'dev' : 'dist'}/ucdlib-iam-support.js?v=${config.version}'></script>
+    <link rel="stylesheet" href="/css/${config.env == 'dev' ? 'dev' : 'dist'}/${config.app.stylesheetName}?v=${config.version}">
+    <script src='/js/${config.env == 'dev' ? 'dev' : 'dist'}/${config.app.bundleName}?v=${config.version}'></script>
   `;
 
   spaMiddleware({

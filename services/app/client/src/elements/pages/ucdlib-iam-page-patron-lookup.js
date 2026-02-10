@@ -1,9 +1,9 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-patron-lookup.tpl.js";
-import dtUtils from '@ucd-lib/iam-support-lib/src/utils/dtUtils.js';
+import dtUtils from '#lib/utils/dtUtils.js';
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
-import "../components/ucdlib-iam-modal";
+import "#components/ucdlib-iam-modal.js";
 
 /**
  * @description Component element for querying the UC Davis IAM API
