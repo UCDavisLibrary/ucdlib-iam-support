@@ -1,8 +1,9 @@
 import fetch from 'node-fetch';
 import jwt_decode from "jwt-decode";
+
+import models from '#models';
 import config from "#lib/utils/config.js";
 import AccessToken from '@ucd-lib/iam-support-lib/src/utils/accessToken.js';
-import UcdlibCache from '@ucd-lib/iam-support-lib/src/utils/cache.js';
 
 export default (api) => {
 
@@ -37,7 +38,7 @@ export default (api) => {
     }
 
     // check for cached token
-    let cached = await UcdlibCache.get('accessToken', token.preferred_username, '1 hour');
+    let cached = await models.cache.get('accessToken', token.preferred_username, '1 hour');
     if ( cached.err ) {
       console.error(cached.err);
     }
@@ -78,7 +79,7 @@ export default (api) => {
       });
       return;
     }
-    const setCache = await UcdlibCache.set('accessToken', token.preferred_username, {token: token, userInfo});
+    const setCache = await models.cache.set('accessToken', token.preferred_username, {token: token, userInfo});
     if ( setCache.err ) {
       console.error(setCache.err);
     }

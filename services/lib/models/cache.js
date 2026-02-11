@@ -1,4 +1,4 @@
-import pg from "./pg.js";
+import pg from "#lib/utils/pg.js";
 
 // postgres class for getting/settting cache values
 class UcdlibCache {

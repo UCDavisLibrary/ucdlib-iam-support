@@ -1,16 +1,10 @@
+import models from '#models';
+
 import RequestsIsoUtils from '@ucd-lib/iam-support-lib/src/utils/requests-iso-utils.js';
-import UcdlibOnboarding from '@ucd-lib/iam-support-lib/src/utils/onboarding.js';
-import UcdlibGroups from '@ucd-lib/iam-support-lib/src/utils/groups.js';
-import PermissionsRequests from '@ucd-lib/iam-support-lib/src/utils/permissions.js';
 import config from "#lib/utils/config.js";
-import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.js';
-import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
 import TextUtils from '@ucd-lib/iam-support-lib/src/utils/text.js';
-import getByName from '@ucd-lib/iam-support-lib/src/utils/getByName.js';
 import Pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
-import iamAdmin from '@ucd-lib/iam-support-lib/src/utils/admin.js';
 import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
-import SystemAccessRecord from '@ucd-lib/iam-support-lib/src/utils/SystemAccessRecord.js';
 
 UcdIamModel.init(config.ucdIamApi);
 
@@ -33,7 +27,7 @@ export default (api) => {
 
     payload.submittedBy = req.auth.token.id;
     payload.modifiedBy = req.auth.token.id;
-    payload.additionalData[SystemAccessRecord.onboardingRecordProp] = [];
+    payload.additionalData[models.SystemAccessRecord.onboardingRecordProp] = [];
 
     // get ucd iam record
     if ( payload.iamId ){
@@ -54,7 +48,7 @@ export default (api) => {
 
       // check for local employee record
       const options = {returnSupervisor: true, returnGroups: true};
-      const employeeRecord = await UcdlibEmployees.getById(payload.iamId, 'iamId', options);
+      const employeeRecord = await models.employees.getById(payload.iamId, 'iamId', options);
       if ( employeeRecord.err ) {
         console.error(employeeRecord.err);
         res.status(500).json({error: true, message: 'Unable to retrieve employee record'});
@@ -84,7 +78,7 @@ export default (api) => {
       };
     }
 
-    const r = await UcdlibOnboarding.create(payload);
+    const r = await models.onboarding.create(payload);
     if ( r.err ) {
       console.error(r.err);
       return res.status(500).json({error: true, message: 'Unable to create onboarding request.'});
@@ -95,13 +89,13 @@ export default (api) => {
     const ad = payload.additionalData || {};
     const notifySupervisor = ad.supervisorEmail && !ad.skipSupervisor;
     const notifyEmployee = ad.contactEmployee && ad.employeeContactEmail;
-    let department =  await UcdlibGroups.getDepartmentsById(payload.groupIds || []);
+    let department =  await models.groups.getDepartmentsById(payload.groupIds || []);
     department = department.res && department.res.rows.length ? department.res.rows[0].name : '';
     const employeeName = `${ad.employeeLastName}, ${ad.employeeFirstName}`;
 
     // create rt ticket
-    const rtClient = new UcdlibRt(config.rt);
-    const ticket = new UcdlibRtTicket();
+    const rtClient = new models.rt(config.rt);
+    const ticket = new models.rtTicket();
 
     ticket.addSubject(`Onboarding: ${employeeName}`);
     if ( config.rt.user ){
@@ -152,7 +146,7 @@ export default (api) => {
     const rtResponse = await rtClient.createTicket(ticket);
     if ( rtResponse.err || !rtResponse.res.id )  {
       console.error(rtResponse);
-      await UcdlibOnboarding.delete(output.id);
+      await models.onboarding.delete(output.id);
       return res.status(500).json({error: true, message: 'Unable to create an RT ticket for this request.'});
     }
 
@@ -183,12 +177,12 @@ export default (api) => {
       const replyResponse = await rtClient.sendCorrespondence(reply);
       if ( replyResponse.err )  {
         console.error(replyResponse);
-        await UcdlibOnboarding.delete(output.id);
+        await models.onboarding.delete(output.id);
         return res.status(500).json({error: true, message: 'Unable to send RT request to supervisor.'});
       }
     }
 
-    await UcdlibOnboarding.update(output.id, {rtTicketId: rtResponse.res.id});
+    await models.onboarding.update(output.id, {rtTicketId: rtResponse.res.id});
     return res.json(output);
 
   });
@@ -214,7 +208,7 @@ export default (api) => {
     }
 
     // make sure onboarding record exists and user has access
-    let onboardingRecord = await UcdlibOnboarding.getById(payload.onboardingId);
+    let onboardingRecord = await models.onboarding.getById(payload.onboardingId);
     if ( onboardingRecord.err ) {
       console.error(onboardingRecord.err);
       res.status(400).json({error: true, message: 'Unable to retrieve onboarding request'});
@@ -260,8 +254,8 @@ export default (api) => {
 
     // send RT correspondence
     if ( onboardingRecord.rtTicketId ) {
-      const rtClient = new UcdlibRt(config.rt);
-      const ticket = new UcdlibRtTicket(false, {id: onboardingRecord.rtTicketId});
+      const rtClient = new models.rt(config.rt);
+      const ticket = new models.rtTicket(false, {id: onboardingRecord.rtTicketId});
       let reply = ticket.createReply();
       reply.addSubject(`Onboarding Record Reconciled with UC Davis IAM System`);
       const d = {
@@ -285,7 +279,7 @@ export default (api) => {
       iamId: payload.iamId,
       modifiedBy: req.auth.token.id,
       additionalData: onboardingRecord.additionalData || {},
-      statusId: UcdlibOnboarding.statusCodes.supervisor
+      statusId: models.onboarding.statusCodes.supervisor
     };
     data.additionalData.employeeId = iamRecord.employeeId;
     data.additionalData.employeeEmail = iamRecord.email;
@@ -295,11 +289,11 @@ export default (api) => {
       record: iamRecord.data
     }
     if ( !iamRecord.userId ) {
-      data.statusId = UcdlibOnboarding.statusCodes.userId;
+      data.statusId = models.onboarding.statusCodes.userId;
     } else if ( onboardingRecord.skipSupervisor || !onboardingRecord.supervisorId ) {
-      data.statusId = UcdlibOnboarding.statusCodes.provisioning;
+      data.statusId = models.onboarding.statusCodes.provisioning;
     } else {
-      const permRequest = await PermissionsRequests.getOnboardingPermissions(onboardingRecord.id);
+      const permRequest = await models.permissions.getOnboardingPermissions(onboardingRecord.id);
       if ( permRequest.err ) {
         console.error(permRequest.err);
         res.status(502).json({
@@ -309,10 +303,10 @@ export default (api) => {
         return;
       }
       if ( permRequest.res.rowCount ) {
-        data.statusId = UcdlibOnboarding.statusCodes.provisioning;
+        data.statusId = models.onboarding.statusCodes.provisioning;
       }
     }
-    const update = await UcdlibOnboarding.update(onboardingRecord.id, data);
+    const update = await models.onboarding.update(onboardingRecord.id, data);
     if ( update.err ) {
       console.error(update.err);
       res.status(500).json({
@@ -348,7 +342,7 @@ export default (api) => {
       return;
     }
 
-    const r = await getByName.getByName("onboarding",req.query.firstName, req.query.lastName);
+    const r = await models.getByName.getByName("onboarding",req.query.firstName, req.query.lastName);
     if ( r.err ) {
       console.error(r.err);
       return res.status(500).json({error: true, message: 'Unable to retrieve SEARCH onboarding request'});
@@ -367,7 +361,7 @@ export default (api) => {
    */
   api.get('/onboarding/:id', async (req, res) => {
 
-    const r = await UcdlibOnboarding.getById(req.params.id);
+    const r = await models.onboarding.getById(req.params.id);
     if ( r.err ) {
       console.error(r.err);
       return res.status(500).json({error: true, message: 'Unable to retrieve onboarding request'});
@@ -390,7 +384,7 @@ export default (api) => {
     }
 
     // Get department name
-    let groups = await UcdlibGroups.getAll();
+    let groups = await models.groups.getAll();
     if ( groups.err ){
       console.error(groups.err);
       return res.status(500).json({error: true, message: errorMsg});
@@ -417,10 +411,10 @@ export default (api) => {
       });
       return;
     }
-    const systemAccessRecord = new SystemAccessRecord();
+    const systemAccessRecord = new models.SystemAccessRecord();
 
     // add to database
-    const addToDb = await iamAdmin.adoptEmployee(req.params.id, {ucdIamConfig: config.ucdIamApi});
+    const addToDb = await models.admin.adoptEmployee(req.params.id, {ucdIamConfig: config.ucdIamApi});
     if ( addToDb.error ){
       console.error(`Error adding employee to database. Onboarding Id: ${req.params.id}`, addToDb);
       return res.status(400).json({
@@ -430,10 +424,10 @@ export default (api) => {
     systemAccessRecord.add('ucdlib-iam-db', req.auth.token.id);
 
     // add to keycloak
-    const addToKc = await iamAdmin.provisionKcAccount(addToDb.employeeId, {keycloakConfig: {...config.keycloakAdmin, refreshInterval: 58000}});
+    const addToKc = await models.admin.provisionKcAccount(addToDb.employeeId, {keycloakConfig: {...config.keycloakAdmin, refreshInterval: 58000}});
     if ( addToKc.error ){
       console.error(`Error provisioning keycloak account. Onboarding Id: ${req.params.id}`, addToKc);
-      await iamAdmin.deleteEmployee(addToDb.employeeId);
+      await models.admin.deleteEmployee(addToDb.employeeId);
       return res.status(400).json({
         ...addToKc
       });
@@ -443,7 +437,7 @@ export default (api) => {
     await systemAccessRecord.writeToOnboardingRequest(req.params.id);
 
     // send RT ticket
-    const sendRt = await iamAdmin.sendAdoptionRtNotification(addToDb.onboardingRecord.rt_ticket_id);
+    const sendRt = await models.admin.sendAdoptionRtNotification(addToDb.onboardingRecord.rt_ticket_id);
 
     return res.json({
       success: true,
@@ -469,7 +463,7 @@ export default (api) => {
         return;
       }
 
-      const obReq = await UcdlibOnboarding.getById(req.params.id);
+      const obReq = await models.onboarding.getById(req.params.id);
       if ( obReq.err ) {
         console.error(obReq.err);
         res.status(500).json({error: true, message: 'Unable to retrieve onboarding request'});
@@ -499,7 +493,7 @@ export default (api) => {
           res.status(400).json({error: true, message: 'No ITIS RT ticket ID found!'});
           return;
         }
-        const r = await iamAdmin.sendBackgroundCheckRtNotification(ticketId, payload, params);
+        const r = await models.admin.sendBackgroundCheckRtNotification(ticketId, payload, params);
         if ( r.error ) {
           console.error(r);
           res.status(500).json({error: true, message: 'Unable to send ITIS RT notification'});
@@ -514,7 +508,7 @@ export default (api) => {
           res.status(400).json({error: true, message: 'No Facilities RT ticket ID found!'});
           return;
         }
-        const r = await iamAdmin.sendBackgroundCheckRtNotification(ticketId, payload, params);
+        const r = await models.admin.sendBackgroundCheckRtNotification(ticketId, payload, params);
         if ( r.error ) {
           console.error(r);
           res.status(500).json({error: true, message: 'Unable to send Facilities RT notification'});
@@ -529,7 +523,7 @@ export default (api) => {
       backgroundCheck.notificationSent = true;
       backgroundCheck.submittedBy = req.auth.token.id;
       const additionalData = {...onboardingRecord.additional_data, backgroundCheck};
-      const update = await UcdlibOnboarding.update(onboardingRecord.id, {additionalData});
+      const update = await models.onboarding.update(onboardingRecord.id, {additionalData});
       if ( update.err ) {
         console.error(update.err);
         res.status(500).json({
@@ -575,12 +569,12 @@ export default (api) => {
       q.limit = parseInt(req.query.limit);
     }
 
-    const r = await UcdlibOnboarding.query(q);
+    const r = await models.onboarding.query(q);
     if ( r.err ) {
       console.error(r.err);
       return res.status(500).json({error: true, message: errorMsg});
     }
-    let groups = await UcdlibGroups.getAll();
+    let groups = await models.groups.getAll();
     if ( groups.err ){
       console.error(groups.err);
       return res.status(500).json({error: true, message: errorMsg});

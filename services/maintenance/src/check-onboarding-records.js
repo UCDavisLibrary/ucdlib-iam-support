@@ -1,6 +1,5 @@
-import iamAdmin from "@ucd-lib/iam-support-lib/src/utils/admin.js";
-import UcdlibOnboarding from "@ucd-lib/iam-support-lib/src/utils/onboarding.js";
-import UcdlibJobs from "@ucd-lib/iam-support-lib/src/utils/jobs.js";
+import models from '#models';
+
 import config from "#lib/utils/config.js";
 
 function OnboardingStatusError(error) {
@@ -19,20 +18,20 @@ export const run = async (logError, saveToDB) => {
   let thisJob;
   try {
     if ( saveToDB ) {
-      const r = await UcdlibJobs.start('check-onboarding-records');
+      const r = await models.jobs.start('check-onboarding-records');
       if ( r.job ) thisJob = r.job;
     }
     const logs = [];
-    const activeRecords = await UcdlibOnboarding.query({isOpen: true});
+    const activeRecords = await models.onboarding.query({isOpen: true});
     if ( activeRecords.err ) throw new OnboardingStatusError(activeRecords.err);
     for (const record of activeRecords.res.rows) {
 
       // check if the record needs to be resolved based on RT ticket status
-      const resolvedStatus = await iamAdmin.resolveOnboardingRecord(record, {rtConfig: config.rt});
+      const resolvedStatus = await models.admin.resolveOnboardingRecord(record, {rtConfig: config.rt});
       if ( resolvedStatus.error ) throw resolvedStatus.message;
       logs.push(resolvedStatus);
 
-      const ucdIamStatus = await iamAdmin.checkOnboardingUcdIamRecord(record, {ucdIamConfig: config.ucdIamApi, rtConfig: config.rt, sendRt: true});
+      const ucdIamStatus = await models.admin.checkOnboardingUcdIamRecord(record, {ucdIamConfig: config.ucdIamApi, rtConfig: config.rt, sendRt: true});
       if ( ucdIamStatus.error ) throw ucdIamStatus.message;
       logs.push(ucdIamStatus);
     }

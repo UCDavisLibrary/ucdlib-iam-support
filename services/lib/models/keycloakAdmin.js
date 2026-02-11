@@ -1,9 +1,9 @@
+import models from '#models';
+
 import KcAdminClient from '@keycloak/keycloak-admin-client';
-import UcdlibEmployees from "./employees.js";
-import UcdlibGroups from "./groups.js";
 import {Issuer} from 'openid-client';
 
-class KeycloakAdmin{
+class KeycloakAdmin {
 
   constructor(){
     this.config = {};
@@ -178,7 +178,7 @@ class KeycloakAdmin{
    */
   async getDbGroupMembership(){
     if ( Object.keys(this.dbGroupMembershipByUserId).length ) return this.dbGroupMembershipByUserId;
-    const groupMembership = await UcdlibGroups.getGroupMembershipWithIds(null, true);
+    const groupMembership = await models.groups.getGroupMembershipWithIds(null, true);
     if ( groupMembership.err ) throw groupMembership.err;
     for (const row of groupMembership.res.rows){
       if ( !this.dbGroupMembershipByUserId[row.user_id] ){
@@ -195,7 +195,7 @@ class KeycloakAdmin{
    */
   async getDbGroups(){
     if ( this.dbGroups.length ) return this.dbGroups;
-    const groups = await UcdlibGroups.getAll();
+    const groups = await models.groups.getAll();
     if ( groups.err ) throw groups.err;
     this.dbGroups = groups.res.rows;
     return this.dbGroups;
@@ -361,7 +361,7 @@ class KeycloakAdmin{
   async syncSupervisorsGroup(remove=true){
     const group = await this.getSupervisorsGroup();
     await this.getAllUsers();
-    const supervisors = await UcdlibEmployees.getAllSupervisors();
+    const supervisors = await models.employees.getAllSupervisors();
     if ( supervisors.err ) throw supervisors.err;
 
     const localMembership = [];
@@ -638,7 +638,7 @@ class KeycloakAdmin{
     const users = await this.getAllUsers();
 
     // get all employees from local db and sync with keycloak
-    const employees = await UcdlibEmployees.getAll();
+    const employees = await models.employees.getAll();
     if ( employees.err ) throw employees.err;
     for ( const employee of employees.res.rows ){
       this.addEmployeeToCache(employee);
@@ -657,7 +657,7 @@ class KeycloakAdmin{
       return;
     }
     if ( !this.employees[userId] ){
-      const employee = await UcdlibEmployees.getById(userId, 'userId');
+      const employee = await models.employees.getById(userId, 'userId');
       if ( employee.err ) throw employee.err;
       if ( !employee.res.rows.length && !remove) {
         this.writeLog(userId, 'delete', logEntity, 'User not found in employee table. Remove flag set to false', false);
@@ -674,7 +674,7 @@ class KeycloakAdmin{
     // need when updating attributes
     const supervisorUserId = this.iamIdToUserId[employee.supervisor_id];
     if ( !supervisorUserId ){
-      const supervisor = await UcdlibEmployees.getById(employee.supervisor_id, 'iamId');
+      const supervisor = await models.employees.getById(employee.supervisor_id, 'iamId');
       if ( supervisor.err ) throw supervisor.err;
       if ( supervisor.res.rows.length ) {
         this.addEmployeeToCache(supervisor.res.rows[0]);

@@ -1,8 +1,8 @@
+import models from "#models";
+
 import slack from './slack.js';
 import config from "#lib/utils/config.js";
 import { CronJob } from 'cron';
-import UcdlibEmployees from "@ucd-lib/iam-support-lib/src/utils/employees.js";
-import UcdlibJobs from "@ucd-lib/iam-support-lib/src/utils/jobs.js";
 
 new CronJob(
 	config.cron.discrepancyNotification,
@@ -15,9 +15,9 @@ new CronJob(
 async function run() {
   let thisJob;
   try {
-    thisJob = await UcdlibJobs.start('discrepancy-notification');
+    thisJob = await models.jobs.start('discrepancy-notification');
     // get recent notifications
-    const notifications = await UcdlibEmployees.getActiveRecordDiscrepancyNotifications(config.slack.iamSyncCacheThreshold);
+    const notifications = await models.employees.getActiveRecordDiscrepancyNotifications(config.slack.iamSyncCacheThreshold);
     if ( notifications.err ) throw notifications.err;
 
     // group notifications by reason
@@ -29,7 +29,7 @@ async function run() {
 
     // get reason labels and descriptions
     const reasons = {};
-    Object.values(UcdlibEmployees.outdatedReasons).forEach(r => reasons[r.slug] = r);
+    Object.values(models.employees.outdatedReasons).forEach(r => reasons[r.slug] = r);
 
     // build message
     let msg = '';
@@ -43,7 +43,7 @@ async function run() {
       for (const n of notifications) {
         let emp = employeeRecords[n.iam_id];
         if ( !emp ) {
-          emp = await UcdlibEmployees.getById(n.iam_id, 'iamId');
+          emp = await models.employees.getById(n.iam_id, 'iamId');
           if ( emp.err ) throw emp.err;
           if ( !emp.res.rows.length ) {
             msg += `- \`${n.iam_id}\`  Employee record not found\n`;

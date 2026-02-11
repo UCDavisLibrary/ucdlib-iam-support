@@ -1,5 +1,6 @@
+import models from '#models';
+
 import config from "#lib/utils/config.js";
-import backupLog from '@ucd-lib/iam-support-lib/src/utils/backupLog.js';
 import jobs from '@ucd-lib/iam-support-lib/src/utils/jobs.js';
 import fetch from 'node-fetch';
 
@@ -9,9 +10,9 @@ export default (app) => {
       const services = {};
 
       // check last time backup service was successfully run
-      const backupLogExists = await backupLog.tableExists();
+      const backupLogExists = await models.backupLog.tableExists();
       if ( backupLogExists && config.backup.statusFailAfterInterval ) {
-        const lastBackup = await backupLog.lastBackupWithinInterval();
+        const lastBackup = await models.backupLog.lastBackupWithinInterval();
 
         if ( lastBackup.error ){
           throw lastBackup.error;
@@ -25,7 +26,7 @@ export default (app) => {
         if ( lastBackup.res.rows.length ) {
           services.backup.lastBackup = lastBackup.res.rows[0].backup_time;
         } else {
-          let b = await backupLog.lastBackup();
+          let b = await models.backupLog.lastBackup();
           if ( b.error ) {
             throw b.error;
           }

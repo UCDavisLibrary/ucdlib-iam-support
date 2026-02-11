@@ -3,7 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import { Issuer } from 'openid-client';
 
 import config from '#lib/utils/config.js';
-import UcdlibCache from '@ucd-lib/iam-support-lib/src/utils/cache.js';
+import models from '#models';
 
 export default ( api ) => {
 
@@ -38,7 +38,7 @@ export default ( api ) => {
     }
 
     // compare password to cached hash
-    const cached = await UcdlibCache.get('authApi', username, '30 minutes');
+    const cached = await models.cache.get('authApi', username, '30 minutes');
     if ( cached.err ) {
       console.error(cached.err);
     }
@@ -85,7 +85,7 @@ export default ( api ) => {
     }
 
     // cache access token and hash
-    const setCache = await UcdlibCache.set('authApi', username, {
+    const setCache = await models.cache.set('authApi', username, {
       accessToken,
       hash: await bcrypt.hash(password, 10)
     });

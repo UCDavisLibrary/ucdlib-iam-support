@@ -1,6 +1,4 @@
-import iamAdmin from "@ucd-lib/iam-support-lib/src/utils/admin.js";
-import UcdlibSeparation from "@ucd-lib/iam-support-lib/src/utils/separation.js";
-import UcdlibJobs from "@ucd-lib/iam-support-lib/src/utils/jobs.js";
+import models from '#models';
 import config from "#lib/utils/config.js";
 
 function SeparationStatusError(error) {
@@ -19,20 +17,20 @@ export const run = async (logError, saveToDB) => {
   let thisJob;
   try {
     if ( saveToDB ) {
-      const r = await UcdlibJobs.start('check-separation-records');
+      const r = await models.jobs.start('check-separation-records');
       if ( r.job ) thisJob = r.job;
     }
     const logs = [];
-    const activeRecords = await UcdlibSeparation.query({isOpen: true});
+    const activeRecords = await models.separation.query({isOpen: true});
     if ( activeRecords.err ) throw new SeparationStatusError(activeRecords.err);
     for (const record of activeRecords.res.rows) {
-      const resolvedStatus = await iamAdmin.resolveSeparationRecord(record, {rtConfig: config.rt});
+      const resolvedStatus = await models.admin.resolveSeparationRecord(record, {rtConfig: config.rt});
       if ( resolvedStatus.log?.error ) throw resolvedStatus.log.message;
       resolvedStatus.log.separationRecordId = record.id;
       logs.push(resolvedStatus.log);
 
       if ( !resolvedStatus.isResolved ) {
-        const reminderStatus = await iamAdmin.sendSeparationReminder(record, {rtConfig: config.rt});
+        const reminderStatus = await models.admin.sendSeparationReminder(record, {rtConfig: config.rt});
         if ( reminderStatus.log?.error ) throw reminderStatus.log.message;
         reminderStatus.log.separationRecordId = record.id;
         logs.push(reminderStatus.log);

@@ -1,7 +1,8 @@
+import models from '#models';
+
 import util from 'util';
 import config from "#lib/utils/config.js";
 import { printTable } from 'console-table-printer';
-import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
 import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
 import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
 import IamPersonTransform from '@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js';
@@ -31,11 +32,11 @@ class UtilsCli{
    * @description Validate employee exists
    * @param {String} employee_id - Employee unique identifier
    * @param {String} idType - Type of employee_id
-   * @param {Object} args - Additional arguments to pass to UcdlibEmployees.getById
+   * @param {Object} args - Additional arguments to pass to getById method of employees model
    * @returns
    */
   async validateEmployee(employee_id, idType, args){
-    let employee = await UcdlibEmployees.getById(employee_id.trim(), idType, args);
+    let employee = await models.employees.getById(employee_id.trim(), idType, args);
     if ( employee.err ) {
       console.log(employee.err);
       await pg.pool.end();

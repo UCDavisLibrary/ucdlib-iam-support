@@ -5,7 +5,7 @@ import RequestsIsoUtils from "./requests-iso-utils.js";
 /**
  * @description Manages pg data for onboarding form
  */
-class UcdlibOnboarding{
+class UcdlibOnboarding {
   constructor() {
     this.statusCodes = RequestsIsoUtils.statusCodes;
   }

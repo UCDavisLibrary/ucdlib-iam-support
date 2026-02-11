@@ -1,7 +1,7 @@
-import UcdlibCache from '@ucd-lib/iam-support-lib/src/utils/cache.js';
+import models from '#models';
+
 import { UcdIamModel } from "@ucd-lib/iam-support-lib/index.js";
 import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js";
-import UcdlibEmployees from "@ucd-lib/iam-support-lib/src/utils/employees.js";
 import groupMigration from "./group-migration.js";
 
 import * as dotenv from 'dotenv'
@@ -49,13 +49,13 @@ class PersonMigration {
       this.checkForMissingFields(personToWrite);
 
       // write to db
-      const personExists = await UcdlibEmployees.getById(personToWrite.iamId, 'iamId');
+      const personExists = await models.employees.getById(personToWrite.iamId, 'iamId');
       if ( personExists.res.rowCount ){
         this.iamIdToTableId[personToWrite.iamId] = personExists.res.rows[0].id;
       } else {
         console.log('importing person:');
         console.log(personToWrite);
-        const personResult = await UcdlibEmployees.create(personToWrite);
+        const personResult = await models.employees.create(personToWrite);
         this.iamIdToTableId[personToWrite.iamId] = personResult.res.rows[0].id;
       }
       await this.addPersonToGroups(person);
@@ -122,7 +122,7 @@ class PersonMigration {
     if ( person.execCouncil ) groups.push({id: groupMigration.groupBySlug['executive-council'].id});
     groups.push({id: groupMigration.groupBySlug[person.department].id, deptHead: person.isDepartmentHead});
     for (const group of groups) {
-      await UcdlibEmployees.addEmployeeToGroup(this.iamIdToTableId[person.iamId], group.id, group.deptHead);
+      await models.employees.addEmployeeToGroup(this.iamIdToTableId[person.iamId], group.id, group.deptHead);
     }
   }
 
@@ -137,7 +137,7 @@ class PersonMigration {
       return this.iamRecords[iamId];
     }
 
-    const r = await UcdlibCache.get(idType, id);
+    const r = await models.cache.get(idType, id);
     if (r.err) {
       throw new Error(r.err);
     } else if (r.res.rows.length) {
@@ -167,9 +167,9 @@ class PersonMigration {
       console.log(iamRecord)
       throw new Error('Error getting iam record for '+iamId);
     }
-    await UcdlibCache.set('iamId', iamId, iamRecord);
+    await models.cache.set('iamId', iamId, iamRecord);
     if ( iamRecord.employeeId ) {
-      await UcdlibCache.set('employeeId', iamRecord.employeeId, iamRecord);
+      await models.cache.set('employeeId', iamRecord.employeeId, iamRecord);
     }
     iamRecord = new IamPersonTransform(iamRecord);
     this.iamRecords[iamId] = iamRecord;

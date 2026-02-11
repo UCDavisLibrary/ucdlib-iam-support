@@ -1,4 +1,5 @@
-import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
+import models from '#models';
+
 import TextUtils from '@ucd-lib/iam-support-lib/src/utils/text.js';
 
 export default (api) => {
@@ -13,7 +14,7 @@ export default (api) => {
       res.json([]);
       return;
     }
-    const r = await UcdlibEmployees.getDirectReports(iamId);
+    const r = await models.employees.getDirectReports(iamId);
     if ( r.err ) {
       console.error(r.err);
       return res.status(500).json({error: true});
@@ -50,7 +51,7 @@ export default (api) => {
     }
 
     if ( req.query.name ) {
-      const r = await UcdlibEmployees.searchByName(req.query.name);
+      const r = await models.employees.searchByName(req.query.name);
       if ( r.err ) {
         console.error(r.err);
         res.status(500).json({error: true});
@@ -101,7 +102,7 @@ export default (api) => {
         results: [],
       }
 
-      const r = await UcdlibEmployees.getById(req.params.id, idType, options);
+      const r = await models.employees.getById(req.params.id, idType, options);
       if ( r.err ) {
         console.error(r.err);
         res.status(500).json({error: true});
@@ -131,7 +132,7 @@ export default (api) => {
         return;
       }
 
-      const r = await UcdlibEmployees.update(req.params.id, req.body);
+      const r = await models.employees.update(req.params.id, req.body);
       if ( r.err ) {
         console.error(r.err);
         return res.status(500).json({error: true});
@@ -160,7 +161,7 @@ export default (api) => {
       let isHead = false;
       if(req.body.isHead) isHead = true;
 
-      const r = await UcdlibEmployees.addEmployeeToGroup(req.params.id, req.body.departmentId, isHead);
+      const r = await models.employees.addEmployeeToGroup(req.params.id, req.body.departmentId, isHead);
       if ( r.err ) {
         console.error(r.err);
         return res.status(500).json({error: true});
@@ -185,7 +186,7 @@ export default (api) => {
         return;
       }
 
-      const r = await UcdlibEmployees.removeEmployeeFromGroup(req.params.id, req.body.departmentId);
+      const r = await models.employees.removeEmployeeFromGroup(req.params.id, req.body.departmentId);
       if ( r.err ) {
         console.error(r.err);
         return res.status(500).json({error: true});
@@ -214,7 +215,7 @@ export default (api) => {
     let interval = '';
     const id = req.params.id;
 
-    const r = await UcdlibEmployees.getActiveRecordDiscrepancyNotifications(interval, id);
+    const r = await models.employees.getActiveRecordDiscrepancyNotifications(interval, id);
 
     if ( r.err ) {
       console.error(`Error getting active record discrepancy notifications\n${r.err.message}`);
@@ -227,7 +228,7 @@ export default (api) => {
     const result = r.res.rows;
 
     for(let res of result){
-      const reasonMatch = Object.values(UcdlibEmployees.outdatedReasons).find(
+      const reasonMatch = Object.values(models.employees.outdatedReasons).find(
         r => r.slug === res.reason
       );
 
@@ -256,7 +257,7 @@ export default (api) => {
     const id = req.params.id;
     const discrepanciesList = req.body;
 
-    const r = await UcdlibEmployees.dismissRecordDiscrepancyNotifications(id, discrepanciesList);
+    const r = await models.employees.dismissRecordDiscrepancyNotifications(id, discrepanciesList);
 
 
     if ( r.err ) {

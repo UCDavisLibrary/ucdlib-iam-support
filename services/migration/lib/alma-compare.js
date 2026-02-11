@@ -1,7 +1,7 @@
 // a little script that compares internal alma users with users from local db
 // just an ad hoc script we needed to run not related to the migration
 
-import UcdlibEmployees from "@ucd-lib/iam-support-lib/src/utils/employees.js";
+import models from "#models";
 import * as fs from 'fs';
 import { parse } from 'csv-parse';
 import { fileURLToPath } from 'node:url';
@@ -11,7 +11,7 @@ const run = async () => {
 
   const out = [];
   // get local users and map by user id
-  const localUsers = (await UcdlibEmployees.getAll()).res.rows;
+  const localUsers = (await models.employees.getAll()).res.rows;
   const localUsersMap = localUsers.reduce((map, user) => {
     map[user.user_id] = user;
     return map;

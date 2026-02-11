@@ -1,5 +1,5 @@
 import utils from './utils.js';
-import UcdlibOnboarding from '@ucd-lib/iam-support-lib/src/utils/onboarding.js';;
+import models from '#models';
 import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
 
 class onboardingCli {
@@ -11,7 +11,7 @@ class onboardingCli {
     } else if ( options.statustype === 'resolved' ) {
       query.isOpen = false;
     }
-    const r = await UcdlibOnboarding.query(query);
+    const r = await models.onboarding.query(query);
     await pg.pool.end();
     if ( !r.res.rowCount ) {
       console.log('No onboarding records found');
@@ -22,7 +22,7 @@ class onboardingCli {
   }
 
   async inspect(id){
-    const r = await UcdlibOnboarding.getById(id);
+    const r = await models.onboarding.getById(id);
     await pg.pool.end();
     if ( !r.res.rowCount ) {
       console.log('No onboarding records found');
@@ -32,7 +32,7 @@ class onboardingCli {
   }
 
   async remove(id){
-    const request = await UcdlibOnboarding.getById(id);
+    const request = await models.onboarding.getById(id);
     if ( !request.res.rowCount ) {
       console.error(`Onboarding request ${id} not found`);
       await pg.pool.end();
@@ -40,13 +40,13 @@ class onboardingCli {
     }
 
     let r;
-    r = await UcdlibOnboarding.deleteAllPermissionRequests(id);
+    r = await models.onboarding.deleteAllPermissionRequests(id);
     if ( r.err ) {
       console.error(r.err);
       await pg.pool.end();
       return;
     }
-    r = await UcdlibOnboarding.delete(id);
+    r = await models.onboarding.delete(id);
     if ( r.err ) {
       console.error(r.err);
       await pg.pool.end();
@@ -57,7 +57,7 @@ class onboardingCli {
   }
 
   async setUcdIamRecord(id, options) {
-    let request = await UcdlibOnboarding.getById(id);
+    let request = await models.onboarding.getById(id);
     if ( !request.res.rowCount ) {
       console.error(`Onboarding request ${id} not found`);
       await pg.pool.end();
@@ -87,7 +87,7 @@ class onboardingCli {
       record: iamRecord.data
     }
     const additionalData = {...(request.additional_data || {}), ucdIamRecord};
-    const update = await UcdlibOnboarding.update(id, {additionalData});
+    const update = await models.onboarding.update(id, {additionalData});
     if ( update.err ) {
       console.error(update.err);
       await pg.pool.end();
@@ -98,7 +98,7 @@ class onboardingCli {
   }
 
   async updatePrimaryAssociation(id, deptCode, titleCode){
-    const request = await UcdlibOnboarding.getById(id);
+    const request = await models.onboarding.getById(id);
     if ( !request.res.rowCount ) {
       console.error(`Onboarding request ${id} not found`);
       await pg.pool.end();
@@ -107,7 +107,7 @@ class onboardingCli {
 
     const additionalData = request.res.rows[0].additional_data;
     additionalData.primaryAssociation = {deptCode, titleCode};
-    const update = await UcdlibOnboarding.update(id, {additionalData});
+    const update = await models.onboarding.update(id, {additionalData});
     await pg.pool.end();
     if ( update.err ) {
       console.error(update.err);

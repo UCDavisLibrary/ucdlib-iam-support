@@ -1,5 +1,5 @@
-import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
-import UcdlibGroups from '@ucd-lib/iam-support-lib/src/utils/groups.js';
+import models from '#models';
+
 import utils from "../lib/utils.js";
 
 export default ( api ) => {
@@ -61,7 +61,7 @@ export default ( api ) => {
 
   api.get(`${route}`, async (req, res) => {
 
-    const results = await UcdlibGroups.getById([], getQueryOptions(req));
+    const results = await models.groups.getById([], getQueryOptions(req));
     if ( results.err ) {
       return res.status(400).json({
         error: 'Error getting groups'
@@ -90,7 +90,7 @@ export default ( api ) => {
       });
     }
     const employeeIdentifierType = utils.getEmployeeIdType(req);
-    const employee = await UcdlibEmployees.getById(employeeIdentifier, employeeIdentifierType, {returnGroups: true});
+    const employee = await models.employees.getById(employeeIdentifier, employeeIdentifierType, {returnGroups: true});
     if ( employee.err ) {
       return res.status(400).json({
         error: 'Error getting employee'
@@ -108,7 +108,7 @@ export default ( api ) => {
 
       if ( req.query['part-of-org'] && !g.partOfOrg ) continue;
 
-      const group = await UcdlibGroups.getById(g.id, getQueryOptions(req));
+      const group = await models.groups.getById(g.id, getQueryOptions(req));
       if ( group.err ) {
         return res.status(400).json({
           error: 'Error getting group'

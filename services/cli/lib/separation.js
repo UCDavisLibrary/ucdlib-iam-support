@@ -1,5 +1,5 @@
 import utils from './utils.js';
-import UcdlibSeparation from '@ucd-lib/iam-support-lib/src/utils/separation.js';
+import models from '#models';
 import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
 
 class separationCli {
@@ -11,7 +11,7 @@ class separationCli {
     } else if ( options.statustype === 'resolved' ) {
       query.isOpen = false;
     }
-    const r = await UcdlibSeparation.query(query);
+    const r = await models.separation.query(query);
     await pg.pool.end();
     if ( !r.res.rowCount ) {
       console.log('No separation records found');
@@ -22,7 +22,7 @@ class separationCli {
   }
 
   async inspect(id){
-    const r = await UcdlibSeparation.getById(id);
+    const r = await models.separation.getById(id);
     await pg.pool.end();
     if ( !r.res.rowCount ) {
       console.log('No separation records found');
@@ -32,14 +32,14 @@ class separationCli {
   }
 
   async remove(id){
-    const request = await UcdlibSeparation.getById(id);
+    const request = await models.separation.getById(id);
     if ( !request.res.rowCount ) {
       console.error(`Separation request ${id} not found`);
       await pg.pool.end();
       return;
     }
 
-    const r = await UcdlibSeparation.delete(id);
+    const r = await models.separation.delete(id);
     await pg.pool.end();
     if ( r.err ) {
       console.error(r.err);

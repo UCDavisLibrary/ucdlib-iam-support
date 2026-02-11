@@ -1,17 +1,13 @@
-import UcdlibEmployees from "./employees.js";
-import UcdlibOnboarding from "./onboarding.js";
-import UcdlibSeparation from "./separation.js";
-import UcdlibGroups from "./groups.js";
+import models from '#models';
+
 import UcdIamModel from "../models/UcdIamModel.js";
 import IamPersonTransform from "./IamPersonTransform.js";
-import keycloakClient from "./keycloakAdmin.js";
-import PermissionsRequests from "./permissions.js"
 import RequestsIsoUtils from "./requests-iso-utils.js";
 import permissionsFormProperties from "./permissionsFormProperties.js";
-import { UcdlibRt, UcdlibRtTicket } from "./rt.js";
 import config from "#lib/utils/config.js";
 
-const rtClient = new UcdlibRt(config.rt);
+const rtClient = new models.rt(config.rt);
+const keycloakClient = models.keycloakAdmin;
 
 /**
  * @classdesc Used to perform various admin operations for this application.
@@ -37,7 +33,7 @@ class iamAdmin {
       out.canForce = false;
       return out;
     };
-    let onboardingRecord = await UcdlibOnboarding.getById(onboardingId);
+    let onboardingRecord = await models.onboarding.getById(onboardingId);
     if ( onboardingRecord.err ) {
       out.error = true;
       out.message = `Error retrieving onboarding record: ${onboardingRecord.err.message}`;
@@ -120,7 +116,7 @@ class iamAdmin {
 
     // check if already employee
     let existingEmployee = false;
-    const employeeRecord = await UcdlibEmployees.getByAnyId(dataToWrite);
+    const employeeRecord = await models.employees.getByAnyId(dataToWrite);
     if ( employeeRecord.err ) {
       out.error = true;
       out.message = `Error retrieving employee record: ${employeeRecord.err.message}`;
@@ -139,8 +135,8 @@ class iamAdmin {
     }
 
     if ( existingEmployee ) {
-      await UcdlibEmployees.removeAllGroupMemberships(existingEmployee);
-      await UcdlibEmployees.delete(existingEmployee);
+      await models.employees.removeAllGroupMemberships(existingEmployee);
+      await models.employees.delete(existingEmployee);
     }
     const groupArg = groups.map(g => {
       let isHead = onboardingRecord.additional_data?.isDeptHead && g.part_of_org;
@@ -149,7 +145,7 @@ class iamAdmin {
         isHead
       }
     })
-    const newEmployeeRecord = await UcdlibEmployees.create(dataToWrite, groupArg);
+    const newEmployeeRecord = await models.employees.create(dataToWrite, groupArg);
     if ( newEmployeeRecord.err ) {
       out.error = true;
       out.message = `Error creating employee record: ${newEmployeeRecord.err.message}`;
@@ -171,7 +167,7 @@ class iamAdmin {
     if ( config.rt.forbidWrite ) {
       return {error: false, message: 'RT write operations are forbidden in this environment'};
     }
-    const ticket = new UcdlibRtTicket(false, {id: rtTicketId});
+    const ticket = new models.rtTicket(false, {id: rtTicketId});
     const reply = ticket.createReply();
     reply.addSubject('Employee Record Added');
     reply.addContent('This employee was adopted into the UC Davis Library Identity and Access Management System');
@@ -190,7 +186,7 @@ class iamAdmin {
     if ( config.rt.forbidWrite ) {
       return {error: false, message: 'RT write operations are forbidden in this environment'};
     }
-    const ticket = new UcdlibRtTicket(false, {id: rtTicketId});
+    const ticket = new models.rtTicket(false, {id: rtTicketId});
     const reply = ticket.createReply();
     reply.addSubject('Employee Access Was Removed');
     reply.addContent('This employee was removed from the UC Davis Library Identity and Access Management System.');
@@ -227,7 +223,7 @@ class iamAdmin {
       }
     }
     const groupIds = parsedGroups.map(g => g.id);
-    let groupRecords = await UcdlibGroups.getById(groupIds, {returnHead: true});
+    let groupRecords = await models.groups.getById(groupIds, {returnHead: true});
     if ( groupRecords.err ) {
       error.message = `Error retrieving group records: ${groupRecords.err.message}`;
       error.canForce = false;
@@ -317,7 +313,7 @@ class iamAdmin {
    */
   async employeeRecordsExist(iamId, force){
     const error = {error: true, message: '', canForce: false};
-    const dbRecord = await UcdlibEmployees.getById(iamId, 'iamId');
+    const dbRecord = await models.employees.getById(iamId, 'iamId');
     if ( dbRecord.err ) {
       error.message = `Error retrieving employee record from local db: ${dbRecord.err.message}`;
       error.canForce = false;
@@ -422,7 +418,7 @@ class iamAdmin {
       return out;
     }
 
-    const employeeRecord = await UcdlibEmployees.getById(id);
+    const employeeRecord = await models.employees.getById(id);
     if ( employeeRecord.err ) {
       out.error = true;
       out.message = `Error retrieving employee record: ${employeeRecord.err.message}`;
@@ -509,7 +505,7 @@ class iamAdmin {
     }
 
     // check if employee exists
-    let employee = await UcdlibEmployees.getById(id, idType, {returnGroups: true, returnSupervisor: true});
+    let employee = await models.employees.getById(id, idType, {returnGroups: true, returnSupervisor: true});
     if ( !employee.res?.rowCount ) {
       out.error = true;
       out.message = `${out.message} - Employee ${idType}:${id} not found`;
@@ -524,7 +520,7 @@ class iamAdmin {
     }
 
     // check if employee has direct reports
-    const directReports = await UcdlibEmployees.getDirectReports(iamId);
+    const directReports = await models.employees.getDirectReports(iamId);
     if ( directReports.res?.rowCount ) {
       out.error = 'directReports';
       out.directReports = directReports.res.rows;
@@ -542,7 +538,7 @@ class iamAdmin {
     }
 
     // remove groups
-    const rmGroups = await UcdlibEmployees.removeAllGroupMemberships(employee.id);
+    const rmGroups = await models.employees.removeAllGroupMemberships(employee.id);
     if ( rmGroups.err ) {
       out.error = true;
       out.message = `${out.message} - Error removing group memberships: ${rmGroups.err?.message}`;
@@ -550,7 +546,7 @@ class iamAdmin {
     }
 
     // remove employee
-    const rmEmployee = await UcdlibEmployees.delete(id, idType);
+    const rmEmployee = await models.employees.delete(id, idType);
     if ( rmEmployee.err ) {
       out.error = true;
       out.message = `${out.message} - Error removing employee: ${rmEmployee.err?.message}`;
@@ -558,7 +554,7 @@ class iamAdmin {
     }
 
     // mark any notifications as dismissed
-    const dismissNotifications = await UcdlibEmployees.dismissRecordDiscrepancyNotifications(iamId);
+    const dismissNotifications = await models.employees.dismissRecordDiscrepancyNotifications(iamId);
     if ( dismissNotifications.err ) {
       out.error = true;
       out.message = `${out.message} - Error dismissing record discrepancy notifications: ${dismissNotifications.err?.message}`;
@@ -574,11 +570,11 @@ class iamAdmin {
    * @param {string} id - employee table id
    */
   async deleteEmployee(id){
-    const grouptxn = await UcdlibEmployees.removeAllGroupMemberships(id);
+    const grouptxn = await models.employees.removeAllGroupMemberships(id);
     if ( grouptxn.err ) {
       throw grouptxn.err;
     }
-    const emptxn = await UcdlibEmployees.delete(id);
+    const emptxn = await models.employees.delete(id);
     if ( emptxn.err ) {
       throw emptxn.err;
     }
@@ -616,7 +612,7 @@ class iamAdmin {
       out.log.message = 'No RT ticket id found';
       return out;
     }
-    const employee = await UcdlibEmployees.getById(record.iam_id, 'iamId');
+    const employee = await models.employees.getById(record.iam_id, 'iamId');
     if ( employee.err ) {
       out.log.message = `Error retrieving employee record: ${employee.err.message}`;
       out.log.error = true;
@@ -629,8 +625,8 @@ class iamAdmin {
     const employeeData = employee.res.rows[0];
     const employeeName = `${employeeData.first_name} ${employeeData.last_name}`;
 
-    const rtClient = new UcdlibRt(rtConfig);
-    const ticket = new UcdlibRtTicket(false, {id: rtTicketId});
+    const rtClient = new models.rt(rtConfig);
+    const ticket = new models.rtTicket(false, {id: rtTicketId});
     const reply = ticket.createReply();
     reply.addSubject('Reminder: Employee Separation Date');
     reply.addContent(`This is just a reminder for ITIS administrators that the separation date (${separationDay}) for ${employeeName} has passed.`);
@@ -643,7 +639,7 @@ class iamAdmin {
     }
 
     const additionalData = {...(record.additional_data || {}), separationReminderSent: true};
-    const update = await UcdlibSeparation.update(record.id, {additionalData});
+    const update = await models.separation.update(record.id, {additionalData});
     if ( update.err ) {
       out.log.message = `Error updating separation record: ${update.err.message}`;
       out.log.error = true;
@@ -674,12 +670,12 @@ class iamAdmin {
     }
 
     // status is resolving, check if it needs to be resolved
-    if ( record.status_id === UcdlibSeparation.statusCodes.resolving ) {
+    if ( record.status_id === models.separation.statusCodes.resolving ) {
       const threshold = params.rtConfig.daysSinceResolved || 3;
       const resolvedOn = new Date(lastStatusChange.res.Created);
       const intervalInDays = (Date.now() - resolvedOn.getTime()).toFixed(0) / 1000 / 60 / 60 / 24;
       if ( intervalInDays >= threshold ) {
-        const setToResolved = await UcdlibSeparation.update(record.id, {statusId: UcdlibSeparation.statusCodes.resolved});
+        const setToResolved = await models.separation.update(record.id, {statusId: models.separation.statusCodes.resolved});
         if ( setToResolved.err ) {
           out.log.error = true;
           out.log.message = `Error updating separation record status: ${setToResolved.err.message}`;
@@ -694,7 +690,7 @@ class iamAdmin {
       }
 
     } else {
-      const setToResolving = await UcdlibSeparation.update(record.id, {statusId: UcdlibSeparation.statusCodes.resolving});
+      const setToResolving = await models.separation.update(record.id, {statusId: models.separation.statusCodes.resolving});
       if ( setToResolving.err ) {
         out.log.error = true;
         out.log.message = `Error updating separation record status: ${setToResolving.err.message}`;
@@ -720,7 +716,7 @@ class iamAdmin {
       out.log.message = 'No rt config provided';
       return out;
     }
-    const rtClient = new UcdlibRt(rtConfig);
+    const rtClient = new models.rt(rtConfig);
     out.lastStatusChange = await rtClient.getLastStatusChange(ticketId);
     if ( out.lastStatusChange.err ) {
       out.log.error = true;
@@ -764,12 +760,12 @@ class iamAdmin {
     }
 
     // status is resolving, check if it needs to be resolved
-    if ( onboardingRecord.status_id === UcdlibOnboarding.statusCodes.resolving ) {
+    if ( onboardingRecord.status_id === models.onboarding.statusCodes.resolving ) {
       const threshold = params.rtConfig.daysSinceResolved || 3;
       const resolvedOn = new Date(lastStatusChange.res.Created);
       const intervalInDays = (Date.now() - resolvedOn.getTime()).toFixed(0) / 1000 / 60 / 60 / 24;
       if ( intervalInDays >= threshold ) {
-        const setToResolved = await UcdlibOnboarding.update(onboardingRecord.id, {statusId: UcdlibOnboarding.statusCodes.resolved});
+        const setToResolved = await models.onboarding.update(onboardingRecord.id, {statusId: models.onboarding.statusCodes.resolved});
         if ( setToResolved.err ) {
           out.error = true;
           out.message = `Error updating onboarding record status: ${setToResolved.err.message}`;
@@ -784,7 +780,7 @@ class iamAdmin {
       }
 
     } else {
-      const setToResolving = await UcdlibOnboarding.update(onboardingRecord.id, {statusId: UcdlibOnboarding.statusCodes.resolving});
+      const setToResolving = await models.onboarding.update(onboardingRecord.id, {statusId: models.onboarding.statusCodes.resolving});
       if ( setToResolving.err ) {
         out.error = true;
         out.message = `Error updating onboarding record status: ${setToResolving.err.message}`;
@@ -806,7 +802,7 @@ class iamAdmin {
     }
     let onboardingRecord;
     if ( typeof idOrRecord === 'string' ) {
-      const record = await UcdlibOnboarding.getById(idOrRecord);
+      const record = await models.onboarding.getById(idOrRecord);
       if ( record.err ) {
         out.error = true;
         out.message = `Error retrieving onboarding record: ${record.err.message}`;
@@ -886,7 +882,7 @@ class iamAdmin {
       data.statusId = 5;
 
       if ( !onboardingRecord.skip_supervisor ) {
-        let hasSupervisorResponse = await PermissionsRequests.getOnboardingPermissions(onboardingRecord.id);
+        let hasSupervisorResponse = await models.permissions.getOnboardingPermissions(onboardingRecord.id);
         if ( hasSupervisorResponse.err ) {
           out.error = true;
           out.message = `Error checking for supervisor permissions request: ${hasSupervisorResponse.err.message}`;
@@ -915,7 +911,7 @@ class iamAdmin {
     }
 
     // update onboarding record
-    const updatedRecord = await UcdlibOnboarding.update(onboardingRecord.id, data);
+    const updatedRecord = await models.onboarding.update(onboardingRecord.id, data);
     if ( updatedRecord.err ) {
       out.error = true;
       out.message = `Error updating onboarding record: ${updatedRecord.err.message}`;
@@ -931,8 +927,8 @@ class iamAdmin {
       onboardingRecord.rt_ticket_id &&
       !onboardingRecord.rt_ticket_id.startsWith('fake-')){
       try {
-        const rtClient = new UcdlibRt(params.rtConfig);
-        const ticket = new UcdlibRtTicket(false, {id: onboardingRecord.rt_ticket_id});
+        const rtClient = new models.rt(params.rtConfig);
+        const ticket = new models.rtTicket(false, {id: onboardingRecord.rt_ticket_id});
         const reply = ticket.createReply();
         reply.addSubject('UC Davis IAM Record Updated');
         if ( updatedFields.iamId.changed ) {
@@ -980,7 +976,7 @@ class iamAdmin {
     }
     const query = {};
     query[idType] = id;
-    const employeeRecord = await UcdlibEmployees.getByAnyId(query);
+    const employeeRecord = await models.employees.getByAnyId(query);
     if ( employeeRecord.err ) {
       out.error = true;
       out.message = `Error retrieving employee record: ${employeeRecord.err.message}`;
@@ -992,7 +988,7 @@ class iamAdmin {
       return out;
     }
     const employee = employeeRecord.res.rows[0];
-    const update = await UcdlibEmployees.update(employee.id, {created: new Date()});
+    const update = await models.employees.update(employee.id, {created: new Date()});
     if ( update.err ) {
       out.error = true;
       out.message = `Error updating employee record: ${update.err.message}`;
@@ -1018,7 +1014,7 @@ class iamAdmin {
     // fetch onboarding record
     let onboardingRecord;
     if ( typeof idOrRecord === 'string' ) {
-      onboardingRecord = await UcdlibOnboarding.getById(idOrRecord);
+      onboardingRecord = await models.onboarding.getById(idOrRecord);
       if ( onboardingRecord.err ) {
         console.log(onboardingRecord.err);
         out.error = true;
@@ -1040,7 +1036,7 @@ class iamAdmin {
     }
 
     // retrieve and check onboarding permissions record for data to send to facilities
-    const permissionsRecord = await PermissionsRequests.getOnboardingPermissions(onboardingRecord.id);
+    const permissionsRecord = await models.permissions.getOnboardingPermissions(onboardingRecord.id);
     if ( permissionsRecord.err ) {
       out.error = true;
       console.log(permissionsRecord.err);
@@ -1076,8 +1072,8 @@ class iamAdmin {
 
     // create RT ticket
     const config = params.rtConfig;
-    const rtClient = new UcdlibRt(config);
-    const ticket = new UcdlibRtTicket();
+    const rtClient = new models.rt(config);
+    const ticket = new models.rtTicket();
     const ad = onboardingRecord.additional_data || {};
     const subject = `New Employee Onboarding: ${ad.employeeFirstName || ''} ${ad.employeeLastName || ''}`;
     ticket.addSubject(subject);
@@ -1117,7 +1113,7 @@ class iamAdmin {
       out.message = `Error creating facitilies RT ticket`;
       return out;
     }
-    const updateRes = await UcdlibOnboarding.update(onboardingRecord.id, {additionalData: {...ad, facilitiesRtTicketId: rtResponse.res.id}});
+    const updateRes = await models.onboarding.update(onboardingRecord.id, {additionalData: {...ad, facilitiesRtTicketId: rtResponse.res.id}});
     if ( updateRes.err ) {
       console.log(updateRes.err);
       out.error = true;
@@ -1146,8 +1142,8 @@ class iamAdmin {
       message: '',
       rtSent: false,
     }
-    const rtClient = new UcdlibRt(params.rtConfig);
-    const ticket = new UcdlibRtTicket(false, {id: rtTicketId});
+    const rtClient = new models.rt(params.rtConfig);
+    const ticket = new models.rtTicket(false, {id: rtTicketId});
     let name = '';
     if ( params.onboardingRecord?.additional_data ) {
       name = `${params.onboardingRecord.additional_data.employeeFirstName || ''} ${params.onboardingRecord.additional_data.employeeLastName || ''}`;

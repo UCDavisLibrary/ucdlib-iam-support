@@ -1,9 +1,6 @@
-import PermissionsRequests from '@ucd-lib/iam-support-lib/src/utils/permissions.js';
+import models from '#models';
+
 import TextUtils from '@ucd-lib/iam-support-lib/src/utils/text.js';
-import UcdlibOnboarding from '@ucd-lib/iam-support-lib/src/utils/onboarding.js';
-import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
-import iamAdmin from '@ucd-lib/iam-support-lib/src/utils/admin.js';
-import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.js';
 import config from "#lib/utils/config.js";
 import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
 import IamPersonTransform from '@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js';
@@ -22,9 +19,9 @@ export default (api) => {
 
     let pRes;
     if ( idType === 'onboarding' ){
-      pRes = await PermissionsRequests.getOnboardingPermissions(req.params.id);
+      pRes = await models.permissions.getOnboardingPermissions(req.params.id);
     } else if ( idType === 'update' ) {
-      pRes = await PermissionsRequests.getUpdatePermissions(req.params.id);
+      pRes = await models.permissions.getUpdatePermissions(req.params.id);
     }
     if ( pRes.err ){
       console.error(pRes.err);
@@ -64,7 +61,7 @@ export default (api) => {
   api.get('/submitted-permission-requests', async (req, res) => {
 
     const userId = req.auth.token.id;
-    const pRes = await PermissionsRequests.getAllBySubmitter(userId);
+    const pRes = await models.permissions.getAllBySubmitter(userId);
     if ( pRes.err ){
       console.error(pRes.err);
       return res.status(400).json({error: true, message: 'Unable to retrieve permissions records'});
@@ -94,8 +91,8 @@ export default (api) => {
     if ( action === 'onboarding' ){
       data.needsSupervisorApproval = false;
       const [previousSubmission, onboardingRequest] = await Promise.all([
-        PermissionsRequests.getOnboardingPermissions(data.onboardingRequestId),
-        UcdlibOnboarding.getById(data.onboardingRequestId)
+        models.permissions.getOnboardingPermissions(data.onboardingRequestId),
+        models.onboarding.getById(data.onboardingRequestId)
       ])
       if ( previousSubmission.res && previousSubmission.res.rows.length ){
         data.revision = previousSubmission.res.rows[0].revision + 1;
@@ -114,14 +111,14 @@ export default (api) => {
       data.needsSupervisorApproval = false;
 
       if ( !data.permissionRequestId ) {
-        const nextId = await PermissionsRequests.getNextPermissionId();
+        const nextId = await models.permissions.getNextPermissionId();
         if ( nextId.err ) {
           console.error(nextId.err);
           return res.status(400).json({error: true, message: 'Unable to create permissions request.'});
         }
         data.permissionRequestId = nextId.res.rows[0].nextval;
       } else {
-        const previousSubmission = await PermissionsRequests.getUpdatePermissions(data.permissionRequestId);
+        const previousSubmission = await models.permissions.getUpdatePermissions(data.permissionRequestId);
         if ( previousSubmission.res && previousSubmission.res.rows.length ){
           data.revision = previousSubmission.res.rows[0].revision + 1;
           data.rtTicketId = previousSubmission.res.rows[0].rt_ticket_id;
@@ -137,7 +134,7 @@ export default (api) => {
       // Might need supervisor approval. lets check their records
       [ucdIamResponse, employeeResponse] = await Promise.all([
         UcdIamModel.getPersonByIamId(data.iamId),
-        UcdlibEmployees.getById(data.iamId, 'iamId')
+        models.employees.getById(data.iamId, 'iamId')
       ]);
       if ( employeeResponse.err ){
         console.error(employeeResponse.err);
@@ -174,7 +171,7 @@ export default (api) => {
     }
 
     data.submittedBy = req.auth.token.id;
-    const r = await PermissionsRequests.create(data);
+    const r = await models.permissions.create(data);
     if ( r.err ) {
       console.error(r.err);
       return res.status(400).json({error: true, message: 'Unable to create permissions request.'});
@@ -182,21 +179,21 @@ export default (api) => {
     const output = r.res.rows[0];
 
     // send rt
-    const rtClient = new UcdlibRt(config.rt);
+    const rtClient = new models.rt(config.rt);
 
     //send facilities RT if first onboarding request, and facilities is checked
     if ( action === 'onboarding' ){
-      const facilitiesRes = await iamAdmin.sendFacilitiesRtRequest(data.onboardingRequestId, {rtConfig: config.rt});
+      const facilitiesRes = await models.admin.sendFacilitiesRtRequest(data.onboardingRequestId, {rtConfig: config.rt});
       if ( facilitiesRes.error ) {
         console.error(facilitiesRes.message);
-        await PermissionsRequests.delete(output.id);
+        await models.permissions.delete(output.id);
         return res.status(400).json({error: true, message: 'Unable to create facilities RT request.'});
       }
     }
 
     // update existing onboarding/permissions request RT ticket
     if ( data.rtTicketId ){
-      const ticket = new UcdlibRtTicket(false, {id: data.rtTicketId});
+      const ticket = new models.rtTicket(false, {id: data.rtTicketId});
       let reply = ticket.createReply();
       reply.addSubject(`Permissions Request${data.revision > 0 ? ' (Update)': ''}`);
       addPermissionRtBody(reply, data, req, action == 'update');
@@ -204,33 +201,33 @@ export default (api) => {
       const rtResponse = await rtClient.sendCorrespondence(reply);
       if ( rtResponse.err )  {
         console.error(rtResponse);
-        await PermissionsRequests.delete(output.id);
+        await models.permissions.delete(output.id);
         return res.status(503).json({error: true, message: 'Unable to send RT request.'});
       }
-      if ( action === 'onboarding' && onboardingStatus == UcdlibOnboarding.statusCodes.supervisor ) {
-        let newStatus = UcdlibOnboarding.statusCodes.provisioning;
+      if ( action === 'onboarding' && onboardingStatus == models.onboarding.statusCodes.supervisor ) {
+        let newStatus = models.onboarding.statusCodes.provisioning;
         if ( !data.iamId ){
-          newStatus = UcdlibOnboarding.statusCodes.iamRecord;
+          newStatus = models.onboarding.statusCodes.iamRecord;
         } else if (!userId){
-          newStatus = UcdlibOnboarding.statusCodes.userId;
+          newStatus = models.onboarding.statusCodes.userId;
         }
-        await UcdlibOnboarding.update(data.onboardingRequestId, {statusId: newStatus});
+        await models.onboarding.update(data.onboardingRequestId, {statusId: newStatus});
       }
     } else if ( action === 'update' ) {
       // check for supervisor
       let supervisor;
       if ( data.needsSupervisorApproval && supervisorId ) {
-        supervisor = await UcdlibEmployees.getById(supervisorId, 'iamId');
+        supervisor = await models.employees.getById(supervisorId, 'iamId');
         if ( supervisor.err || !supervisor.res.rows.length ) {
           console.error(supervisor.err);
-          await PermissionsRequests.delete(output.id);
+          await models.permissions.delete(output.id);
           return res.status(400).json({error: true, message: 'Unable to create permissions request.'});
         }
         supervisor = supervisor.res.rows[0];
       }
 
       // create new RT ticket
-      const ticket = new UcdlibRtTicket();
+      const ticket = new models.rtTicket();
       if ( req.auth.token.email ) {
         ticket.addRequestor(req.auth.token.email);
       }
@@ -261,14 +258,14 @@ export default (api) => {
       const rtResponse = await rtClient.createTicket(ticket);
       if ( rtResponse.err )  {
         console.error(rtResponse);
-        await PermissionsRequests.delete(output.id);
+        await models.permissions.delete(output.id);
         return res.status(500).json({error: true, message: 'Unable to send RT request.'});
       }
-      await PermissionsRequests.setRtId(output.id, rtResponse.res.id);
+      await models.permissions.setRtId(output.id, rtResponse.res.id);
 
       // write reply to supervisor requesting approval
       if ( supervisor ) {
-        const ticket = new UcdlibRtTicket(false, {id: rtResponse.res.id});
+        const ticket = new models.rtTicket(false, {id: rtResponse.res.id});
         const reply = ticket.createReply();
         reply.addSubject(`Supervisor Action Required!`);
         reply.addContent(`Hi ${supervisor.first_name},`);
@@ -280,7 +277,7 @@ export default (api) => {
         const replyResponse = await rtClient.sendCorrespondence(reply);
         if ( replyResponse.err )  {
           console.error(replyResponse);
-          await PermissionsRequests.delete(output.id);
+          await models.permissions.delete(output.id);
           return res.status(500).json({error: true, message: 'Unable to send RT request.'});
         }
       }

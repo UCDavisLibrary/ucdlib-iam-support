@@ -1,5 +1,4 @@
-import UcdlibGroups from '@ucd-lib/iam-support-lib/src/utils/groups.js';
-import UcdlibCache from '@ucd-lib/iam-support-lib/src/utils/cache.js';
+import models from '#models';
 
 class GroupMigration {
   constructor() {
@@ -26,18 +25,18 @@ class GroupMigration {
           throw new Error(`Parent group ${group.parent} not found for ${group.name}`);
         }
       }
-      const r = await UcdlibGroups.create(g);
+      const r = await models.groups.create(g);
       if (r.err) {
         throw new Error(r.err);
       }
       this.groupBySlug[group.slug] = r.res.rows[0];
     }
-    await UcdlibCache.set('migration', 'groupsBySlug', this.groupBySlug);
+    await models.cache.set('migration', 'groupsBySlug', this.groupBySlug);
     await this.getAllGroups();
   }
 
   async getAllGroups() {
-    const r = await UcdlibGroups.getAll();
+    const r = await models.groups.getAll();
     if (r.err) {
       throw new Error(r.err);
     }
@@ -46,7 +45,7 @@ class GroupMigration {
   }
 
   async groupsExist() {
-    const r = await UcdlibGroups.getCount();
+    const r = await models.groups.getCount();
     if (r.err) {
       throw new Error(r.err);
     }
@@ -55,7 +54,7 @@ class GroupMigration {
 
   // set groupsBySlug from cache
   async setGroupsBySlug() {
-    const r = await UcdlibCache.get('migration', 'groupsBySlug');
+    const r = await models.cache.get('migration', 'groupsBySlug');
     if (r.err) {
       throw new Error(r.err);
     } else if (!r.res.rows.length) {

@@ -1,5 +1,5 @@
-import pg from "./pg.js";
-import TextUtils from "./text.js";
+import pg from "#lib/utils/pg.js";
+import TextUtils from "#lib/utils/text.js";
 
 class UcdlibEmployees {
   constructor() {

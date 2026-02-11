@@ -1,6 +1,7 @@
-import keycloakClient from "@ucd-lib/iam-support-lib/src/utils/keycloakAdmin.js";
-import UcdlibJobs from "@ucd-lib/iam-support-lib/src/utils/jobs.js";
+import models from '#models';
 import config from "#lib/utils/config.js";
+
+const keycloakClient = models.keycloakAdmin;
 
 function KeycloakSyncError(error) {
   this.error = error;
@@ -16,7 +17,7 @@ export const run = async (saveToDB) => {
   let thisJob;
   try {
     if ( saveToDB ) {
-      const r = await UcdlibJobs.start('keycloak-sync');
+      const r = await models.jobs.start('keycloak-sync');
       if ( r.job ) thisJob = r.job;
     }
     keycloakClient.resetState(); // does cron job remember state between runs?

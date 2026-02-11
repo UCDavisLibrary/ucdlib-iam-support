@@ -1,7 +1,6 @@
-import UcdlibEmployees from "@ucd-lib/iam-support-lib/src/utils/employees.js";
-import UcdlibCache from '@ucd-lib/iam-support-lib/src/utils/cache.js';
+import models from '#models';
+
 import { UcdIamModel } from "@ucd-lib/iam-support-lib/index.js";
-import UcdlibJobs from "@ucd-lib/iam-support-lib/src/utils/jobs.js";
 import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js";
 import config from "#lib/utils/config.js";
 import assert from 'node:assert/strict';
@@ -20,7 +19,7 @@ export class IamEmployees {
 
   // get records from local employees table
   async getEmployees(){
-    const employees = await UcdlibEmployees.getAll();
+    const employees = await models.employees.getAll();
     if ( employees.err ){
       throw employees.err;
     }
@@ -63,7 +62,7 @@ export class IamEmployees {
     }
 
     // check database cache
-    const cache = await UcdlibCache.get(idType, id, config.ucdIamApi.cacheExpiration);
+    const cache = await models.cache.get(idType, id, config.ucdIamApi.cacheExpiration);
     if ( cache.res && cache.res.rowCount ) {
       const d = cache.res.rows[0].data;
       if ( idType === 'iamId' ) this.iamResponses.byId[id] = d;
@@ -84,7 +83,7 @@ export class IamEmployees {
       throw response.error;
     }
     if ( !response.error ) {
-      await UcdlibCache.set(idType, id, response);
+      await models.cache.set(idType, id, response);
     }
     if ( idType === 'iamId' ) {
       this.iamResponses.byId[id] = response;
@@ -102,7 +101,7 @@ export class IamEmployees {
   // compare records in the employees table with the ucd iam records
   // check for updates that can be applied automatically, and those that require manual intervention
   async compareRecords(){
-    const discrepancyTypes = UcdlibEmployees.outdatedReasons;
+    const discrepancyTypes = models.employees.outdatedReasons;
     for ( let employee of this.employees ){
 
       // check for no iam record
@@ -151,7 +150,7 @@ export class IamEmployees {
       }
 
       // since TES employees do not have a library appointment, check that TES employees appointments are still active
-      if ( !UcdlibEmployees.libDeptCodes.includes(employee.ucd_dept_code)) {
+      if ( !models.employees.libDeptCodes.includes(employee.ucd_dept_code)) {
         let libApptStart = new Date(employee.created);
         libApptStart.setDate(libApptStart.getDate()+14); // grace period of 14 days
         const iamAppStart = new Date(iamRecord.getPrimaryAssociation().assocStartDate);
@@ -239,7 +238,7 @@ export class IamEmployees {
   async updateEmployees(){
     if ( !this.updates.length ) return;
     for ( let update of this.updates ){
-      const r = await UcdlibEmployees.update(update.iamId, update, 'iamId');
+      const r = await models.employees.update(update.iamId, update, 'iamId');
       if ( r.err ) {
         throw r.err;
       }
@@ -255,21 +254,21 @@ export class IamEmployees {
       if ( !libEmployees.has(employee.supervisor_id) ) {
         this.discrepancies.push({
           iam_id: employee.iam_id,
-          reason: UcdlibEmployees.outdatedReasons.supervisorNotLibraryEmployee.slug
+          reason: models.employees.outdatedReasons.supervisorNotLibraryEmployee.slug
         });
       }
 
       if ( !employee.supervisor_id ){
         this.discrepancies.push({
           iam_id: employee.iam_id,
-          reason: UcdlibEmployees.outdatedReasons.noSupervisor.slug
+          reason: models.employees.outdatedReasons.noSupervisor.slug
         });
       } else {
         const supervisorIamRecord = await this._getIamRecord(employee.supervisor_id, 'iamId');
         if ( this.iam.noEmployeeFound(supervisorIamRecord) ){
           this.discrepancies.push({
             iam_id: employee.iam_id,
-            reason: UcdlibEmployees.outdatedReasons.noSupervisorIamRecord.slug
+            reason: models.employees.outdatedReasons.noSupervisorIamRecord.slug
           });
         }
       }
@@ -279,7 +278,7 @@ export class IamEmployees {
   async writeDiscrepancies(){
     if ( !this.discrepancies.length ) return;
     for (const d of this.discrepancies) {
-      const r = await UcdlibEmployees.createRecordDiscrepancyNotification(d.iam_id, d.reason);
+      const r = await models.employees.createRecordDiscrepancyNotification(d.iam_id, d.reason);
       if ( r.err ) {
         throw r.err;
       }
@@ -297,7 +296,7 @@ export const run = async (saveToDB) => {
   let thisJob;
   try {
     if ( saveToDB ) {
-      const r = await UcdlibJobs.start('iam-employee');
+      const r = await models.jobs.start('iam-employee');
       if ( r.job ) thisJob = r.job;
     }
     const iamEmployees = new IamEmployees();

@@ -1,7 +1,8 @@
+import models from '#models';
+
 import pg from "./pg.js";
 import TextUtils from "./text.js";
 import RequestsIsoUtils from "./requests-iso-utils.js";
-import UcdlibEmployees from './employees.js';
 
 
 /**
@@ -50,7 +51,7 @@ class UcdlibSeparation{
       out.message = `Separation request with id ${separationId} does not have an iam_id`;
       return out;
     }
-    let employeeRecord = await UcdlibEmployees.getById(iamId, 'iamId', {returnGroups: true, returnSupervisor: true});
+    let employeeRecord = await models.employees.getById(iamId, 'iamId', {returnGroups: true, returnSupervisor: true});
     if ( !employeeRecord.res?.rowCount ){
       out.error = true;
       out.message = `Employee record with iam_id ${iamId} does not exist`;

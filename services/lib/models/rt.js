@@ -1,5 +1,5 @@
 import { RT, RTTicket } from '@ucd-lib/rt-api';
-import UcdlibGroups from "./groups.js";
+import models from '#models';
 
 class UcdlibRt {
 
@@ -130,7 +130,7 @@ class UcdlibRtTicket extends RTTicket {
    */
   async addOnboardingPositionInfo(request){
     if ( !request ) return;
-    let department =  await UcdlibGroups.getDepartmentsById(request.groupIds || request.group_ids || []);
+    let department =  await models.groups.getDepartmentsById(request.groupIds || request.group_ids || []);
     department = department.res && department.res.rows.length ? department.res.rows[0].name : '????';
     const ad = request.additional_data || request.additionalData || {};
     let startDate = request.startDate || request.start_date || '????';

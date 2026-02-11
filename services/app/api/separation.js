@@ -1,11 +1,7 @@
-import UcdlibSeparation from '@ucd-lib/iam-support-lib/src/utils/separation.js';
-import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
-import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.js';
-import getByName from '@ucd-lib/iam-support-lib/src/utils/getByName.js';
+import models from '#models';
+
 import TextUtils from '@ucd-lib/iam-support-lib/src/utils/text.js';
 import config from "#lib/utils/config.js";
-import SystemAccessRecord from '@ucd-lib/iam-support-lib/src/utils/SystemAccessRecord.js';
-import iamAdmin from '@ucd-lib/iam-support-lib/src/utils/admin.js';
 
 export default (api) => {
     api.post('/separation/new', async (req, res) => {
@@ -22,12 +18,12 @@ export default (api) => {
       if ( !payload.additionalData ) payload.additionalData = {};
 
       payload.submittedBy = req.auth.token.id;
-      payload.additionalData[SystemAccessRecord.separationRecordProp] = [];
+      payload.additionalData[models.SystemAccessRecord.separationRecordProp] = [];
 
 
       // department info for ticket
       const options = {returnSupervisor: true, returnGroups: true};
-      const employeeRecord = await UcdlibEmployees.getById(payload.iamId, 'iamId', options);
+      const employeeRecord = await models.employees.getById(payload.iamId, 'iamId', options);
       if ( employeeRecord.err ) {
         console.error(employeeRecord.err);
         res.status(500).json({error: true, message: 'Unable to retrieve employee record'});
@@ -41,7 +37,7 @@ export default (api) => {
       payload.additionalData.departmentName = payload.additionalData.employeeRecord.groups.find(g => g.partOfOrg)?.name || '';
 
       //create separation request entry
-      const r = await UcdlibSeparation.create(payload);
+      const r = await models.separation.create(payload);
       if ( r.err ) {
         console.error(r.err);
         res.json({error: true, message: 'Unable to create separation request.'});
@@ -57,8 +53,8 @@ export default (api) => {
       const employeeName = `${ad.employeeLastName}, ${ad.employeeFirstName}`;
 
       // create rt ticket
-      const rtClient = new UcdlibRt(config.rt);
-      const ticket = new UcdlibRtTicket();
+      const rtClient = new models.rt(config.rt);
+      const ticket = new models.rtTicket();
 
       ticket.addSubject(`Separation: ${employeeName}`);
       if ( config.rt.user ){
@@ -99,7 +95,7 @@ export default (api) => {
       const rtResponse = await rtClient.createTicket(ticket);
       if ( rtResponse.err || !rtResponse.res.id )  {
         console.error(rtResponse);
-        await UcdlibSeparation.delete(output.id);
+        await models.separation.delete(output.id);
         return res.status(500).json({error: true, message: 'Unable to create an RT ticket for this request.'});
       }
 
@@ -134,13 +130,13 @@ export default (api) => {
         const replyResponse = await rtClient.sendCorrespondence(reply);
         if ( replyResponse.err )  {
           console.error(replyResponse);
-          await UcdlibSeparation.delete(output.id);
+          await models.separation.delete(output.id);
           res.json({error: true, message: 'Unable to send RT request to supervisor.'});
           return;
         }
       }
 
-      await UcdlibSeparation.update(output.id, {rtTicketId: rtResponse.res.id});
+      await models.separation.update(output.id, {rtTicketId: rtResponse.res.id});
       return res.json(output);
 
     });
@@ -166,7 +162,7 @@ export default (api) => {
         return;
       }
 
-      const r = await getByName.getByName("separation",req.query.firstName, req.query.lastName);
+      const r = await models.getByName.getByName("separation",req.query.firstName, req.query.lastName);
       if ( r.err ) {
         console.error(r.err);
         return res.status(500).json({error: true, message: 'Unable to retrieve SEARCH separation request'});
@@ -193,7 +189,7 @@ export default (api) => {
         return;
       }
 
-      const r = await UcdlibSeparation.update(req.params.id, req.body);
+      const r = await models.separation.update(req.params.id, req.body);
       if ( r.err ) {
         console.error(r.err);
         return res.status(500).json({error: true, message: 'Unable to retrieve separation request'});
@@ -221,7 +217,7 @@ export default (api) => {
         return;
       }
 
-      const r = await UcdlibSeparation.getById(req.params.id);
+      const r = await models.separation.getById(req.params.id);
       if ( r.err ) {
         console.error(r.err);
         return res.status(500).json({error: true, message: 'Unable to retrieve separation request'});
@@ -245,7 +241,7 @@ export default (api) => {
         return;
       }
 
-      const systemAccessRecord = new SystemAccessRecord();
+      const systemAccessRecord = new models.SystemAccessRecord();
       const separationId = req.params.id;
 
       // make sure separation request and employee record exist
@@ -254,7 +250,7 @@ export default (api) => {
         message: recordExistsMessage,
         separationRecord,
         employeeRecord
-      } = await UcdlibSeparation.getEmployeeRecord(separationId);
+      } = await models.separation.getEmployeeRecord(separationId);
       if ( recordExistsError ) {
         console.error(recordExistsMessage);
         return res.status(400).json({
@@ -265,7 +261,7 @@ export default (api) => {
 
       // remove employee from keycloak
       const userId = employeeRecord.user_id || separationRecord.additional_data?.employeeUserId;
-      const { error: deprovisionError, message: deprovisionMessage, keycloakUser } = await iamAdmin.deprovisionKcAccount(userId);
+      const { error: deprovisionError, message: deprovisionMessage, keycloakUser } = await models.admin.deprovisionKcAccount(userId);
       if ( deprovisionError ) {
         console.error(deprovisionMessage);
         return res.status(400).json({
@@ -281,7 +277,7 @@ export default (api) => {
         message: rmMessage,
         directReports,
         isHeadOf
-      } = await iamAdmin.deleteEmployeeRecord(employeeRecord.iam_id);
+      } = await models.admin.deleteEmployeeRecord(employeeRecord.iam_id);
       if ( rmError ) {
         console.error(rmMessage);
         return res.status(400).json({
@@ -293,7 +289,7 @@ export default (api) => {
 
       await systemAccessRecord.writeToSeparationRequest(separationId);
 
-      const { rtSent } = await iamAdmin.sendSeparationNotification(separationRecord.rt_ticket_id);
+      const { rtSent } = await models.admin.sendSeparationNotification(separationRecord.rt_ticket_id);
 
       return res.json({
         success: true,
@@ -328,7 +324,7 @@ export default (api) => {
       }
 
 
-      const r = await UcdlibSeparation.query(q);
+      const r = await models.separation.query(q);
       if ( r.err ) {
         console.error(r.err);
         return res.status(500).json({error: true, message: errorMsg});

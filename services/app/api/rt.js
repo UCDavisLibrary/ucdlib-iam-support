@@ -1,6 +1,5 @@
 import config from "#lib/utils/config.js";
-import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.js';
-import UcdlibOnboarding from '@ucd-lib/iam-support-lib/src/utils/onboarding.js';
+import models from '#models';
 
 export default (api) => {
 
@@ -8,11 +7,11 @@ export default (api) => {
    * @description Get ticket history
    */
   api.get('/rt/history/:id', async (req, res) => {
-    const rtClient = new UcdlibRt(config.rt);
+    const rtClient = new models.rt(config.rt);
 
     // auth
     if ( !req.auth.token.hasAdminAccess && !req.auth.token.hasHrAccess ){
-      const r = UcdlibOnboarding.query({rtTicketId: req.params.id, supervisorId: req.auth.token.iamId});
+      const r = await models.onboarding.query({rtTicketId: req.params.id, supervisorId: req.auth.token.iamId});
       if ( r.err || !r.res.rows.length ){
         console.error(r.err);
         res.status(403).json({

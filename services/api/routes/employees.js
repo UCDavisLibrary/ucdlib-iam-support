@@ -1,5 +1,5 @@
-import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
-import UcdlibGroups from '@ucd-lib/iam-support-lib/src/utils/groups.js';
+import models from '#models';
+
 import utils from "../lib/utils.js";
 import protect from '../lib/protect.js';
 
@@ -45,7 +45,7 @@ export default ( api ) => {
     const queryOptions = getQueryOptions(req);
     const employeeName = queryOptions.name || '';
 
-    const results = await UcdlibEmployees.searchByName(employeeName, queryOptions);
+    const results = await models.employees.searchByName(employeeName, queryOptions);
     if ( results.err ) {
       return res.status(400).json({
         error: 'Error getting employees'
@@ -81,7 +81,7 @@ export default ( api ) => {
       queryOptions.returnGroups = true;
     }
 
-    const results = await UcdlibEmployees.getById(employeeIdentifier, employeeIdentifierType, queryOptions);
+    const results = await models.employees.getById(employeeIdentifier, employeeIdentifierType, queryOptions);
     if ( results.err ) {
       return res.status(400).json({
         error: 'Error getting employee'
@@ -102,14 +102,14 @@ export default ( api ) => {
         employee.departmentHead = null;
         const department = (employee.groups || []).find(group => group.partOfOrg);
         if ( department && !department.isHead ) {
-          const headResult = await UcdlibGroups.getGroupHead(department.id);
+          const headResult = await models.groups.getGroupHead(department.id);
           if ( headResult.err ) {
             return res.status(400).json({
               error: 'Error getting department head'
             });
           }
           if ( headResult.res.rowCount ) {
-            employee.departmentHead = UcdlibEmployees.toBriefObject(headResult.res.rows[0]);
+            employee.departmentHead = models.employees.toBriefObject(headResult.res.rows[0]);
           }
         }
       }

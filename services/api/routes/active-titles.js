@@ -1,5 +1,6 @@
-import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
-import UcdlibGroups from '@ucd-lib/iam-support-lib/src/utils/groups.js';
+import models from '#models';
+
+
 import utils from "../lib/utils.js";
 import protect from '../lib/protect.js';
 
@@ -9,7 +10,7 @@ export default ( api ) => {
   api.get(`/active-titles`, async (req, res) => {
 
 
-    const results = await UcdlibEmployees.getAll({returnUcdRecord: true});
+    const results = await models.employees.getAll({returnUcdRecord: true});
     if ( results.err ) {
       return res.status(400).json({
         error: 'Error getting active titles'

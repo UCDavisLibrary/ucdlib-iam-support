@@ -1,5 +1,7 @@
-import keycloakClient from "@ucd-lib/iam-support-lib/src/utils/keycloakAdmin.js";
+import models from '#models';
 import config from "#lib/utils/config.js";
+
+const keycloakClient = models.keycloakAdmin;
 
 const run = async () => {
   await keycloakClient.init({...config.keycloakAdmin, refreshInterval: 58000});

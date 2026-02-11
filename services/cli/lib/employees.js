@@ -1,14 +1,10 @@
 import config from "#lib/utils/config.js";
+import models from '#models';
+
 import utils from './utils.js';
-import iamAdmin from '@ucd-lib/iam-support-lib/src/utils/admin.js';
-import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
 import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
-import { UcdlibRt, UcdlibRtTicket } from '@ucd-lib/iam-support-lib/src/utils/rt.js';
 import IamPersonTransform from '@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js';
 import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
-import UcdlibSeparation from '@ucd-lib/iam-support-lib/src/utils/separation.js';
-import keycloakClient from "@ucd-lib/iam-support-lib/src/utils/keycloakAdmin.js";
-import SystemAccessRecord from '@ucd-lib/iam-support-lib/src/utils/SystemAccessRecord.js';
 import * as fs from 'node:fs/promises';
 
 UcdIamModel.init(config.ucdIamApi);
@@ -29,7 +25,7 @@ class employeesCli {
     id = id.trim();
     const data = {};
     data[property] = value;
-    const r = await UcdlibEmployees.update(id, data, idType);
+    const r = await models.employees.update(id, data, idType);
     await pg.pool.end();
     if ( r.err ) {
       console.error(`Error updating employee record\n${r.err.message}`);
@@ -45,7 +41,7 @@ class employeesCli {
    * @returns
    */
   async separate(separationId, options){
-    const systemAccessRecord = new SystemAccessRecord();
+    const systemAccessRecord = new models.SystemAccessRecord();
 
     // make sure separation request and employee record exist
     const {
@@ -53,7 +49,7 @@ class employeesCli {
       message: recordExistsMessage,
       separationRecord,
       employeeRecord
-    } = await UcdlibSeparation.getEmployeeRecord(separationId);
+    } = await models.separation.getEmployeeRecord(separationId);
     if ( recordExistsError ) {
       console.error(recordExistsMessage);
       await pg.pool.end();
@@ -63,7 +59,7 @@ class employeesCli {
     // deprovision keycloak account
     if ( options.deprovision ){
       const userId = employeeRecord.user_id || separationRecord.additional_data?.employeeUserId;
-      const { error: deprovisionError, message: deprovisionMessage, keycloakUser } = await iamAdmin.deprovisionKcAccount(userId);
+      const { error: deprovisionError, message: deprovisionMessage, keycloakUser } = await models.admin.deprovisionKcAccount(userId);
       if ( deprovisionError ) {
         console.error(deprovisionMessage);
         await pg.pool.end();
@@ -81,7 +77,7 @@ class employeesCli {
         message: rmMessage,
         directReports,
         isHeadOf
-      } = await iamAdmin.deleteEmployeeRecord(employeeRecord.iam_id, options);
+      } = await models.admin.deleteEmployeeRecord(employeeRecord.iam_id, options);
       if ( rmError ) {
         console.error(rmMessage);
         if ( rmError === 'directReports') {
@@ -101,7 +97,7 @@ class employeesCli {
 
     // comment on rt ticket
     if ( options.rt ) {
-      await iamAdmin.sendSeparationNotification(separationRecord.rt_ticket_id);
+      await models.admin.sendSeparationNotification(separationRecord.rt_ticket_id);
     }
 
     await pg.pool.end();
@@ -114,7 +110,7 @@ class employeesCli {
    * @returns
    */
   async search(name, options){
-    let r = await UcdlibEmployees.searchByName(name);
+    let r = await models.employees.searchByName(name);
 
     utils.logObject(r.res.rows);
     await pg.pool.end();
@@ -130,7 +126,7 @@ class employeesCli {
     const ucd = options.ucd;
     id = id.trim();
 
-    const r = await UcdlibEmployees.getById(id, idType, {returnGroups: true, returnSupervisor: true});
+    const r = await models.employees.getById(id, idType, {returnGroups: true, returnSupervisor: true});
     await pg.pool.end();
     if ( r.res.rowCount ) {
       console.log("Employee Record:");
@@ -163,7 +159,7 @@ class employeesCli {
     console.log(`Adopting employee from onboarding record ${onboardingId} with options:`, options);
 
     const forceMessage = 'Use --force to override this check.';
-    const systemAccessRecord = new SystemAccessRecord();
+    const systemAccessRecord = new models.SystemAccessRecord();
 
     const adoptParams = {
       ucdIamConfig: config.ucdIamApi,
@@ -173,7 +169,7 @@ class employeesCli {
     };
     if ( config.rt.forbidWrite ) adoptParams.sendRt = false;
 
-    const result = await iamAdmin.adoptEmployee(onboardingId, adoptParams);
+    const result = await models.admin.adoptEmployee(onboardingId, adoptParams);
     if ( result.error ) {
       let msg = `Error adopting employee!\n${result.message}.`;
       if ( result.canForce ) msg += `\n${forceMessage}`;
@@ -189,9 +185,9 @@ class employeesCli {
         keycloakConfig: {...config.keycloakAdmin, refreshInterval: 58000},
         printLogs: true
       };
-      const kcResult = await iamAdmin.provisionKcAccount(result.employeeId, kcParams);
+      const kcResult = await models.admin.provisionKcAccount(result.employeeId, kcParams);
       if ( kcResult.error ) {
-        await iamAdmin.deleteEmployee(result.employeeId);
+        await models.admin.deleteEmployee(result.employeeId);
         let msg = `Error provisioning keycloak account!\n${kcResult.message}.`;
         console.error(msg);
         await pg.pool.end();
@@ -205,7 +201,7 @@ class employeesCli {
 
     // comment on rt ticket
     if ( options.rt ) {
-      await iamAdmin.sendAdoptionRtNotification(result.onboardingRecord.rt_ticket_id);
+      await models.admin.sendAdoptionRtNotification(result.onboardingRecord.rt_ticket_id);
     }
 
     console.log(result.message);
@@ -218,7 +214,7 @@ class employeesCli {
    * @param {String} iamId - Employee IAM id
    */
   async dismissRecordDiscrepancyNotifications(iamId){
-    const r = await UcdlibEmployees.dismissRecordDiscrepancyNotifications(iamId);
+    const r = await models.employees.dismissRecordDiscrepancyNotifications(iamId);
     await pg.pool.end();
     if ( r.err) {
       console.error(`Error dismissing record discrepancy notifications\n${r.err.message}`);
@@ -232,7 +228,7 @@ class employeesCli {
     if ( intervalLength && intervalUnit ) {
       interval = `${intervalLength} ${intervalUnit}`;
     }
-    const r = await UcdlibEmployees.getActiveRecordDiscrepancyNotifications(interval);
+    const r = await models.employees.getActiveRecordDiscrepancyNotifications(interval);
     await pg.pool.end();
     if ( r.err ) {
       console.error(`Error getting active record discrepancy notifications\n${r.err.message}`);
@@ -246,7 +242,7 @@ class employeesCli {
   }
 
   async updateCreationDate(id, idtype){
-    const r = await iamAdmin.updateEmployeeCreationDate(id, idtype);
+    const r = await models.admin.updateEmployeeCreationDate(id, idtype);
     console.log(`${r.error ? 'Error:' : 'Success:'} ${r.message}`);
     await pg.pool.end();
   }
@@ -333,7 +329,7 @@ class employeesCli {
     // update employee record
     const d = {primaryAssociation: {deptCode, titleCode}, ucdDeptCode: deptCode};
     if ( supervisorId ) d.supervisorId = supervisorId;
-    const update = await UcdlibEmployees.update(employee.id, d);
+    const update = await models.employees.update(employee.id, d);
     if ( update.err ) {
       console.error(`Error updating employee record\n${update.err.message}`);
     } else {
@@ -395,7 +391,7 @@ class employeesCli {
     // update employee record
     const d = {primaryAssociation: {}, ucdDeptCode: iamRecord.getPrimaryAssociation().deptCode};
     if ( supervisorId ) d.supervisorId = supervisorId;
-    const update = await UcdlibEmployees.update(employee.id, d);
+    const update = await models.employees.update(employee.id, d);
     if ( update.err ) {
       console.error(`Error updating employee record\n${update.err.message}`);
     } else {
@@ -428,7 +424,7 @@ class employeesCli {
     iamRecord = new IamPersonTransform(iamRecord);
 
     // check if employee already exists in local db
-    const localRecord = await UcdlibEmployees.getById(iamId, 'iamId');
+    const localRecord = await models.employees.getById(iamId, 'iamId');
     if ( localRecord.res.rowCount ) {
       await pg.pool.end();
       console.error(`Employee ${iamId} already exists in local database`);
@@ -442,7 +438,7 @@ class employeesCli {
       templateRecord: employee,
       force
     }
-    let d = iamAdmin.extractAndPopulateEmployeeFields(args);
+    let d = models.admin.extractAndPopulateEmployeeFields(args);
     if ( d.error ) {
       console.error(`Error validating employee data\n${d.error.message}`);
       if ( d.error.canForce ) console.error(forceMessage);
@@ -453,7 +449,7 @@ class employeesCli {
 
     // validate appointments
     const primaryAssociation = employee.primary_association?.deptCode || employee.primary_association?.titleCode ? employee.primary_association : {};
-    const appointments = await iamAdmin.validateAppointments(iamRecord, primaryAssociation, force);
+    const appointments = await models.admin.validateAppointments(iamRecord, primaryAssociation, force);
     if ( appointments.error ) {
       console.error(`Error validating appointments\n${appointments.error.message}`);
       if ( appointments.error.canForce ) console.error(forceMessage);
@@ -467,7 +463,7 @@ class employeesCli {
 
     // user entered supervisor id
     if ( employee.supervisor_id ) {
-      const supervisor = await iamAdmin.employeeRecordsExist(employee.supervisor_id, force);
+      const supervisor = await models.admin.employeeRecordsExist(employee.supervisor_id, force);
       if ( supervisor.error ) {
         console.error(`Error validating supervisor\n${supervisor.error.message}`);
         if ( supervisor.error.canForce ) console.error(forceMessage);
@@ -490,7 +486,7 @@ class employeesCli {
         await pg.pool.end();
         return;
       }
-      const supervisorLocalRecord = await UcdlibEmployees.getById(supervisorEmployeeId, 'employeeId');
+      const supervisorLocalRecord = await models.employees.getById(supervisorEmployeeId, 'employeeId');
       if ( !supervisorLocalRecord.res.rowCount ) {
         await pg.pool.end();
         console.error(`Error validating supervisor`);
@@ -501,7 +497,7 @@ class employeesCli {
     }
 
     // validate groups
-    const groups = await iamAdmin.validateGroupList(employee.groups, false, force);
+    const groups = await models.admin.validateGroupList(employee.groups, false, force);
     if ( groups.error ) {
       console.error(`Error validating groups\n${groups.error.message}`);
       if ( groups.error.canForce ) console.error(forceMessage);
@@ -510,7 +506,7 @@ class employeesCli {
     }
 
     // create record
-    const createEmployee = await UcdlibEmployees.create(dataToWrite, employee.groups);
+    const createEmployee = await models.employees.create(dataToWrite, employee.groups);
     if ( createEmployee.err ) {
       console.error(`Error creating employee record\n${createEmployee.err.message}`);
       await pg.pool.end();

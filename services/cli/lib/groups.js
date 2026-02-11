@@ -1,5 +1,5 @@
-import UcdlibGroups from '@ucd-lib/iam-support-lib/src/utils/groups.js';
-import UcdlibEmployees from '@ucd-lib/iam-support-lib/src/utils/employees.js';
+import models from '#models';
+
 import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
 import utils from './utils.js';
 
@@ -8,7 +8,7 @@ import * as fs from 'node:fs/promises';
 class GroupsCli {
 
   async list(options){
-    const groups = await UcdlibGroups.groupQuery(options, {returnHead: options.return_head});
+    const groups = await models.groups.groupQuery(options, {returnHead: options.return_head});
     if ( groups.err ) {
       console.log(groups.err);
       await pg.pool.end();
@@ -25,7 +25,7 @@ class GroupsCli {
   }
 
   async removeHead(group_id){
-    const group = await UcdlibGroups.getById(group_id);
+    const group = await models.groups.getById(group_id);
     if ( group.err ) {
       console.log(group.err);
       await pg.pool.end();
@@ -36,7 +36,7 @@ class GroupsCli {
       await pg.pool.end();
       return;
     }
-    const rmHead = await UcdlibGroups.removeGroupHead(group_id);
+    const rmHead = await models.groups.removeGroupHead(group_id);
     if ( rmHead.err ) {
       console.log(rmHead.err);
       await pg.pool.end();
@@ -84,7 +84,7 @@ class GroupsCli {
       return;
     }
 
-    const r = await UcdlibEmployees.removeEmployeeFromGroup(employee.id, group_id);
+    const r = await models.employees.removeEmployeeFromGroup(employee.id, group_id);
     if ( r.err ) {
       console.log(r.err);
     } else {
@@ -104,7 +104,7 @@ class GroupsCli {
     if ( !toGroup ) return;
 
     // move all members from one group to another
-    const res = await UcdlibGroups.moveAllMembers(from_group_id, to_group_id);
+    const res = await models.groups.moveAllMembers(from_group_id, to_group_id);
     if ( res.err ) {
       console.log(res.err);
       await pg.pool.end();
@@ -147,7 +147,7 @@ class GroupsCli {
       return;
     }
 
-    const r = await UcdlibEmployees.addEmployeeToGroup(employee.id, group_id, false);
+    const r = await models.employees.addEmployeeToGroup(employee.id, group_id, false);
     if ( r.err ) {
       console.log(r.err);
     } else {
@@ -198,14 +198,14 @@ class GroupsCli {
     }
 
     if ( isMember ){
-      const r = await UcdlibGroups.setGroupHead(group_id, employee.id);
+      const r = await models.groups.setGroupHead(group_id, employee.id);
       if ( r.err ) {
         console.log(r.err);
         await pg.pool.end();
         return;
       }
     } else {
-      const r = await UcdlibEmployees.addEmployeeToGroup(employee.id, group_id, true)
+      const r = await models.employees.addEmployeeToGroup(employee.id, group_id, true)
       if ( r.err ) {
         console.log(r.err);
         await pg.pool.end();
@@ -218,7 +218,7 @@ class GroupsCli {
 
   async inspect(group_id){
     const args = {returnMembers: true, returnParent: true, returnChildren: true};
-    const group = await UcdlibGroups.getById(group_id, args);
+    const group = await models.groups.getById(group_id, args);
     if ( group.err ) {
       console.log(group.err);
       await pg.pool.end();
@@ -249,7 +249,7 @@ class GroupsCli {
       const data = {
         [property]: value
       };
-      const r = await UcdlibGroups.update(id, data);
+      const r = await models.groups.update(id, data);
       await pg.pool.end();
       if ( r.err ) {
         console.error(`Error updating group record\n${r.err.message}`);
@@ -285,7 +285,7 @@ class GroupsCli {
     }
 
     // Create group
-    const r = await UcdlibGroups.create(group);
+    const r = await models.groups.create(group);
     if ( r.err ) {
       console.error(`Error creating group\n${r.err.message}`);
       await pg.pool.end();
@@ -299,12 +299,12 @@ class GroupsCli {
   /**
    * @description Validate group exists
    * @param {Int} group_id - Group id
-   * @param {Object} args - Additional arguments to pass to UcdlibGroups.getById
+   * @param {Object} args - Additional arguments to pass to models.groups.getById
    * @returns {Object} Group object or null if group does not exist
    */
   async _validateGroup(group_id, args){
     // validate group exists
-    let group = await UcdlibGroups.getById(group_id, args);
+    let group = await models.groups.getById(group_id, args);
     if ( group.err ) {
       console.log(group.err);
       await pg.pool.end();

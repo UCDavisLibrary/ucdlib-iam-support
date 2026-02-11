@@ -1,11 +1,11 @@
 import { printTable } from 'console-table-printer';
-import ucdlibJobs from '@ucd-lib/iam-support-lib/src/utils/jobs.js';
+import models from '#models';
 import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
 
 class jobsCli {
 
   async list(options){
-    const r = await ucdlibJobs.getRecent(options);
+    const r = await models.jobs.getRecent(options);
     await pg.pool.end();
     if ( r.err ) {
       console.error(`Error getting recent jobs\n${r.err.message}`);
@@ -25,7 +25,7 @@ class jobsCli {
   }
 
   async names(){
-    const r = await ucdlibJobs.getUniqueJobNames();
+    const r = await models.jobs.getUniqueJobNames();
     await pg.pool.end();
     if ( r.err ) {
       console.error(`Error getting job names\n${r.err.message}`);
@@ -39,8 +39,8 @@ class jobsCli {
   }
 
   async inspect(id){
-    const jobResult = await ucdlibJobs.getById(id);
-    const logCtResult = await ucdlibJobs.getJobLogCount(id);
+    const jobResult = await models.jobs.getById(id);
+    const logCtResult = await models.jobs.getJobLogCount(id);
     await pg.pool.end();
     const error = jobResult.err || logCtResult.err;
     if ( error ) {
@@ -69,7 +69,7 @@ class jobsCli {
   }
 
   async getLogs(id, options){
-    const r = await ucdlibJobs.getLogs(id, options);
+    const r = await models.jobs.getLogs(id, options);
     await pg.pool.end();
     if ( r.err ) {
       console.error(`Error getting job logs\n${r.err.message}`);
