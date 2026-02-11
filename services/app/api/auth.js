@@ -3,7 +3,7 @@ import jwt_decode from "jwt-decode";
 
 import models from '#models';
 import config from "#lib/utils/config.js";
-import AccessToken from '@ucd-lib/iam-support-lib/src/utils/accessToken.js';
+import AccessToken from '#lib/utils/accessToken.js';
 
 export default (api) => {
 

@@ -1,6 +1,5 @@
 import config from "#lib/utils/config.js";
-import sftp from '@ucd-lib/iam-support-lib/src/utils/sftp.js';
-
+import sftp from '#lib/utils/sftp.js';
 
 export default (api) => {
 

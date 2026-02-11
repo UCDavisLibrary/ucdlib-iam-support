@@ -1,5 +1,4 @@
-import pg from "./pg.js";
-import TextUtils from "./text.js";
+import pg from "#lib/utils/pg.js";
 
 /**
  * @classdesc A class to handle all database interactions for the jobs & job_logs table

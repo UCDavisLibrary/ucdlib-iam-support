@@ -1,5 +1,5 @@
 import config from "#lib/utils/config.js";
-import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
+import {UcdIamModel} from '#lib/cork/models/UcdIamModel.js';
 
 UcdIamModel.init(config.ucdIamApi);
 

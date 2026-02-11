@@ -1,5 +1,4 @@
-import onboarding from "./onboarding.js";
-import separation from "./separation.js";
+import models from '#models';
 
 /**
  * @description Class to manage system access modification record keeping.
@@ -69,7 +68,7 @@ class SystemAccessRecord {
     }
 
     // ensure the access record exists in the database
-    const existing = await onboarding.getById(onboardingRequestId);
+    const existing = await models.onboarding.getById(onboardingRequestId);
     if ( existing.err ) {
       throw new Error(`SystemAccessRecord: Failed to retrieve onboarding request with id ${onboardingRequestId}`);
     }
@@ -83,7 +82,7 @@ class SystemAccessRecord {
     additionalData[this.onboardingRecordProp] = additionalData[this.onboardingRecordProp] || [];
     additionalData[this.onboardingRecordProp].push(...this.access);
 
-    await onboarding.update(onboardingRequestId, {additionalData});
+    await models.onboarding.update(onboardingRequestId, {additionalData});
   }
 
   async writeToSeparationRequest(separationRequestId){
@@ -96,7 +95,7 @@ class SystemAccessRecord {
     }
 
     // ensure the access record exists in the database
-    const existing = await separation.getById(separationRequestId);
+    const existing = await models.separation.getById(separationRequestId);
     if ( existing.err ) {
       throw new Error(`SystemAccessRecord: Failed to retrieve separation request with id ${separationRequestId}`);
     }
@@ -110,7 +109,7 @@ class SystemAccessRecord {
     additionalData[this.separationRecordProp] = additionalData[this.separationRecordProp] || [];
     additionalData[this.separationRecordProp].push(...this.access);
 
-    await separation.update(separationRequestId, {additionalData});
+    await models.separation.update(separationRequestId, {additionalData});
   }
 
 }

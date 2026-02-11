@@ -1,5 +1,7 @@
 import { Command } from 'commander';
+
 import people from '../lib/people.js';
+
 const program = new Command();
 
 program

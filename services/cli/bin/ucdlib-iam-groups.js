@@ -1,6 +1,8 @@
 import { Command, Option } from 'commander';
+
 import groups from '../lib/groups.js';
 import utils from '../lib/utils.js';
+
 const program = new Command();
 
 program

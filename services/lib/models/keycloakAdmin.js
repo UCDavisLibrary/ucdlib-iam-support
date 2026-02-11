@@ -1,7 +1,7 @@
-import models from '#models';
-
+import { Issuer } from 'openid-client';
 import KcAdminClient from '@keycloak/keycloak-admin-client';
-import {Issuer} from 'openid-client';
+
+import models from '#models';
 
 class KeycloakAdmin {
 

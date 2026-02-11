@@ -1,7 +1,5 @@
 import models from '#models';
-
 import utils from "../lib/utils.js";
-import protect from '../lib/protect.js';
 
 export default ( api ) => {
 

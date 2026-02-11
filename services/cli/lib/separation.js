@@ -1,6 +1,6 @@
 import utils from './utils.js';
 import models from '#models';
-import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
+import pg from '#lib/utils/pg.js';
 
 class separationCli {
 

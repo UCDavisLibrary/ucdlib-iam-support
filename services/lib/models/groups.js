@@ -1,5 +1,5 @@
-import pg from "./pg.js";
-import TextUtils from "./text.js";
+import pg from "#lib/utils/pg.js";
+import textUtils from "#lib/utils/text.js";
 
 
 /**
@@ -215,10 +215,10 @@ class UcdlibGroups{
     for (const prop of props) {
       if ( data.hasOwnProperty(prop) ){
         if ( first ) {
-          text += TextUtils.underscore(prop);
+          text += textUtils.underscore(prop);
           first = false;
         } else {
-          text += `, ${TextUtils.underscore(prop)}`;
+          text += `, ${textUtils.underscore(prop)}`;
         }
         values.push(data[prop]);
       }

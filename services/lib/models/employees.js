@@ -1,5 +1,5 @@
 import pg from "#lib/utils/pg.js";
-import TextUtils from "#lib/utils/text.js";
+import textUtils from "#lib/utils/text.js";
 
 class UcdlibEmployees {
   constructor() {
@@ -78,10 +78,10 @@ class UcdlibEmployees {
     for (const prop of props) {
       if ( data.hasOwnProperty(prop) ){
         if ( first ) {
-          text += TextUtils.underscore(prop);
+          text += textUtils.underscore(prop);
           first = false;
         } else {
-          text += `, ${TextUtils.underscore(prop)}`;
+          text += `, ${textUtils.underscore(prop)}`;
         }
         values.push(data[prop]);
       }
@@ -145,7 +145,7 @@ class UcdlibEmployees {
         LEFT JOIN employees as supervisor on e.supervisor_id = supervisor.iam_id
       ` : ''}
       WHERE
-        e.${TextUtils.underscore(idType)} IN ${pg.valuesArray(params)}
+        e.${textUtils.underscore(idType)} IN ${pg.valuesArray(params)}
         ${returnGroups ? 'AND (NOT g.archived OR g.archived IS NULL)' : ''}
       ${returnGroups || returnSupervisor ? 'GROUP BY e.id' : ''}
       ${returnSupervisor ? ', supervisor.id' : ''}
@@ -237,7 +237,7 @@ class UcdlibEmployees {
     const updateClause = pg.toUpdateClause(data, true);
     const text = `
     UPDATE employees SET ${updateClause.sql}
-    WHERE ${TextUtils.underscore(idType)} = $${updateClause.values.length + 1}
+    WHERE ${textUtils.underscore(idType)} = $${updateClause.values.length + 1}
     `;
     return await pg.query(text, [...updateClause.values, id]);
   }
@@ -256,7 +256,7 @@ class UcdlibEmployees {
     const params = [id];
     const text = `
       DELETE FROM employees
-      WHERE ${TextUtils.underscore(idType)} = $1
+      WHERE ${textUtils.underscore(idType)} = $1
     `;
     return await pg.query(text, params);
   }
@@ -420,7 +420,7 @@ class UcdlibEmployees {
     const props = ['iam_id', 'first_name', 'last_name', 'title', 'email'];
     const out = {};
     for (const prop of props) {
-      out[camelCase ? TextUtils.camelCase(prop) : prop] = employee[prop];
+      out[camelCase ? textUtils.camelCase(prop) : prop] = employee[prop];
     }
     return out;
   }

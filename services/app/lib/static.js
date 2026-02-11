@@ -1,7 +1,8 @@
 import path from 'path';
 import spaMiddleware from '@ucd-lib/spa-router-middleware';
-import config from '#lib/utils/config.js';
 import { fileURLToPath } from 'url';
+
+import config from '#lib/utils/config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

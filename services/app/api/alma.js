@@ -1,5 +1,5 @@
 import config from "#lib/utils/config.js";
-import AlmaModel from '@ucd-lib/iam-support-lib/src/models/AlmaModel.js';
+import AlmaModel from '#lib/cork/models/AlmaModel.js';
 
 AlmaModel.init(config.alma);
 

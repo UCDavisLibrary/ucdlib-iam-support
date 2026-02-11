@@ -1,5 +1,6 @@
-import slack from './slack.js';
 import { CronJob } from 'cron';
+
+import slack from './slack.js';
 import config from "#lib/utils/config.js";
 import { run as syncEmployees } from './iam-employee.js';
 import { run as syncKeycloak } from './keycloak-sync.js';

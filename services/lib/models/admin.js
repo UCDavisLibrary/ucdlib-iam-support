@@ -1,9 +1,8 @@
 import models from '#models';
-
-import UcdIamModel from "../models/UcdIamModel.js";
-import IamPersonTransform from "./IamPersonTransform.js";
-import RequestsIsoUtils from "./requests-iso-utils.js";
-import permissionsFormProperties from "./permissionsFormProperties.js";
+import UcdIamModel from "#lib/cork/models/UcdIamModel.js";
+import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
+import RequestsIsoUtils from "#lib/utils/requests-iso-utils.js";
+import permissionsFormProperties from "#lib/utils/permissionsFormProperties.js";
 import config from "#lib/utils/config.js";
 
 const rtClient = new models.rt(config.rt);

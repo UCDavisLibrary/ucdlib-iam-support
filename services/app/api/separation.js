@@ -1,6 +1,6 @@
 import models from '#models';
 
-import TextUtils from '@ucd-lib/iam-support-lib/src/utils/text.js';
+import textUtils from '#lib/utils/text.js';
 import config from "#lib/utils/config.js";
 
 export default (api) => {
@@ -199,7 +199,7 @@ export default (api) => {
         res.json({error: true, message: 'Request does not exist!'});
         return;
       }
-      const obReq = TextUtils.camelCaseObject(r.res.rows[0]);
+      const obReq = textUtils.camelCaseObject(r.res.rows[0]);
       return res.json(obReq);
 
 
@@ -227,7 +227,7 @@ export default (api) => {
         res.json({error: true, message: 'Request does not exist!'});
         return;
       }
-      const obReq = TextUtils.camelCaseObject(r.res.rows[0]);
+      const obReq = textUtils.camelCaseObject(r.res.rows[0]);
       return res.json(obReq);
 
     });
@@ -332,7 +332,7 @@ export default (api) => {
 
 
       const output = r.res.rows.map(row => {
-        return TextUtils.camelCaseObject(row);
+        return textUtils.camelCaseObject(row);
       });
       return res.json(output);
     });

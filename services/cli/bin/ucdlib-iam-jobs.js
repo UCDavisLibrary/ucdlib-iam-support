@@ -1,5 +1,7 @@
 import { Command } from 'commander';
+
 import jobs from '../lib/jobs.js';
+
 const program = new Command();
 
 program

@@ -1,14 +1,13 @@
-import config from "#lib/utils/config.js";
-import models from '#models';
-
-import utils from './utils.js';
-import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
-import IamPersonTransform from '@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js';
-import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
 import * as fs from 'node:fs/promises';
 
-UcdIamModel.init(config.ucdIamApi);
+import config from "#lib/utils/config.js";
+import models from '#models';
+import utils from './utils.js';
+import pg from '#lib/utils/pg.js';
+import IamPersonTransform from '#lib/utils/IamPersonTransform.js';
+import {UcdIamModel} from '#lib/cork/models/UcdIamModel.js';
 
+UcdIamModel.init(config.ucdIamApi);
 
 class employeesCli {
 

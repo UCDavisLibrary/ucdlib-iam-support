@@ -1,4 +1,4 @@
-import pg from "./pg.js";
+import pg from "#lib/utils/pg.js";
 
 /**
  * @description Manages pg data for onboarding form

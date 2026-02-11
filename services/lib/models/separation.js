@@ -1,8 +1,7 @@
 import models from '#models';
-
-import pg from "./pg.js";
-import TextUtils from "./text.js";
-import RequestsIsoUtils from "./requests-iso-utils.js";
+import pg from "#lib/utils/pg.js";
+import textUtils from "#lib/utils/text.js";
+import RequestsIsoUtils from "#lib/utils/requests-iso-utils.js";
 
 
 /**
@@ -27,7 +26,7 @@ class UcdlibSeparation{
     text += 'status_id';
     for (const prop of props) {
       if ( data.hasOwnProperty(prop) ){
-        text += `, ${TextUtils.underscore(prop)}`;
+        text += `, ${textUtils.underscore(prop)}`;
         values.push(data[prop]);
       }
     }
@@ -107,7 +106,7 @@ class UcdlibSeparation{
 
     if ( q.orderAsc ) orderAsc = true;
     if ( q.orderBy && ['submitted', 'separation_date'].includes(q.orderBy) ) {
-      orderBy = TextUtils.underscore(q.orderBy);
+      orderBy = textUtils.underscore(q.orderBy);
     }
 
     const whereClause = pg.toWhereClause(whereParams);

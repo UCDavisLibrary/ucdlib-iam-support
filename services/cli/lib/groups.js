@@ -1,9 +1,9 @@
-import models from '#models';
+import * as fs from 'node:fs/promises';
 
-import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
+import models from '#models';
+import pg from '#lib/utils/pg.js';
 import utils from './utils.js';
 
-import * as fs from 'node:fs/promises';
 
 class GroupsCli {
 

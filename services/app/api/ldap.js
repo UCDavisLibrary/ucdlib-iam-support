@@ -1,5 +1,5 @@
 import config from "#lib/utils/config.js";
-import ldap from '@ucd-lib/iam-support-lib/src/utils/ldap.js'
+import ldap from '#lib/utils/ldap.js'
 
 export default (api) => {
 

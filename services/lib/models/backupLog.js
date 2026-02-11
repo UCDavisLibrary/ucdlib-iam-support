@@ -1,4 +1,4 @@
-import pg from "./pg.js";
+import pg from "#lib/utils/pg.js";
 import config from "#lib/utils/config.js";
 
 class BackupLog {

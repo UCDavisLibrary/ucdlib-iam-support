@@ -1,5 +1,4 @@
 import models from '#models';
-
 import config from "#lib/utils/config.js";
 
 function OnboardingStatusError(error) {

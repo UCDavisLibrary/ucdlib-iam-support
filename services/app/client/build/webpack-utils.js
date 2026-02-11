@@ -1,8 +1,9 @@
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import config from "#lib/utils/config.js";
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+
+import config from "#lib/utils/config.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

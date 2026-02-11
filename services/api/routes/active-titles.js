@@ -1,14 +1,8 @@
 import models from '#models';
 
-
-import utils from "../lib/utils.js";
-import protect from '../lib/protect.js';
-
 export default ( api ) => {
 
-
   api.get(`/active-titles`, async (req, res) => {
-
 
     const results = await models.employees.getAll({returnUcdRecord: true});
     if ( results.err ) {

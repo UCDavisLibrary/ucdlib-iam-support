@@ -1,8 +1,7 @@
-import models from '#models';
-
-import config from "#lib/utils/config.js";
-import jobs from '@ucd-lib/iam-support-lib/src/utils/jobs.js';
 import fetch from 'node-fetch';
+
+import models from '#models';
+import config from "#lib/utils/config.js";
 
 export default (app) => {
   app.get('/health', async (req, res) => {
@@ -40,7 +39,7 @@ export default (app) => {
         // last maintenance task to run
         const jobName = 'check-separation-records';
 
-        const lastMaintenance = await jobs.getRecent({
+        const lastMaintenance = await models.jobs.getRecent({
           limit: 1,
           name: jobName,
           endedSince: config.maintenance.statusFailAfterInterval
@@ -58,7 +57,7 @@ export default (app) => {
         if ( lastMaintenance.res.rows.length ) {
           services.maintenance.lastRun = lastMaintenance.res.rows[0].end_time;
         } else {
-          const m = await jobs.getRecent({
+          const m = await models.jobs.getRecent({
             limit: 1,
             name: jobName
           });

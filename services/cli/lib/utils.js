@@ -1,11 +1,11 @@
-import models from '#models';
-
 import util from 'util';
-import config from "#lib/utils/config.js";
 import { printTable } from 'console-table-printer';
-import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
-import {UcdIamModel} from '@ucd-lib/iam-support-lib/index.js';
-import IamPersonTransform from '@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js';
+
+import models from '#models';
+import config from "#lib/utils/config.js";
+import pg from '#lib/utils/pg.js';
+import {UcdIamModel} from '#lib/cork/models/UcdIamModel.js';
+import IamPersonTransform from '#lib/utils/IamPersonTransform.js';
 
 UcdIamModel.init(config.ucdIamApi);
 

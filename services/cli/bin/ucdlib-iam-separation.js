@@ -1,5 +1,7 @@
 import { Command, Option } from 'commander';
+
 import separation from '../lib/separation.js';
+
 const program = new Command();
 
 const statusOpenChoices = ['open', 'resolved', 'all'];

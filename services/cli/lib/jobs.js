@@ -1,6 +1,6 @@
 import { printTable } from 'console-table-printer';
 import models from '#models';
-import pg from '@ucd-lib/iam-support-lib/src/utils/pg.js';
+import pg from '#lib/utils/pg.js';
 
 class jobsCli {
 

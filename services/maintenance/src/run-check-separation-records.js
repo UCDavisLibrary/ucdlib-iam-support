@@ -1,5 +1,5 @@
 import { run as checkSeparationRecords } from './check-separation-records.js';
-import pg from "@ucd-lib/iam-support-lib/src/utils/pg.js";
+import pg from "#lib/utils/pg.js";
 
 await checkSeparationRecords(true);
 

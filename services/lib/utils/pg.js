@@ -1,5 +1,6 @@
 import pg from 'pg';
-import TextUtils from "./text.js";
+import textUtils from "./text.js";
+
 const pool = new pg.Pool();
 
 /**
@@ -80,7 +81,7 @@ class Pg {
     if ( queryObject && typeof queryObject === 'object' ){
       for (const [i, k] of (Object.keys(queryObject)).entries()) {
         values.push(queryObject[k]);
-        sql += `${i > 0 ? sep : ''}${underscore ? TextUtils.underscore(k) : k}=$${i+1}`;
+        sql += `${i > 0 ? sep : ''}${underscore ? textUtils.underscore(k) : k}=$${i+1}`;
       }
     }
     return {sql, values};

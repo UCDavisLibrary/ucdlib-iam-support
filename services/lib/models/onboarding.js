@@ -1,6 +1,6 @@
-import pg from "./pg.js";
-import TextUtils from "./text.js";
-import RequestsIsoUtils from "./requests-iso-utils.js";
+import pg from "#lib/utils/pg.js";
+import textUtils from "#lib/utils/text.js";
+import RequestsIsoUtils from "#lib/utils/requests-iso-utils.js";
 
 /**
  * @description Manages pg data for onboarding form
@@ -33,7 +33,7 @@ class UcdlibOnboarding {
     text += 'status_id';
     for (const prop of props) {
       if ( data.hasOwnProperty(prop) ){
-        text += `, ${TextUtils.underscore(prop)}`;
+        text += `, ${textUtils.underscore(prop)}`;
         values.push(data[prop]);
       }
     }
@@ -88,7 +88,7 @@ class UcdlibOnboarding {
 
     if ( q.orderAsc ) orderAsc = true;
     if ( q.orderBy && ['submitted', 'modified', 'startDate'].includes(q.orderBy) ) {
-      orderBy = TextUtils.underscore(q.orderBy);
+      orderBy = textUtils.underscore(q.orderBy);
     }
 
     const whereClause = pg.toWhereClause(whereParams);

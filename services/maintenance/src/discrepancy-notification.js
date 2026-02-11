@@ -1,8 +1,8 @@
-import models from "#models";
+import { CronJob } from 'cron';
 
 import slack from './slack.js';
+import models from "#models";
 import config from "#lib/utils/config.js";
-import { CronJob } from 'cron';
 
 new CronJob(
 	config.cron.discrepancyNotification,

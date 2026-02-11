@@ -1,6 +1,5 @@
 import models from '#models';
-
-import TextUtils from '@ucd-lib/iam-support-lib/src/utils/text.js';
+import TextUtils from '#lib/utils/text.js';
 
 export default (api) => {
   /**

@@ -1,9 +1,9 @@
-import models from '#models';
-
-import { UcdIamModel } from "@ucd-lib/iam-support-lib/index.js";
-import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js";
-import config from "#lib/utils/config.js";
 import assert from 'node:assert/strict';
+
+import models from '#models';
+import { UcdIamModel } from "#lib/cork/models/UcdIamModel.js";
+import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
+import config from "#lib/utils/config.js";
 
 export class IamEmployees {
   constructor(){

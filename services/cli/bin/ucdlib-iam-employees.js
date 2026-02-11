@@ -1,8 +1,9 @@
 import { Command, Option } from 'commander';
+
 import employees from '../lib/employees.js';
 import utils from '../lib/utils.js';
-const program = new Command();
 
+const program = new Command();
 const outputChoices = ['table', 'json'];
 
 program

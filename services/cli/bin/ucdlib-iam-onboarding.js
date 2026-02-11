@@ -1,5 +1,7 @@
 import { Command, Option } from 'commander';
+
 import onboarding from '../lib/onboarding.js';
+
 const program = new Command();
 
 const statusOpenChoices = ['open', 'resolved', 'all'];

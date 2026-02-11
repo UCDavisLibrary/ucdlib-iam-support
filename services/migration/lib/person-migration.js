@@ -1,7 +1,7 @@
 import models from '#models';
 
-import { UcdIamModel } from "@ucd-lib/iam-support-lib/index.js";
-import IamPersonTransform from "@ucd-lib/iam-support-lib/src/utils/IamPersonTransform.js";
+import { UcdIamModel } from "#lib/cork/models/UcdIamModel.js";
+import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
 import groupMigration from "./group-migration.js";
 
 import * as dotenv from 'dotenv'
