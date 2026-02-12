@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 import models from '#models';
 import config from "#lib/utils/config.js";
@@ -25,7 +25,7 @@ export default (api) => {
     // parse token
     try {
       token = req.headers.authorization.replace('Bearer ', '');
-      token = jwt_decode(token)
+      token = jwtDecode(token)
       if ( !token.iss ) throw new Error('Missing iss');
       if ( !token.jti ) throw new Error('Missing jti');
     } catch (error) {

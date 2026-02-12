@@ -4,7 +4,7 @@ import RequestsIsoUtils from '#lib/utils/requests-iso-utils.js';
 import config from "#lib/utils/config.js";
 import TextUtils from '#lib/utils/text.js';
 import Pg from '#lib/utils/pg.js';
-import {UcdIamModel} from '#lib/cork/models/UcdIamModel.js';
+import UcdIamModel from '#lib/cork/models/UcdIamModel.js';
 
 UcdIamModel.init(config.ucdIamApi);
 

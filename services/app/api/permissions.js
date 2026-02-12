@@ -2,7 +2,7 @@ import models from '#models';
 
 import TextUtils from '#lib/utils/text.js';
 import config from "#lib/utils/config.js";
-import {UcdIamModel} from '#lib/cork/models/UcdIamModel.js';
+import UcdIamModel from '#lib/cork/models/UcdIamModel.js';
 import IamPersonTransform from '#lib/utils/IamPersonTransform.js';
 
 UcdIamModel.init(config.ucdIamApi);

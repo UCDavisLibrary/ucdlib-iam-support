@@ -5,7 +5,7 @@ import models from '#models';
 import utils from './utils.js';
 import pg from '#lib/utils/pg.js';
 import IamPersonTransform from '#lib/utils/IamPersonTransform.js';
-import {UcdIamModel} from '#lib/cork/models/UcdIamModel.js';
+import UcdIamModel from '#lib/cork/models/UcdIamModel.js';
 
 UcdIamModel.init(config.ucdIamApi);
 

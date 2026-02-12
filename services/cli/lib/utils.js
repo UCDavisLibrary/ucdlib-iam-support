@@ -4,7 +4,7 @@ import { printTable } from 'console-table-printer';
 import models from '#models';
 import config from "#lib/utils/config.js";
 import pg from '#lib/utils/pg.js';
-import {UcdIamModel} from '#lib/cork/models/UcdIamModel.js';
+import UcdIamModel from '#lib/cork/models/UcdIamModel.js';
 import IamPersonTransform from '#lib/utils/IamPersonTransform.js';
 
 UcdIamModel.init(config.ucdIamApi);

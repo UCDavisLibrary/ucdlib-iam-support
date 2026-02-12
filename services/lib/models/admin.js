@@ -5,9 +5,6 @@ import RequestsIsoUtils from "#lib/utils/requests-iso-utils.js";
 import permissionsFormProperties from "#lib/utils/permissionsFormProperties.js";
 import config from "#lib/utils/config.js";
 
-const rtClient = new models.rt(config.rt);
-const keycloakClient = models.keycloakAdmin;
-
 /**
  * @classdesc Used to perform various admin operations for this application.
  */
@@ -166,6 +163,7 @@ class iamAdmin {
     if ( config.rt.forbidWrite ) {
       return {error: false, message: 'RT write operations are forbidden in this environment'};
     }
+    const rtClient = new models.rt(config.rt);
     const ticket = new models.rtTicket(false, {id: rtTicketId});
     const reply = ticket.createReply();
     reply.addSubject('Employee Record Added');
@@ -186,6 +184,7 @@ class iamAdmin {
       return {error: false, message: 'RT write operations are forbidden in this environment'};
     }
     const ticket = new models.rtTicket(false, {id: rtTicketId});
+    const rtClient = new models.rt(config.rt);
     const reply = ticket.createReply();
     reply.addSubject('Employee Access Was Removed');
     reply.addContent('This employee was removed from the UC Davis Library Identity and Access Management System.');
@@ -436,21 +435,21 @@ class iamAdmin {
     }
 
     try {
-      keycloakClient.resetState();
-      await keycloakClient.init({...params.keycloakConfig, refreshInterval: 58000});
-      await keycloakClient.syncEmployee(employee.user_id, true);
-      await keycloakClient.syncGroupMembershipByUser(employee.user_id);
-      await keycloakClient.syncSupervisorsGroup(false);
+      models.keycloakAdmin.resetState();
+      await models.keycloakAdmin.init({...params.keycloakConfig, refreshInterval: 58000});
+      await models.keycloakAdmin.syncEmployee(employee.user_id, true);
+      await models.keycloakAdmin.syncGroupMembershipByUser(employee.user_id);
+      await models.keycloakAdmin.syncSupervisorsGroup(false);
       if ( params.printLogs) {
-        keycloakClient.printLogs();
+        models.keycloakAdmin.printLogs();
       }
-      keycloakClient.resetState();
+      models.keycloakAdmin.resetState();
     } catch (e) {
       console.error(e);
       out.error = true;
       out.message = 'Error provisioning Keycloak account';
     } finally {
-      keycloakClient.stopRefreshInterval();
+      models.keycloakAdmin.stopRefreshInterval();
     }
 
     return out;
@@ -469,9 +468,9 @@ class iamAdmin {
       return out;
     }
     try {
-      keycloakClient.resetState();
-      await keycloakClient.init({...config.keycloakAdmin, refreshInterval: 58000});
-      let keycloakUser = await keycloakClient.getUserByUserName(userId);
+      models.keycloakAdmin.resetState();
+      await models.keycloakAdmin.init({...config.keycloakAdmin, refreshInterval: 58000});
+      let keycloakUser = await models.keycloakAdmin.getUserByUserName(userId);
       if ( !keycloakUser ) {
         out.error = true;
         out.message = `${out.message} - No Keycloak user found with user id ${userId}`;
@@ -479,14 +478,14 @@ class iamAdmin {
       }
       keycloakUser = keycloakUser[0];
       out.keycloakUser = keycloakUser;
-      await keycloakClient.client.users.del({id: keycloakUser.id});
+      await models.keycloakAdmin.client.users.del({id: keycloakUser.id});
     } catch (e) {
         out.error = true;
         out.message = `${out.message} - Error interacting with keycloak.`;
         console.error(out.message, e);
         return out;
     } finally {
-      keycloakClient.stopRefreshInterval();
+      models.keycloakAdmin.stopRefreshInterval();
     }
     out.message = 'Keycloak account deprovisioned successfully';
     return out;
