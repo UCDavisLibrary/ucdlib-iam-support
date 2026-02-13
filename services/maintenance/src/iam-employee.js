@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 
 import models from '#models';
-import { UcdIamModel } from "#lib/cork/models/UcdIamModel.js";
+import UcdIamModel from "#lib/cork/models/UcdIamModel.js";
 import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
 import config from "#lib/utils/config.js";
 
@@ -302,11 +302,11 @@ export const run = async (saveToDB) => {
     const iamEmployees = new IamEmployees();
     console.log('Getting employees from the database');
     await iamEmployees.getEmployees();
-    console.log('Got employees from the database');
+    console.log(`Got ${iamEmployees.employees.length} employees from the database`);
 
     console.log('Getting iam records for employees and supervisors');
     await iamEmployees.getIamRecords();
-    console.log('Got iam records for employees and supervisors');
+    console.log(`Got iam records for ${Object.keys(iamEmployees.iamResponses.byId).length} unique iam ids`);
 
     console.log('Comparing records');
     await iamEmployees.compareRecords();

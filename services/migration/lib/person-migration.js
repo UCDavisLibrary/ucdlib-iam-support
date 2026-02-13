@@ -1,6 +1,6 @@
 import models from '#models';
 
-import { UcdIamModel } from "#lib/cork/models/UcdIamModel.js";
+import UcdIamModel from "#lib/cork/models/UcdIamModel.js";
 import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
 import groupMigration from "./group-migration.js";
 

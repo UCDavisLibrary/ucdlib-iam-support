@@ -1,4 +1,3 @@
-import { discovery } from 'openid-client';
 import KcAdminClient from '@keycloak/keycloak-admin-client';
 
 import models from '#models';
@@ -106,45 +105,27 @@ class KeycloakAdmin {
  * @description Refreshes the access token for the keycloak admin client (password grant)
  */
 async refreshAccessToken() {
-  const discoveryUrl = `${this.config.baseUrl}/realms/${this.config.realmName}/.well-known/openid-configuration`;
+  const tokenEndpoint = `${this.config.baseUrl}/realms/${this.config.realmName}/protocol/openid-connect/token`;
 
-  let tokenSet;
-  try {
-    // discover provider metadata
-    const provider = await discovery(discoveryUrl);
-    const tokenEndpoint = provider.token_endpoint;
-    if (!tokenEndpoint) {
-      throw new Error('Token endpoint not found in discovery document');
-    }
+  const params = new URLSearchParams({
+    grant_type: 'password',
+    username: this.config.username,
+    password: this.config.password,
+    client_id: this.config.clientId
+  });
 
-    // Build form params for password grant
-    const params = new URLSearchParams();
-    params.set('grant_type', this.config.grantType || 'password');
+  const resp = await fetch(tokenEndpoint, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+  });
 
-    if (!this.config.username || !this.config.password) {
-      throw new Error('username/password required for password grant');
-    }
-    params.set('username', this.config.username);
-    params.set('password', this.config.password);
-    params.set('client_id', this.config.clientId);
-
-    const resp = await fetch(tokenEndpoint, {
-      method: 'POST',
-      headers: { 'content-type': 'application/x-www-form-urlencoded' },
-      body: params.toString(),
-    });
-
-    if (!resp.ok) {
-      const errBody = await resp.text().catch(() => '');
-      throw new Error(`token endpoint returned ${resp.status} ${resp.statusText}: ${errBody}`);
-    }
-
-    tokenSet = await resp.json();
-  } catch (err) {
-    console.error('Failed to refresh access token:', err?.message ?? err);
-    throw err;
+  if (!resp.ok) {
+    const errBody = await resp.text().catch(() => '');
+    throw new Error(`token endpoint returned ${resp.status} ${resp.statusText}: ${errBody}`);
   }
 
+  const tokenSet = await resp.json();
   if (!tokenSet?.access_token) {
     throw new Error('token response did not include access_token');
   }

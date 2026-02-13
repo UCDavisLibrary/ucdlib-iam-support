@@ -1,6 +1,5 @@
 x-variables:
-  main-image: &main-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support:v1.16.0
-  utils-image: &utils-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support-utils:v1.16.0
+  main-image: &main-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support:v2.0.0
 services:
   app:
     image: *main-image
@@ -20,9 +19,9 @@ services:
     restart: always
     depends_on:
       - db
-    command: node index.js
+    command: ["npm", "run", "start-client"]
   cli:
-    image: *utils-image
+    image: *main-image
     restart: always
     env_file:
       - .env
@@ -33,11 +32,8 @@ services:
       PGPORT: 5432
     depends_on:
       - db
-    volumes:
-      - ../../utils/db-entrypoint:/app-sql
-    command: /cli/cli.sh
   api:
-    image: *utils-image
+    image: *main-image
     restart: always
     env_file:
       - .env
@@ -50,9 +46,9 @@ services:
       - ${UCDLIB_API_HOST_PORT:-3002}:3000
     depends_on:
       - db
-    command: /api/api.sh
+    command: ["npm", "run", "start-api"]
   backup:
-    image: *utils-image
+    image: *main-image
     restart: always
     env_file:
       - .env
@@ -69,11 +65,11 @@ services:
       GOOGLE_CLOUD_BUCKET: 'itis-iam'
       SQL_FILE_NAME: 'itis-iam.sql.gz'
       BACKUP_LOG_TABLE: ${BACKUP_LOG_TABLE:-backup_log}
-    command: /backup/entrypoint.sh
+    command: /services/backup/entrypoint.sh
     volumes:
       - ../../secrets/gc-itis-iam-writer-key.json:/etc/service-account.json
   init:
-    image: *utils-image
+    image: *main-image
     env_file:
       - .env
     depends_on:
@@ -88,11 +84,11 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /etc/service-account.json
       GOOGLE_CLOUD_BUCKET: 'itis-iam'
       SQL_FILE_NAME: 'itis-iam.sql.gz'
-    command: /init/init.sh
+    command: /services/init/init.sh
     volumes:
       - ../../secrets/gc-itis-iam-reader-key.json:/etc/service-account.json
   maintenance:
-    image: *utils-image
+    image: *main-image
     restart: always
     env_file:
       - .env
@@ -104,7 +100,7 @@ services:
       PGPORT: 5432
     depends_on:
       - db
-    command: /maintenance/entrypoint.sh
+    command: /services/maintenance/entrypoint.sh
   db:
     image: postgres:15.3
     restart: always

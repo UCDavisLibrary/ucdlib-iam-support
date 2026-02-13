@@ -1,6 +1,5 @@
 import bcrypt from "bcrypt";
 import { jwtDecode } from "jwt-decode";
-import { discovery } from 'openid-client';
 
 import config from '#lib/utils/config.js';
 import models from '#models';
@@ -52,18 +51,9 @@ export default ( api ) => {
       }
     }
 
-    const discoveryUrl = `${config.keycloak.url}/realms/${config.keycloak.realm}/.well-known/openid-configuration`;
-
     let tokenSet;
     try {
-      // discover provider metadata
-      const provider = await discovery(discoveryUrl);
-
-      // token endpoint
-      const tokenEndpoint = provider.token_endpoint;
-      if (!tokenEndpoint) {
-        throw new Error('Token endpoint not found in discovery document');
-      }
+      const tokenEndpoint = `${config.keycloak.url}/realms/${config.keycloak.realm}/protocol/openid-connect/token`;
 
       // Resource Owner Password Grant (public client) -- send client_id in body, no auth header
       const params = new URLSearchParams({

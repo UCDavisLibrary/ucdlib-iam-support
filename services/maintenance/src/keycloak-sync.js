@@ -16,6 +16,7 @@ function KeycloakSyncError(error) {
 export const run = async (saveToDB) => {
   let thisJob;
   try {
+    console.log(`Syncing to keycloak: ${config.keycloakAdmin.baseUrl}/realms/${config.keycloakAdmin.realmName}`);
     if ( saveToDB ) {
       const r = await models.jobs.start('keycloak-sync');
       if ( r.job ) thisJob = r.job;

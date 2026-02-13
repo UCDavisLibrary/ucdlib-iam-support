@@ -71,7 +71,6 @@ COPY services/api ./api
 
 # Web app
 COPY services/app ./app
-# RUN npm run client-build-dist
+RUN npm run client-build-dist
 
-RUN npm link
 CMD ["bash", "-c", "tail -f /dev/null"]

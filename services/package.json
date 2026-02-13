@@ -5,9 +5,6 @@
   "license": "ISC",
   "author": "spelkey@ucdavis.edu",
   "type": "module",
-  "bin": {
-    "ucdlib-iam": "services/cli/bin/ucdlib-iam.js"
-  },
   "main": "index.js",
   "imports": {
     "#models": "./lib/models/index.js",
@@ -18,7 +15,8 @@
     "client-watch": "cd ./app/client/build && webpack --config webpack-watch.config.js --watch",
     "client-build-dev": "cd ./app/client/build && webpack --config webpack-watch.config.js",
     "client-build-dist": "cd ./app/client/build && webpack --config webpack-dist.config.js",
-    "start-client": "node ./app/index.js"
+    "start-client": "node ./app/index.js",
+    "start-api": "node ./api/index.js"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.2.0",
@@ -45,7 +43,6 @@
     "mini-css-extract-plugin": "^2.7.5",
     "node-fetch": "^3.3.2",
     "normalize-scss": "^7.0.1",
-    "openid-client": "^6.8.2",
     "papaparse": "^5.5.3",
     "pg": "^8.18.0",
     "sass": "^1.59.3",
