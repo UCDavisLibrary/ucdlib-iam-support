@@ -10,7 +10,7 @@ export default (app) => {
   let assetsDir = path.join(__dirname, '../client/public');
   const bundle = `
     <link rel="stylesheet" href="/css/${config.env == 'dev' ? 'dev' : 'dist'}/${config.app.stylesheetName}?v=${config.version}">
-    <script src='/js/${config.env == 'dev' ? 'dev' : 'dist'}/${config.app.bundleName}?v=${config.version}'></script>
+    <script src='/js/${config.env == 'dev' ? 'dev' : 'dist'}/${config.app.bundleName}?v=${config.version}' defer></script>
   `;
 
   spaMiddleware({

@@ -177,7 +177,7 @@ export default (api) => {
 
     });
 
-    api.post('/separation/:id?', async (req, res) => {
+    api.post('/separation/:id', async (req, res) => {
 
       if (
         !req.auth.token.hasAdminAccess &&

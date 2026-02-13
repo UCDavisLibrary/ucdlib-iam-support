@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { jwtDecode } from "jwt-decode";
-import { Issuer } from 'openid-client';
+import { discovery } from 'openid-client';
 
 import config from '#lib/utils/config.js';
 import models from '#models';
@@ -52,23 +52,41 @@ export default ( api ) => {
       }
     }
 
-    // fetch access token from keycloak
-    const keycloakIssuer = await Issuer.discover(
-      `${config.keycloak.url}/realms/${config.keycloak.realm}`,
-    );
-    const client = new keycloakIssuer.Client({
-      client_id: config.keycloak.apiClientId,
-      token_endpoint_auth_method: 'none'
-    });
+    const discoveryUrl = `${config.keycloak.url}/realms/${config.keycloak.realm}/.well-known/openid-configuration`;
 
     let tokenSet;
     try {
-      tokenSet = await client.grant({
+      // discover provider metadata
+      const provider = await discovery(discoveryUrl);
+
+      // token endpoint
+      const tokenEndpoint = provider.token_endpoint;
+      if (!tokenEndpoint) {
+        throw new Error('Token endpoint not found in discovery document');
+      }
+
+      // Resource Owner Password Grant (public client) -- send client_id in body, no auth header
+      const params = new URLSearchParams({
         grant_type: 'password',
         username,
-        password
+        password,
+        client_id: config.keycloak.apiClientId
       });
+
+      const resp = await fetch(tokenEndpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+      });
+
+      if (!resp.ok) {
+        const errBody = await resp.text().catch(() => '');
+        throw new Error(`token endpoint returned ${resp.status} ${resp.statusText}: ${errBody}`);
+      }
+
+      tokenSet = await resp.json(); 
     } catch (error) {
+      console.error('Authentication error:', error?.message ?? error);
       return res.status(401).json({
         error: 'Authentication failed.'
       });

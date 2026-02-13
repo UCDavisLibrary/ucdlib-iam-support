@@ -134,19 +134,6 @@ export function render() {
                 ${this.renderCheckbox('pSlack', 'Create Account')}
               </div>
             </div>
-            <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('bigsys')}>
-              <div class='l-first'>
-                ${this.renderGroupLabel('Bigsys', 'bigsys')}
-              </div>
-              <div class='l-second'>
-                <label>Access to:</label>
-                ${this.renderCheckbox('pBigsysPatron', 'Patron Lookup Tool')}
-                ${this.renderCheckbox('pBigsysTravel', 'Travel Forms and Expenses')}
-                ${this.renderCheckbox('pBigsysOpenAccess', 'Open Access Funds Management')}
-                ${this.renderCheckbox('pBigsysCheckProcessing', 'Alma-KFS Integration Application')}
-                ${this.renderTextArea('pBigsysOther', 'Other:')}
-              </div>
-            </div>
             <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('calendly')}>
               <div class='l-first'>
                 ${this.renderGroupLabel('Calendly', 'calendly')}
@@ -179,7 +166,7 @@ export function render() {
             </div>
             <div class="l-2col l-2col--33-67 field-row" ?hidden=${this.hideApplication('custom-applications')}>
               <div class='l-first'>
-                ${this.renderGroupLabel('List Applications', 'custom-applications')}
+                ${this.renderGroupLabel('Other Applications', 'custom-applications')}
               </div>
               <div class='l-second'>
                 ${this.renderTextArea('customApplications', '', 10)}
@@ -316,18 +303,6 @@ export function renderHelpModal(){
         <li>To add a user to a specific channel, you must contact the channel owner.</li>
       </ul>
     `;
-  } else if ( this.helpModal === 'bigsys' ){
-    title = 'Bigsys';
-    const url = 'https://bigsys.lib.ucdavis.edu';
-    content = html`
-      <div>Bigsys is an older server at <a href=${url}>${url}</a>, which still hosts a few applications, including:</div>
-      <ul class='list--arrow'>
-        <li><a href='https://bigsys.lib.ucdavis.edu/search/patron/'>Patron Lookup Tool</a></li>
-        <li><a href='https://bigsys.lib.ucdavis.edu/travel/index.php'>Travel Forms and Expenses</a></li>
-        <li><a href='https://bigsys.lib.ucdavis.edu/apps/openaccess/'>Open Access Funds Management</a></li>
-        <li><a href='https://bigsys.lib.ucdavis.edu/reports/check_processing/index.php'>Alma-KFS Integration Application</a></li>
-      </ul>
-    `;
   } else if ( this.helpModal === 'lang-prize') {
     title = 'Lang Prize';
     const url = 'https://langprize.library.ucdavis.edu/';
@@ -341,7 +316,7 @@ export function renderHelpModal(){
       <div>Aggie Open can be found at <a href=${url}>${url}</a>.</div>`;
   }
   else if ( this.helpModal === 'custom-applications' ){
-    title = 'List Applications';
+    title = 'Other Applications';
     content = html`
       <div>Provide the urls of the applications you need access to. More information is usually better than less.</div>`;
   }
