@@ -149,11 +149,7 @@ class UcdIamModel extends BaseModel {
    * @returns Array of people or error object
    */
   async getPersonByName(last, first, middle, useDirectory, getPayload=true){
-    try {
-      await this.service.getPersonByName(last, first, middle, useDirectory);
-    } catch(e) {}
-    const key = this.service._makeNameQuery(last, first, middle, useDirectory).toString();
-    const response = this.store.data.name[key];
+    const response = await this.service.getPersonByName(last, first, middle, useDirectory);
     if ( !getPayload ) return response;
     return this._getPayload(response);
   }
@@ -169,10 +165,7 @@ class UcdIamModel extends BaseModel {
   }
 
   async _getPersonById(id, idType, getPayload=true, getSingle=true){
-    try {
-      await this.service.getPersonById(id, idType);
-    } catch(e) {}
-    const response = this.store.data[idType][id];
+    const response = await this.service.getPersonById(id, idType);
     if ( !getPayload ) return response;
     const payload = this._getPayload(response);
     if ( !getSingle) return payload;

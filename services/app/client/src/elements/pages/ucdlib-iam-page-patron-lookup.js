@@ -202,32 +202,6 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
   }
 
   /**
-   * @method _onTokenRefreshed
-   * @description bound to AuthModel token-refreshed event
-   * @param {AccessToken} token
-   */
-  _onTokenRefreshed(token){
-    this.canViewActiveList = token.hasAdminAccess || token.hasHrAccess;
-    this.userIamId = token.iamId;
-    if ( this.AppStateModel.currentPage == this.id ) this. _getRequiredPageData();
-  }
-
-  /**
-   * @description Do data retrieval required to display a subpage
-   */
-  async _getRequiredPageData(){
-    const activeListEle = this.querySelector(`#${this.activeId}`);
-    const supervisorEle = this.querySelector(`#${this.supervisorId}`);
-    if ( !activeListEle || !supervisorEle ){
-      return; // page not fully loaded yet. wait for next app-state-update.
-    }
-    const promises = [];
-    if ( this.canViewActiveList ) promises.push(activeListEle.doQuery());
-    if ( this.userIamId ) promises.push(supervisorEle.doQuery(false, {supervisorId: this.userIamId}));
-    await new Promise(resolve => {requestAnimationFrame(resolve);});
-  }
-
-  /**
    * @description Lit lifecycle hook
    * @param {Map} props - Changed properties
    */

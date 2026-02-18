@@ -190,22 +190,21 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
    * @description Attached to submit event on onboarding form
    * @param {*} e - Submit event
    */
-  _onSubmit(e){
+  async _onSubmit(e){
     e.preventDefault();
-    this.SeparationModel.newSubmission(this.payload());
+    this.SeparationModel.create(this.payload());
   }
 
   /**
-   * @description Attached to Separation Model NEW_SEPARATION_SUBMISSION event
+   * @description Attached to Separation Model SEPARATION_CREATE_UPDATE event
    * @param {Object} e
    */
-  _onNewSeparationSubmission(e){
+  _onSeparationCreateUpdate(e){
     if ( e.state === this.SeparationModel.store.STATE.LOADING ){
       this.AppStateModel.showLoading(this.id);
     } else if ( e.state === this.SeparationModel.store.STATE.LOADED ){
       this._resetEmployeeStateProps();
       // this._resetLookupForms();
-      this.SeparationModel.clearQueryCache();
       this.AppStateModel.setLocation(`/separation`);
       this.AppStateModel.showAlertBanner({message: 'Separation request created', brandColor: 'farmers-market'});
     } else if ( e.state === this.SeparationModel.store.STATE.ERROR ) {

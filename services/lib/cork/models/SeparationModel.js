@@ -2,6 +2,8 @@ import {BaseModel} from '@ucd-lib/cork-app-utils';
 import SeparationService from '../services/SeparationService.js';
 import SeparationStore from '../stores/SeparationStore.js';
 
+import clearCache from '../utils/clearCache.js';
+
 class SeparationModel extends BaseModel {
 
   constructor() {
@@ -13,53 +15,26 @@ class SeparationModel extends BaseModel {
     this.register('SeparationModel');
   }
 
-  async newSubmission(payload){
-    const now = (new Date()).toISOString();
-    try {
-      await this.service.newSubmission(now, payload);
-    } catch (error) {
-
+  async create(data) {
+    const res = await this.service.create(data);
+    if ( res.state === 'loaded' ) {
+      clearCache();
     }
-    return this.store.data.newSubmissions[now];
+    return res;
+  }
+
+  async get(separationId) {
+    const res = await this.service.get(separationId);
+    return res;
   }
 
 
-  async getById(id) {
-    let state = this.store.data.byId[id];
-    try {
-      if( state && state.state === 'loading' ) {
-        await state.request;
-      } else {
-        await this.service.getById(id);
-      }
-    } catch(e) {}
-    this.store.emit(this.store.events.SEPARATION_SUBMISSION_REQUEST, this.store.data.byId[id]);
-    return this.store.data.byId[id];
-  }
-
-  async deprovision(id) {
-    let state = this.store.data.deprovision[id];
-    try {
-      if( state && state.state === 'loading' ) {
-        await state.request;
-      } else {
-        await this.service.deprovision(id);
-      }
-    } catch(e) {}
-    return this.store.data.deprovision[id];
-  }
-
-  async changeById(id, q={}) {
-    const query = this.makeQueryString(q);
-    let state = this.store.data.byChangeId[id];
-    try {
-      if( state && state.state === 'loading' ) {
-        await state.request;
-      } else {
-        await this.service.changeById(id, query);
-      }
-    } catch(e) {}
-    return this.store.data.byChangeId[id];
+  async deprovision(separationId) {
+    const res = await this.service.deprovision(separationId);
+    if ( res.state === 'loaded' ) {
+      clearCache();
+    }
+    return res;
   }
 
 
@@ -76,38 +51,8 @@ class SeparationModel extends BaseModel {
     return this.store.data.byRecord.result;
   }
 
-  clearIdCache(id){
-    if ( id ){
-      if ( this.store.data.byId[id] ) {
-        delete this.store.data.byId[id];
-      }
-    } else {
-      this.store.data.byId = {};
-    }
-  }
-
-  async query(q) {
-    const id = this.makeQueryString(q);
-    let state = this.store.data.byQuery[id];
-    try {
-      if( state && state.state === 'loading' ) {
-        await state.request;
-      } else {
-        await this.service.query(id);
-      }
-    } catch(e) {}
-    return this.store.data.byQuery[id];
-  }
-
-  clearQueryCache(q){
-    if ( q ) {
-      const id = this.makeQueryString(q);
-      if ( this.store.data.byQuery[id] ) {
-        delete this.store.data.byQuery[id];
-      }
-    } else {
-      this.store.data.byQuery = {};
-    }
+  async query(q={}) {
+    return this.service.query(q);
   }
 
   makeQueryString(q){

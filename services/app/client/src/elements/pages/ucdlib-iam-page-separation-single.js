@@ -76,7 +76,7 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     if ( e.page != this.id ) return;
     this.AppStateModel.showLoading();
     this.requestId = e.location.path[1];
-    const data = await this.SeparationModel.getById(this.requestId);
+    const data = await this.SeparationModel.get(this.requestId);
     if ( data.state == 'loaded'){
       await this._setStateProperties(data.payload);
       await this.RtModel.getHistory(this.rtTicketId);
@@ -160,8 +160,6 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
       console.error(r);
       requestAnimationFrame(() => this.AppStateModel.showError(msg));
     } else {
-      this.SeparationModel.clearIdCache(this.requestId);
-      this.SeparationModel.clearQueryCache();
       if ( this.rtTicketId ){
         this.RtModel.clearHistoryCache(this.rtTicketId);
       }

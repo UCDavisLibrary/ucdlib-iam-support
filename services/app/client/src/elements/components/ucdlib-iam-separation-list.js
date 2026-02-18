@@ -63,16 +63,6 @@ export default class UcdlibIamSeparationList extends Mixin(LitElement)
   }
 
   /**
-   * @description Attached to SeparationModel separation-query event
-   * @param {Object} e cork-app-utils event
-   */
-  _onSeparationQuery(e){
-    if ( e.state === 'loaded' && e.queryId === this.SeparationModel.makeQueryString(this._query)){
-      this._records = e.payload;
-    }
-  }
-
-  /**
    * @description Lit lifecycle method
    * @param {*} props - Changed properties
    */
@@ -91,10 +81,9 @@ export default class UcdlibIamSeparationList extends Mixin(LitElement)
 
   /**
    * @description Retrieves separation requesting based on element attributes, updates view.
-   * @param {Boolean} ignoreCache - Will not use cache if it exists.
    * @param {query} query - Manually set query instead of doing
    */
-  async doQuery(ignoreCache, query){
+  async doQuery(query){
     let q = {};
 
     if ( query ) {
@@ -109,12 +98,12 @@ export default class UcdlibIamSeparationList extends Mixin(LitElement)
     }
 
     this._query = q;
-
-
-    if ( ignoreCache ){
-      this.SeparationModel.clearQueryCache(q);
+    const r = await this.SeparationModel.query(q);
+    if ( r?.state === 'loaded' ) {
+      this._records = r.payload;
     }
-    return await this.SeparationModel.query(q);
+
+    return r;
   }
 
 

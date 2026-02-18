@@ -23,32 +23,49 @@ class UcdIamService extends BaseService {
     }
   }
 
-  getPersonById(id, idType) {
+  async getPersonById(id, idType) {
     const url = `${this.config.url}/${this.searchParamToEndpoint[idType].path}`;
+    let storeKey = `${idType}:${id}`;
+    const store = this.store.data.getById;
 
     const params = new URLSearchParams({v: this.config.version, key: this.config.key});
     params.set(idType, id);
-    return this.request({
-      url : `${url}?${params.toString()}`,
-      onLoading : request => this.store.getPersonByIdLoading(id, idType, request),
-      onLoad : result => this.store.getPersonByIdLoaded(id, idType, result.body),
-      onError : e => this.store.getPersonByIdError(id, idType, e)
-    });
+
+    await this.checkRequesting(
+      storeKey, store,
+      () => this.request({
+        url : `${url}?${params.toString()}`,
+        checkCached : () => store.get(storeKey),
+        onUpdate : resp => this.store.set(
+          {...resp, id: storeKey},
+          store
+        )
+      })
+    );
+    return store.get(storeKey);
   }
 
-  getPersonByName(last, first, middle, useDirectory){
+  async getPersonByName(last, first, middle, useDirectory){
     const url = `${this.config.url}/${this.searchParamToEndpoint['name'].path}`;
+    const store = this.store.data.getByName;
     const cacheParams = this._makeNameQuery(last, first, middle, useDirectory);
+    const id = cacheParams.toString();
     const urlParams = this._makeNameQuery(last, first, middle, useDirectory);
     urlParams.set('v', this.config.version);
     urlParams.set('key', this.config.key);
 
-    return this.request({
-      url : `${url}?${urlParams.toString()}`,
-      onLoading : request => this.store.getPersonByNameLoading(cacheParams, request),
-      onLoad : result => this.store.getPersonByNameLoaded(cacheParams, result.body),
-      onError : e => this.store.getPersonByNameError(cacheParams, e)
-    });
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${url}?${urlParams.toString()}`,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+    return store.get(id);
   }
 
   _makeNameQuery(last, first, middle, useDirectory){

@@ -1,5 +1,8 @@
 import BaseService from './BaseService.js';
+import { digest } from '@ucd-lib/cork-app-utils';
 import SeparationStore from '../stores/SeparationStore.js';
+
+import payload from '../utils/payload.js';
 
 class SeparationService extends BaseService {
 
@@ -8,50 +11,71 @@ class SeparationService extends BaseService {
     this.store = SeparationStore;
   }
 
-  newSubmission(timestamp, payload) {
-    return this.request({
-      url : '/api/separation/new',
-      fetchOptions : {
-        method : 'POST',
-        body : payload
-      },
-      json: true,
-      onLoading : request => this.store.postNewLoading(request, timestamp, payload),
-      onLoad : result => this.store.postNewLoaded(result.body, timestamp),
-      onError : e => this.store.postNewError(e, timestamp, payload)
-    });
+  get baseUrl(){
+    return `/api/separation`;
   }
 
-  getById(id){
-    return this.request({
-      url : `/api/separation/${id}`,
-      checkCached: () => this.store.data.byId[id],
-      onLoading : request => this.store.byIdLoading(request, id),
-      onLoad : result => this.store.byIdLoaded(result.body, id),
-      onError : e => this.store.byIdError(e, id)
-    });
+  async create(data) {
+    const id = (new Date()).toISOString();
+    const store = this.store.data.create;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/new`,
+        json: true,
+        fetchOptions: { 
+          method: 'POST',
+          body: data
+        },
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+    return store.get(id);
   }
 
-  changeById(id, q){
-    return this.request({
-      url : `/api/separation/${id}?q=${q}`,
-      checkCached: () => this.store.data.byChangeId[id],
-      onLoading : request => this.store.byChangeIdLoading(request, id),
-      onLoad : result => this.store.byChangeIdLoaded(result.body, id),
-      onError : e => this.store.byChangeIdError(e, id)
-    });
+  async get(separationId){
+    const ido = { entityId: separationId };
+    const id = payload.getKey(ido);
+    const store = this.store.data.get;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/${separationId}`,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          payload.generate(ido, resp),
+          store
+        )
+      })
+    );
+
+    return store.get(id);
   }
 
-  deprovision(id) {
-    return this.request({
-      url : `/api/separation/${id}/deprovision`,
-      fetchOptions : {
-        method : 'POST'
-      },
-      onLoading : request => this.store.deprovisionLoading(request, id),
-      onLoad : result => this.store.deprovisionLoaded(result.body, id),
-      onError : e => this.store.deprovisionError(e, id)
-    });
+  async deprovision(separationId) {
+    const ido = { entityId: separationId };
+    const id = payload.getKey(ido);
+    const store = this.store.data.deprovision;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/${separationId}/deprovision`,
+        fetchOptions: { 
+          method: 'POST'
+        },
+        onUpdate : resp => this.store.set(
+          payload.generate(ido, resp),
+          store
+        )
+      })
+    );
+    return store.get(id);
   }
 
   recordSearch(q){
@@ -64,14 +88,25 @@ class SeparationService extends BaseService {
     });
   }
 
-  query(id){
-    return this.request({
-      url : `/api/separation${id != 'all' ? '?' + id: ''}`,
-      checkCached: () => this.store.data.byQuery[id],
-      onLoading : request => this.store.byQueryLoading(request, id),
-      onLoad : result => this.store.byQueryLoaded(result.body, id),
-      onError : e => this.store.byQueryError(e, id)
-    });
+  async query(query){
+    if ( !query.limit ) query.limit = 25;
+    let id = await digest(query);
+    const store = this.store.data.query;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}`,
+        qs: query,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+
+    return store.get(id);
   }
 
 

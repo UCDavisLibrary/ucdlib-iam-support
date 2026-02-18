@@ -57,7 +57,7 @@ export default class UcdlibIamPageSeparation extends Mixin(LitElement)
    * @description Attached to SeparationModel separation-query event
    * @param {Object} e cork-app-utils event
    */
-  _onSeparationQuery(e){
+  _onSeparationQueryUpdate(e){
     if ( e.state === 'error'){
       let msg = 'Unable to load separation requests';
       if ( e.error.details && e.error.details.message ){
@@ -83,7 +83,7 @@ export default class UcdlibIamPageSeparation extends Mixin(LitElement)
       promises.push(activeListEle.doQuery());
       promises.push(recentListEle.doQuery());
     }
-    if ( this.userIamId ) promises.push(supervisorEle.doQuery(false, {supervisorId: this.userIamId}));
+    if ( this.userIamId ) promises.push(supervisorEle.doQuery({supervisorId: this.userIamId}));
     await new Promise(resolve => {requestAnimationFrame(resolve);});
   }
 

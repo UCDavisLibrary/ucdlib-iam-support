@@ -235,7 +235,7 @@ export default (api) => {
     UcdIamModel.init(config.ucdIamApi);
     const iamResponse = await UcdIamModel.getPersonByIamId(payload.iamId);
     if ( iamResponse.error ) {
-      if ( UcdIamModel.noEmployeeFound ){
+      if ( UcdIamModel.noEmployeeFound(iamResponse) ){
         res.status(400).json({
           error: true,
           message: 'No employee found with this IAM ID'
