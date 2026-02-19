@@ -20,37 +20,9 @@ class RtModel extends BaseModel {
     this.register('RtModel');
   }
 
-  /**
-   * @description Get ticket transaction history
-   * @param {String} id RT ticket id
-   * @returns
-   */
-  async getHistory(id) {
-    let state = this.store.data.history[id];
-    try {
-      if( state && state.state === 'loading' ) {
-        await state.request;
-      } else {
-        await this.service.getHistory(id);
-      }
-    } catch(e) {}
-    this.store.emit(this.store.events.RT_TICKET_HISTORY_REQUEST, this.store.data.history[id]);
-    return this.store.data.history[id];
-  }
-
-  /**
-   * @description Clears cache for transaction history.
-   * @param {String} id - RT ticket id - if excluded, will clear cache for all tickets
-   */
-  clearHistoryCache(id){
-    if ( id ){
-      if ( this.store.data.history[id] ){
-        delete this.store.data.history[id];
-      }
-    } else {
-      this.store.data.history = {};
-    }
-  }
+  getTicketHistory(id) {
+    return this.service.getTicketHistory(id);
+   }
 
   /**
    * @description Formats ticket history items into a brief text blurb

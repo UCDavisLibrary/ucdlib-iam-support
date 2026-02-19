@@ -22,14 +22,23 @@ class PermissionsService extends BaseService {
     });
   }
 
-  getById(id, idType){
-    return this.request({
-      url : `/api/permissions/${id}?idType=${idType}`,
-      checkCached: () => this.store.data.byId[idType][id],
-      onLoading : request => this.store.byIdLoading(request, id, idType),
-      onLoad : result => this.store.byIdLoaded(result.body, id, idType),
-      onError : e => this.store.byIdError(e, id, idType)
-    });
+  async get(id, idType) {
+    const storeKey = `${idType}:${id}`;
+    const store = this.store.data.get;
+
+    await this.checkRequesting(
+      storeKey, store,
+      () => this.request({
+        url : `/api/permissions/${id}`,
+        qs: {idType},
+        checkCached : () => store.get(storeKey),
+        onUpdate : resp => this.store.set(
+          {...resp, id: storeKey},
+          store
+        )
+      })
+    );
+    return store.get(storeKey);
   }
 
   ownUpdateList(){

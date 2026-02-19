@@ -4,6 +4,8 @@ import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 import Papa from 'papaparse';
 import jschardet from 'jschardet';
 
+import { AppComponentController } from '#controllers';
+
 /**
  * @classdesc Xomponent for displaying the application Org chart page
  */
@@ -34,6 +36,11 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
     this.uploadWidgetTitle =  'Upload File for Organizational Chart';
     this.csvData = null;
     this.formatError = false;
+
+    this.ctl = {
+      appComponent : new AppComponentController(this),
+    }
+
     this._injectModel('AppStateModel', 'EmployeeModel', 'PersonModel', 'OrgchartModel');
   }
 
@@ -317,8 +324,8 @@ ${singleRoots.map(n => ` ${n.fullName}`)}`;
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-    if ( e.page != this.id ) return;
-    this.AppStateModel.showLoaded(this.id);
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
+    this.ctl.appComponent.showPage();
   }
 
 }

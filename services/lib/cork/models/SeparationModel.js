@@ -37,29 +37,12 @@ class SeparationModel extends BaseModel {
     return res;
   }
 
-
-  async recordSearch(q) {
-    const id = this.makeQueryString(q);
-    let state = this.store.data.byRecord[id];
-    try {
-      if( state && state.state === 'loading' ) {
-        await state.request;
-      } else {
-        await this.service.recordSearch(id);
-      }
-    } catch(e) {}
-    return this.store.data.byRecord.result;
+  async queryByName(query){
+    return this.service.queryByName(query);
   }
 
   async query(q={}) {
     return this.service.query(q);
-  }
-
-  makeQueryString(q){
-    if ( !q || !Object.keys(q).length) return 'all';
-    const searchParams = new URLSearchParams(q);
-    searchParams.sort();
-    return searchParams.toString();
   }
 
 }

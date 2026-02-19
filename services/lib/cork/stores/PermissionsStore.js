@@ -1,4 +1,4 @@
-import {BaseStore} from '@ucd-lib/cork-app-utils';
+import {BaseStore, LruStore} from '@ucd-lib/cork-app-utils';
 
 class PermissionsStore extends BaseStore {
 
@@ -7,16 +7,11 @@ class PermissionsStore extends BaseStore {
 
     this.data = {
       submissions: {},
-      byId: {
-        onboarding: {},
-        update: {}
-      },
+      get: new LruStore({name: 'permissions.get'}),
       ownUpdateList: {}
     };
     this.events = {
       PERMISSIONS_SUBMISSION: 'permissions-submission',
-      PERMISSIONS_RECORD_FETCH: 'permissions-record-fetch',
-      PERMISSIONS_RECORD_REQUEST: 'permissions-record-request',
       PERMISSIONS_OWN_UPDATE_LIST_FETCH: 'permissions-own-update-list-fetch',
     };
   }
@@ -47,32 +42,6 @@ class PermissionsStore extends BaseStore {
   _setSubmissionState(state, timestamp) {
     this.data.submissions[timestamp] = state;
     this.emit(this.events.PERMISSIONS_SUBMISSION, state);
-  }
-
-  byIdLoading(request, id, idType) {
-    this._setByIdState({
-      state : this.STATE.LOADING,
-      request
-    }, id, idType);
-  }
-
-  byIdLoaded(payload, id, idType) {
-    this._setByIdState({
-      state : this.STATE.LOADED,
-      payload
-    }, id, idType);
-  }
-
-  byIdError(error, id, idType) {
-    this._setByIdState({
-      state : this.STATE.ERROR,
-      error
-    }, id, idType);
-  }
-
-  _setByIdState(state, id, idType) {
-    this.data.byId[idType][id] = state;
-    this.emit(this.events.PERMISSIONS_RECORD_FETCH, state);
   }
 
   ownUpdateListLoading(request) {

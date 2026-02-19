@@ -328,24 +328,6 @@ export default class UcdlibIamAlma extends Mixin(LitElement)
   }
 
   /**
-   * @description Sets subpage based on location hash
-   * @param {Object} e
-   */
-  async _setPage(e){
-    if (e.page != this.id ) return;
-
-    this.AppStateModel.showLoading('alma');
-    await this._getRequiredPageData(e.location.hash);
-    this.AppStateModel.showLoaded();
-    if ( ['submission', 'manual', 'lookup'].includes(e.location.hash) ){
-      this.page = 'alma-' + e.location.hash;
-    } else {
-      this.page = 'alma-home';
-    }
-    this._validatePage();
-  }
-
-  /**
    * @description Attached to click listeners on results page
    * @param {Number} id - IAM ID
    * @returns

@@ -2,6 +2,8 @@ import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-home.tpl.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
+import { AppComponentController } from '#controllers';
+
 /**
  * @classdesc Component for displaying the application home page
  */
@@ -23,6 +25,10 @@ export default class UcdlibIamPageHome extends Mixin(LitElement)
       employees: 'redbud'
     };
 
+    this.ctl = {
+      appComponent : new AppComponentController(this),
+    }
+
     this._injectModel('AppStateModel');
   }
 
@@ -41,8 +47,8 @@ export default class UcdlibIamPageHome extends Mixin(LitElement)
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-    if ( e.page != this.id ) return;
-    this.AppStateModel.showLoaded(this.id);
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
+    this.ctl.appComponent.showPage();
   }
 
 }

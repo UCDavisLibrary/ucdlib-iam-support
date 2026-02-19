@@ -3,6 +3,8 @@ import * as Templates from "./ucdlib-iam-page-patron-lookup.tpl.js";
 import dtUtils from '#lib/utils/dtUtils.js';
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
+import { AppComponentController } from '#controllers';
+
 import "#components/ucdlib-iam-modal.js";
 
 /**
@@ -51,6 +53,10 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     this.renderNameForm = Templates.renderNameForm.bind(this);
 
     this.reset();
+
+    this.ctl = {
+      appComponent : new AppComponentController(this),
+    }
     this._injectModel('PersonModel','AppStateModel', 'AuthModel', 'AlmaUserModel', 'LdapModel');
 
     this.navItems = [];
@@ -108,7 +114,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-    if (e.page != this.id ) return;
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
     const token = this.AuthModel.getToken();
     if ( token.canDoPatronSearch ){
       this._setPage(e);
@@ -127,7 +133,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
       return;
     }
     if (this.page == "information") this._onReturn();
-    this.AppStateModel.showLoading(this.id);
+    this.AppStateModel.showLoading();
 
     this.requestId = e.location.query.iamid;
 
@@ -136,7 +142,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     }
 
 
-    this.AppStateModel.showLoaded();
+    this.ctl.appComponent.showPage();
 
   }
 
@@ -146,7 +152,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
    */
   async getInformation(){
     let id = this.requestId;
-    const r = await this.PersonModel.getPersonById(id, 'iamId', 'select');
+    const r = await this.PersonModel.getPersonById(id, 'iamId');
 
     if( r.state === this.PersonModel.store.STATE.LOADED ) {
       this.isFetching = false;

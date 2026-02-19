@@ -78,14 +78,23 @@ class SeparationService extends BaseService {
     return store.get(id);
   }
 
-  recordSearch(q){
-    return this.request({
-      url : `/api/separation/search?${q}`,
-      // checkCached: () => this.store.data.byRecord[q],
-      onLoading : request => this.store.byRecordLoading(request, q),
-      onLoad : result => this.store.byRecordLoaded(result.body, q),
-      onError : e => this.store.byRecordError(e, q)
-    });
+  async queryByName(query){
+    const id = await digest(query);
+    const store = this.store.data.byName;
+    
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/search`,
+        qs: query,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+    return store.get(id);
   }
 
   async query(query){

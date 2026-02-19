@@ -2,6 +2,8 @@ import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-separation-new.tpl.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
+import { AppComponentController } from '#controllers';
+
 import "#components/ucdlib-iam-alma.js";
 import "#components/ucdlib-iam-modal.js";
 import "#components/ucdlib-employee-search.js";
@@ -40,6 +42,10 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
 
     this.page = 'sp-lookup';
     this._resetEmployeeStateProps();
+
+    this.ctl = {
+      appComponent : new AppComponentController(this),
+    }
 
     this._injectModel('AppStateModel', 'GroupModel', 'SeparationModel', 'AuthModel');
   }
@@ -113,7 +119,7 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-    if (e.page != this.id ) return;
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
     const token = this.AuthModel.getToken();
     if ( token.canCreateRequests ){
       this._setPage(e);
@@ -175,9 +181,9 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
    * @param {Object} e
    */
   async _setPage(e){
-    this.AppStateModel.showLoading('separation-new');
+    this.AppStateModel.showLoading();
     await this._getRequiredPageData(e.location.hash);
-    this.AppStateModel.showLoaded();
+    this.ctl.appComponent.showPage();
     if ( ['submission'].includes(e.location.hash) ){
       this.page = 'sp-' + e.location.hash;
     } else {
@@ -201,7 +207,7 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
    */
   _onSeparationCreateUpdate(e){
     if ( e.state === this.SeparationModel.store.STATE.LOADING ){
-      this.AppStateModel.showLoading(this.id);
+      this.AppStateModel.showLoading();
     } else if ( e.state === this.SeparationModel.store.STATE.LOADED ){
       this._resetEmployeeStateProps();
       // this._resetLookupForms();

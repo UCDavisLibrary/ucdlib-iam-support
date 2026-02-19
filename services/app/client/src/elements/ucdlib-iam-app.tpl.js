@@ -41,20 +41,20 @@ export function render() {
     `)}
   </ol>
 
-  <ucdlib-pages id='main-pages' selected=${this.page}>
-    <ucdlib-iam-state id='loading' state=${this.status} error-message=${this.errorMessage}></ucdlib-iam-state>
-    <ucdlib-iam-page-onboarding id='onboarding'></ucdlib-iam-page-onboarding>
-    <ucdlib-iam-page-onboarding-new id='onboarding-new'></ucdlib-iam-page-onboarding-new>
-    <ucdlib-iam-page-patron-lookup id='patron'></ucdlib-iam-page-patron-lookup>
-    <ucdlib-iam-page-onboarding-single id='onboarding-single'></ucdlib-iam-page-onboarding-single>
-    <ucdlib-iam-page-home id='home'></ucdlib-iam-page-home>
-    <ucdlib-iam-page-orgchart id='orgchart'></ucdlib-iam-page-orgchart>
-    <ucdlib-iam-page-separation id='separation'></ucdlib-iam-page-separation>
-    <ucdlib-iam-page-separation-new id='separation-new'></ucdlib-iam-page-separation-new>
-    <ucdlib-iam-page-separation-single id='separation-single'></ucdlib-iam-page-separation-single>
-    <ucdlib-iam-page-permissions-single id='permissions-single'></ucdlib-iam-page-permissions-single>
-    <ucdlib-iam-page-permissions id='permissions'></ucdlib-iam-page-permissions>
-    <ucdlib-iam-page-tools id='tools'></ucdlib-iam-page-tools>
-    <ucdlib-iam-page-update-tool id='emupdate'></ucdlib-iam-page-update-tool>
+  <ucdlib-pages id='main-pages' selected=${this.page} attr-for-selected='page-id'>
+    <ucdlib-iam-state page-id='loading' state=${this.status} error-message=${this.errorMessage}></ucdlib-iam-state>
+    <ucdlib-iam-page-onboarding page-id='onboarding'></ucdlib-iam-page-onboarding>
+    <ucdlib-iam-page-onboarding-new page-id='onboarding-new'></ucdlib-iam-page-onboarding-new>
+    <ucdlib-iam-page-patron-lookup page-id='patron'></ucdlib-iam-page-patron-lookup>
+    <ucdlib-iam-page-onboarding-single page-id='onboarding-single'></ucdlib-iam-page-onboarding-single>
+    <ucdlib-iam-page-home page-id='home'></ucdlib-iam-page-home>
+    <ucdlib-iam-page-orgchart page-id='orgchart'></ucdlib-iam-page-orgchart>
+    <ucdlib-iam-page-separation page-id='separation'></ucdlib-iam-page-separation>
+    <ucdlib-iam-page-separation-new page-id='separation-new'></ucdlib-iam-page-separation-new>
+    <ucdlib-iam-page-separation-single page-id='separation-single'></ucdlib-iam-page-separation-single>
+    <ucdlib-iam-page-permissions-single page-id='permissions-single'></ucdlib-iam-page-permissions-single>
+    <ucdlib-iam-page-permissions page-id='permissions'></ucdlib-iam-page-permissions>
+    <ucdlib-iam-page-tools page-id='tools'></ucdlib-iam-page-tools>
+    <ucdlib-iam-page-update-tool page-id='emupdate'></ucdlib-iam-page-update-tool>
   </ucdlib-pages>
 `;}

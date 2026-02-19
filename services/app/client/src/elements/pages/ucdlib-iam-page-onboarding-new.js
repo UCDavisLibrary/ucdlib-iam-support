@@ -8,6 +8,8 @@ import "#components/ucdlib-iam-modal.js";
 import "#components/ucdlib-employee-search.js";
 import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
 
+import { AppComponentController } from '#controllers';
+
 /**
  * @description Displays onboarding request form
  */
@@ -58,6 +60,10 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
     this.page = 'obn-home';
     this.groups = [];
     this._resetEmployeeStateProps();
+
+    this.ctl = {
+      appComponent : new AppComponentController(this),
+    }
 
     this._injectModel('AppStateModel', 'PersonModel', 'GroupModel', 'OnboardingModel', 'AuthModel');
   }
@@ -163,7 +169,7 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-    if (e.page != this.id ) return;
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
     const token = this.AuthModel.getToken();
     if ( token.canCreateRequests ){
       this._setPage(e);
@@ -208,7 +214,10 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
       // get supervisor(s) record
       try {
         this.iamRecord.allSupervisorEmployeeIds.forEach( async empId => {
-          let emp = await this.PersonModel.getPersonById(empId, 'employeeId', false);
+          let emp = await this.PersonModel.getPersonById(empId, 'employeeId');
+          if ( emp.state !== this.PersonModel.store.STATE.LOADED ) {
+            throw new Error('Unable to load supervisor');
+          }
           emp = new IamPersonTransform(emp.payload);
           if ( emp.employeeId == this.iamRecord.getSupervisorEmployeeId() ){
             this.supervisor = emp;
@@ -256,7 +265,7 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
     // set supervisor, if different.
     // personModel object should already be cached
     if ( appt.reportsToEmplID ){
-      let emp = await this.PersonModel.getPersonById(appt.reportsToEmplID, 'employeeId', false);
+      let emp = await this.PersonModel.getPersonById(appt.reportsToEmplID, 'employeeId');
       this.supervisor = new IamPersonTransform(emp.payload);
       this.supervisorEmail = this.supervisor.email;
     }
@@ -317,7 +326,7 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
    */
   _onNewOnboardingSubmission(e){
     if ( e.state === this.OnboardingModel.store.STATE.LOADING ){
-      this.AppStateModel.showLoading(this.id);
+      this.AppStateModel.showLoading();
     } else if ( e.state === this.OnboardingModel.store.STATE.LOADED ){
       this._resetEmployeeStateProps();
       this._resetLookupForms();

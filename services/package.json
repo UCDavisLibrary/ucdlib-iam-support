@@ -9,7 +9,8 @@
   "imports": {
     "#models": "./lib/models/index.js",
     "#lib/*": "./lib/*",
-    "#components/*": "./app/client/src/elements/components/*"
+    "#components/*": "./app/client/src/elements/components/*",
+    "#controllers": "./app/client/src/controllers/index.js"
   },
   "scripts": {
     "client-watch": "cd ./app/client/build && webpack --config webpack-watch.config.js --watch",

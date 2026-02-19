@@ -4,6 +4,8 @@ import dtUtls from '#lib/utils/dtUtils.js';
 import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
+import { AppComponentController } from '#controllers';
+
 import "#components/ucdlib-rt-history.js";
 import "#components/ucdlib-iam-search.js";
 import "#components/ucdlib-iam-modal.js";
@@ -73,6 +75,10 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
     this.ucdIamRecord = new IamPersonTransform({});
     this.showAdoptButton = false;
 
+    this.ctl = {
+      appComponent : new AppComponentController(this),
+    }
+
     this._injectModel('AppStateModel', 'OnboardingModel', 'RtModel', 'AuthModel');
   }
 
@@ -107,16 +113,16 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-    if ( e.page != this.id ) return;
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
     this.AppStateModel.showLoading();
     this.requestId = e.location.path[1];
     const data = await this.OnboardingModel.getById(this.requestId);
     if ( data.state == 'loaded'){
       await this._setStateProperties(data.payload);
-      await this.RtModel.getHistory(this.rtTicketId);
+      await this.RtModel.getTicketHistory(this.rtTicketId);
       this.AppStateModel.setTitle({show: true, text: this.pageTitle()});
       this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs: this.breadcrumbs()});
-      requestAnimationFrame(() => this.AppStateModel.showLoaded(this.id));
+      requestAnimationFrame(() => this.ctl.appComponent.showPage());
     } else if ( data.state == 'error' ){
       let msg = 'Unable to display onboarding request';
       if ( data.error && data.error.payload && data.error.payload.message ) msg = data.error.payload.message;
@@ -231,9 +237,6 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
     } else {
       this.OnboardingModel.clearIdCache(this.requestId);
       this.OnboardingModel.clearQueryCache();
-      if ( this.rtTicketId ){
-        this.RtModel.clearHistoryCache(this.rtTicketId);
-      }
       this.AppStateModel.refresh();
       this.AppStateModel.showAlertBanner({message: 'Employee adopted', brandColor: 'farmers-market'});
     }
@@ -263,9 +266,6 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
     } else {
       this.OnboardingModel.clearIdCache(this.requestId);
       this.OnboardingModel.clearQueryCache();
-      if ( this.rtTicketId ){
-        this.RtModel.clearHistoryCache(this.rtTicketId);
-      }
       this.AppStateModel.setLocation('/onboarding');
       this.AppStateModel.showAlertBanner({message: 'Onboarding request reconciled', brandColor: 'farmers-market'});
     }
@@ -312,9 +312,6 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
     } else {
       this.OnboardingModel.clearIdCache(this.requestId);
       this.OnboardingModel.clearQueryCache();
-      if ( this.rtTicketId ){
-        this.RtModel.clearHistoryCache(this.rtTicketId);
-      }
       this.AppStateModel.refresh();
       this.AppStateModel.showAlertBanner({message: 'Background check notification sent', brandColor: 'farmers-market'});
     }

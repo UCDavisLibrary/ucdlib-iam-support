@@ -155,7 +155,7 @@ export default class UcdlibIamExistingSearch extends Mixin(LitElement)
 
     this.widgetTitle = this.onboarding ? 'UC Davis Onboarding Search': 'UC Davis Separation Search';
     this.resultLabel = this.onboarding ? 'Onboarding': 'Separation';
-    let r = this.onboarding ? await this.OnboardingModel.recordSearch(q) : await this.SeparationModel.recordSearch(q);
+    let r = this.onboarding ? await this.OnboardingModel.recordSearch(q) : await this.SeparationModel.queryByName(q);
     let error = this.onboarding ? this.OnboardingModel.store.STATE.ERROR : this.SeparationModel.store.STATE.ERROR;
     let loaded = this.onboarding ? this.OnboardingModel.store.STATE.LOADED : this.SeparationModel.store.STATE.LOADED;
     this.link = this.onboarding ? "/onboarding/" : "/separation/";

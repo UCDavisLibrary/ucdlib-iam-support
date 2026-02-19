@@ -1,6 +1,9 @@
 import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-separation.tpl.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
+
+import { AppComponentController } from '#controllers';
+
 import "#components/ucdlib-iam-separation-list.js";
 import "#components/ucdlib-iam-modal.js";
 import "#components/ucdlib-iam-existing-search.js";
@@ -22,6 +25,10 @@ export default class UcdlibIamPageSeparation extends Mixin(LitElement)
   constructor() {
     super();
     this.render = render.bind(this);
+
+    this.ctl = {
+      appComponent : new AppComponentController(this),
+    }
 
     this._injectModel('AppStateModel', 'SeparationModel', 'AuthModel');
 
@@ -49,7 +56,7 @@ export default class UcdlibIamPageSeparation extends Mixin(LitElement)
   _onTokenRefreshed(token){
     this.canViewAll = token.hasAdminAccess || token.hasHrAccess;
     this.userIamId = token.iamId;
-    if ( this.AppStateModel.currentPage == this.id ) this. _getRequiredPageData();
+    if ( this.ctl.appComponent.isOnActivePage ) this. _getRequiredPageData();
   }
 
 
@@ -94,10 +101,10 @@ export default class UcdlibIamPageSeparation extends Mixin(LitElement)
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-    if ( e.page != this.id ) return;
-    this.AppStateModel.showLoading(this.id);
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
+    this.AppStateModel.showLoading();
     await this. _getRequiredPageData();
-    this.AppStateModel.showLoaded(this.id);
+    this.ctl.appComponent.showPage();
   }
 
 

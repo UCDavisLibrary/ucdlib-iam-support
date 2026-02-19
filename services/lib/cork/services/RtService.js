@@ -8,14 +8,26 @@ class RtService extends BaseService {
     this.store = RtStore;
   }
 
-  getHistory(id){
-    return this.request({
-      url : '/api/rt/history/' + id,
-      checkCached: () => this.store.data.history[id],
-      onLoading : request => this.store.historyLoading(request, id),
-      onLoad : result => this.store.historyLoaded(result.body, id),
-      onError : e => this.store.historyError(e, id)
-    });
+  get baseUrl(){
+    return `/api/rt`;
+  }
+
+  async getTicketHistory(id) {
+    const store = this.store.data.ticketHistory;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/history/${id}`,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+
+    return store.get(id);
   }
 
 }

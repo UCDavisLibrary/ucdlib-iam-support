@@ -2,6 +2,8 @@ import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-permissions.tpl.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
+import { AppComponentController } from '#controllers';
+
 /**
  * @classdesc Page that displays options for requesting permissions
  * Allows user to pick if is for
@@ -38,6 +40,10 @@ export default class UcdlibIamPagePermissions extends Mixin(LitElement)
     this.reports = [];
     this.userPermissionRequests = [];
 
+    this.ctl = {
+      appComponent : new AppComponentController(this),
+    }
+
     this._injectModel('AppStateModel', 'EmployeeModel', 'PermissionsModel');
   }
 
@@ -67,8 +73,8 @@ export default class UcdlibIamPagePermissions extends Mixin(LitElement)
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-    if ( e.page != this.id ) return;
-    this.AppStateModel.showLoading(this.id);
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
+    this.AppStateModel.showLoading();
 
     // set page from hash
     const hashes = ['report', 'applications', 'employee'];
@@ -91,7 +97,7 @@ export default class UcdlibIamPagePermissions extends Mixin(LitElement)
 
 
     this.setBreadcrumbs();
-    this.AppStateModel.showLoaded(this.id);
+    this.ctl.appComponent.showPage();
   }
 
   _onPermissionsOwnUpdateListFetch(e){

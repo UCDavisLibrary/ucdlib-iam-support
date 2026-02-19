@@ -8,43 +8,44 @@ class PersonService extends BaseService {
     this.store = PersonStore;
   }
 
-  getPeopleByIds(ids, event) {
-    const url = `${this.store.searchParams[bulk].endpoint}`;
-    const params = new URLSearchParams();
-    params.set('ids', ids);
-    return this.request({
-      url : `${url}?${params.toString()}`,
-      onLoading : request => this.store.getPeopleByIdsLoading(ids, request, event),
-      checkCached : () => this.store.data.bulk[ids],
-      onLoad : result => this.store.getPeopleByIdsLoaded(ids, result.body, event),
-      onError : e => this.store.getPeopleByIdsError(ids, e, event)
-    });
-  }
-
-  getPersonById(id, idType, event) {
+  async getPersonById(id, idType) {
     const url = `${this.store.searchParams[idType].endpoint}/${id}`;
-    const params = new URLSearchParams();
-    params.set('idType', idType);
-    return this.request({
-      url : `${url}?${params.toString()}`,
-      onLoading : request => this.store.getPersonByIdLoading(id, idType, request, event),
-      checkCached : () => this.store.data[idType][id],
-      onLoad : result => this.store.getPersonByIdLoaded(id, idType, result.body, event),
-      onError : e => this.store.getPersonByIdError(id, idType, e, event)
-    });
+    const storeKey = `${idType}:${id}`;
+    const store = this.store.data.getById;
+
+    await this.checkRequesting(
+      storeKey, store,
+      () => this.request({
+        url : url,
+        qs: {idType},
+        checkCached : () => store.get(storeKey),
+        onUpdate : resp => this.store.set(
+          {...resp, id: storeKey},
+          store
+        )
+      })
+    );
+    return store.get(storeKey);
   }
 
-  getPersonByName(last, first, middle, useDirectory){
+  async getPersonByName(last, first, middle, useDirectory){
     const url = this.store.searchParams.name.endpoint;
     const params = this._makeNameQuery(last, first, middle, useDirectory);
+    const id = params.toString();
+    const store = this.store.data.getByName;
 
-    return this.request({
-      url : `${url}?${params.toString()}`,
-      onLoading : request => this.store.getPersonByNameLoading(params, request),
-      //checkCached : () => this.store.data.name[params.toString()],
-      onLoad : result => this.store.getPersonByNameLoaded(params, result.body),
-      onError : e => this.store.getPersonByNameError(params, e)
-    });
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${url}?${id}`,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+    return store.get(id);
   }
 
   _makeNameQuery(last, first, middle, useDirectory){
@@ -59,6 +60,7 @@ class PersonService extends BaseService {
     if ( useDirectory ){
       params.set('useDirectory', true);
     }
+    params.sort();
     return params;
   }
 

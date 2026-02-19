@@ -7,6 +7,8 @@ import selectOptions from "../../utils/permissionsFormOptions.js";
 import formProperties from '#lib/utils/permissionsFormProperties.js';
 import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
 
+import { AppComponentController } from '#controllers';
+
 import "#components/ucdlib-iam-modal.js";
 import "#components/ucdlib-iam-alma.js";
 import "#components/ucdlib-rt-history.js";
@@ -68,6 +70,10 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
 
     this.setDefaultForm();
 
+    this.ctl = {
+      appComponent : new AppComponentController(this),
+    }
+
     this._injectModel(
       'AppStateModel', 'OnboardingModel', 'PermissionsModel',
       'RtModel', 'AlmaUserModel', 'AuthModel', 'PersonModel'
@@ -90,7 +96,7 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
    */
   async _onAppStateUpdate(e) {
     this.isActive = false;
-    if ( e.page != this.id ) return;
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
     this.resetState();
     this.AppStateModel.showLoading();
 
@@ -113,7 +119,7 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
       const title = this.formTypes.update.title.replace(':name', `${this.firstName} ${this.lastName}`);
       this.AppStateModel.setTitle({text: title, show: true});
     }
-    this.AppStateModel.showLoaded(this.id);
+    this.ctl.appComponent.showPage();
   }
 
   /**
@@ -123,11 +129,11 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
     const promises = [];
     if ( this.formType == 'onboarding' ){
       promises.push(this.OnboardingModel.getById(this.associatedObjectId));
-      promises.push(this.PermissionsModel.getById(this.associatedObjectId, 'onboarding'));
+      promises.push( this.getPermissionRecord() );
       promises.push(this.AlmaUserModel.getAlmaUserRoleType());
     } else if ( this.formType == 'update' ){
       if ( this.associatedObjectId ){
-        promises.push(this.PermissionsModel.getById(this.associatedObjectId, 'update'));
+        promises.push( this.getPermissionRecord('update') );
       } else {
         promises.push(this.getRequestedEmployee());
       }
@@ -135,7 +141,7 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
         promises.push(this.AlmaUserModel.getAlmaUserRoleType());
       }
     }
-    await Promise.all(promises);
+    await Promise.allSettled(promises);
   }
 
   /**
@@ -152,7 +158,7 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
       const token = this.AuthModel.getToken();
       iamId = token.iamId;
     }
-    const personRecord = await this.PersonModel.getPersonById(iamId, 'iamId', false);
+    const personRecord = await this.PersonModel.getPersonById(iamId, 'iamId');
     if ( personRecord.state === 'error' ){
       this.AppStateModel.showError('Unable to retrieve UC Davis record for this user.');
       return;
@@ -163,12 +169,8 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
     this.lastName = this.requestedPerson.lastName;
   }
 
-  /**
-   * @description Attached to PermissionsModel PERMISSIONS_RECORD_REQUEST
-   * Fires when permissions record is retrieved, even if cached
-   * @param {*} e - cork-app-utils event
-   */
-  _onPermissionsRecordRequest(e){
+  async getPermissionRecord(idType='onboarding'){
+    const e = await this.PermissionsModel.get(this.associatedObjectId, idType);
     if ( !this.isActive ) return;
     if ( e.state === 'loaded' ){
       this.setDefaultForm();
@@ -187,7 +189,7 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
         this.iamId = p.iamId || '';
         const title = this.formTypes[this.formType].title.replace(':name', `${this.firstName} ${this.lastName}`);
         this.AppStateModel.setTitle({text: title, show: true});
-        if ( this.rtTicketId ) this.RtModel.getHistory(this.rtTicketId);
+        if ( this.rtTicketId ) this.RtModel.getTicketHistory(this.rtTicketId);
       }
     }
     else if (e.state === 'error' ){
@@ -333,12 +335,10 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
         this.OnboardingModel.clearIdCache(this.associatedObjectId);
         this.OnboardingModel.clearQueryCache();
         this.PermissionsModel.clearIdCache(this.associatedObjectId, 'onboarding');
-        if ( this.rtTicketId ) this.RtModel.clearHistoryCache(this.rtTicketId);
         this.AppStateModel.setLocation(`/onboarding/${this.associatedObjectId}`);
       } else if ( this.formType === 'update' ){
         this.PermissionsModel.clearIdCache(this.associatedObjectId, 'update');
         this.PermissionsModel.clearOwnUpdateListCache();
-        if ( this.rtTicketId ) this.RtModel.clearHistoryCache(this.rtTicketId);
         this.AppStateModel.setLocation(`/permissions`);
       }
       this.AppStateModel.showAlertBanner({message: 'Permissions request submitted', brandColor: 'farmers-market'});

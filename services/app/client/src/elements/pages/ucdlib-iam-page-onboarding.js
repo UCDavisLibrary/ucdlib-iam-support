@@ -2,6 +2,8 @@ import { LitElement } from 'lit';
 import {render} from "./ucdlib-iam-page-onboarding.tpl.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
+import { AppComponentController } from '#controllers';
+
 import "#components/ucdlib-iam-onboarding-list.js";
 import "#components/ucdlib-iam-existing-search.js";
 import "#components/ucdlib-iam-modal.js";
@@ -31,6 +33,10 @@ export default class UcdlibIamPageOnboarding extends Mixin(LitElement)
     this.canViewAll = false;
     this.userIamId = '';
     this.tabView = 'active'; // active or recent
+
+    this.ctl = {
+      appComponent : new AppComponentController(this),
+    }
   }
 
   /**
@@ -62,10 +68,10 @@ export default class UcdlibIamPageOnboarding extends Mixin(LitElement)
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-    if ( e.page != this.id ) return;
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
     this.AppStateModel.showLoading();
     await this._getRequiredPageData();
-    this.AppStateModel.showLoaded(this.id);
+    this.ctl.appComponent.showPage();
   }
 
   /**
@@ -76,7 +82,7 @@ export default class UcdlibIamPageOnboarding extends Mixin(LitElement)
   _onTokenRefreshed(token){
     this.canViewAll = token.hasAdminAccess || token.hasHrAccess;
     this.userIamId = token.iamId;
-    if ( this.AppStateModel.currentPage == this.id ) this. _getRequiredPageData();
+    if ( this.ctl.appComponent.isOnActivePage ) this. _getRequiredPageData();
   }
 
   /**

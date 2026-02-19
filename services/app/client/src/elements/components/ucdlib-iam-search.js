@@ -237,7 +237,7 @@ export default class UcdlibIamSearch extends Mixin(LitElement)
     this.isFetching = true;
 
     this.selectedPersonId = id;
-    const r = await this.PersonModel.getPersonById(id, 'iamId', 'select');
+    const r = await this.PersonModel.getPersonById(id, 'iamId');
     if( r.state === this.PersonModel.store.STATE.LOADED ) {
       this.isFetching = false;
       this.selectedPersonProfile = r.payload;

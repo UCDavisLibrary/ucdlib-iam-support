@@ -2,6 +2,8 @@ import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-update-tool.tpl.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
+import { AppComponentController } from '#controllers';
+
 import "#components/ucdlib-employee-search.js";
 import "#components/ucdlib-iam-search.js";
 
@@ -41,6 +43,11 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this.disabledSubmit = false;
     this.deptHeadConflict = false;
     this.departmentName = 'department';
+
+    this.ctl = {
+      appComponent : new AppComponentController(this),
+    }
+
 
     this._injectModel('EmployeeModel','AppStateModel', 'AuthModel', 'GroupModel', 'PersonModel');
   }
@@ -143,7 +150,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
-    if (e.page != this.id ) return;
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
 
     const token = this.AuthModel.getToken();
     if(!token.hasAdminAccess && !token.hasHrAccess) {
@@ -165,7 +172,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
    */
   async _setPage(){
     this.page = "employee-select";
-    this.AppStateModel.showLoaded(this.id);
+    this.ctl.appComponent.showPage();
 
   }
 

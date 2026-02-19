@@ -19,32 +19,13 @@ class PersonModel extends BaseModel {
   }
 
   /**
-   * @description Get/search for a person by an identifier
+   * @description Get a person by an identifier
    * @param {String} id - The identifier to search for
    * @param {String} idType - See UcdIamModel for valid identifiers
-   * @param {String} event - 'search' or 'select' - Used to determine what event to emit
    * @returns
    */
-  async getPersonById(id, idType='iamId', event='search'){
-    if ( !id ) {
-      console.warn('id is a required argument');
-    }
-    try {
-      await this.service.getPersonById(id, idType, event);
-    } catch(e) {}
-    return this.store.data[idType][id];
-
-  }
-
-  async getPeopleByIds(ids, event='search'){
-    if ( !ids ) {
-      console.warn('id is a required argument');
-    }
-    try {
-      await this.service.getPeopleByIds(ids, event);
-    } catch(e) {}
-    return this.store.data.bulk[ids];
-
+  async getPersonById(id, idType='iamId'){
+    return this.service.getPersonById(id, idType);
   }
 
   /**
@@ -56,12 +37,7 @@ class PersonModel extends BaseModel {
    * @returns Array of people or error object
    */
    async getPersonByName(last, first, middle, useDirectory){
-    try {
-      await this.service.getPersonByName(last, first, middle, useDirectory);
-    } catch(e) {}
-    const key = this.service._makeNameQuery(last, first, middle, useDirectory).toString();
-    const response = this.store.data.name[key];
-    return response
+    return this.service.getPersonByName(last, first, middle, useDirectory);
   }
 
 }

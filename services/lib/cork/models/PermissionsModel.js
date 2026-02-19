@@ -38,17 +38,8 @@ class PermissionsModel extends BaseModel {
    * @param {String} idType - 'onboarding' or 'update'
    * @returns
    */
-  async getById(id, idType='onboarding') {
-    let state = this.store.data.byId[idType][id];
-    try {
-      if( state && state.state === 'loading' ) {
-        await state.request;
-      } else {
-        await this.service.getById(id, idType);
-      }
-    } catch(e) {}
-    this.store.emit(this.store.events.PERMISSIONS_RECORD_REQUEST, this.store.data.byId[idType][id]);
-    return this.store.data.byId[idType][id];
+  get(id, idType='onboarding') {
+    return this.service.get(id, idType);
   }
 
   /**
