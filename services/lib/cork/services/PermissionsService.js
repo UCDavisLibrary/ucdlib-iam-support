@@ -8,18 +8,27 @@ class PermissionsService extends BaseService {
     this.store = PermissionsStore;
   }
 
-  newSubmission(timestamp, payload) {
-    return this.request({
-      url : '/api/permissions',
-      fetchOptions : {
-        method : 'POST',
-        body : payload
-      },
-      json: true,
-      onLoading : request => this.store.submissionLoading(request, timestamp, payload),
-      onLoad : result => this.store.submissionLoaded(result.body, timestamp),
-      onError : e => this.store.submissionError(e, timestamp, payload)
-    });
+
+  async create(data) {
+    const id = (new Date()).toISOString();
+    const store = this.store.data.create;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `/api/permissions`,
+        json: true,
+        fetchOptions: { 
+          method: 'POST',
+          body: data
+        },
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+    return store.get(id);
   }
 
   async get(id, idType) {
@@ -41,14 +50,22 @@ class PermissionsService extends BaseService {
     return store.get(storeKey);
   }
 
-  ownUpdateList(){
-    return this.request({
-      url : `/api/submitted-permission-requests`,
-      checkCached: () => this.store.data.ownUpdateList,
-      onLoading : request => this.store.ownUpdateListLoading(request),
-      onLoad : result => this.store.ownUpdateListLoaded(result.body),
-      onError : e => this.store.ownUpdateListError(e)
-    });
+  async getOwn(){
+    const id = 'own';
+    const store = this.store.data.query;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `/api/submitted-permission-requests`,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+    return store.get(id);
   }
 
 }

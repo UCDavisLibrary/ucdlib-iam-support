@@ -91,7 +91,7 @@ export default class UcdlibIamPagePermissions extends Mixin(LitElement)
     if ( this.page == 'report' ){
       promises.push(this.EmployeeModel.getDirectReports());
     } else if ( this.page == 'home' ){
-      promises.push(this.PermissionsModel.ownUpdateList());
+      promises.push(this.getOwnPermissionRequests());
     }
     await Promise.all(promises);
 
@@ -100,10 +100,11 @@ export default class UcdlibIamPagePermissions extends Mixin(LitElement)
     this.ctl.appComponent.showPage();
   }
 
-  _onPermissionsOwnUpdateListFetch(e){
-    if ( e.state === 'loaded' ){
-      this.userPermissionRequests = e.payload;
-    } else if ( e.state === 'error' ){
+  async getOwnPermissionRequests(){
+    const r = await this.PermissionsModel.getOwn();
+    if ( r.state === 'loaded' ){
+      this.userPermissionRequests = r.payload;
+    } else if ( r.state === 'error' ){
       this.AppStateModel.showError('Error fetching your permission requests');
     }
   }

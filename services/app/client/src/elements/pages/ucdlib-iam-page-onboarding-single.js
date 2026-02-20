@@ -116,7 +116,7 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
     if ( !this.ctl.appComponent.isOnActivePage ) return;
     this.AppStateModel.showLoading();
     this.requestId = e.location.path[1];
-    const data = await this.OnboardingModel.getById(this.requestId);
+    const data = await this.OnboardingModel.get(this.requestId);
     if ( data.state == 'loaded'){
       await this._setStateProperties(data.payload);
       await this.RtModel.getTicketHistory(this.rtTicketId);
@@ -210,7 +210,7 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
    * @param {*} e
    */
   _onReconEmployeeSelect(e){
-    this.reconId = e.id;
+    this.reconId = e.payload.iamId;
   }
 
   /**
@@ -235,8 +235,6 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
       console.error(r);
       requestAnimationFrame(() => this.AppStateModel.showError(msg));
     } else {
-      this.OnboardingModel.clearIdCache(this.requestId);
-      this.OnboardingModel.clearQueryCache();
       this.AppStateModel.refresh();
       this.AppStateModel.showAlertBanner({message: 'Employee adopted', brandColor: 'farmers-market'});
     }
@@ -264,8 +262,6 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
       console.error(r);
       requestAnimationFrame(() => this.AppStateModel.showError(msg));
     } else {
-      this.OnboardingModel.clearIdCache(this.requestId);
-      this.OnboardingModel.clearQueryCache();
       this.AppStateModel.setLocation('/onboarding');
       this.AppStateModel.showAlertBanner({message: 'Onboarding request reconciled', brandColor: 'farmers-market'});
     }
@@ -301,7 +297,6 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
   async _onSendBackgroundCheck(){
     const modal = this.querySelector('#obs-background-check');
     modal.hide();
-    console.log(this.backgroundCheck);
     this.AppStateModel.showLoading();
     const r = await this.OnboardingModel.sendBackgroundCheckNotification(this.requestId, this.backgroundCheck);
     if ( r.state == 'error' ){
@@ -310,8 +305,6 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
       console.error(r);
       requestAnimationFrame(() => this.AppStateModel.showError(msg));
     } else {
-      this.OnboardingModel.clearIdCache(this.requestId);
-      this.OnboardingModel.clearQueryCache();
       this.AppStateModel.refresh();
       this.AppStateModel.showAlertBanner({message: 'Background check notification sent', brandColor: 'farmers-market'});
     }

@@ -8,19 +8,26 @@ class OrgchartService extends BaseService {
     this.store = OrgchartStore;
   }
 
-  orgPush(payload){
-    return this.request({
-      url : '/api/orgchart',
-      fetchOptions : {
-        method : 'POST',
-        body : payload
-      },
-      json: true,
-      onLoading : request => this.store.getOrgchartLoading(request),
-      checkCached : () => this.store.data.orgchart,
-      onLoad : result => this.store.getOrgchartLoaded(result.body),
-      onError : e => this.store.getOrgchartError(e)
-    });
+  async create(data) {
+    const id = (new Date()).toISOString();
+    const store = this.store.data.create;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `/api/orgchart`,
+        json: true,
+        fetchOptions: { 
+          method: 'POST',
+          body: data
+        },
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+    return store.get(id);
   }
 
 }

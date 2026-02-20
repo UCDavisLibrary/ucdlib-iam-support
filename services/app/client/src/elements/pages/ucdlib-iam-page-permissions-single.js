@@ -128,7 +128,7 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
   async getRequiredPageData(){
     const promises = [];
     if ( this.formType == 'onboarding' ){
-      promises.push(this.OnboardingModel.getById(this.associatedObjectId));
+      promises.push( this.getOnboardingRecord() );
       promises.push( this.getPermissionRecord() );
       promises.push(this.AlmaUserModel.getAlmaUserRoleType());
     } else if ( this.formType == 'update' ){
@@ -142,6 +142,26 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
       }
     }
     await Promise.allSettled(promises);
+  }
+
+  async getOnboardingRecord(){
+    const r = await this.OnboardingModel.get(this.associatedObjectId)
+    if ( r.state === 'loaded' ){
+      this.associatedObject = r.payload;
+      this.firstName = r.payload.additionalData.employeeFirstName || '';
+      this.lastName = r.payload.additionalData.employeeLastName || '';
+      this.rtTicketId = r.payload.rtTicketId || '';
+      this.iamId = r.payload.iamId || '';
+      const title = this.formTypes[this.formType].title.replace(':name', `${this.firstName} ${this.lastName}`);
+      this.AppStateModel.setTitle({text: title, show: true});
+      this.setBreadcrumbs();
+    } else if (r.state === 'error' ){
+      let msg = 'Unable to retrieve onboarding request';
+      if ( r.error && r.error.payload && r.error.payload.message ) msg = r.error.payload.message;
+      setTimeout(() => {
+        this.AppStateModel.showError(msg);
+      }, 10);
+    }
   }
 
   /**
@@ -205,31 +225,6 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
     }
   }
 
-  /**
-   * @description Attached to OnboardingModel ONBOARDING_SUBMISSION_REQUEST event.
-   * Fires when onboarding request is retrieved, even if cached
-   * @param {*} e - cork-app-utils event
-   * @returns
-   */
-  _onOnboardingSubmissionRequest(e){
-    if ( !this.isActive ) return;
-    if ( e.state === 'loaded' ){
-      this.associatedObject = e.payload;
-      this.firstName = e.payload.additionalData.employeeFirstName || '';
-      this.lastName = e.payload.additionalData.employeeLastName || '';
-      this.rtTicketId = e.payload.rtTicketId || '';
-      this.iamId = e.payload.iamId || '';
-      const title = this.formTypes[this.formType].title.replace(':name', `${this.firstName} ${this.lastName}`);
-      this.AppStateModel.setTitle({text: title, show: true});
-      this.setBreadcrumbs();
-    } else if (e.state === 'error' ){
-      let msg = 'Unable to retrieve onboarding request';
-      if ( e.error && e.error.payload && e.error.payload.message ) msg = e.error.payload.message;
-      setTimeout(() => {
-        this.AppStateModel.showError(msg);
-      }, 10);
-    }
-  }
 
   /**
    * @description Determines if an application should be hidden from the form
@@ -255,7 +250,6 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
       breadcrumbs.push(this.AppStateModel.store.breadcrumbs.permissions);
       breadcrumbs.push({text: 'Update', link: ''});
     }
-
     this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs});
   }
 
@@ -314,42 +308,30 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
    * @description Attached to submit event on main form
    * @param {*} e - Submit event
    */
-  _onSubmit(e){
+  async _onSubmit(e){
     e.preventDefault();
     if ( this.submitting ) return;
     this.setPayload();
-    this.PermissionsModel.newSubmission(this.payload);
-  }
+    this.submitting = true;
+    this.AppStateModel.showLoading();
+    const r = await this.PermissionsModel.create(this.payload);
 
-  /**
-   * @description Attached PermissionsModel PERMISSIONS_SUBMISSION event
-   * @param {Object} e - cork-app-utils event
-   */
-  _onPermissionsSubmission(e){
-    if ( e.state == 'loading' ){
-      this.submitting = true;
-      this.AppStateModel.showLoading();
-    } else if ( e.state == 'loaded' ){
+    if ( r.state == 'loaded' ){
       this.submitting = false;
       if ( this.formType === 'onboarding' ){
-        this.OnboardingModel.clearIdCache(this.associatedObjectId);
-        this.OnboardingModel.clearQueryCache();
-        this.PermissionsModel.clearIdCache(this.associatedObjectId, 'onboarding');
         this.AppStateModel.setLocation(`/onboarding/${this.associatedObjectId}`);
       } else if ( this.formType === 'update' ){
-        this.PermissionsModel.clearIdCache(this.associatedObjectId, 'update');
-        this.PermissionsModel.clearOwnUpdateListCache();
         this.AppStateModel.setLocation(`/permissions`);
       }
       this.AppStateModel.showAlertBanner({message: 'Permissions request submitted', brandColor: 'farmers-market'});
       this.setDefaultForm();
 
-    } else if ( e.state == 'error' ){
+    } else if ( r.state == 'error' ){
       this.submitting = false;
-      console.error(e);
+      console.error(r);
       let msg = '';
-      if ( e.error.details && e.error.details.message ){
-        msg =  e.error.details.message;
+      if ( r.error.details && r.error.details.message ){
+        msg =  r.error.details.message;
       }
       this.AppStateModel.showError(msg);
     }

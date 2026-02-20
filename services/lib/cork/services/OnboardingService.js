@@ -1,6 +1,9 @@
 import BaseService from './BaseService.js';
 import OnboardingStore from '../stores/OnboardingStore.js';
 
+import { digest } from '@ucd-lib/cork-app-utils';
+import payload from '../utils/payload.js';
+
 class OnboardingService extends BaseService {
 
   constructor() {
@@ -8,89 +11,153 @@ class OnboardingService extends BaseService {
     this.store = OnboardingStore;
   }
 
-  newSubmission(timestamp, payload) {
-    return this.request({
-      url : '/api/onboarding/new',
-      fetchOptions : {
-        method : 'POST',
-        body : payload
-      },
-      json: true,
-      onLoading : request => this.store.postNewLoading(request, timestamp, payload),
-      onLoad : result => this.store.postNewLoaded(result.body, timestamp),
-      onError : e => this.store.postNewError(e, timestamp, payload)
-    });
+  get baseUrl(){
+    return `/api/onboarding`;
   }
 
-  reconcile(onboardingId, iamId){
-    return this.request({
-      url : '/api/onboarding/reconcile',
-      fetchOptions : {
-        method : 'POST',
-        body : {onboardingId, iamId}
-      },
-      json: true,
-      onLoading : request => this.store.reconciliationLoading(request, onboardingId),
-      onLoad : result => this.store.reconciliationLoaded(result.body, onboardingId),
-      onError : e => this.store.reconciliationError(e, onboardingId)
-    });
+  async create(data) {
+    const id = (new Date()).toISOString();
+    const store = this.store.data.create;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/new`,
+        json: true,
+        fetchOptions: { 
+          method: 'POST',
+          body: data
+        },
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+    return store.get(id);
   }
 
-  backgroundCheck(onboardingId, payload){
-    return this.request({
-      url : `/api/onboarding/${onboardingId}/background-check-notification`,
-      fetchOptions : {
-        method : 'POST',
-        body : payload
-      },
-      json: true,
-      onLoading : request => this.store.backgroundCheckLoading(request, onboardingId),
-      onLoad : result => this.store.backgroundCheckLoaded(result.body, onboardingId),
-      onError : e => this.store.backgroundCheckError(e, onboardingId)
-    });
+  async reconcile(onboardingId, iamId) {
+    const store = this.store.data.reconciliation;
+    const id = onboardingId;
+    
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/reconcile`,
+        json: true,
+        fetchOptions: { 
+          method: 'POST',
+          body: { onboardingId, iamId }
+        },
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+    return store.get(id);
   }
 
-  adoptEmployee(onboardingId) {
-    return this.request({
-      url : `/api/onboarding/${onboardingId}/adopt`,
-      fetchOptions : {
-        method : 'POST'
-      },
-      json: true,
-      onLoading : request => this.store.adoptionLoading(request, onboardingId),
-      onLoad : result => this.store.adoptionLoaded(result.body, onboardingId),
-      onError : e => this.store.adoptionError(e, onboardingId)
-    });
+  async backgroundCheck(id, data) {
+    const store = this.store.data.backgroundCheck;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/${id}/background-check-notification`,
+        json: true,
+        fetchOptions: { 
+          method: 'POST',
+          body: data
+        },
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+    return store.get(id);
   }
 
-  getById(id){
-    return this.request({
-      url : '/api/onboarding/' + id,
-      checkCached: () => this.store.data.byId[id],
-      onLoading : request => this.store.byIdLoading(request, id),
-      onLoad : result => this.store.byIdLoaded(result.body, id),
-      onError : e => this.store.byIdError(e, id)
-    });
+  async adoptEmployee(id) {
+    const store = this.store.data.adopt;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/${id}/adopt`,
+        json: true,
+        fetchOptions: { 
+          method: 'POST'
+        },
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+    return store.get(id);
   }
 
-  recordSearch(q){
-    return this.request({
-      url : `/api/onboarding/search?${q}`,
-      // checkCached: () => this.store.data.byRecord[q],
-      onLoading : request => this.store.byRecordLoading(request, q),
-      onLoad : result => this.store.byRecordLoaded(result.body, q),
-      onError : e => this.store.byRecordError(e, q)
-    });
+  async get(onboardingId){
+    const ido = { entityId: onboardingId };
+    const id = payload.getKey(ido);
+    const store = this.store.data.get;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/${onboardingId}`,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          payload.generate(ido, resp),
+          store
+        )
+      })
+    );
+
+    return store.get(id);
   }
 
-  query(id){
-    return this.request({
-      url : `/api/onboarding${id != 'all' ? '?' + id: ''}`,
-      checkCached: () => this.store.data.byQuery[id],
-      onLoading : request => this.store.byQueryLoading(request, id),
-      onLoad : result => this.store.byQueryLoaded(result.body, id),
-      onError : e => this.store.byQueryError(e, id)
-    });
+  async queryByName(query){
+    const id = await digest(query);
+    const store = this.store.data.byName;
+    
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/search`,
+        qs: query,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+    return store.get(id);
+  }
+
+  async query(query){
+    if ( !query.limit ) query.limit = 25;
+    let id = await digest(query);
+    const store = this.store.data.query;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}`,
+        qs: query,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+
+    return store.get(id);
   }
 
 

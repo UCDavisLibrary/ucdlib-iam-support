@@ -315,31 +315,22 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
    * @description Attached to submit event on onboarding form
    * @param {*} e - Submit event
    */
-  _onSubmit(e){
+  async _onSubmit(e){
     e.preventDefault();
-    this.OnboardingModel.newSubmission(this.payload());
-  }
-
-  /**
-   * @description Attached to Onboarding Model NEW_ONBOARDING_SUBMISSION event
-   * @param {Object} e
-   */
-  _onNewOnboardingSubmission(e){
-    if ( e.state === this.OnboardingModel.store.STATE.LOADING ){
-      this.AppStateModel.showLoading();
-    } else if ( e.state === this.OnboardingModel.store.STATE.LOADED ){
+    this.AppStateModel.showLoading();
+    const r = await this.OnboardingModel.create(this.payload());
+    if ( r.state === 'loaded' ){
       this._resetEmployeeStateProps();
       this._resetLookupForms();
-      this.OnboardingModel.clearQueryCache();
       this.AppStateModel.setLocation(`/onboarding`);
       this.AppStateModel.showAlertBanner({message: 'Onboarding request created', brandColor: 'farmers-market'});
-    } else if ( e.state === this.OnboardingModel.store.STATE.ERROR ) {
+    } else if ( r.state === 'error' ){ 
       this._resetEmployeeStateProps();
       this._resetLookupForms();
-      console.error(e);
+      console.error(r);
       let msg = '';
-      if ( e.error.details && e.error.details.message ){
-        msg =  e.error.details.message;
+      if ( r.error.details && r.error.details.message ){
+        msg =  r.error.details.message;
       }
       this.AppStateModel.showError(msg);
     }

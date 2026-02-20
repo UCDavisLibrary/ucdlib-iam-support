@@ -200,7 +200,7 @@ ${singleRoots.map(n => ` ${n.fullName}`)}`;
         this.AppStateModel.showAlertBanner({message: multipleNodeErrorMessage, brandColor: 'double-decker'});
         return;
       }
-      let res = await this.OrgchartModel.orgPush(this.csvData);
+      let res = await this.OrgchartModel.create(this.csvData);
       
       if(res.error) {
         this.AppStateModel.showAlertBanner({message: serverErrorMessage, brandColor: 'double-decker'});

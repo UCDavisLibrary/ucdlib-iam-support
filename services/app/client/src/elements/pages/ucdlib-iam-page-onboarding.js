@@ -48,10 +48,11 @@ export default class UcdlibIamPageOnboarding extends Mixin(LitElement)
   }
 
   /**
-   * @description Attached to OnboardingModel onboarding-query event
+   * @description Attached to OnboardingModel onboarding-query-update event
    * @param {Object} e cork-app-utils event
    */
-  _onOnboardingQuery(e){
+  _onOnboardingQueryUpdate(e){
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
     if ( e.state === 'error'){
       let msg = 'Unable to load onboarding requests';
       if ( e.error.details && e.error.details.message ){
@@ -100,7 +101,7 @@ export default class UcdlibIamPageOnboarding extends Mixin(LitElement)
       promises.push(activeListEle.doQuery());
       promises.push(recentEle.doQuery());
     }
-    if ( this.userIamId ) promises.push(supervisorEle.doQuery(false, {supervisorId: this.userIamId}));
+    if ( this.userIamId ) promises.push(supervisorEle.doQuery({supervisorId: this.userIamId}));
     await new Promise(resolve => {requestAnimationFrame(resolve);});
   }
 

@@ -63,16 +63,6 @@ export default class UcdlibIamOnboardingList extends Mixin(LitElement)
   }
 
   /**
-   * @description Attached to OnboardingModel onboarding-query event
-   * @param {Object} e cork-app-utils event
-   */
-  _onOnboardingQuery(e){
-    if ( e.state === 'loaded' && e.queryId === this.OnboardingModel.makeQueryString(this._query)){
-      this._records = e.payload;
-    }
-  }
-
-  /**
    * @description Lit lifecycle method
    * @param {*} props - Changed properties
    */
@@ -90,11 +80,11 @@ export default class UcdlibIamOnboardingList extends Mixin(LitElement)
 
   /**
    * @description Retrieves onboarding requesting based on element attributes, updates view.
-   * @param {Boolean} ignoreCache - Will not use cache if it exists.
    * @param {query} query - Manually set query instead of doing
    */
-  async doQuery(ignoreCache, query){
+  async doQuery(query){
     let q = {};
+
     if ( query ) {
       q = query;
     } else {
@@ -106,11 +96,13 @@ export default class UcdlibIamOnboardingList extends Mixin(LitElement)
       }
     }
     this._query = q;
+    const r = await this.OnboardingModel.query(q);
 
-    if ( ignoreCache ){
-      this.OnboardingModel.clearQueryCache(q);
+    if ( r?.state === 'loaded' ) {
+      this._records = r.payload;
     }
-    return await this.OnboardingModel.query(q);
+
+    return r;
   }
 
   /**

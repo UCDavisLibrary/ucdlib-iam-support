@@ -102,6 +102,7 @@ class PermissionsRequests{
         ) AND
         p.revision IN (SELECT max(revision) From permissions_requests WHERE ${idField} = p.${idField})
       ORDER BY p.submitted DESC
+      LIMIT 25
     `;
     return pg.query(text, [submitter]);
   }

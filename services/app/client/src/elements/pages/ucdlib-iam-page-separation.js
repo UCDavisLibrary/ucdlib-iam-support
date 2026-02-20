@@ -65,6 +65,7 @@ export default class UcdlibIamPageSeparation extends Mixin(LitElement)
    * @param {Object} e cork-app-utils event
    */
   _onSeparationQueryUpdate(e){
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
     if ( e.state === 'error'){
       let msg = 'Unable to load separation requests';
       if ( e.error.details && e.error.details.message ){

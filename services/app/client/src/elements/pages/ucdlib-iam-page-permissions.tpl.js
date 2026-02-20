@@ -61,7 +61,7 @@ export function renderHome(){
       </div>
     </div>
     <div ?hidden=${!this.userPermissionRequests.length}>
-    <h2 class='heading--underline'>Your Previous Requests</h2>
+    <h2 class='heading--underline'>Your Recent Requests</h2>
     <div class='update-list'>
       <div class='update-list-header'>
         <div class='update-list-name'>Employee Name</div>

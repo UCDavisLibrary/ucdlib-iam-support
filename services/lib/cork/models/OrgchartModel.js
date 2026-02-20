@@ -18,21 +18,9 @@ class OrgchartModel extends BaseModel {
     this.register('OrgchartModel');
   }
 
-  /**
-   * @description SFTP Posts the data
-   * @returns {Array}
-   */
-     async orgPush(payload){
-      let state = this.store.data.orgchart;
-      try {
-        if ( state.state === 'loading' ){
-          await state.request
-        } else {
-          await this.service.orgPush(payload);
-        }
-      } catch(e) {}
-      return this.store.data.orgchart;
-    }
+  create(data) {
+    return this.service.create(data);
+  }
 
 }
 
