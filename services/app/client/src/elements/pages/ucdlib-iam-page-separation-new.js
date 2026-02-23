@@ -181,8 +181,6 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
    * @param {Object} e
    */
   async _setPage(e){
-    this.AppStateModel.showLoading();
-    await this._getRequiredPageData(e.location.hash);
     this.ctl.appComponent.showPage();
     if ( ['submission'].includes(e.location.hash) ){
       this.page = 'sp-' + e.location.hash;
@@ -223,19 +221,6 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
       }
       this.AppStateModel.showError(msg);
     }
-  }
-
-
-  /**
-   * @description Do data retrieval required to display a subpage
-   * @param {String} hash - url hash representing the subpage
-   */
-  async _getRequiredPageData(hash){
-    const promises = [];
-    if ( hash === 'submission' ){
-      promises.push(this.GroupModel.getAll());
-    }
-    await Promise.all(promises);
   }
 
   /**

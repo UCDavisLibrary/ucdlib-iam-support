@@ -89,7 +89,7 @@ export default class UcdlibIamPagePermissions extends Mixin(LitElement)
     // get any needed data
     const promises = [];
     if ( this.page == 'report' ){
-      promises.push(this.EmployeeModel.getDirectReports());
+      promises.push(this.getDirectReports());
     } else if ( this.page == 'home' ){
       promises.push(this.getOwnPermissionRequests());
     }
@@ -98,6 +98,15 @@ export default class UcdlibIamPagePermissions extends Mixin(LitElement)
 
     this.setBreadcrumbs();
     this.ctl.appComponent.showPage();
+  }
+
+  async getDirectReports(){
+    const r = await this.EmployeeModel.getDirectReports();
+    if ( r.state === 'loaded' ){
+      this.reports = r.payload;
+    } else if ( r.state === 'error' ){
+      this.AppStateModel.showError('Error fetching direct reports');
+    }
   }
 
   async getOwnPermissionRequests(){
@@ -126,18 +135,6 @@ export default class UcdlibIamPagePermissions extends Mixin(LitElement)
     }
 
     this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs});
-  }
-
-  /**
-   * @description Bound to EmployeeModel direct-reports-fetched event
-   * @param {Object} e - cork-app-utils update event
-   */
-  _onDirectReportsFetched(e){
-    if ( e.state === 'loaded' ){
-      this.reports = e.payload;
-    } else if ( e.state === 'error' ){
-      this.AppStateModel.showError('Error fetching direct reports');
-    }
   }
 
   /**

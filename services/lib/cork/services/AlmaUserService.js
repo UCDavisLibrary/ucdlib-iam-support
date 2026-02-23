@@ -1,6 +1,8 @@
 import BaseService from './BaseService.js';
 import AlmaUserStore from '../stores/AlmaUserStore.js';
 
+import payload from '../utils/payload.js';
+
 class AlmaUserService extends BaseService {
 
   constructor() {
@@ -8,65 +10,66 @@ class AlmaUserService extends BaseService {
     this.store = AlmaUserStore;
   }
 
-  getAlmaUserRoleType(){
-    return this.request({
-      url : `/api${this.store.searchParams.roleType.endpoint}`,
-      onLoading : request => this.store.getAlmaUserRoleTypeLoading(request),
-      checkCached : () => this.store.data.roleType,
-      onLoad : result => this.store.getAlmaUserRoleTypeLoaded(result.body),
-      onError : e => this.store.getAlmaUserRoleTypeError(e)
-    });
+  get baseUrl(){
+    return `/api/alma`;
   }
 
-  getAlmaUserById(id, idType, event) {
-    const url = `/api${this.store.searchParams[idType].endpoint}/${id}`;
-    return this.request({
-      url : `${url}`,
-      onLoading : request => this.store.getAlmaUserByIdLoading(id, idType, request, event),
-      checkCached : () => this.store.data[idType][id],
-      onLoad : result => this.store.getAlmaUserByIdLoaded(id, idType, result.body, event),
-      onError : e => this.store.getAlmaUserByIdError(id, idType, e, event)
-    });
+  async getUserById(id){
+    const store = this.store.data.getUserById;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/users/${id}`,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+
+    return store.get(id);
   }
 
-  getAlmaUserByIds(ids, event) {
-    const url = `/api${this.store.searchParams[bulk].endpoint}`;
-    const params = new URLSearchParams();
-    params.set('ids', ids);
-    return this.request({
-      url : `${url}?${params.toString()}`,
-      onLoading : request => this.store.getAlmaUserByIdsLoading(ids, request, event),
-      checkCached : () => this.store.data.bulk[ids],
-      onLoad : result => this.store.getAlmaUserByIdsLoaded(ids, result.body, event),
-      onError : e => this.store.getAlmaUserByIdsError(ids, e, event)
-    });
+  async queryUserByName(lastName, firstName){
+    const store = this.store.data.queryUserByName;
+    const ido = { lastName, firstName };
+    const id = payload.getKey(ido);
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/users/search`,
+        qs: ido,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          payload.generate(ido, resp),
+          store
+        )
+      })
+    );
+
+    return store.get(id);
   }
 
+  async getRoleTypes(){
+    const store = this.store.data.getRoleTypes;
+    const id = 'roleTypes';
 
-  getAlmaUserByName(last, first){
-    const url = this.store.searchParams.name.endpoint;
-    const params = this._makeNameQuery(last, first);
-    return this.request({
-      url : `/api${url}?${decodeURIComponent(params.toString())}`,
-      onLoading : request => this.store.getAlmaUserByNameLoading(params, request),
-      //checkCached : () => this.store.data.name[params.toString()],
-      onLoad : result => this.store.getAlmaUserByNameLoaded(params, result.body),
-      onError : e => this.store.getAlmaUserByNameError(params, e)
-    });
-  }
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/roleTypes`,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
 
-  _makeNameQuery(last, first){
-    let params = new URLSearchParams();
-    let k = '';
-    ['last', 'first'].forEach(n => {
-      const v = eval(n);
-      if ( v ){
-        k += n + 'Name=' + v + '&';
-      }
-    })
-    params = k;
-    // params.set("", k);
-    return params;
+    return store.get(id);
   }
 
 }

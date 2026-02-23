@@ -4,6 +4,8 @@ import "../components/ucdlib-iam-modal.js";
 import AlmaTransform from "#lib/utils/AlmaTransform.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
+import { AppComponentController } from '#controllers';
+
 /**
  * @description Component element for querying the UC Davis Alma API
  *
@@ -61,6 +63,10 @@ export default class UcdlibIamAlma extends Mixin(LitElement)
     this.renderAlmaIdForm = Templates.renderAlmaIdForm.bind(this);
     this.renderNameForm = Templates.renderNameForm.bind(this);
 
+    this.ctl = {
+      appComponent : new AppComponentController(this),
+    }
+
     this._injectModel('AppStateModel', 'AlmaUserModel');
     this.roles = [];
     this.page = 'alma-home';
@@ -95,6 +101,11 @@ export default class UcdlibIamAlma extends Mixin(LitElement)
     this._resetEmployeeStateProps();
 
     this.reset();
+  }
+
+  _onAppStateUpdate() {
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
+    this.getRoleTypes();
   }
 
   /**
@@ -268,13 +279,12 @@ export default class UcdlibIamAlma extends Mixin(LitElement)
     const selectedParam = this.searchParams.find(({ attribute }) => attribute === this.searchParam);
     let r;
     if ( selectedParam.key === 'name' ){
-      r = await this.AlmaUserModel.getAlmaUserByName(this.lastName, this.firstName);
+      r = await this.AlmaUserModel.queryUserByName(this.lastName, this.firstName);
     } else if (selectedParam.key === 'almaId') {
-      r = await this.AlmaUserModel.getAlmaUserById(this[selectedParam.key], selectedParam.key);
+      r = await this.AlmaUserModel.getUserById(this[selectedParam.key]);
     }// } else {
     //   r = await this.AlmaUserModel.getAlmaUserRoleType();
     // }
-    let allRoles = await this.AlmaUserModel.getAlmaUserRoleType();
 
     if ( r.state === this.AlmaUserModel.store.STATE.LOADED ) {
       if ('user' in r.payload) {
@@ -287,7 +297,6 @@ export default class UcdlibIamAlma extends Mixin(LitElement)
 
       this.isFetching = false;
       this.results = Array.isArray(r) ? r : [r];
-      this.roles = allRoles.payload.row;
       if ( !this.hideResults ){
         this.page = 'results';
       }
@@ -307,9 +316,10 @@ export default class UcdlibIamAlma extends Mixin(LitElement)
 
   }
 
-  _onRoletypeUpdate(e){
-    if ( e.state == 'loaded'){
-      this.roles = e.payload.row;
+  async getRoleTypes(){
+    const r = await this.AlmaUserModel.getRoleTypes();
+    if ( r.state === 'loaded' ){
+      this.roles = r.payload.row;
     }
   }
 
@@ -339,7 +349,7 @@ export default class UcdlibIamAlma extends Mixin(LitElement)
     this.isFetching = true;
 
     this.selectedAlmaId = id;
-    const r = await this.AlmaUserModel.getAlmaUserById(id, 'almaId', 'select');
+    const r = await this.AlmaUserModel.getUserById(id);
 
     if( r.state === this.AlmaUserModel.store.STATE.LOADED ) {
       this.isFetching = false;

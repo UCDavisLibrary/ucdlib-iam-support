@@ -5,7 +5,7 @@ AlmaModel.init(config.alma);
 
 export default (api) => {
 
-  api.get('/users', async (req, res) => {
+  api.get('/alma/users', async (req, res) => {
 
     if ( !req.auth.token.canQueryUcdIam ){
       res.status(403).json({
@@ -20,7 +20,7 @@ export default (api) => {
 
   });
 
-  api.get('/users/search', async (req, res) => {
+  api.get('/alma/users/search', async (req, res) => {
 
     if ( !req.auth.token.canQueryUcdIam ){
       res.status(403).json({
@@ -40,7 +40,7 @@ export default (api) => {
 
     // query for a people by bulk
   // returns a set of records
-  api.get('/users/bulksearch', async (req, res) => {
+  api.get('/alma/users/bulksearch', async (req, res) => {
 
     if ( !req.auth.token.canQueryUcdIam ){
       res.status(403).json({
@@ -75,7 +75,7 @@ export default (api) => {
 
   // query for a person by a unique identifier
   // returns a single record if successful
-  api.get('/users/:id', async (req, res) => {
+  api.get('/alma/users/:id', async (req, res) => {
 
     if ( !req.auth.token.canQueryUcdIam ){
       res.status(403).json({
@@ -92,7 +92,7 @@ export default (api) => {
 
   });
 
-  api.get('/roleTypes', async (req, res) => {
+  api.get('/alma/roleTypes', async (req, res) => {
 
     if ( !req.auth.token.canQueryUcdIam ){
       res.status(403).json({

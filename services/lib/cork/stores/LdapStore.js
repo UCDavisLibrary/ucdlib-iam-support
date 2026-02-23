@@ -1,4 +1,4 @@
-import {BaseStore} from '@ucd-lib/cork-app-utils';
+import { BaseStore, LruStore } from '@ucd-lib/cork-app-utils';
 
 class LdapStore extends BaseStore {
 
@@ -6,38 +6,9 @@ class LdapStore extends BaseStore {
     super();
 
     this.data = {
-      ldap:{}
+      query: new LruStore({ name: 'ldap.query' })
     };
-    this.events = {
-      LDAP_FETCHED: 'ldap-fetched'
-    };
-  }
-
-  getLdapDataLoading(query, request){
-    this._setLdapDataState({
-      state : this.STATE.LOADING,
-      request, query
-    })
-  }
-
-  getLdapDataLoaded(query, payload){
-    this._setLdapDataState({
-      state : this.STATE.LOADED,
-      payload, query
-    })
-  }
-
-  getLdapDataError(query, error){
-    this._setLdapDataState({
-      state : this.STATE.ERROR,
-      error, query
-    })
-  }
-
-  _setLdapDataState(state){
-    let name = state.query.iamId;
-    this.data.ldap[name] = state;
-    this.emit(this.events.LDAP_FETCHED, state);
+    this.events = {};
   }
 
 }

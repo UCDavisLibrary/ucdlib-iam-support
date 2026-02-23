@@ -1,6 +1,8 @@
 import BaseService from './BaseService.js';
 import LdapStore from '../stores/LdapStore.js';
 
+import { digest } from '@ucd-lib/cork-app-utils';
+
 class LdapService extends BaseService {
 
   constructor() {
@@ -8,19 +10,29 @@ class LdapService extends BaseService {
     this.store = LdapStore;
   }
 
-  getLdapData(query){
-    let iamid = query.iamId;
-    const params = new URLSearchParams(query).toString();
-
-    return this.request({
-      url: `/api/ldap?${params}`,
-      checkCached: () => this.store.data.ldap[iamid],
-      onLoading : request => this.store.getLdapDataLoading(query, request),
-      onLoad : result => this.store.getLdapDataLoaded(query, result.body),
-      onError : e => this.store.getLdapDataError(query, e)
-    });
+  get baseUrl(){
+    return `/api/ldap`;
   }
-  
+
+  async query(query){
+    let id = await digest(query);
+    const store = this.store.data.query;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}`,
+        qs: query,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+
+    return store.get(id);
+  }
 
 }
 

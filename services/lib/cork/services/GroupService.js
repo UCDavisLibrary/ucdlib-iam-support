@@ -8,54 +8,88 @@ class GroupService extends BaseService {
     this.store = GroupStore;
   }
 
-  getGroups(){
-    return this.request({
-      url : '/api/groups',
-      onLoading : request => this.store.getGroupsLoading(request),
-      checkCached : () => this.store.data.groups,
-      onLoad : result => this.store.getGroupsLoaded(result.body),
-      onError : e => this.store.getGroupsError(e)
-    });
+  get baseUrl(){
+    return `/api/groups`;
   }
 
-  getById(id){
-    return this.request({
-      url : `/api/groups/${id}`,
-      onLoading : request => this.store.getByIdLoading(id, request),
-      checkCached : () => this.store.data.groupById,
-      onLoad : result => this.store.getByIdLoaded(id, result.body),
-      onError : e => this.store.getByIdError(id, e)
-    });
+  async list(){
+    const store = this.store.data.list;
+    const id = 'list';
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}`,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+
+    return store.get(id);
   }
 
-  setGroupHead(id, payload){
-    return this.request({
-      url : `/api/groups/sethead/${id}`,
-      fetchOptions : {
-        method : 'POST',
-        body : payload
-      },
-      json: true,
-      onLoading : request => this.store.setGroupHeadLoading(request, id),
-      checkCached : () => this.store.data.setGroupHead,
-      onLoad : result => this.store.setGroupHeadLoaded(result.body, id),
-      onError : e => this.store.setGroupHeadError(e, id)
-    });
+  async get(id){
+    const store = this.store.data.get;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/${id}`,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+
+    return store.get(id);
   }
 
-  removeGroupHead(id, payload){
-    return this.request({
-      url : `/api/groups/removehead/${id}`,
-      fetchOptions : {
-        method : 'POST',
-        body : payload
-      },
-      json: true,
-      onLoading : request => this.store.removeGroupHeadLoading(request, id),
-      checkCached : () => this.store.data.removeGroupHead,
-      onLoad : result => this.store.removeGroupHeadLoaded(result.body, id),
-      onError : e => this.store.removeGroupHeadError(e, id)
-    });
+  async setHead(id, payload){
+    const store = this.store.data.setHead;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/sethead/${id}`,
+        fetchOptions : {
+          method : 'POST',
+          body : payload
+        },
+        json: true,
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+
+    return store.get(id);
+  }
+
+  async removeHead(id){
+    const store = this.store.data.removeHead;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.baseUrl}/removehead/${id}`,
+        fetchOptions : {
+          method : 'POST'
+        },
+        json: true,
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+
+    return store.get(id);
   }
 
 }

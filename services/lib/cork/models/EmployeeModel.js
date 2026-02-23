@@ -2,6 +2,8 @@ import {BaseModel} from '@ucd-lib/cork-app-utils';
 import EmployeeService from '../services/EmployeeService.js';
 import EmployeeStore from '../stores/EmployeeStore.js';
 
+import clearCache from '../utils/clearCache.js';
+
 /**
  * @class EmployeeModel
  * @description Centralized state management for library employee data retrieved from local db via api.
@@ -19,18 +21,9 @@ class EmployeeModel extends BaseModel {
 
   /**
    * @description Returns all direct reports for the current user
-   * @returns {Array}
    */
-  async getDirectReports(){
-    let state = this.store.data.directReports;
-    try {
-      if ( state && state.state === 'loading' ){
-        await state.request
-      } else {
-        await this.service.getDirectReports();
-      }
-    } catch(e) {}
-    return this.store.data.directReports;
+  getDirectReports(){
+    return this.service.getDirectReports();
   }
 
   /**
@@ -38,114 +31,69 @@ class EmployeeModel extends BaseModel {
    * @param {String} name
    * @returns {Object} {total, results}
    */
-  async searchByName(name){
-    let state = this.store.data.byName[name];
-    try {
-      if ( state && state.state === 'loading' ){
-        await state.request
-      } else {
-        await this.service.searchByName(name);
-      }
-    } catch(e) {}
-    return this.store.data.byName[name];
+  searchByName(name){
+    return this.service.searchByName(name);
   }
 
-
   /**
-   * @description Search for employees by ID
+   * @description Get employee by an id
    * @param {Number} id
    * @returns {Object} {total, results}
    */
-    async searchById(id, idType='id'){
-      let state = this.store.data.byId;
-      try {
-        if ( state && state.state === 'loading' ){
-          await state.request
-        } else {
-          await this.service.searchById(id, idType);
-        }
-      } catch(e) {}
-      return this.store.data.byId;
-    }
-
- /**
-   * @description updates employee infomation
-   * @returns {Array}
-   */
-    async update(id, payload){
-      let state = this.store.data.update;
-      try {
-        if ( state.state === 'loading' ){
-          await state.request
-        } else {
-          await this.service.update(id, payload);
-        }
-      } catch(e) {}
-      return this.store.data.update;
-    }
+  get(id, idType='id'){
+    return this.service.get(id, idType);
+  }
 
   /**
-   * @description add employee from group
-   * @returns {Array}
+   * @description updates employee infomation
    */
-      async addToGroup(id, payload){
-        let state = this.store.data.addEmployeeToGroup;
-        try {
-          if ( state.state === 'loading' ){
-            await state.request
-          } else {
-            await this.service.addToGroup(id, payload);
-          }
-        } catch(e) {}
-        return this.store.data.addEmployeeToGroup;
-      }
+  async update(id, payload){
+    const res = await this.service.update(id, payload);
+    if ( res.state === 'loaded' ) {
+      clearCache();
+    }
+    return res;
+  }
+
+  /**
+   * @description add employee to group
+   */
+  
+  async addToGroup(id, payload){
+    const res = await this.service.addToGroup(id, payload);
+    if ( res.state === 'loaded' ) {
+      clearCache();
+    }
+    return res;
+  }
 
   /**
    * @description remove employee from group
-   * @returns {Array}
    */
-     async removeFromGroup(id, payload){
-      let state = this.store.data.removeEmployeeFromGroup;
-      try {
-        if ( state.state === 'loading' ){
-          await state.request
-        } else {
-          await this.service.removeFromGroup(id, payload);
-        }
-      } catch(e) {}
-      return this.store.data.removeEmployeeFromGroup;
+  async removeFromGroup(id, payload){
+    const res = await this.service.removeFromGroup(id, payload);
+    if ( res.state === 'loaded' ) {
+      clearCache();
     }
+    return res;
+  }
 
   /**
    * @description List the employee's active record discrepancy notifications
    * @returns {Array}
    */
-    getActiveDiscrepancy(id){
-      return this.service.getActiveDiscrepancy(id);
-    }
-
-  /**
-   * @description remove employee's active record discrepancy notification
-   * @returns {Array}
-   */
-  async removeActiveDiscrepancy(id, discrepanciesList){
-    const r = await this.service.removeActiveDiscrepancy(id, discrepanciesList);
-    if ( r.state === 'loaded' ) {
-      this.clearDiscrepancyCache(id);
-    }
-    return r;
+  getActiveDiscrepancy(id){
+    return this.service.getActiveDiscrepancy(id);
   }
 
-  /**
-   * @description Clears cache for discrepancies.
-   */
-  clearDiscrepancyCache(id){
-    if (id) {
-      this.store.data.activeDiscrepancies.cache.delete(id);
-      return;
+  async dismissDiscrepancies(id, discrepanciesList){
+    const res = await this.service.dismissDiscrepancies(id, discrepanciesList);
+    if ( res.state === 'loaded' ) {
+      clearCache();
     }
-    this.store.data.activeDiscrepancies = {};
+    return res;
   }
+
 }
 
 const model = new EmployeeModel();

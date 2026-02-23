@@ -76,12 +76,12 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
 
     this._injectModel(
       'AppStateModel', 'OnboardingModel', 'PermissionsModel',
-      'RtModel', 'AlmaUserModel', 'AuthModel', 'PersonModel'
+      'RtModel', 'AuthModel', 'PersonModel'
     );
   }
 
   /**
-   * @description Disables the shadowdom
+   * @description Disables` the shadowdom
    * @returns
    */
   createRenderRoot() {
@@ -130,15 +130,11 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
     if ( this.formType == 'onboarding' ){
       promises.push( this.getOnboardingRecord() );
       promises.push( this.getPermissionRecord() );
-      promises.push(this.AlmaUserModel.getAlmaUserRoleType());
     } else if ( this.formType == 'update' ){
       if ( this.associatedObjectId ){
         promises.push( this.getPermissionRecord('update') );
       } else {
         promises.push(this.getRequestedEmployee());
-      }
-      if ( this.requestedApplications.includes('alma') ){
-        promises.push(this.AlmaUserModel.getAlmaUserRoleType());
       }
     }
     await Promise.allSettled(promises);

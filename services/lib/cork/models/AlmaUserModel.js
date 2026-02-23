@@ -13,59 +13,18 @@ class AlmaUserModel extends BaseModel {
     this.register('AlmaUserModel');
   }
 
-  /**
-   * @description Returns all active groups
-   * @returns {Array}
-   */
-   async getAlmaUserRoleType(){
-    let state = this.store.data.roleType;
-    try {
-      if ( state.state === 'loading' ){
-        await state.request
-      } else {
-        await this.service.getAlmaUserRoleType();
-      }
-    } catch(e) {}
-    return this.store.data.roleType;
+  getRoleTypes(){
+    return this.service.getRoleTypes();
   }
 
-
-  async getAlmaUserById(id, idType='almaId', event='search'){
-    if ( !id ) {
-      console.warn('id is a required argument');
-    }
-    try {
-      await this.service.getAlmaUserById(id, idType, event);
-    } catch(e) {}
-    return this.store.data[idType][id];
-
+  getUserById(id){
+    return this.service.getUserById(id);
   }
 
-  async getAlmaUserByIds(ids, event='search'){
-    if ( !ids ) {
-      console.warn('id is a required argument');
-    }
-    try {
-      await this.service.getAlmaUserByIds(ids, event);
-    } catch(e) {}
-    return this.store.data.bulk[ids];
-
+  queryUserByName(last, first){
+    return this.service.queryUserByName(last, first);
   }
 
-  /**
-   * @description Searches for a users by name
-   * @param {String} last - Last Name
-   * @param {String} first - First Name
-   * @returns Array of users or error object
-   */
-   async getAlmaUserByName(last, first){
-    try {
-      await this.service.getAlmaUserByName(last, first);
-    } catch(e) {}
-    const key = this.service._makeNameQuery(last, first).toString();
-    const response = this.store.data.name[key];
-    return response
-  }
 
 }
 

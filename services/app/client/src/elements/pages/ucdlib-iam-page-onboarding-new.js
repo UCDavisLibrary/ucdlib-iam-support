@@ -281,20 +281,6 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
   }
 
   /**
-   * @description Attached to GroupModel GROUPS_FETCHED event
-   * @param {Object} e
-   */
-  _onGroupsFetched(e){
-    if ( e.state === this.GroupModel.store.STATE.LOADED ){
-      this.groups = e.payload.filter(g => !g.archived);
-      //this.departmentId = this.groups.length ? this.groups[0].id : 0;
-    } else if ( e.state === this.GroupModel.store.STATE.ERROR ) {
-      console.error('Cannot display page. Groups not loaded!');
-      this.AppStateModel.showError('Unable to load department list.');
-    }
-  }
-
-  /**
    * @description Sets subpage based on location hash
    * @param {Object} e
    */
@@ -367,9 +353,18 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
   async _getRequiredPageData(hash){
     const promises = [];
     if ( hash === 'submission' ){
-      promises.push(this.GroupModel.getAll());
+      promises.push(this.getGroups());
     }
     await Promise.all(promises);
+  }
+
+  async getGroups(){
+    const r = await this.GroupModel.list();
+    if ( r.state === 'loaded' ){
+      this.groups = r.payload.filter(g => !g.archived);
+    } else if ( r.state === 'error' ) {
+      this.AppStateModel.showError('Unable to load department list.');
+    }
   }
 
   /**

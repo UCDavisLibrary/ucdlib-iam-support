@@ -62,88 +62,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
   }
 
   /**
-   * @method _onGroupsFetched
-   * @description attached to GroupModel GROUPS_FETCHED event
-   * @param {Object} e
-   */
-  _onGroupsFetched(e){
-    if ( e.state === this.GroupModel.store.STATE.LOADED ){
-      this.groups = e.payload.filter(g => !g.archived);
-
-    } else if ( e.state === this.GroupModel.store.STATE.ERROR ) {
-      console.error('Cannot display page. Groups not loaded!');
-    }
-  }
-
-  /**
-   * @method _onUpdateEmployees
-   * @description attached to EmployeeModel UPDATE_EMPLOYEES event
-   * @param {Object} e
-   */
-  _onUpdateEmployees(e){
-    if ( e.state === this.EmployeeModel.store.STATE.LOADED ){
-      console.log("Update Finished: ",e);
-    } else if ( e.state === this.EmployeeModel.store.STATE.ERROR ) {
-      console.error('Cannot display page. Something wrong with update');
-    }
-  }
-
-  /**
-   * @method _onAddEmployeeToGroup
-   * @description attached to EmployeeModel ADD_EMPLOYEE_TO_GROUP event
-   * @param {Object} e
-   */
-  _onAddEmployeeToGroup(e){
-    if ( e.state === this.EmployeeModel.store.STATE.LOADED ){
-      console.log("Add Employee Finished: ",e);
-    } else if ( e.state === this.EmployeeModel.store.STATE.ERROR ) {
-      console.error('Cannot display page. Employee not added.');
-    }
-  }
-
-  /**
-   * @method _onRemoveEmployeeFromGroup
-   * @description attached to EmployeeModel REMOVE_EMPLOYEE_FROM_GROUP event
-   * @param {Object} e
-   */
-  _onRemoveEmployeeFromGroup(e){
-    if ( e.state === this.EmployeeModel.store.STATE.LOADED ){
-      console.log("Remove Employee Finished:",e);
-    } else if ( e.state === this.EmployeeModel.store.STATE.ERROR ) {
-      console.error('Cannot display page. Employee not removed');
-    }
-  }
-
-  /**
-   * @method _onSetGroupsHead
-   * @description attached to GroupModel SET_GROUPS_HEAD event
-   * @param {Object} e
-   */
-  _onSetGroupsHead(e){
-    if ( e.state === this.GroupModel.store.STATE.LOADED ){
-      console.log("Add Head Finished:",e);
-
-    } else if ( e.state === this.GroupModel.store.STATE.ERROR ) {
-      console.error('Cannot display page. Group Head not added.');
-    }
-  }
-
-  /**
-   * @method _onRemoveGroupsHead
-   * @description attached to GroupModel REMOVE_GROUPS_HEAD event
-   * @param {Object} e
-   */
-  _onRemoveGroupsHead(e){
-    if ( e.state === this.GroupModel.store.STATE.LOADED ){
-      console.log("Head Remove Finished:", e);
-
-    } else if ( e.state === this.GroupModel.store.STATE.ERROR ) {
-      console.error('Cannot display page. Group Head not removed.');
-    }
-  }
-
-
-  /**
    * @method _onAppStateUpdate
    * @description bound to AppStateModel app-state-update event
    *
@@ -162,8 +80,17 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this._setPage(e);
 
     const promises = [];
-    promises.push(this.GroupModel.getAll());
+    promises.push(this.getGroups());
     await Promise.all(promises);
+  }
+
+  async getGroups(){
+    const r = await this.GroupModel.list();
+    if ( r.state === 'loaded' ){
+      this.groups = r.payload.filter(g => !g.archived);
+    } else if ( r.state === 'error' ) {
+      this.AppStateModel.showError('Unable to load department list.');
+    }
   }
 
   /**
@@ -265,28 +192,21 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this.discrepancy = [];
     this.dismissDiscrepancyList = [];
 
-    await this.EmployeeModel.getActiveDiscrepancy(this.iamId);
-
+    await this.getActiveDiscrepancies();
 
     this.checkDepartmentHead(this.departmentId);
 
     this.requestUpdate();
   }
 
-  /**
-   * @method _onGetActiveDiscrepancies
-   * @description attached to EmployeeModel GET_ACTIVE_DISCREPANCIES event
-   * @param {Object} e
-   */
-  _onGetActiveDiscrepancies(e){
-    if ( e.state === this.EmployeeModel.store.STATE.LOADED ){
-      this.discrepancy = e.payload;
-    } else if ( e.state === this.EmployeeModel.store.STATE.ERROR ) {
+  async getActiveDiscrepancies(){
+    const r = await this.EmployeeModel.getActiveDiscrepancy(this.iamId);
+    if ( r.state === 'loaded' ){
+      this.discrepancy = r.payload || [];
+    } else if ( r.state === 'error' ) {
       this.AppStateModel.showAlertBanner({message: 'Error occurred when retrieving discrepancies. Employee may have discrepancies not listed.', brandColor: 'double-decker'});
       this.discrepancy = [];
     }
-
-    this.requestUpdate();
   }
 
   /**
@@ -314,30 +234,13 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
    * @param {Object} e
    */
   async _dismissDiscrepancies(){
-    try {
-      await this.EmployeeModel.removeActiveDiscrepancy(this.iamId, this.dismissDiscrepancyList);
-      await this.EmployeeModel.getActiveDiscrepancy(this.iamId);
-      this.requestUpdate();
-    } catch (err) {
-      console.error('Error:', err);
+    const r = await this.EmployeeModel.dismissDiscrepancies(this.iamId, this.dismissDiscrepancyList);
+    if ( r.state === 'loaded' ){
+      this.AppStateModel.showAlertBanner({message: 'Discrepancies successfully dismissed.', brandColor: 'farmers-market'});
+      await this.getActiveDiscrepancies();
+    } else if ( r.state === 'error' ) {
+      this.AppStateModel.showAlertBanner({message: 'Error occurred when dismissing discrepancies. Please try again later.', brandColor: 'double-decker'});
     }
-
-  }
-
-  /**
-   * @method _onRemoveActiveDiscrepancies
-   * @description attached to EmployeeModel REMOVE_ACTIVE_DISCREPANCIES event
-   * @param {Object} e
-   */
-  async _onRemoveActiveDiscrepancies(e){
-    if ( e.state === this.EmployeeModel.store.STATE.LOADED ){
-      this.AppStateModel.showAlertBanner({message: 'Discrepancies are successfully deleted.', brandColor: 'farmers-market'});
-    } else if( e.state === this.EmployeeModel.store.STATE.ERROR ) {
-      this.AppStateModel.showAlertBanner({message: 'Error occurred when deleting discrepancies.', brandColor: 'double-decker'});
-    }
-    this.dismissDiscrepancyList = [];
-    this.requestUpdate();
-
   }
 
   /**
@@ -347,9 +250,12 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
    */
   async checkDepartmentHead(id){
     this.departmentId = Number(id);
-    let groupById = await this.GroupModel.getById(this.departmentId);
+    let groupById = await this.GroupModel.get(this.departmentId);
+    if ( groupById.state === 'error' ){
+      this.AppStateModel.showError('Unable to verify department head. Please try again later.');
+      return;
+    }
 
-    await this.GroupModel.clearGroupIDCache();
     let deptHead = groupById?.payload?.[0].head[0];
 
     this.deptHead = deptHead;
@@ -439,9 +345,9 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
       // Handle only head status change
       if (this.isHead !== this.department.isHead) {
         if (!this.isHead) {
-          promises.push(this.GroupModel.removeGroupHead(this.departmentId));
+          promises.push(this.GroupModel.removeHead(this.departmentId));
         } else {
-          promises.push(this.GroupModel.setGroupHead(this.departmentId, { employeeRowID: this.dbId }));
+          promises.push(this.GroupModel.setHead(this.departmentId, { employeeRowID: this.dbId }));
         }
       }
     }
@@ -468,7 +374,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
   async _onRenderResult(){
     let id = this.iamId;
 
-    let res = await this.EmployeeModel.searchById(id, 'iamId');
+    let res = await this.EmployeeModel.get(id, 'iamId');
     res = res.payload.results[0];
     this.employeeRecord = {};
 

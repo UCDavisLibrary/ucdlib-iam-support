@@ -19,22 +19,12 @@ class LdapModel extends BaseModel {
   }
 
   /**
-   * @description LDAP GETs the data
+   * @description LDAP queries the data
    * @returns {Array}
    */
-    async getLdapData(query){
-      let state = this.store.data.ldap
-      
-      try {
-        if ( state.state === 'loading' ){
-          await state.request
-        } else {
-          await this.service.getLdapData(query);
-        }
-      } catch(e) {}
-
-      return this.store.data.ldap[query.iamId];
-    }
+  query(query){
+    return this.service.query(query);
+  }
 
 }
 
