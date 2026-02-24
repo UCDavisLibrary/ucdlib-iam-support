@@ -1,61 +1,72 @@
 import BaseService from './BaseService.js';
 import AlmaStore from '../stores/AlmaStore.js';
 
+import config from '#lib/utils/config.js';
+import payload from '../utils/payload.js';
+
+
 class AlmaService extends BaseService {
 
   constructor() {
     super();
     this.store = AlmaStore;
-
-
-    this.searchEndpoints = {
-      roles: {id: 'roles', path: 'conf/code-tables/HFrUserRoles.roleType?limit=100&offset=0&'},
-      users: {id: 'users', path: 'users'},
-      limit: {id: 'limit', path: '?limit=100&offset=0&'},
-      json: {id:'json', path: 'format=json'}
-    };
   }
 
-  getRoles(key){
-    return this.request({
-      url : `${this.config.url}${this.searchEndpoints.roles.path}${this.searchEndpoints.limit.path}apikey=${key}&${this.searchEndpoints.json.path}`,
-      onLoading : request => this.store.getRolesLoading(request),
-      checkCached : () => this.store.data.roles,
-      onLoad : result => this.store.getRolesLoaded(result.body),
-      onError : e => this.store.getRolesError(e)
-    });
+  async getRoles(){
+    const store = this.store.data.roles;
+    const id = 'roles';
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${config.alma.url}conf/code-tables/HFrUserRoles.roleType?limit=100&offset=0&apikey=${config.alma.key}&format=json`,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+
+    return store.get(id);
   }
 
-  getUsers(key){
-    return this.request({
-      url : `${this.config.url}${this.searchEndpoints.users.path}${this.searchEndpoints.limit.path}apikey=${key}&${this.searchEndpoints.json.path}`,
-      onLoading : request => this.store.getUsersLoading(request),
-      checkCached : () => this.store.data.users,
-      onLoad : result => this.store.getUsersLoaded(result.body),
-      onError : e => this.store.getUsersError(e)
-    });
+  async getUserById(id){
+    const store = this.store.data.getUserById;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${config.alma.url}users/${id}?apikey=${config.alma.key}&format=json`,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+
+    return store.get(id);
   }
 
-  getUsersById(id, key) {
-    const url = `${this.config.url}${this.searchEndpoints.users.path}/${id}?apikey=${key}&${this.searchEndpoints.json.path}`;
-    return this.request({
-      url : `${url}`,
-      onLoading : request => this.store.getUsersByIdLoading(id, request),
-      onLoad : result => this.store.getUsersByIdLoaded(id, result.body),
-      onError : e => this.store.getUsersByIdError(id, e)
-    });
-  }
+  async queryUserByName(lastName, firstName){
+    const store = this.store.data.queryUserByName;
+    const ido = { lastName, firstName };
+    const id = payload.getKey(ido);
+    const queryParam = this._makeNameQuery(lastName, firstName);
 
-  getUsersByName(last, first, key){
-    const url = `${this.config.url}${this.searchEndpoints.users.path}?apikey=${key}&${this.searchEndpoints.json.path}&`;
-    const cacheParams = this._makeNameQuery(last, first);
-    const urlParams = this._makeNameQuery(last, first);
-    return this.request({
-      url : `${url}${decodeURIComponent(urlParams.toString())}`,
-      onLoading : request => this.store.getUsersByNameLoading(cacheParams, request),
-      onLoad : result => this.store.getUsersByNameLoaded(cacheParams, result.body),
-      onError : e => this.store.getUsersByNameError(cacheParams, e)
-    });
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${config.alma.url}users?apikey=${config.alma.key}&format=json&${decodeURIComponent(queryParam.toString())}`,
+        checkCached : () => store.get(id),
+        onUpdate : resp => this.store.set(
+          payload.generate(ido, resp),
+          store
+        )
+      })
+    );
+
+    return store.get(id);
   }
 
   _makeNameQuery(last, first){

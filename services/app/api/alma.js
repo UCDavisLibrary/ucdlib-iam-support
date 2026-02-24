@@ -1,24 +1,7 @@
-import config from "#lib/utils/config.js";
 import AlmaModel from '#lib/cork/models/AlmaModel.js';
 
-AlmaModel.init(config.alma);
 
 export default (api) => {
-
-  api.get('/alma/users', async (req, res) => {
-
-    if ( !req.auth.token.canQueryUcdIam ){
-      res.status(403).json({
-        error: true,
-        message: 'Not authorized to access this resource.'
-      });
-      return;
-    }
-
-    let response = await AlmaModel.getUsers(config.alma.key);
-    res.json(response);
-
-  });
 
   api.get('/alma/users/search', async (req, res) => {
 
@@ -33,43 +16,14 @@ export default (api) => {
     const firstName = req.query.firstName;
     const lastName = req.query.lastName;
 
-    let response = await AlmaModel.getUsersByName(lastName, firstName, config.alma.key);
-    res.json(response);
-
-  });
-
-    // query for a people by bulk
-  // returns a set of records
-  api.get('/alma/users/bulksearch', async (req, res) => {
-
-    if ( !req.auth.token.canQueryUcdIam ){
-      res.status(403).json({
+    let response = await AlmaModel.queryUserByName(lastName, firstName);
+    if ( response.state === 'error' ){
+      return res.status(502).json({
         error: true,
-        message: 'Not authorized to access this resource.'
+        message: 'Error retrieving user from Alma.'
       });
-      return;
     }
-
-    const queryLimit = config.alma.queryLimit;
-    const kerbIds = req.query.ids.split(',').map(id => id.trim()).slice(0, queryLimit);
-
-    const maxConcurrentRequests = config.alma.maxConcurrentRequests;
-
-    while (kerbIds.length > 0) {
-        const chunk = kerbIds.splice(0, maxConcurrentRequests);
-        res.push(chunk);
-    }
-    const chunks = res;
-
-    const people = [];
-    for (const chunk of chunks) {
-      const promises = chunk.map(id => AlmaModel._getUsersById(id));
-      await Promise.all(promises);
-      people.push(...promises);
-    }
-
-    res.json(people);
-
+    res.json(response.payload);
 
   });
 
@@ -85,10 +39,16 @@ export default (api) => {
       return;
     }
 
-    let response;
+    const response = await AlmaModel.getUserById(req.params.id);
 
-    response = await AlmaModel._getUsersById(req.params.id, config.alma.key);
-    res.json(response);
+    if ( response.state === 'error' ){
+      return res.status(502).json({
+        error: true,
+        message: 'Error retrieving user from Alma.'
+      });
+    }
+
+    res.json(response.payload);
 
   });
 
@@ -102,8 +62,15 @@ export default (api) => {
       return;
     }
 
-      let response = await AlmaModel.getRoles(config.alma.key);
-      res.json(response);
+    let response = await AlmaModel.getRoles();
+
+    if ( response.state === 'error' ){
+      return res.status(502).json({
+        error: true,
+        message: 'Error retrieving role types from Alma.'
+      });
+    }
+    res.json(response.payload);
 
   });
 

@@ -125,6 +125,8 @@ services:
       PGPASSWORD: 'localhost'
       PGPORT: 5432
       UCDLIB_RT_FORBID_WRITE: ${UCDLIB_RT_FORBID_WRITE:-true}
+      UCDLIB_RT_QUEUE: ${UCDLIB_RT_QUEUE:-test}
+      UCDLIB_RT_FACILITIES_QUEUE: ${UCDLIB_RT_FACILITIES_QUEUE:-test}
       KEYCLOAK_ADMIN_BASE_URL: ${KEYCLOAK_ADMIN_BASE_URL:-https://sandbox.auth.library.ucdavis.edu}
     # command: /services/maintenance/entrypoint.sh
     volumes:

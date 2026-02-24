@@ -1,4 +1,4 @@
-import {BaseStore} from '@ucd-lib/cork-app-utils';
+import { BaseStore, LruStore } from '@ucd-lib/cork-app-utils';
 
 class AlmaStore extends BaseStore {
 
@@ -6,114 +6,41 @@ class AlmaStore extends BaseStore {
     super();
 
     this.data = {
-      roles: {},
-      users: {}
+      roles: new LruStore({ name: 'alma.roles' }),
+      getUserById: new LruStore({name: 'alma.getUserById'}),
+      queryUserByName: new LruStore({ name: 'alma.queryUserByName' }),
     };
-    this.events = {
-      ROLES_FETCHED: 'roles-fetched',
-    };
+    this.events = {};
+
+    // set interval to clear cache to prevent stale low-use entries for accumulating
+    const FIFTEEN_MINUTES = 15 * 60 * 1000;
+    const TWELVE_HOURS = 12 * 60 * 60 * 1000;
+    this.cacheClearInterval = setInterval(() => this.clearCache(TWELVE_HOURS), FIFTEEN_MINUTES);
   }
 
-  getRolesLoading(request) {
-    this._setRolesState({
-      state : this.STATE.LOADING,
-      request
-    });
-  }
-
-  getRolesLoaded(payload) {
-    this._setRolesState({
-      state : this.STATE.LOADED,
-      payload
-    });
-  }
-
-  getRolesError(error) {
-    this._setRolesState({
-      state : this.STATE.ERROR,
-      error
-    });
-  }
-
-  _setRolesState(state) {
-    this.data.roles = state;
-  }
-
-
-  getUsersLoading(request) {
-    this._setUsersState({
-      state : this.STATE.LOADING,
-      request
-    });
-  }
-
-  getUsersLoaded(payload) {
-    this._setUsersState({
-      state : this.STATE.LOADED,
-      payload
-    });
-  }
-
-  getUsersError(error) {
-    this._setUsersState({
-      state : this.STATE.ERROR,
-      error
-    });
-  }
-
-  _setUsersState(state) {
-    this.data.users = state;
-  }
-
-  getUsersByIdLoading(id, request) {
-    this._setUsersByIdState({
-      state : this.STATE.LOADING,
-      request, id
-    });
-  }
-
-  getUsersByIdLoaded(id, payload) {
-    this._setUsersByIdState({
-      state : this.STATE.LOADED,
-      payload, id
-    });
-  }
-
-  getUsersByIdError(id, error) {
-    this._setUsersByIdState({
-      state : this.STATE.ERROR,
-      error, id
-    });
-  }
-
-  _setUsersByIdState(state) {
-    this.data.users[state.id] = state;
-  }
-
-
-  getUsersByNameLoading(query, request) {
-    this._setUsersByNameState({
-      state : this.STATE.LOADING,
-      request, query
-    });
-  }
-
-  getUsersByNameLoaded(query, payload) {
-    this._setUsersByNameState({
-      state : this.STATE.LOADED,
-      payload, query
-    });
-  }
-
-  getUsersByNameError(query, error) {
-    this._setUsersByNameState({
-      state : this.STATE.ERROR,
-      error, query
-    });
-  }
-
-  _setUsersByNameState(state) {
-    this.data.users[state.query.toString()] = state;
+  /**
+   * @description Clear all LruStore caches in this store
+   * @param {Number} interval - Entries greater than this age (in milliseconds) will be cleared. If not provided, all entries will be cleared.
+   */
+  clearCache(interval){
+    for (const storeName in this.data) {
+      const store = this.data[storeName];
+      if ( !(store instanceof LruStore) ) {
+        continue;
+      }
+      if (interval) {
+        const now = Date.now();
+        const keysToPurge = [];
+        for ( const [key, entry] of store.cache.entries() ) {
+          if ( now - entry.lastUsed > interval ) {
+            keysToPurge.push(key);
+          }
+        }
+        keysToPurge.forEach(key => store.cache.delete(key));
+      } else {
+        store.purge();
+      }
+    }
   }
 
 }
