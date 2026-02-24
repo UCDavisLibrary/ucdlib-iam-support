@@ -112,6 +112,7 @@ class iamAdmin {
 
     // check if already employee
     let existingEmployee = false;
+    const isTransfer = onboardingRecord.additional_data?.isTransfer || false;
     const employeeRecord = await models.employees.getByAnyId(dataToWrite);
     if ( employeeRecord.err ) {
       out.error = true;
@@ -121,7 +122,7 @@ class iamAdmin {
     }
     if ( employeeRecord.res.rows.length ) {
       existingEmployee = employeeRecord.res.rows[0].id;
-      if ( !forceAdoption ) {
+      if ( !forceAdoption && !isTransfer ) {
         out.error = true;
         out.message = 'Employee already exists';
         out.canForce = true;

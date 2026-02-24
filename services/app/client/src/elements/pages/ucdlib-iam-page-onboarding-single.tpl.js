@@ -90,7 +90,7 @@ export function render() {
             <i class="fas fa-database fa-2x"></i>
           </div>
           <div class="focal-link__body">
-            <strong>Add To Library IAM Database</strong>
+            <strong>${this.isTransfer ? 'Update Library IAM Record' : 'Add To Library IAM Database'}</strong>
           </div>
         </a>
         <a href="/permissions/onboarding/${this.requestId}" class="focal-link category-brand--poppy u-space-mb">
@@ -194,14 +194,21 @@ export function render() {
     <pre style='font-size:15px;margin:0;'>${JSON.stringify(this.ucdIamRecord.data, null, "  ")}</pre>
   </ucdlib-iam-modal>
   <ucdlib-iam-modal id='obs-iam-adopt-modal' dismiss-text='Close' content-title='Adopt Employee' auto-width hide-footer>
-    <p>Are you sure you want to adopt this employee into the library IAM system?</p>
-    <p>This will create new record in the database in addition to creating a new Keycloak account with base permissions.</p>
+    <div ?hidden=${this.isTransfer}>
+      <p>Are you sure you want to adopt this employee into the library IAM system?</p>
+      <p>This will create new record in the database in addition to creating a new Keycloak account with base permissions.</p>
+    </div>
+    <div ?hidden=${!this.isTransfer}>
+      <p>Are you sure you want to update this employee's library IAM record?</p>
+      <p>This will update the existing record in the database and keycloak account</p>
+    </div>
+
     <div>
       <button
         @click=${this._onAdoptEmployeeConfirm}
         type='button'
         class="btn btn--alt btn--block u-space-mt border-box"
-      >Adopt Employee
+      >${this.isTransfer ? 'Update Employee' : 'Adopt Employee'}
       </button>
     </div>
   </ucdlib-iam-modal>
