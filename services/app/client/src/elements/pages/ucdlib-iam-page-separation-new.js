@@ -1,0 +1,278 @@
+import { LitElement } from 'lit';
+import * as Templates from "./ucdlib-iam-page-separation-new.tpl.js";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
+
+import { AppComponentController } from '#controllers';
+
+import "#components/ucdlib-iam-alma.js";
+import "#components/ucdlib-iam-modal.js";
+import "#components/ucdlib-employee-search.js";
+
+/**
+ * @description Displays separation request form
+ */
+export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
+  .with(LitCorkUtils) {
+
+  static get properties() {
+    return {
+      page: {type: String},
+      userEnteredData: {state: true},
+      separationDate: {state: true},
+      supervisor: {state: true},
+      supervisorEmail: {state: true},
+      firstName: {state: true},
+      lastName: {state: true},
+      email: {state: true},
+      employeeId: {state: true},
+      userId: {state: true},
+      notes: {state: true},
+      employeeRecord: {state:true},
+      skipSupervisor: {state: true},
+      skipFacilities: {state: true},
+
+    };
+  }
+
+  constructor() {
+    super();
+    this.render = Templates.render.bind(this);
+    this.renderSubmissionForm = Templates.renderSubmissionForm.bind(this);
+    this.renderEmployeeForm = Templates.renderEmployeeForm.bind(this);
+
+    this.page = 'sp-lookup';
+    this._resetEmployeeStateProps();
+
+    this.ctl = {
+      appComponent : new AppComponentController(this),
+    }
+
+    this._injectModel('AppStateModel', 'GroupModel', 'SeparationModel', 'AuthModel');
+  }
+
+
+  /**
+   * @description Resets onboarding form values
+   */
+  _resetEmployeeStateProps(){
+    this.userEnteredData = false;
+    this.separationDate = '';
+    this.firstName = '';
+    this.lastName = '';
+    this.middleName = '';
+    this.employeeTitle = '';
+    this.supervisorId = '';
+    this.ucdDeptCode = '';
+    this.userId = '';
+    this.email = '';
+    this.employeeId = '';
+    this.userId = '';
+    this.skipSupervisor = false;
+    this.skipFacilities = false;
+    this.supervisorEmail = '';
+    this.employeeRecord = {};
+    this.supervisor = {};
+    this.notes = '';
+  }
+
+  /**
+   * @param props {map} - changed properties
+   * @description Lit lifecycle method before update
+   */
+  willUpdate(props){
+    if ( props.has('employeeRecord') ){
+      this.hasEmployeeRecord = Object.keys(this.employeeRecord).length > 0;
+    }
+  }
+
+  /**
+   * @description - Disables manual form submission if missing certain form values
+   * We need a supervisor, and at least one unambiguous person identifier
+   * @param {*} props - Changed properties
+   */
+  _setManualFormDisabled(props){
+    if ( props.has('supervisor') ) {
+      this.manualFormDisabled = this.supervisor.isEmpty;
+    }
+  }
+
+  /**
+   * @description Disables the shadowdom
+   * @returns
+   */
+  createRenderRoot() {
+    return this;
+  }
+
+  /**
+   * @description Opens the employee info modal
+   */
+  openEmployeeInfoModal(){
+    const ele = this.renderRoot.querySelector('#sp-employee-modal');
+    if ( ele ) ele.show();
+  }
+
+  /**
+   * @method _onAppStateUpdate
+   * @description bound to AppStateModel app-state-update event
+   *
+   * @param {Object} e
+   */
+  async _onAppStateUpdate(e) {
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
+    const token = this.AuthModel.getToken();
+    if ( token.canCreateRequests ){
+      this._setPage(e);
+    } else {
+      this.AppStateModel.showError('You do not have permission to create separation requests.');
+    }
+  }
+
+
+  /**
+   * @description Attached to ucdlib-employee-search element in transfer page. Fires when the state changes
+   * @param {*} e
+   */
+  _onEmployeeStatusChange(e){
+    if ( e.detail.employee ){
+      this.employeeRecord = e.detail.employee;
+    } else {
+      this.employeeRecord = {};
+    }
+  }
+
+  /**
+   * @description Sets state properties from separated person record class
+   */
+  _onSeparateFormSubmit(){
+    if ( !this.hasEmployeeRecord ) return;
+    this.groups = this.employeeRecord.groups;
+    this.iamId = this.employeeRecord.iamId;
+    this.dbId = this.employeeRecord.id;
+    this.middleName = this.employeeRecord.middleName;
+    this.primaryAssociation = this.employeeRecord.primaryAssociation;
+    this.employeeTitle = this.employeeRecord.title;
+    this.supervisor = this.employeeRecord.supervisor;
+    this.supervisor_fullname =  this.supervisor.firstName + " " + this.supervisor.lastName;
+    this.supervisorEmail = this.supervisor.email;
+    this.supervisorId = this.employeeRecord.supervisorId;
+    this.types = this.employeeRecord.types;
+    this.ucdDeptCode = this.employeeRecord.ucdDeptCode;
+    this.firstName = this.employeeRecord.firstName;
+    this.lastName = this.employeeRecord.lastName;
+    this.email = this.employeeRecord.email;
+    this.employeeId = this.employeeRecord.employeeId;
+    this.userId = this.employeeRecord.userId;
+    this.page = "sp-submission";
+    this.AppStateModel.setLocation('#submission');
+  }
+
+
+
+  /**
+   * @description Resets the employee lookup forms
+   */
+  _resetLookupForms(){
+    this.renderRoot.querySelector('#sp-lookup ucdlib-employee-search' ).reset();
+  }
+
+  /**
+   * @description Sets subpage based on location hash
+   * @param {Object} e
+   */
+  async _setPage(e){
+    this.ctl.appComponent.showPage();
+    if ( ['submission'].includes(e.location.hash) ){
+      this.page = 'sp-' + e.location.hash;
+    } else {
+      this.page = 'sp-lookup';
+    }
+    this._validatePage();
+  }
+
+  /**
+   * @description Attached to submit event on onboarding form
+   * @param {*} e - Submit event
+   */
+  async _onSubmit(e){
+    e.preventDefault();
+    this.SeparationModel.create(this.payload());
+  }
+
+  /**
+   * @description Attached to Separation Model SEPARATION_CREATE_UPDATE event
+   * @param {Object} e
+   */
+  _onSeparationCreateUpdate(e){
+    if ( e.state === this.SeparationModel.store.STATE.LOADING ){
+      this.AppStateModel.showLoading();
+    } else if ( e.state === this.SeparationModel.store.STATE.LOADED ){
+      this._resetEmployeeStateProps();
+      // this._resetLookupForms();
+      this.AppStateModel.setLocation(`/separation`);
+      this.AppStateModel.showAlertBanner({message: 'Separation request created', brandColor: 'farmers-market'});
+    } else if ( e.state === this.SeparationModel.store.STATE.ERROR ) {
+      this._resetEmployeeStateProps();
+      // this._resetLookupForms();
+      console.error(e);
+      let msg = '';
+      if ( e.error.details && e.error.details.message ){
+        msg =  e.error.details.message;
+      }
+      this.AppStateModel.showError(msg);
+    }
+  }
+
+  /**
+   * @description Makes payload for POST call when submitting a new request
+   * @returns {Object}
+   */
+  payload(){
+    const payload = {};
+    const additionalData = {};
+    if ( this.hasEmployeeRecord ){
+      payload.iamId = this.employeeRecord.iamId;
+    }
+
+    payload.separationDate = this.separationDate;
+    payload.supervisorId = this.supervisorId;
+    payload.notes = this.notes;
+    payload.skipSupervisor = this.skipSupervisor;
+    payload.skipFacilities = this.skipFacilities;
+    additionalData.employeeEmail = this.email;
+    additionalData.groups = this.groups;
+    additionalData.id = this.dbId;
+    additionalData.middleName = this.middleName;
+    additionalData.primaryAssociation = this.primaryAssociation;
+    additionalData.title = this.employeeTitle;
+    additionalData.types = this.types;
+    additionalData.ucdDeptCode = this.ucdDeptCode;
+    additionalData.supervisorEmail = this.supervisorEmail;
+    additionalData.supervisorFirstName = this.supervisor.firstName;
+    additionalData.supervisorLastName = this.supervisor.lastName;
+    additionalData.employeeFirstName = this.firstName;
+    additionalData.employeeLastName = this.lastName;
+    additionalData.employeeId = this.employeeId;
+    additionalData.employeeUserId = this.userId;
+
+    payload.additionalData = additionalData;
+    return payload;
+  }
+
+  /**
+   * @description Displays error or reroutes to home if something with the page state is wrong
+   * @returns
+   */
+  _validatePage(){
+    if ( this.page === 'sp-submission' ){
+      if (this.employeeRecord.isEmpty ){
+        console.warn('missing employee record');
+        this.AppStateModel.setLocation('#lookup');
+        return;
+      }
+    }
+  }
+
+}
+
+customElements.define('ucdlib-iam-page-separation-new', UcdlibIamPageSeparationNew);

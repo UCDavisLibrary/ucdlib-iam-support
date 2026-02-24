@@ -1,0 +1,124 @@
+import { LitElement } from 'lit';
+import {render} from "./ucdlib-iam-page-separation.tpl.js";
+import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
+
+import { AppComponentController } from '#controllers';
+
+import "#components/ucdlib-iam-separation-list.js";
+import "#components/ucdlib-iam-modal.js";
+import "#components/ucdlib-iam-existing-search.js";
+
+/**
+ * @classdesc Lists active separation requests and provides navigation to additional separations actions
+ */
+export default class UcdlibIamPageSeparation extends Mixin(LitElement)
+  .with(LitCorkUtils) {
+
+  static get properties() {
+    return {
+      canViewAll: {state: true},
+      tabView: {state: true},
+      userIamId: {state: true}
+    };
+  }
+
+  constructor() {
+    super();
+    this.render = render.bind(this);
+
+    this.ctl = {
+      appComponent : new AppComponentController(this),
+    }
+
+    this._injectModel('AppStateModel', 'SeparationModel', 'AuthModel');
+
+    this.activeId = 'sp-list-active'; //only show if hr or admin
+    this.recentId = 'sp-list-recent'; //only show if hr or admin
+    this.supervisorId = 'sp-list-supervisor';
+    this.canViewAll = false;
+    this.userIamId = '';
+    this.tabView = 'active'; // active or recent
+  }
+
+  /**
+   * @description Disables the shadowdom
+   * @returns
+   */
+  createRenderRoot() {
+    return this;
+  }
+
+  /**
+   * @method _onTokenRefreshed
+   * @description bound to AuthModel token-refreshed event
+   * @param {AccessToken} token
+   */
+  _onTokenRefreshed(token){
+    this.canViewAll = token.hasAdminAccess || token.hasHrAccess;
+    this.userIamId = token.iamId;
+    if ( this.ctl.appComponent.isOnActivePage ) this. _getRequiredPageData();
+  }
+
+
+  /**
+   * @description Attached to SeparationModel separation-query event
+   * @param {Object} e cork-app-utils event
+   */
+  _onSeparationQueryUpdate(e){
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
+    if ( e.state === 'error'){
+      let msg = 'Unable to load separation requests';
+      if ( e.error.details && e.error.details.message ){
+        msg =  e.error.details.message;
+      }
+      this.AppStateModel.showError(msg);
+    }
+  }
+
+
+  /**
+   * @description Do data retrieval required to display a subpage
+   */
+  async _getRequiredPageData(){
+    const activeListEle = this.querySelector(`#${this.activeId}`);
+    const supervisorEle = this.querySelector(`#${this.supervisorId}`);
+    const recentListEle = this.querySelector(`#${this.recentId}`);
+    if ( !activeListEle || !supervisorEle || !recentListEle ){
+      return; // page not fully loaded yet. wait for next app-state-update.
+    }
+    const promises = [];
+    if ( this.canViewAll ) {
+      promises.push(activeListEle.doQuery());
+      promises.push(recentListEle.doQuery());
+    }
+    if ( this.userIamId ) promises.push(supervisorEle.doQuery({supervisorId: this.userIamId}));
+    await new Promise(resolve => {requestAnimationFrame(resolve);});
+  }
+
+  /**
+   * @method _onAppStateUpdate
+   * @description bound to AppStateModel app-state-update event
+   *
+   * @param {Object} e
+   */
+  async _onAppStateUpdate(e) {
+    if ( !this.ctl.appComponent.isOnActivePage ) return;
+    this.AppStateModel.showLoading();
+    await this. _getRequiredPageData();
+    this.ctl.appComponent.showPage();
+  }
+
+
+  showSearchModal(){
+    const modal = this.querySelector('#sp-search');
+    modal.show();
+  }
+
+  hideSearchModal(){
+    const modal = this.querySelector('#sp-search');
+    modal.hide();
+  }
+
+}
+
+customElements.define('ucdlib-iam-page-separation', UcdlibIamPageSeparation);

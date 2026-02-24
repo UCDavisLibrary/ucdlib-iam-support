@@ -1,0 +1,67 @@
+import {BaseModel} from '@ucd-lib/cork-app-utils';
+import RtService from '../services/RtService.js';
+import RtStore from '../stores/RtStore.js';
+import DtUtils from "#lib/utils/dtUtils.js"
+
+/**
+ * @class RtModel
+ * @description Centralized state management for RT data retrieved from RT API.
+ */
+class RtModel extends BaseModel {
+
+  constructor() {
+    super();
+
+    this.store = RtStore;
+    this.service = RtService;
+
+    this.url = 'https://rt.lib.ucdavis.edu';
+
+    this.register('RtModel');
+  }
+
+  getTicketHistory(id) {
+    return this.service.getTicketHistory(id);
+   }
+
+  /**
+   * @description Formats ticket history items into a brief text blurb
+   * @param {Array} history - transaction items from getHistory method
+   * @returns {Array} [{text: foo, created: datestring}]
+   */
+  formatHistory(history){
+    const out = [];
+    for (const trans of history) {
+      const item = {};
+      const name = trans.Creator ? trans.Creator.RealName || trans.Creator.Name || '' : '';
+      if ( trans.Created ) {
+        item.created = DtUtils.fmtDatetime(trans.Created);
+      }
+      if ( trans.Type === 'Create' ) {
+        item.text = `Created by ${name}`;
+      } else if ( trans.Type === 'Correspond' && trans.Data.startsWith('Permissions Request') ){
+        item.text = `Permissions request submitted`;
+      } else if ( trans.Type === 'Correspond' && trans.Data.startsWith('Onboarding Record Reconciled') ){
+        item.text = `Record reconciled`;
+      } else if ( trans.Type === 'Correspond' && trans.Data.startsWith('Employee Record Added') ){
+        item.text = `Employee record added to Library IAM system`;
+      } else if ( trans.Type === 'Correspond' ){
+        item.text = `Correspondence added by ${name}`;
+      } else if (trans.Type === 'Status' ){
+        item.text = `Status changed to ${trans.NewValue} by ${name}`
+      } else {
+        continue;
+      }
+      out.push(item);
+    }
+    return out;
+  }
+
+  makeTicketUrl(id){
+    return `${this.url}/Ticket/Display.html?id=${id}`;
+  }
+
+}
+
+const model = new RtModel();
+export default model;

@@ -1,43 +1,32 @@
 # Identity and Access Management (IAM) Support
-This is a monorepo that contains applications and utilities for managing the [IAM system](https://github.com/UCDavisLibrary/keycloak-deployment) at the UC Davis Library.
+This is a monorepo that contains services for managing personnel records and access control lists to be used by other internal UC Davis Library applications.
 
-- [App Components](#app-components)
-- [Devops](#devops)
-- [Using the Application](#using-the-application)
+## Services Overview
 
-## App Components
+### Web Application
+The web application (`/services/app`) lets
+1. HR submit personnel onboarding and separation forms, which create RT tickets (via API) for ITIS and facilities.
+2. Supervisors request access to systems for their employees when onboarded (via form), which is then written to the onboarding RT ticket.
+3. ITIS add/remove employees entered by HR into a postgres DB and our internal Keycloak realm, which is used for OIDC by other applications.
 
-### Application Client
-The application (in `/app`) is designed to be used by 
-1. HR for initiating onboarding and separation processes
-2. Supervisors to request access to systems for their employees when onboarded.
-
-The application does not assign permissions, but creates, routes, and tracks system provisioning tickets via the [Request Tracker (RT)](https://rt.lib.ucdavis.edu/) API. 
+Additionally, some supplemental functionality is tacked on:
+- A patron lookup tool to determine UCD affiliation
+- Org chart update tool
 
 ### CLI
-The command line interface (in `/utils/cli`) is designed to be used by ITIS to perform adminstrative actions, such as loading a user into Keycloak and assigning permissions.
+There is also a cli (`/services/cli`), which is designed to be used in conjunction with the web application in cases where a graphical user interface isn't necessary.
 
 To use the CLI:
 1. bash into container: `docker compose exec cli bash`
-2. run commands: `ucdlib-iam --help`
-
-### Backup Utility
-
-Located in `utils/backup`, this container will automatically back up the database to the `itis-iam` Google Cloud Storage bucket if `NIGHTLY_BACKUPS` and `BACKUP_ENV` env variables are set.
-
-In order to backup, you need a GC key, which can be obtained by running `deploy/cmds/get-writer-key.sh`.
-
-### Init Utility
-
-Located in `utils/init`, this container will automatically hydrate the database upon `docker compose up` if local db is empty. Requires `RUN_INIT` and `DATA_ENV` env variables to be set.
+2. `node ./services/cli/bin/ucdlib-iam.js`
 
 ### Maintenance Utility
-Located in `utils/maintenance`, this container runs a node cron service for performing needed maintenance tasks, such as keeping employee records in sync with campus data stores. `ENABLE_MAINTENANCE` must be set to true.
+Located in `services/maintenance`, this container runs a node cron service for performing needed maintenance tasks, such as keeping employee records in sync with campus data stores. `ENABLE_MAINTENANCE` must be set to true.
 
 ### External API
-Located in `utils/api`, this is an express service that runs a JSON API designed to return personnel data to other applications.
+Located in `services/api`, this is an express service that runs a JSON API designed to return personnel data to other applications.
 
-You can view some example queries and responses in `utils/api/examples`.
+You can view some example queries and responses in `services/api/examples`.
 
 Before you can use the service (either locally or in prod), you will need to mint an API key by:
 1. Go to keycloak. Make sure you are in the `internal` realm
@@ -49,23 +38,19 @@ Before you can use the service (either locally or in prod), you will need to min
    3. Search `iam-api`
    4. Select either `read` or `write` access depending on access level needed.
 
-### Shared Code
-Any code shared by the application and cli should be placed in the `/lib` directory. Both the app and cli docker images use the same base image that npm links this shared code as the `@ucd-lib/iam-support-lib` package.
-
-Technical documentation created at the start of the project can be found in this [Google Doc](https://docs.google.com/document/d/129KuqatZVwj7Fl_am4E3eTJgq6Fj1MNjo66MbI5mMok/edit?usp=sharing).
-
 ## Devops
 
 ### Local Development
 To get this application up and running for the first time:
 1. Clone this repository
 2. Checkout the branch you want to work on.
-3. Run `./deploy/cmds/init-local-dev.sh` to download gc key, env, and build js
+3. Run `./deploy/cmds/init-local-dev.sh`
 4. Review the env file downloaded to `./deploy/compose/ucdlib-iam-support-local-dev`
-5. Run `./deploy/cmds/build-local-dev.sh` to build images
+5. Run `./deploy/cmds/build-local-dev.sh main` to build image
 6. Enter `./deploy/compose/ucdlib-iam-support-local-dev`, and run `docker compose up -d`
+7. `./deploy/cmds/start-app.sh` to start the web application
+8. `./deploy/cmds/watch-client.sh` to start the web application client watch process
 
-To start the client watch process: `cd ./app/client && npm run watch`
 
 ### Production Deployment
 
@@ -100,11 +85,9 @@ The steps for onboarding an employee are as follows:
 - Provisioning proceeds as normal with the RT ticket being passed around ITIS personnel.
 - An ITIS programmer has to manually add the employee to the local database and Keycloak by doing the following:
   - Clicking the `Add To Library IAM Database` on the GUI
-  - Or using the cli:
-    - `ssh veers.library.ucdavis.edu`
-    - `cd /opt/ucdlib-iam-support/deploy && docker compose exec cli bash`
-    - `ucdlib-iam onboarding ls` to get the onboarding-record-id.
-    - `ucdlib-iam employees adopt <onboarding-record-id>`
+  - Use cli commands:
+    - `onboarding ls` to get the onboarding-record-id.
+    - `employees adopt <onboarding-record-id>`
 - Depending on the permissions requested, you might have to log into Keycloak and assign special permissions to clients.
 - The onboarding record will be marked as resolved three days after the RT ticket is resolved.
 
@@ -117,19 +100,15 @@ The steps for separating an employee are as follows:
 - When the separation date has passed, an ITIS programmer will need to manually remove the employee from the local database and Keycloak by doing the following:
   - Clicking the `Deprovision From Library IAM Database` on the GUI
   - Or using the cli:
-    - `ssh veers.library.ucdavis.edu`
-    - `cd /opt/ucdlib-iam-support/deploy && docker compose exec cli bash`
-    - `ucdlib-iam separation ls` to get the separation record id
-    - `ucdlib-iam employees separate <separation-record-id>`
+    - `separation ls` to get the separation record id
+    - `employees separate <separation-record-id>`
 - The system will send a reminder to the RT ticket when the separation date has passed.
 
 ### Discrepancy Notifications
 When possible, the system will update local employee records when the UCD IAM record is updated - for example, when an employee changes their preferred name in the UC Davis directory. However, there are some cases where an automatic update isn't possible or is ill-advised, in which case a discrepancy notification is created. These notifications are bundled and sent to the ITIS error notification slack channel once a week. It is contingent on an ITIS programmer to resolve them:
 - Going to the employee update page, and dismissing them with the widget
 - Or using the cli:
-  - `ssh veers.library.ucdavis.edu`
-  - `cd /opt/ucdlib-iam-support/deploy && docker compose exec cli bash`
-  - `ucdlib-iam employees list-active-notifications` gets a list of active discrepancy notifications
-  - Then you would fix the records it points out. The exact command varies depending on the notification, but they can all be found in `ucdlib-iam employees`. The `--help` flag will list available commands.
-  - When complete run `ucdlib-iam employees dismiss-notifications <iamId of employee notification is regarding>`. Otherwise, you will get the same notification sent to slack next week.
+  - `employees list-active-notifications` gets a list of active discrepancy notifications
+  - Then you would fix the records it points out. The exact command varies depending on the notification, but they can all be found in `employees`. The `--help` flag will list available commands.
+  - When complete run `dismiss-notifications <iamId of employee notification is regarding>`. Otherwise, you will get the same notification sent to slack next week.
 
