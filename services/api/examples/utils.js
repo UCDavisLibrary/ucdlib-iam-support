@@ -26,13 +26,29 @@ class utils {
   }
 
   async get(url){
-    console.log(url);
+    console.log('url:', url);
+    console.log('headers:', headers);
     const res = await fetch(url, {headers});
-    const json = await res.json();
-    this.log(json);
-    return json;
+    console.log('status:', res.status);
+    const content = await this.parseContent(res);
+    this.log(content);
   }
 
+  async parseContent(res){
+    let content = null;
+    try {
+      content = await res.json();
+    } catch (err) {
+      console.warn('Failed to parse JSON, trying text:', err);
+      try {
+        content = await res.text();
+      } catch (err) {
+        console.error('Failed to parse text:', err);
+        content = null;
+      }
+    }
+    return content;
+  }
 }
 
 export default new utils();
