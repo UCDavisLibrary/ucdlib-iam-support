@@ -25,7 +25,7 @@
     "@slack/webhook": "^7.0.6",
     "@ucd-lib/cork-app-build": "^0.5.0",
     "@ucd-lib/cork-app-state": "^3.2.0",
-    "@ucd-lib/cork-app-utils": "^6.4.1",
+    "@ucd-lib/cork-app-utils": "^6.4.2",
     "@ucd-lib/rt-api": "^1.2.2",
     "@ucd-lib/spa-router-middleware": "^0.3.0",
     "@ucd-lib/theme-elements": "^3.5.0",
