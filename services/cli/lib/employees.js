@@ -115,6 +115,22 @@ class employeesCli {
     await pg.pool.end();
   }
 
+  async directReports(id, options){
+    const idType = options.idtype ? options.idtype : 'iamId';
+    id = id.trim();
+    const r = await models.employees.getDirectReports(id, idType, {returnGroups: true});
+    await pg.pool.end();
+    if ( r.err ) {
+      console.error(`Error getting direct reports\n${r.err.message}`);
+      return;
+    }
+    if ( !r.res.rowCount ) {
+      console.log('No direct reports found');
+      return;
+    }
+    utils.logObject(r.res.rows);
+  }
+
   /**
    * @description Get an employee by id
    * @param {String} id - Employee unique indentifier

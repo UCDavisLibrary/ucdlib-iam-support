@@ -261,12 +261,37 @@ class UcdlibEmployees {
     return await pg.query(text, params);
   }
 
-  async getDirectReports(iamId){
-    const params = [iamId];
+  /**
+   * @description Returns all direct reports for a given supervisor
+   * @param {String} id - supervisor id
+   * @param {String} idType - id, iamId, employeeId, userId, email
+   * @param {Object} options - options object with the following properties:
+   * @param {Boolean} options.returnGroups - return each employee's groups
+   * @returns
+   */
+  async getDirectReports(id, idType='id', options={}){
+    if ( !Array.isArray(id) ) id = [id];
+    const params = id;
+    const { returnGroups } = options;
+
+    const supervisorWhere = idType === 'iamId'
+      ? `e.supervisor_id IN ${pg.valuesArray(params)}`
+      : `e.supervisor_id IN (SELECT iam_id FROM employees WHERE ${textUtils.underscore(idType)} IN ${pg.valuesArray(params)})`;
+
     const text = `
-      SELECT *
-      FROM employees
-      WHERE supervisor_id = $1
+      SELECT e.*
+      ${returnGroups ? `, json_agg(${this.groupJson()}) as groups` : ''}
+      FROM employees as e
+      ${returnGroups ? `
+        LEFT JOIN group_membership as gm on e.id = gm.employee_key
+        LEFT JOIN groups as g on gm.group_id = g.id
+        LEFT JOIN group_types as gt on g.type = gt.id
+      ` : ''}
+      WHERE
+        ${supervisorWhere}
+        ${returnGroups ? 'AND (NOT g.archived OR g.archived IS NULL)' : ''}
+      ${returnGroups ? 'GROUP BY e.id' : ''}
+      ORDER BY e.last_name, e.first_name
     `;
     return await pg.query(text, params);
   }

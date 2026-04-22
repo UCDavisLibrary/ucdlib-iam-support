@@ -41,6 +41,16 @@ program
 );
 
 program
+  .command('direct-reports')
+  .description('Get direct reports for an employee')
+  .argument('<id>', 'Employee unique indentifier')
+  .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(utils.employeeIds).default('iamId'))
+  .action((id, options) => {
+    employees.directReports(id, options);
+  }
+);
+
+program
   .command('update-property')
   .description('Update an employee property')
   .argument('<id>', 'Employee unique indentifier')

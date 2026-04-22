@@ -519,7 +519,7 @@ class iamAdmin {
     }
 
     // check if employee has direct reports
-    const directReports = await models.employees.getDirectReports(iamId);
+    const directReports = await models.employees.getDirectReports(iamId, 'iamId');
     if ( directReports.res?.rowCount ) {
       out.error = 'directReports';
       out.directReports = directReports.res.rows;
