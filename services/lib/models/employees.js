@@ -197,6 +197,7 @@ class UcdlibEmployees {
       ${departmentIds.length ? 'LEFT JOIN group_membership as gm2 on e.id = gm2.employee_key' : ''}
       WHERE
         (NOT g.archived OR g.archived IS NULL)
+        ${filters.hasCustomSupervisor ? ' AND e.custom_supervisor IS TRUE' : ''}
     `;
     for (let name of names) {
       name = name.trim();

@@ -164,6 +164,24 @@ class employeesCli {
     }
   }
 
+  /**
+   * @description Get list of employees with a custom supervisor
+   * @returns 
+   */
+  async customSupervisorList(){
+    const r = await models.employees.searchByName('', {hasCustomSupervisor: true});
+    await pg.pool.end();
+
+    if ( r.err ) {
+      console.error(`Error getting employees with custom supervisors\n${r.err.message}`);
+      return;
+    }
+    if ( !r.res.rowCount ) {
+      console.log('No employees with custom supervisors found');
+      return;
+    }
+    utils.logObject(r.res.rows);
+  }
 
   /**
    * @description Adopt an employee into the Library IAM database
