@@ -308,6 +308,52 @@ class UcdlibEmployees {
     return await pg.query(text, params);
   }
 
+  /**
+   * @description Assign employee to department group. This will remove employee from any other department groups, but will not affect membership in non-department groups.
+   * @param {String} employeeId - the employee's ID
+   * @param {String} departmentId - the department group ID
+   * @param {Object} options - options object
+   * @param {String} options.employeeIdType - the type of employee ID provided (id, iamId, employeeId, userId, email). Default is 'id'.
+   * @param {Boolean} options.isHead - whether the employee is head of the department group. Default is false.
+   * @returns {Promise}
+   */
+  async assignToDepartment(employeeId, departmentId, options={}){
+    const employeeIdType = options.employeeIdType || 'id';
+    const isHead = options.isHead ? true : false;
+
+    let client = await pg.pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      let employeeKey = await client.query(`
+        SELECT id FROM employees WHERE ${textUtils.underscore(employeeIdType)} = $1
+      `, [employeeId]);
+      if ( !employeeKey.rows.length ) throw new Error('Employee not found');
+      employeeKey = employeeKey.rows[0].id;
+
+      await client.query(`
+        DELETE FROM group_membership
+        USING groups g
+        WHERE group_membership.group_id = g.id
+          AND g.type = 1
+          AND group_membership.employee_key = $1
+      `, [employeeKey]);
+
+      const addDepartmentRes = await client.query(`
+        INSERT INTO group_membership (employee_key, group_id, is_head)
+        VALUES ($1, $2, $3) RETURNING *
+      `, [employeeKey, departmentId, isHead]);
+
+      await client.query('COMMIT');
+      return { res: addDepartmentRes.rows[0] };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      return { error };
+    } finally {
+      client.release();
+    }
+  }
+
   async removeEmployeeFromGroup(employeeTableId, groupId){
     const params = [employeeTableId, groupId];
     const text = `

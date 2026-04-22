@@ -172,6 +172,40 @@ class GroupsCli {
     await pg.pool.end();
   }
 
+  /**
+   * @description Assign employee to a department group, removing them from any other departments
+   * @param {String} group_id - Department group id
+   * @param {String} employee_id - Employee identifier
+   * @param {Object} options - Commander options object
+   */
+  async addDepartmentMember(group_id, employee_id, options){
+    group_id = parseInt(group_id);
+
+    let group = await this._validateGroup(group_id);
+    if ( !group ) return;
+
+    if ( group.type != 1  ) {
+      console.log('Error: Group is not a department group');
+      await pg.pool.end();
+      return;
+    }
+
+    const r = await models.employees.assignToDepartment(employee_id, group_id, {
+      employeeIdType: options.idtype,
+      isHead: options.head
+    });
+
+    if ( r?.error ) {
+      console.log(r.error);
+      await pg.pool.end();
+      return;
+    }
+
+    console.log(`Assigned employee to ${group.name}`);
+    await pg.pool.end();
+  }
+
+
   async addHead(group_id, employee_id, options){
     const addAsMember = options.member;
     const idType = options.idtype;
@@ -315,7 +349,7 @@ class GroupsCli {
    * @description Validate group exists
    * @param {Int} group_id - Group id
    * @param {Object} args - Additional arguments to pass to models.groups.getById
-   * @returns {Object} Group object or null if group does not exist
+   * @returns {Promise<Object|undefined>} Group object, or undefined if not found
    */
   async _validateGroup(group_id, args){
     // validate group exists

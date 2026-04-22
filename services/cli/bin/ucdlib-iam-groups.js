@@ -65,6 +65,17 @@ program
   });
 
 program
+  .command('add-department-member')
+  .description('Assign employee to a department group, removing them from any other departments')
+  .argument('<group_id>', 'Department group id')
+  .argument('<employee_id>', 'Employee unique identifier. See idtype option for possible values')
+  .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(utils.employeeIds).default('iamId'))
+  .option('--head', 'Set employee as head of department', false)
+  .action((group_id, employee_id, options) => {
+    groups.addDepartmentMember(group_id, employee_id, options);
+  });
+
+program
   .command('move-all-members')
   .description('Move all members from one group to another')
   .argument('<from_group_id>', 'From group id')
