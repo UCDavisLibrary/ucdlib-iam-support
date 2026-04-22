@@ -98,6 +98,11 @@ services:
       PGHOST: 'db'
       PGDATABASE: 'postgres'
       PGPORT: 5432
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
     depends_on:
       - db
     command: /services/maintenance/entrypoint.sh
