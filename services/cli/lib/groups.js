@@ -7,8 +7,24 @@ import utils from './utils.js';
 
 class GroupsCli {
 
+  /**
+   * @description List/query groups
+   * @param {Object} options - Commander options object
+   */
   async list(options){
-    const groups = await models.groups.groupQuery(options, {returnHead: options.return_head});
+    const queryOptions = {
+      filterActive: options.active === true,
+      filterArchived: options.active === false,
+      filterById: options.id || [],
+      filterByGroupType: options.group_type ? [options.group_type] : [],
+      filterByName: options.name || '',
+      filterPartOfOrg: options.org,
+      returnParent: options.parent,
+      returnChildren: options.child,
+      returnHead: options.head,
+      returnMembers: options.member
+    };
+    const groups = await models.groups.query(queryOptions);
     if ( groups.err ) {
       console.log(groups.err);
       await pg.pool.end();
@@ -21,7 +37,6 @@ class GroupsCli {
     }
     utils.logObject(groups.res.rows);
     await pg.pool.end();
-
   }
 
   async removeHead(group_id){
