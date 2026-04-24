@@ -184,11 +184,25 @@ class iamAdmin {
     if ( config.rt.forbidWrite ) {
       return {error: false, message: 'RT write operations are forbidden in this environment'};
     }
+
+    let separationRecord = await models.separation.query({rtTicketId});
+    if ( separationRecord.err ) {
+      console.error(`Error retrieving separation record for RT ticket id ${rtTicketId}`, separationRecord.err);
+      return {error: true, message: `Error retrieving separation record for RT ticket id ${rtTicketId}: ${separationRecord.err.message}`};
+    }
+    if ( !separationRecord.res.rows.length ) {
+      const message = `No separation record found for RT ticket id ${rtTicketId}`;
+      console.error(message);
+      return {error: true, message};
+    }
+    separationRecord = separationRecord.res.rows[0];
     const ticket = new models.rtTicket(false, {id: rtTicketId});
     const rtClient = new models.rt(config.rt);
     const reply = ticket.createReply();
     reply.addSubject('Employee Access Was Removed');
     reply.addContent('This employee was removed from the UC Davis Library Identity and Access Management System.');
+    reply.addContent(`<br>`);
+    ticket.addBasicSeparationInfo(separationRecord, reply);
     const rtResponse = await rtClient.sendCorrespondence(reply);
     if ( rtResponse.err )  {
       console.error(`Error sending RT notification for employee separation`, rtResponse);
