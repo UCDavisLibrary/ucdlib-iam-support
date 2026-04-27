@@ -161,7 +161,7 @@ export default (api) => {
       reply.addSubject(`${transfer.isTransfer ? 'New ' : ''}Supervisor Action Required!`);
       reply.addContent(`Hi ${supervisorName},`);
       reply.addContent('');
-      reply.addContent(`To proceed with your employee's onboarding, please describe the accounts and permissions required to perform their essential job duties using the following form:`);
+      reply.addContent(`To proceed with your employee's onboarding (${obUtils.employeeFullName}), please describe the accounts and permissions required to perform their essential job duties using the following form:`);
       reply.addContent('');
       reply.addContent(`<a href='${supervisorLink}'>${supervisorLink}</a>`);
       if ( !obUtils.hasUniqueIdentifier() ){

@@ -164,11 +164,24 @@ class iamAdmin {
     if ( config.rt.forbidWrite ) {
       return {error: false, message: 'RT write operations are forbidden in this environment'};
     }
+
+    let onboardingRecord = await models.onboarding.query({rtTicketId});
+    if ( onboardingRecord.err ) {
+      console.error(`Error retrieving onboarding record for RT ticket id ${rtTicketId}`, onboardingRecord.err);
+      return {error: true, message: `Error retrieving onboarding record for RT ticket id ${rtTicketId}: ${onboardingRecord.err.message}`};
+    }
+    if ( !onboardingRecord.res.rows.length ) {
+      return {error: true, message: `No onboarding record found for RT ticket id ${rtTicketId}`};
+    }
+    onboardingRecord = onboardingRecord.res.rows[0];
+
     const rtClient = new models.rt(config.rt);
     const ticket = new models.rtTicket(false, {id: rtTicketId});
     const reply = ticket.createReply();
     reply.addSubject('Employee Record Added');
     reply.addContent('This employee was adopted into the UC Davis Library Identity and Access Management System');
+    reply.addContent(`<br>`);
+    ticket.addBasicRequestInfo(onboardingRecord, reply);
     const rtResponse = await rtClient.sendCorrespondence(reply);
     if ( rtResponse.err )  {
       console.error(`Error sending RT notification for employee adoption`, rtResponse);
@@ -202,7 +215,7 @@ class iamAdmin {
     reply.addSubject('Employee Access Was Removed');
     reply.addContent('This employee was removed from the UC Davis Library Identity and Access Management System.');
     reply.addContent(`<br>`);
-    ticket.addBasicSeparationInfo(separationRecord, reply);
+    ticket.addBasicRequestInfo(separationRecord, reply);
     const rtResponse = await rtClient.sendCorrespondence(reply);
     if ( rtResponse.err )  {
       console.error(`Error sending RT notification for employee separation`, rtResponse);

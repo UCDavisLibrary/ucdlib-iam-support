@@ -124,18 +124,19 @@ class UcdlibRtTicket extends RTTicket {
     }, false);
   }
 
-  addBasicSeparationInfo(request, correspondence){
+  addBasicRequestInfo(request, correspondence){
     if ( !request ) return;
+    const isSeparation = request.is_existing_employee === undefined && request.isExistingEmployee === undefined;
     const ad = request.additional_data || request.additionalData || {};
     const employeeName = `${ad.employeeLastName || ''}, ${ad.employeeFirstName || ''}`;
-    const recordUrl = `${config.app.baseUrl}/separation/${request.id}`;
+    const recordUrl = `${config.app.baseUrl}/${isSeparation ? 'separation' : 'onboarding'}/${request.id}`;
     const content = {
       'Name': employeeName,
-      'Separation Record': `<a href=${recordUrl}>${recordUrl}</a>`
+      [`${isSeparation ? 'Separation' : 'Onboarding'} Record`]: `<a href=${recordUrl}>${recordUrl}</a>`
     }
     const rtTicketId = request.rtTicketId || request.rt_ticket_id;
     if ( rtTicketId ) {
-      const url = `${config.rt.url}/rt/Ticket/Display.html?id=${rtTicketId}`;
+      const url = `${config.rt.url}/Ticket/Display.html?id=${rtTicketId}`;
       content['Rt Ticket'] = `<a href="${url}">${url}</a>`;
     }
 
