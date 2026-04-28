@@ -29,6 +29,14 @@ program
 );
 
 program
+  .command('custom-supervisor')
+  .description('Get list of employees with a custom supervisor')
+  .action(() => {
+    employees.customSupervisorList();
+  }
+);
+
+program
   .command('get')
   .alias('inspect')
   .description('Get an employee by id')
@@ -37,6 +45,16 @@ program
   .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(utils.employeeIds).default('iamId'))
   .action((id, options) => {
     employees.get(id, options);
+  }
+);
+
+program
+  .command('direct-reports')
+  .description('Get direct reports for an employee')
+  .argument('<id>', 'Employee unique indentifier')
+  .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(utils.employeeIds).default('iamId'))
+  .action((id, options) => {
+    employees.directReports(id, options);
   }
 );
 

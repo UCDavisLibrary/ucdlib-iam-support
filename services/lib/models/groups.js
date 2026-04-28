@@ -1,6 +1,20 @@
 import pg from "#lib/utils/pg.js";
 import textUtils from "#lib/utils/text.js";
 
+/**
+ * @typedef {Object} GroupQueryOptions
+ * @property {Boolean} [returnHead] - If true, returns head(s) of group
+ * @property {Boolean} [returnMembers] - If true, returns members of group
+ * @property {Boolean} [returnParent] - If true, returns parent of group
+ * @property {Boolean} [returnChildren] - If true, returns children of group
+ * @property {Array} [filterById] - List of group ids to filter by - superseded by ids argument
+ * @property {Boolean} [filterActive] - If true, only returns active groups
+ * @property {Boolean} [filterArchived] - If true, only returns archived groups
+ * @property {Boolean} [filterPartOfOrg] - If true, only returns groups that are part of the org
+ * @property {Boolean} [filterNotPartOfOrg] - If true, only returns groups not part of the org
+ * @property {Array} [filterByGroupType] - List of group type ids to filter by
+ * @property {String} [filterByName] - Case-insensitive substring match against group name or short name
+ */
 
 /**
  * @description Manages pg data for groups (departments, committees, etc)
@@ -10,76 +24,12 @@ class UcdlibGroups{
   }
 
   /**
-   * @method groupQuery
-   * @description Performs basic query of groups requests
-   * @param {Object} q - Query object where keys are filters:
-   * - active (bool)
-   * - archived (bool)
-   * - group_type (str)
-   * - type_name (str)
-   * - name (str)
-   * - parent_group (int)
-   * - name_short (str)
-   * - org (bool)
-   * - archived (bool)
-   * - part_of_org (bool)
-   * - parent (bool)
-   * - child (bool)
-   * @param {Object} options - Options object where keys are options:
-   * - returnHead (bool) - If true, returns head(s) of group
-  */
-  async groupQuery(q, options={}){
-    const returnHead = options.returnHead || false;
-    const whereParams = {};
-    let text = `
-    SELECT
-      g.*,
-      ${returnHead ? `
-      ${this.memberCoalesceSql({}, true)},
-      ` : ''}
-      gt.name AS type_name,
-      gt.part_of_org
-    FROM
-      groups g
-    LEFT JOIN group_types gt on g.type = gt.id
-    ${returnHead ? `
-    LEFT JOIN group_membership gm on g.id = gm.group_id
-    ` : ''}
-    `;
-
-    if ( q.active ) whereParams['g.archived'] = "FALSE";
-    if ( q.archived ) whereParams['g.archived'] = String(q["archived"]).toUpperCase();
-    if ( q.group_type ) whereParams['g.type'] = q.group_type;
-    if ( q.type_name ) whereParams['gt.name'] = q.type_name;
-    if ( q.name ) whereParams['g.name'] = q.name;
-    if ( q.parent_group ) whereParams['parent_id'] = q.parent_group;
-    if ( q.name_short ) whereParams['g.name_short'] = q.name_short;
-    if ( q.org ) whereParams['gt.part_of_org'] = String(q["org"]).toUpperCase();
-
-    const whereClause = pg.toWhereClause(whereParams);
-
-    if ( whereClause.sql ) {
-      text = `${text} WHERE ${whereClause.sql}`;
-    }
-
-    if ( q.parent ) {
-      if(text.includes("WHERE"))
-        text += " AND g.parent_id IS NULL"
-      else
-        text += "WHERE g.parent_id IS NULL"
-    }
-    if ( q.child ) {
-      if(text.includes("WHERE"))
-        text += " AND g.parent_id IS NOT NULL"
-      else
-        text += "WHERE g.parent_id IS NOT NULL"
-    }
-
-    if ( returnHead ){
-      text += ' GROUP BY g.id, gt.id';
-    }
-
-    return await pg.query(text, whereClause.values);
+   * @description Query groups with no id filter
+   * @param {GroupQueryOptions} [options={}]
+   * @returns {Promise}
+   */
+  async query(options={}){
+    return this.getById([], options);
   }
 
 
@@ -111,15 +61,9 @@ class UcdlibGroups{
 
   /**
    * @description Get group by id or list of ids
-   * @param {*} ids - Number or array of numbers
-   * @param {*} options - Options object where keys are options:
-   * - returnHead (bool) - If true, returns head(s) of group
-   * - returnMembers (bool) - If true, returns members of group
-   * - returnParent (bool) - If true, returns parent of group
-   * - returnChildren (bool) - If true, returns children of group
-   * - filterById (Array) - List of group ids to filter by - is superceded by ids
-   * - filterActive (bool) - If true, only returns active groups
-   * - filterArchived (bool) - If true, only returns archived groups
+   * @param {Number|Array} ids - Number or array of numbers
+   * @param {GroupQueryOptions} [options={}]
+   * @returns {Promise}
    */
   async getById(ids, options={}){
     const params = [];
@@ -152,6 +96,10 @@ class UcdlibGroups{
     filterByGroupType = filterByGroupType.filter(x => x);
     const groupTypeOffset = params.length;
     params.push(...filterByGroupType);
+
+    const filterByName = options.filterByName || '';
+    const nameOffset = params.length;
+    if ( filterByName ) params.push(`%${filterByName}%`);
 
     let text = `
     SELECT
@@ -187,6 +135,7 @@ class UcdlibGroups{
     ${filterPartOfOrg ? ` AND gt.part_of_org = TRUE` : ''}
     ${filterNotPartOfOrg ? ` AND gt.part_of_org = FALSE` : ''}
     ${filterByGroupType.length ? ` AND gt.id IN ${pg.valuesArray(filterByGroupType, groupTypeOffset)}` : ''}
+    ${filterByName ? ` AND (g.name ILIKE $${nameOffset + 1} OR g.name_short ILIKE $${nameOffset + 1})` : ''}
     ${groupBys.length ?
       `GROUP BY ${groupBys.join(',')}`
       : ''}

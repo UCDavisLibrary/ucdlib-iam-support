@@ -8,6 +8,16 @@ class RequestsIsoUtils {
     this.record = record;
   }
 
+  get employeeFullName(){
+    const ad = this.additionalData;
+    return `${ad.employeeFirstName || ''} ${ad.employeeLastName || ''}`.trim();
+
+  }
+
+  get additionalData(){
+    return this.record?.additionalData || this.record?.additional_data || {};
+  }
+
   /**
    * @description The record has at least one unique identifier for the employee
    * @returns {Boolean}

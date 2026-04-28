@@ -197,6 +197,7 @@ class UcdlibEmployees {
       ${departmentIds.length ? 'LEFT JOIN group_membership as gm2 on e.id = gm2.employee_key' : ''}
       WHERE
         (NOT g.archived OR g.archived IS NULL)
+        ${filters.hasCustomSupervisor ? ' AND e.custom_supervisor IS TRUE' : ''}
     `;
     for (let name of names) {
       name = name.trim();
@@ -261,12 +262,37 @@ class UcdlibEmployees {
     return await pg.query(text, params);
   }
 
-  async getDirectReports(iamId){
-    const params = [iamId];
+  /**
+   * @description Returns all direct reports for a given supervisor
+   * @param {String} id - supervisor id
+   * @param {String} idType - id, iamId, employeeId, userId, email
+   * @param {Object} options - options object with the following properties:
+   * @param {Boolean} options.returnGroups - return each employee's groups
+   * @returns
+   */
+  async getDirectReports(id, idType='id', options={}){
+    if ( !Array.isArray(id) ) id = [id];
+    const params = id;
+    const { returnGroups } = options;
+
+    const supervisorWhere = idType === 'iamId'
+      ? `e.supervisor_id IN ${pg.valuesArray(params)}`
+      : `e.supervisor_id IN (SELECT iam_id FROM employees WHERE ${textUtils.underscore(idType)} IN ${pg.valuesArray(params)})`;
+
     const text = `
-      SELECT *
-      FROM employees
-      WHERE supervisor_id = $1
+      SELECT e.*
+      ${returnGroups ? `, json_agg(${this.groupJson()}) as groups` : ''}
+      FROM employees as e
+      ${returnGroups ? `
+        LEFT JOIN group_membership as gm on e.id = gm.employee_key
+        LEFT JOIN groups as g on gm.group_id = g.id
+        LEFT JOIN group_types as gt on g.type = gt.id
+      ` : ''}
+      WHERE
+        ${supervisorWhere}
+        ${returnGroups ? 'AND (NOT g.archived OR g.archived IS NULL)' : ''}
+      ${returnGroups ? 'GROUP BY e.id' : ''}
+      ORDER BY e.last_name, e.first_name
     `;
     return await pg.query(text, params);
   }
@@ -281,6 +307,52 @@ class UcdlibEmployees {
       ON CONFLICT DO NOTHING
     `;
     return await pg.query(text, params);
+  }
+
+  /**
+   * @description Assign employee to department group. This will remove employee from any other department groups, but will not affect membership in non-department groups.
+   * @param {String} employeeId - the employee's ID
+   * @param {String} departmentId - the department group ID
+   * @param {Object} options - options object
+   * @param {String} options.employeeIdType - the type of employee ID provided (id, iamId, employeeId, userId, email). Default is 'id'.
+   * @param {Boolean} options.isHead - whether the employee is head of the department group. Default is false.
+   * @returns {Promise}
+   */
+  async assignToDepartment(employeeId, departmentId, options={}){
+    const employeeIdType = options.employeeIdType || 'id';
+    const isHead = options.isHead ? true : false;
+
+    let client = await pg.pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      let employeeKey = await client.query(`
+        SELECT id FROM employees WHERE ${textUtils.underscore(employeeIdType)} = $1
+      `, [employeeId]);
+      if ( !employeeKey.rows.length ) throw new Error('Employee not found');
+      employeeKey = employeeKey.rows[0].id;
+
+      await client.query(`
+        DELETE FROM group_membership
+        USING groups g
+        WHERE group_membership.group_id = g.id
+          AND g.type = 1
+          AND group_membership.employee_key = $1
+      `, [employeeKey]);
+
+      const addDepartmentRes = await client.query(`
+        INSERT INTO group_membership (employee_key, group_id, is_head)
+        VALUES ($1, $2, $3) RETURNING *
+      `, [employeeKey, departmentId, isHead]);
+
+      await client.query('COMMIT');
+      return { res: addDepartmentRes.rows[0] };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      return { error };
+    } finally {
+      client.release();
+    }
   }
 
   async removeEmployeeFromGroup(employeeTableId, groupId){

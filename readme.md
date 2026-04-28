@@ -46,7 +46,7 @@ To get this application up and running for the first time:
 2. Checkout the branch you want to work on.
 3. Run `./deploy/cmds/init-local-dev.sh`
 4. Review the env file downloaded to `./deploy/compose/ucdlib-iam-support-local-dev`
-5. Run `./deploy/cmds/build-local-dev.sh main` to build image
+5. Run `./deploy/cmds/build-local-dev.sh sandbox` to build image
 6. Enter `./deploy/compose/ucdlib-iam-support-local-dev`, and run `docker compose up -d`
 7. `./deploy/cmds/start-app.sh` to start the web application
 8. `./deploy/cmds/watch-client.sh` to start the web application client watch process

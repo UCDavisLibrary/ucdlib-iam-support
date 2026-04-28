@@ -1,5 +1,6 @@
 import { RT, RTTicket } from '@ucd-lib/rt-api';
 import models from '#models';
+import config from '#lib/utils/config.js';
 
 class UcdlibRt {
 
@@ -121,6 +122,29 @@ class UcdlibRtTicket extends RTTicket {
       'User Id (kerberos)': ad.employeeUserId || '????',
       'UCD IAM ID': request.iamId || request.iam_id || '????'
     }, false);
+  }
+
+  addBasicRequestInfo(request, correspondence){
+    if ( !request ) return;
+    const isSeparation = request.is_existing_employee === undefined && request.isExistingEmployee === undefined;
+    const ad = request.additional_data || request.additionalData || {};
+    const employeeName = `${ad.employeeLastName || ''}, ${ad.employeeFirstName || ''}`;
+    const recordUrl = `${config.app.baseUrl}/${isSeparation ? 'separation' : 'onboarding'}/${request.id}`;
+    const content = {
+      'Name': employeeName,
+      [`${isSeparation ? 'Separation' : 'Onboarding'} Record`]: `<a href=${recordUrl}>${recordUrl}</a>`
+    }
+    const rtTicketId = request.rtTicketId || request.rt_ticket_id;
+    if ( rtTicketId ) {
+      const url = `${config.rt.url}/Ticket/Display.html?id=${rtTicketId}`;
+      content['Rt Ticket'] = `<a href="${url}">${url}</a>`;
+    }
+
+    if ( correspondence ){
+      correspondence.addContent(content, false);
+    } else {
+      this.addContent(content, false);
+    }
   }
 
   /**

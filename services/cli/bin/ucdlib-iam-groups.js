@@ -8,18 +8,17 @@ const program = new Command();
 program
   .command('list')
   .alias('ls')
-  .description('List of library departments/groups')
-  .option('-act, --active', 'Active Groups', false)
-  .option('-arc, --archived', 'Only Archived Groups', false)
-  .option('-g, --group_type <type>',  'group type by id')
-  .option('-n, --name <char>',  'group by character name')
-  .option('-ns, --name_short <char>',  'group by character name')
-  .option('-tn, --type_name <char>',  'group by character name')
-  .option('-o, --org', 'Part of Organization', false)
-  .option('-pg, --parent_group <type>', 'parent group by id')
-  .option('-p, --parent', 'A parent table', false)
-  .option('-c, --child', 'A child table', false)
-  .option('--return_head', 'Return head of group', false)
+  .alias('query')
+  .description('List or query library departments/groups')
+  .option('-a, --active', 'Only active groups (use --no-active for archived only)')
+  .option('-i, --id <ids...>', 'Filter by group id(s)')
+  .option('-g, --group_type <type>', 'Filter by group type id')
+  .option('-n, --name <char>', 'Case-insensitive substring filter against group name or short name')
+  .option('-o, --org', 'Only groups that are part of the org', false)
+  .option('-p, --parent', 'Include parent group in results', false)
+  .option('-c, --child', 'Include child groups in results', false)
+  .option('--head', 'Include head of group in results', false)
+  .option('-m, --member', 'Include members of group in results. Cannot be used with --head', false)
   .action((options) => {
     groups.list(options);
   });
@@ -60,9 +59,20 @@ program
   .argument('<group_id>', 'group id')
   .argument('<employee_id>', 'Employee unique indentifier. See idtype option for possible values')
   .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(utils.employeeIds).default('iamId'))
-  .option('-f, --force', 'Force removal of employee', false)
+  .option('-f, --force', 'Force addition of employee', false)
   .action((group_id, employee_id, options) => {
     groups.addMember(group_id, employee_id, options);
+  });
+
+program
+  .command('add-department-member')
+  .description('Assign employee to a department group, removing them from any other departments')
+  .argument('<group_id>', 'Department group id')
+  .argument('<employee_id>', 'Employee unique identifier. See idtype option for possible values')
+  .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(utils.employeeIds).default('iamId'))
+  .option('--head', 'Set employee as head of department', false)
+  .action((group_id, employee_id, options) => {
+    groups.addDepartmentMember(group_id, employee_id, options);
   });
 
 program

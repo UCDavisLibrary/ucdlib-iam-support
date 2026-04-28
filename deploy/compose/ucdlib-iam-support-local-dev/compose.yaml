@@ -118,6 +118,11 @@ services:
       - .env
     depends_on:
       - db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
     environment:
       PGUSER: 'postgres'
       PGHOST: 'db'

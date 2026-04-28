@@ -1,5 +1,5 @@
 x-variables:
-  main-image: &main-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support:v2.0.2
+  main-image: &main-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support:v2.1.0
 services:
   app:
     image: *main-image
@@ -98,6 +98,11 @@ services:
       PGHOST: 'db'
       PGDATABASE: 'postgres'
       PGPORT: 5432
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
     depends_on:
       - db
     command: /services/maintenance/entrypoint.sh
