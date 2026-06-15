@@ -194,7 +194,7 @@ export default class UcdlibIamApp extends Mixin(LitElement)
   const silentCheckSsoRedirectUri = window.location.origin + '/silent-check-sso.html';
 
   // set up listeners keycloak listeners
-  // kc.onAuthRefreshError = () => {AuthModel.logout(true);};
+  kc.onAuthRefreshError = () => {AuthModel.logout(true);};
   kc.onAuthError = () => {AuthModel.redirectUnauthorized();};
   kc.onAuthSuccess = () => {
     customElements.define('ucdlib-iam-app', UcdlibIamApp);
