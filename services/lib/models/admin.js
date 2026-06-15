@@ -615,11 +615,11 @@ class iamAdmin {
     }
     let separationDate = record.separation_date;
     if ( !separationDate ) {
-      out.log.message = 'No separation date found';
+      out.log.message = 'Last Day of System Access not found';
       return out;
     }
     if ( record.submitted && record.submitted > separationDate ) {
-      out.log.message = 'Separation date is before submitted date';
+      out.log.message = 'Last Day of System Access is before submitted date';
       return out;
     }
     let separationDay = separationDate.toISOString().split('T')[0];
@@ -628,7 +628,7 @@ class iamAdmin {
     dayAfter.setDate(dayAfter.getDate() + 1);
     const now = new Date();
     if ( dayAfter > now ) {
-      out.log.message = 'Separation date is in the future';
+      out.log.message = 'Last Day of System Access is in the future';
       return out;
     }
 
@@ -654,8 +654,8 @@ class iamAdmin {
     const rtClient = new models.rt(rtConfig);
     const ticket = new models.rtTicket(false, {id: rtTicketId});
     const reply = ticket.createReply();
-    reply.addSubject('Reminder: Employee Separation Date');
-    reply.addContent(`This is just a reminder for ITIS administrators that the separation date (${separationDay}) for ${employeeName} has passed.`);
+    reply.addSubject('Reminder: Employee\'s Last Day of System Access');
+    reply.addContent(`This is just a reminder for ITIS administrators that the last day of system access (${separationDay}) for ${employeeName} has passed.`);
     reply.addContent('Please update the employee record and any access control lists accordingly.');
     const rtResponse = await rtClient.sendCorrespondence(reply);
     if ( rtResponse.err )  {

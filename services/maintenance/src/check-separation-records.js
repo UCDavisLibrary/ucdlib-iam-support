@@ -9,7 +9,7 @@ function SeparationStatusError(error) {
 /**
  * @description Reviews all active separation records and
  * - checks if the RT ticket has been resolved, in which case the status is updated
- * - sends reminder comment on separation date
+ * - sends reminder comment on Last Day of System Access
  * @param {Boolean} logError - if true, will simply throw an error instead of sending message to slack
  * @param {Boolean} saveToDB - if true, will save a record of the run to the jobs table
  */
