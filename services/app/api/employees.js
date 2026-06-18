@@ -8,7 +8,8 @@ export default (api) => {
    * Returns blank array if no reports
    */
   api.get('/employees/direct-reports', async (req, res) => {
-    const iamId = req.auth.token.iamId;
+    const iamId = req.query.iamId || req.auth.token.iamId;
+
     if ( !iamId ) {
       res.json([]);
       return;

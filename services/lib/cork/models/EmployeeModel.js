@@ -21,9 +21,11 @@ class EmployeeModel extends BaseModel {
 
   /**
    * @description Returns all direct reports for the current user
+   * @param {String} iamId - optional, defaults to current user
+   * @returns {Object} {total, results}
    */
-  getDirectReports(){
-    return this.service.getDirectReports();
+  getDirectReports(iamId=''){
+    return this.service.getDirectReports(iamId);
   }
 
   /**

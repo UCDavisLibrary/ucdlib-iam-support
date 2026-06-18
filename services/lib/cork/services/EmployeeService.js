@@ -13,7 +13,7 @@ class EmployeeService extends BaseService {
     return `/api/employees`;
   }
 
-  async getDirectReports(){
+  async getDirectReports(iamId=''){
     const store = this.store.data.directReports;
     const id = 'directReports';
 
@@ -21,6 +21,7 @@ class EmployeeService extends BaseService {
       id, store,
       () => this.request({
         url : `${this.baseUrl}/direct-reports`,
+        qs: { iamId },
         checkCached : () => store.get(id),
         onUpdate : resp => this.store.set(
           {...resp, id},
