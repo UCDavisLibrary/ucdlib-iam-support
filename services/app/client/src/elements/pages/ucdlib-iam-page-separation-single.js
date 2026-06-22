@@ -160,10 +160,14 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
    * @returns {String}
    */
   getDepartmentHead(){
-    let groups = this.request?.additionalData?.groups || [];
+    const groups = this.request?.additionalData?.groups;
 
-    let deptHead = groups.find(g => {return (g.type === 'Department' && g.partOfOrg)});
-    return deptHead.isHead ? 'Yes' : 'No';
+    if( !Array.isArray(groups) ) return '';
+
+    const deptGroup = groups.find(g => {return (g?.type === 'Department' && g?.partOfOrg)});
+
+    if ( !deptGroup ) return '';
+    return deptGroup?.isHead ? 'Yes' : 'No';
   }
 
   /**
