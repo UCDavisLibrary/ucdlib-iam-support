@@ -8,7 +8,17 @@ export default (api) => {
    * Returns blank array if no reports
    */
   api.get('/employees/direct-reports', async (req, res) => {
-    const iamId = req.query.iamId || req.auth.token.iamId;
+    const tokenIamId = req.auth.token.iamId;
+    const queryIamId = req.query.iamId;
+
+    if (queryIamId !== undefined && typeof queryIamId !== 'string') {
+      return res.status(400).json({
+        error: true,
+        message: 'iamId must be a string'
+      });
+    }
+
+    const iamId = queryIamId || tokenIamId;
 
     if ( !iamId ) {
       res.json([]);
