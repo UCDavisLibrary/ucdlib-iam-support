@@ -655,7 +655,7 @@ class iamAdmin {
     const ticket = new models.rtTicket(false, {id: rtTicketId});
     const reply = ticket.createReply();
     reply.addSubject('Reminder: Employee\'s Last Day of System Access');
-    reply.addContent(`This is just a reminder for ITIS administrators that the last day of system access (${separationDay}) for ${employeeName} has passed.`);
+    reply.addContent(`This is just a reminder for ITIS administrators that the Last Day of System Access (${separationDay}) for ${employeeName} has passed.`);
     reply.addContent('Please update the employee record and any access control lists accordingly.');
     const rtResponse = await rtClient.sendCorrespondence(reply);
     if ( rtResponse.err )  {
