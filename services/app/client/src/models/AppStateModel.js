@@ -25,6 +25,7 @@ class AppStateModelImpl extends AppStateModel {
   set(update) {
     if ( update.location.path.length && update.location.path[0] == 'logout' ){
       this.AuthModel.logout();
+      return;
     }
 
     const modals = document?.querySelectorAll?.('ucdlib-iam-modal');
