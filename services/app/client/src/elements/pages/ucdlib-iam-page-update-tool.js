@@ -286,6 +286,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     if(!deptHeadIam || this.iamId == deptHeadIam) {
       this.resetDepartmentChecks();
       this.isHead = true;
+      this.requestUpdate();
       return;
     }
 
@@ -304,7 +305,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
   resetDepartmentChecks(){
     this.disabledSubmit = false;
     this.deptHeadConflict = false;
-    this.requestUpdate();
   }
 
 
