@@ -24,7 +24,6 @@ export function render() {
               <div><label class='u-inline'>IAM ID:</label> ${r.iamId}</div>
               <br>
             `)}
-         </div>
         </div>
         <div class="panel panel--icon panel--icon-custom o-box panel--icon-delta">
           <h2 class="panel__title"><span class="panel__custom-icon fas fa-sitemap"></span>Supervisor</h2>
