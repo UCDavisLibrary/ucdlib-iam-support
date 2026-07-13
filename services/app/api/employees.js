@@ -9,16 +9,9 @@ export default (api) => {
    */
   api.get('/employees/direct-reports', async (req, res) => {
     const tokenIamId = req.auth.token.iamId;
-    const queryIamId = req.query.iamId;
 
-    if (queryIamId !== undefined && typeof queryIamId !== 'string') {
-      return res.status(400).json({
-        error: true,
-        message: 'iamId must be a string'
-      });
-    }
 
-    const iamId = queryIamId || tokenIamId;
+    const iamId = tokenIamId;
 
     if ( !iamId ) {
       res.json([]);

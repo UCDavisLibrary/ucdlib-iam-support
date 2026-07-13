@@ -24,8 +24,8 @@ class EmployeeModel extends BaseModel {
     * @param {String} iamId - optional supervisor IAM id; defaults to current user when omitted/blank
     * @returns {Array<Object>} direct report employee records
    */
-  getDirectReports(iamId=''){
-    return this.service.getDirectReports(iamId);
+  getDirectReports(){
+    return this.service.getDirectReports();
   }
 
   /**

@@ -273,7 +273,7 @@ export default (api) => {
 
       // separate department head if applicable
       const departmentSeparationResult = await models.admin.separateDepartmentHead(separationId);
-
+      console.log('departmentSeparationResult', departmentSeparationResult);
       if ( departmentSeparationResult.error ) {
         console.error(departmentSeparationResult.message);
         return res.status(400).json({

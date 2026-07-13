@@ -72,7 +72,7 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     this.supervisorEmail = '';
     this.employeeRecord = {};
     this.supervisor = {};
-    this.employeeNewHead = {};
+    this.employeeNewHead = null;
     this.notes = '';
     this.isDepartmentHead = false;
   }
@@ -191,20 +191,23 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     if ( e.detail.employee ){
       const newHeadEmployee = e.detail.employee;
       const employeeNewHeadGroups = newHeadEmployee.groups.filter(g => g.type === 'Department');
-      if ( employeeNewHeadGroups.length > 0 
-           && this.employeeRecord.groups.some(
-              g => g.type === 'Department' 
-              && g.id === employeeNewHeadGroups[0].id) )
-      {
+
+
+      if (employeeNewHeadGroups.length > 0 &&
+          employeeNewHeadGroups.some(headGroup => 
+          this.employeeRecord.groups.some(
+              g => g.type === 'Department' && g.id === headGroup.id
+          )
+      )) {
         this.employeeNewHead = newHeadEmployee;
       } else {
         let msg = 'New department head must be in the same department as the separated employee.';
         this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
-        delete this.employeeNewHead;
+        this.employeeNewHead = null;
         return;
       }
     } else {
-      delete this.employeeNewHead;
+      this.employeeNewHead = null;
     }
   }
 
@@ -236,8 +239,8 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
   async _onSubmit(e){
     e.preventDefault();
     
-    if(this.isDepartmentHead && !this.employeeNewHead){ 
-      let msg = 'New Department Head either needs to be selected or the new selected department head needs to be in the same department as the separated employee.';
+    if ( this.isDepartmentHead && !this.employeeNewHead?.iamId ) { 
+      const msg = 'New Department Head must be selected and must be in the same department as the separated employee.';
       this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
       return;
     }
