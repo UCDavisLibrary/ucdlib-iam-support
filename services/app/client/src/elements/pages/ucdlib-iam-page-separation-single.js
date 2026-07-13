@@ -31,7 +31,8 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
       notes: {state: true},
       missingUid: {state: true},
       reconId: {state: true},
-      showDeprovisionButton: {state: true}
+      showDeprovisionButton: {state: true},
+      employeeNewHead: {state: true}
     };
   }
 
@@ -56,6 +57,7 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     this.rtTicketId = '';
     this.employeeUserId = '';
     this.employeeId = '';
+    this.employeeNewHead = null;
     this.showDeprovisionButton = false;
 
     this.ctl = {
@@ -106,6 +108,8 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     this.missingUid = payload.statusId == 9;
     const ad = payload.additionalData;
     this.request = payload;
+    console.log('Separation request payload:', payload);
+    this.employeeNewHead = ad?.employeeNewHead || null;
     this.iamId = payload.iamId || '';
     this.firstName = ad?.employeeFirstName || '';
     this.lastName = ad?.employeeLastName || '';

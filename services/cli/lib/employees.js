@@ -40,66 +40,74 @@ class employeesCli {
    * @returns
    */
   async separate(separationId, options){
-    const systemAccessRecord = new models.SystemAccessRecord();
+    // const systemAccessRecord = new models.SystemAccessRecord();
 
-    // make sure separation request and employee record exist
-    const {
-      error: recordExistsError,
-      message: recordExistsMessage,
-      separationRecord,
-      employeeRecord
-    } = await models.separation.getEmployeeRecord(separationId);
-    if ( recordExistsError ) {
-      console.error(recordExistsMessage);
+    // // make sure separation request and employee record exist
+    // const {
+    //   error: recordExistsError,
+    //   message: recordExistsMessage,
+    //   separationRecord,
+    //   employeeRecord
+    // } = await models.separation.getEmployeeRecord(separationId);
+    // if ( recordExistsError ) {
+    //   console.error(recordExistsMessage);
+    //   await pg.pool.end();
+    //   return;
+    // }
+
+    // // deprovision keycloak account
+    // if ( options.deprovision ){
+    //   const userId = employeeRecord.user_id || separationRecord.additional_data?.employeeUserId;
+    //   const { error: deprovisionError, message: deprovisionMessage, keycloakUser } = await models.admin.deprovisionKcAccount(userId);
+    //   if ( deprovisionError ) {
+    //     console.error(deprovisionMessage);
+    //     await pg.pool.end();
+    //     return;
+    //   }
+    //   systemAccessRecord.add('ucdlib-keycloak', 'cli');
+    //   console.log(`User removed from ${config.keycloakAdmin.baseUrl}`);
+    //   utils.logObject(keycloakUser);
+    // }
+
+
+    const departmentSeparationResult = await models.admin.separateDepartmentHead(separationId);
+    if ( departmentSeparationResult.error ) {
+      console.error(departmentSeparationResult.message);
       await pg.pool.end();
       return;
     }
 
-    // deprovision keycloak account
-    if ( options.deprovision ){
-      const userId = employeeRecord.user_id || separationRecord.additional_data?.employeeUserId;
-      const { error: deprovisionError, message: deprovisionMessage, keycloakUser } = await models.admin.deprovisionKcAccount(userId);
-      if ( deprovisionError ) {
-        console.error(deprovisionMessage);
-        await pg.pool.end();
-        return;
-      }
-      systemAccessRecord.add('ucdlib-keycloak', 'cli');
-      console.log(`User removed from ${config.keycloakAdmin.baseUrl}`);
-      utils.logObject(keycloakUser);
-    }
+    // // remove employee record from local database
+    // if ( options.rm ) {
+    //   const {
+    //     error: rmError,
+    //     message: rmMessage,
+    //     directReports,
+    //     isHeadOf
+    //   } = await models.admin.deleteEmployeeRecord(employeeRecord.iam_id, options);
+    //   if ( rmError ) {
+    //     console.error(rmMessage);
+    //     if ( rmError === 'directReports') {
+    //       utils.printTable(directReports, ['id', 'iam_id', 'first_name', 'last_name']);
+    //     } else if ( rmError === 'isHeadOf' ) {
+    //       utils.printTable(isHeadOf);
+    //     }
+    //     await pg.pool.end();
+    //     return;
+    //   }
+    //   systemAccessRecord.add('ucdlib-iam-db', 'cli');
+    //   console.log(`Employee record removed:`);
+    //   utils.logObject(employeeRecord);
+    // }
 
-    // remove employee record from local database
-    if ( options.rm ) {
-      const {
-        error: rmError,
-        message: rmMessage,
-        directReports,
-        isHeadOf
-      } = await models.admin.deleteEmployeeRecord(employeeRecord.iam_id, options);
-      if ( rmError ) {
-        console.error(rmMessage);
-        if ( rmError === 'directReports') {
-          utils.printTable(directReports, ['id', 'iam_id', 'first_name', 'last_name']);
-        } else if ( rmError === 'isHeadOf' ) {
-          utils.printTable(isHeadOf);
-        }
-        await pg.pool.end();
-        return;
-      }
-      systemAccessRecord.add('ucdlib-iam-db', 'cli');
-      console.log(`Employee record removed:`);
-      utils.logObject(employeeRecord);
-    }
+    // await systemAccessRecord.writeToSeparationRequest(separationId);
 
-    await systemAccessRecord.writeToSeparationRequest(separationId);
+    // // comment on rt ticket
+    // if ( options.rt ) {
+    //   await models.admin.sendSeparationNotification(separationRecord.rt_ticket_id);
+    // }
 
-    // comment on rt ticket
-    if ( options.rt ) {
-      await models.admin.sendSeparationNotification(separationRecord.rt_ticket_id);
-    }
-
-    await pg.pool.end();
+    // await pg.pool.end();
   }
 
   /**

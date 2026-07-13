@@ -57,6 +57,14 @@ export function renderSubmissionForm(){
               <label for="sp-separation-date">Date of Separation <abbr title="Required">*</abbr></label>
               <input id='sp-separation-date' type="date" required .value=${this.separationDate} @input=${(e) => {this.separationDate = e.target.value;}}>
             </div>
+            <div class="field-container" ?hidden=${!this.isDepartmentHead}>
+              <label for="sp-department-head">New Department Head <abbr title="Required">*</abbr></label>
+              <ucdlib-employee-search
+                class='u-space-mb'
+                @status-change=${this._onDepartmentHeadChange}
+                hide-label>
+              </ucdlib-employee-search>
+            </div>
           </section>
         </div>
       </div>

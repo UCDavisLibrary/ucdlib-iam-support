@@ -30,7 +30,7 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
       employeeRecord: {state:true},
       skipSupervisor: {state: true},
       skipFacilities: {state: true},
-
+      isDepartmentHead: {state: true},
     };
   }
 
@@ -72,7 +72,9 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     this.supervisorEmail = '';
     this.employeeRecord = {};
     this.supervisor = {};
+    this.employeeNewHead = {};
     this.notes = '';
+    this.isDepartmentHead = false;
   }
 
   /**
@@ -136,6 +138,7 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
   _onEmployeeStatusChange(e){
     if ( e.detail.employee ){
       this.employeeRecord = e.detail.employee;
+      this._isDepartmentHead();
     } else {
       this.employeeRecord = {};
     }
@@ -167,7 +170,43 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     this.AppStateModel.setLocation('#submission');
   }
 
+  /**
+   * @description Checks if the employee is a department head
+   * @returns {boolean}
+   */
+  async _isDepartmentHead(){
+    const groups = this.employeeRecord.groups;
+    if ( !groups || !groups.length ) return false;
 
+    this.isDepartmentHead = groups.some(g => g.type === 'Department' && g.isHead === true);
+    return this.isDepartmentHead;
+  }
+
+  /**
+   * @description Attached to ucdlib-employee-search element in new separation page. 
+   * Fires when the state changes
+   * @param {*} e
+   */
+  _onDepartmentHeadChange(e){
+    if ( e.detail.employee ){
+      const newHeadEmployee = e.detail.employee;
+      const employeeNewHeadGroups = newHeadEmployee.groups.filter(g => g.type === 'Department');
+      if ( employeeNewHeadGroups.length > 0 
+           && this.employeeRecord.groups.some(
+              g => g.type === 'Department' 
+              && g.id === employeeNewHeadGroups[0].id) )
+      {
+        this.employeeNewHead = newHeadEmployee;
+      } else {
+        let msg = 'New department head must be in the same department as the separated employee.';
+        this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
+        delete this.employeeNewHead;
+        return;
+      }
+    } else {
+      delete this.employeeNewHead;
+    }
+  }
 
   /**
    * @description Resets the employee lookup forms
@@ -196,6 +235,13 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
    */
   async _onSubmit(e){
     e.preventDefault();
+    
+    if(this.isDepartmentHead && !this.employeeNewHead){ 
+      let msg = 'New Department Head either needs to be selected or the new selected department head needs to be in the same department as the separated employee.';
+      this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
+      return;
+    }
+
     this.SeparationModel.create(this.payload());
   }
 
@@ -233,7 +279,6 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     if ( this.hasEmployeeRecord ){
       payload.iamId = this.employeeRecord.iamId;
     }
-
     payload.separationDate = this.separationDate;
     payload.supervisorId = this.supervisorId;
     payload.notes = this.notes;
@@ -254,6 +299,8 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     additionalData.employeeLastName = this.lastName;
     additionalData.employeeId = this.employeeId;
     additionalData.employeeUserId = this.userId;
+    this.employeeNewHead && this.employeeNewHead.iamId 
+      ? additionalData.newDepartmentHead = this.employeeNewHead.iamId : delete additionalData.newDepartmentHead;
 
     payload.additionalData = additionalData;
     return payload;

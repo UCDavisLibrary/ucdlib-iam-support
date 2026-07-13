@@ -259,42 +259,53 @@ export default (api) => {
         });
       }
 
-      // remove employee from keycloak
-      const userId = employeeRecord.user_id || separationRecord.additional_data?.employeeUserId;
-      const { error: deprovisionError, message: deprovisionMessage, keycloakUser } = await models.admin.deprovisionKcAccount(userId);
-      if ( deprovisionError ) {
-        console.error(deprovisionMessage);
+      // // remove employee from keycloak
+      // const userId = employeeRecord.user_id || separationRecord.additional_data?.employeeUserId;
+      // const { error: deprovisionError, message: deprovisionMessage, keycloakUser } = await models.admin.deprovisionKcAccount(userId);
+      // if ( deprovisionError ) {
+      //   console.error(deprovisionMessage);
+      //   return res.status(400).json({
+      //     error: true,
+      //     message: deprovisionMessage
+      //   });
+      // }
+      // systemAccessRecord.add('ucdlib-keycloak', req.auth.token.id);
+
+
+      const departmentSeparationResult = await models.admin.separateDepartmentHead(separationId);
+
+      if ( departmentSeparationResult.error ) {
+        console.error(departmentSeparationResult.message);
         return res.status(400).json({
           error: true,
-          message: deprovisionMessage
+          message: departmentSeparationResult.message
         });
       }
-      systemAccessRecord.add('ucdlib-keycloak', req.auth.token.id);
 
-      // remove employee from library iam db
-      const {
-        error: rmError,
-        message: rmMessage,
-        directReports,
-        isHeadOf
-      } = await models.admin.deleteEmployeeRecord(employeeRecord.iam_id);
-      if ( rmError ) {
-        console.error(rmMessage);
-        return res.status(400).json({
-          error: true,
-          message: rmMessage
-        });
-      }
-      systemAccessRecord.add('ucdlib-iam-db', req.auth.token.id);
+      // // remove employee from library iam db
+      // const {
+      //   error: rmError,
+      //   message: rmMessage,
+      //   directReports,
+      //   isHeadOf
+      // } = await models.admin.deleteEmployeeRecord(employeeRecord.iam_id);
+      // if ( rmError ) {
+      //   console.error(rmMessage);
+      //   return res.status(400).json({
+      //     error: true,
+      //     message: rmMessage
+      //   });
+      // }
+      // systemAccessRecord.add('ucdlib-iam-db', req.auth.token.id);
 
-      await systemAccessRecord.writeToSeparationRequest(separationId);
+      // await systemAccessRecord.writeToSeparationRequest(separationId);
 
-      const { rtSent } = await models.admin.sendSeparationNotification(separationRecord.rt_ticket_id);
+      // const { rtSent } = await models.admin.sendSeparationNotification(separationRecord.rt_ticket_id);
 
-      return res.json({
-        success: true,
-        rtSent
-      });
+      // return res.json({
+      //   success: true,
+      //   rtSent
+      // });
     });
 
     api.get('/separation', async (req, res) => {

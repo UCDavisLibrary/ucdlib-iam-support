@@ -519,6 +519,122 @@ class iamAdmin {
     return out;
   }
 
+  /**
+   * @description Separates a department head from their department and assigns a new department head
+   * @params {string} separationId - id of the separation record
+   * @returns {Object} - {error: boolean, message: string}
+   */
+  async separateDepartmentHead(separationId){
+
+    // check if separation record exists
+    let separationRecord = await models.separation.getById(separationId);
+    
+    if ( separationRecord.err ) {
+      out.error = true;
+      out.message = `Error retrieving separation record: ${separationRecord.err.message}`;
+      return out;
+    }
+    if ( !separationRecord.res.rows.length ){
+      out.error = true;
+      out.message = `No separation record found for id ${separationId}`;
+      return out;
+    }
+    separationRecord = separationRecord.res.rows[0];
+
+    // check if new department head is provided (newDepartmentHead is missing)
+    if( !separationRecord.additional_data?.newDepartmentHead ) {
+      out.error = true;
+      out.message = `No new department head provided for separation record ${separationId}.`;
+      return out;
+    }
+
+    let newHeadEmployee = await models.employees.getById(separationRecord.additional_data.newDepartmentHead, 'iamId', {returnGroups: true});
+
+    if( newHeadEmployee.err ) {
+      out.error = true;
+      out.message = `Error retrieving new department head employee record: ${newHeadEmployee.err.message}`;
+      return out;
+    }
+    if ( !newHeadEmployee.res.rows.length ) {
+      out.error = true;
+      out.message = `No employee record found for new department head with iamId ${separationRecord.additional_data.newDepartmentHead}`;
+      return out;
+    }
+
+    newHeadEmployee = newHeadEmployee.res.rows[0];
+
+    //check if its the department head
+    const isDepartmentHead = separationRecord.additional_data?.groups.some(g => g.type === 'Department' && g.isHead === true);
+
+    if ( !isDepartmentHead ) {
+      console.log(`Employee ${separationRecord.iam_id} is not a department head.`);
+      return {error: true, message: 'Employee is not a department head.'};
+    }
+
+    //check if new department head is provided (newDepartmentHead is missing)
+    if( !separationRecord.additional_data?.newDepartmentHead ) {
+      console.log(`No new department head provided for separation record ${separationId}.`);
+      return {error: true, message: 'No new department head provided.'};
+    }
+
+    //check if new department head is in the department
+    const departmentGroup = separationRecord.additional_data.groups.find(g => g.type === 'Department');
+    const isNewHeadInDepartment = newHeadEmployee.groups.some(g => g.id === departmentGroup.id);
+
+    if ( !isNewHeadInDepartment ) {
+      console.log(`New department head ${separationRecord.additional_data.newDepartmentHead} is not in the department id ${departmentGroup.id}.`);
+      return {error: true, message: 'New department head is not in the department.'};
+    }
+
+    //check if the department currently has a department head that is somebody other than the separating employee
+    const currentDepartmentObj = separationRecord.additional_data.groups.find(g => g.type === 'Department' && g.isHead === true);
+    const currentDepartmentId = currentDepartmentObj.id;
+
+    let departmentRecord = await models.groups.getById(currentDepartmentId, {returnHead: true});
+    if ( departmentRecord.err ) {
+      return {error: true, message: `Error retrieving department record: ${departmentRecord.err.message}`};
+    }
+    if ( !departmentRecord.res.rows.length ) {
+      return {error: true, message: `No department record found for id ${currentDepartmentId}`};
+    }
+    const currentDepartment = departmentRecord.res.rows;
+
+      for (const dept of currentDepartment) {
+        if ( dept.head.length ) {
+          const currentHeads = dept.head; 
+
+          currentHeads.some(h => {
+            if ( h.iamId !== separationRecord.iam_id ) {
+              return {error: true, message: `Department ${dept.name} currently has a department head ${h.iam_id} that is not the separating employee ${separationRecord.iam_id}. Cannot proceed with separation and reassignment.`};
+            }
+        });
+      }
+      else {
+        console.log(`Department ${dept.name} does not currently have a department head. Proceeding with separation and reassignment.`);
+      }
+    }
+    
+    // remove the separated employee as department head (leave department membership intact)
+    models.groups.removeGroupHead(currentDepartmentId).then(result => {
+      if ( result.err ) {
+        console.error(`Error removing department head: ${result.err.message}`);
+        return {error: true, message: `Error removing department head: ${result.err.message}`};
+      }
+      console.log(`Removed employee ${separationRecord.iam_id} as department head from department ${currentDepartment[0].name}.`);
+    });
+
+    // add newDepartmentHead as department head
+    models.groups.setGroupHead(currentDepartmentId, newHeadEmployee.id).then(result => {
+      if ( result.err ) {
+        console.error(`Error setting new department head: ${result.err.message}`);
+        return {error: true, message: `Error setting new department head: ${result.err.message}`};
+      }
+      console.log(`Set employee ${separationRecord.additional_data.newDepartmentHead} as new department head for department ${currentDepartment[0].name}.`);
+    });
+
+    return {error: false, message: 'Department head separation and reassignment completed successfully.'};
+  }
+  
   async deleteEmployeeRecord(id, options={}){
     const out = {error: false, message: 'Unable to delete employee record'};
     const idType = options.idtype ? options.idtype : 'iamId';
