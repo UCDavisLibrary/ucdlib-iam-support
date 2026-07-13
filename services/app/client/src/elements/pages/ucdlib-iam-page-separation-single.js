@@ -108,8 +108,6 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     this.missingUid = payload.statusId == 9;
     const ad = payload.additionalData;
     this.request = payload;
-    console.log('Separation request payload:', payload);
-    this.employeeNewHead = ad?.employeeNewHead || null;
     this.iamId = payload.iamId || '';
     this.firstName = ad?.employeeFirstName || '';
     this.lastName = ad?.employeeLastName || '';
@@ -125,10 +123,21 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     this.status = payload.statusName || '';
     this.statusDescription = payload.statusDescription || '';
     this.removedFromSystems = ad?.removedFromSystems || [];
-    await this.getDirectReports();
+    await this.getNewDepartmentHead(ad?.newDepartmentHead);
 
     this.showDeprovisionButton = this.AuthModel.isAdmin &&
       (Array.isArray(ad?.removedFromSystems) && !ad.removedFromSystems.find(s => s?.value === 'ucdlib-iam-db'));
+  }
+
+  async getNewDepartmentHead(iamId){
+    if ( !iamId ) return;
+    const r = await this.EmployeeModel.get(iamId, "iamId");
+    if ( r.state === 'loaded' ){
+      this.employeeNewHead = r.payload.results?.[0] || null;
+    } else if ( r.state === 'error' ){
+      this.AppStateModel.showError('Error fetching new department head');
+      this.employeeNewHead = null;
+    }
   }
 
   /**
@@ -152,27 +161,6 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
       this.AppStateModel.store.breadcrumbs.separation,
       {text: this.pageTitle(), link: ''}
     ];
-  }
-
-  /**
-   * @description Get direct reports of separated employee for display if employee is currently in system.
-   */
-  async getDirectReports(){
-    const removedFromIamDb = Array.isArray(this.removedFromSystems) && this.removedFromSystems.find(s => s?.value === 'ucdlib-iam-db');
-    
-    if ( removedFromIamDb ) {
-       this.directReports = [];
-       return;
-    }
-    
-    const r = await this.EmployeeModel.getDirectReports(this.iamId);
-
-    if ( r.state === 'loaded' ){
-      this.directReports = r.payload;
-    } else if ( r.state === 'error' ){
-      this.AppStateModel.showError('Error fetching direct reports');
-      this.directReports = [];
-    }
   }
 
   /**
