@@ -111,6 +111,7 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     this.employeeId = ad?.employeeId || '';
     this.employeeUserId = ad?.employeeUserId || '';
     this.department = ad?.departmentName || '';
+    this.departmentHead = this.getDepartmentHead();
     this.rtTicketId = payload.rtTicketId || '';
     this.separationDate = dtUtls.fmtDatetime(payload.separationDate, {dateOnly: true, UTC: true, includeDayOfWeek: true});
     this.supervisorId = payload.supervisorId || '';
@@ -152,6 +153,21 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
    */
   openDeprovisionEmployeeConfirmModal(){
     this.querySelector('#ss-iam-deprovision-modal').show();
+  }
+
+  /**
+   * @description Gets Department Head from the separation request payload. Returns empty string if not found
+   * @returns {String}
+   */
+  getDepartmentHead(){
+    const groups = this.request?.additionalData?.groups;
+
+    if( !Array.isArray(groups) ) return '';
+
+    const deptGroup = groups.find(g => {return (g?.type === 'Department' && g?.partOfOrg)});
+
+    if ( !deptGroup ) return '';
+    return deptGroup?.isHead ? 'Yes' : 'No';
   }
 
   /**
