@@ -12,6 +12,9 @@ class AppStateModelImpl extends AppStateModel {
     this.defaultPage = 'home';
     this.currentPage = this.defaultPage;
     this.store = AppStateStore;
+
+    this.inject('AuthModel');
+
   }
 
   /**
@@ -21,7 +24,8 @@ class AppStateModelImpl extends AppStateModel {
    */
   set(update) {
     if ( update.location.path.length && update.location.path[0] == 'logout' ){
-      this.logout();
+      this.AuthModel.logout();
+      return;
     }
 
     const modals = document?.querySelectorAll?.('ucdlib-iam-modal');
