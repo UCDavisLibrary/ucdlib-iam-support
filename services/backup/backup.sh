@@ -16,7 +16,7 @@ fi
 
 # dump pg data
 echo "Generating sqldump file"
-pg_dump | gzip > $DATA_DIR/$SQL_FILE_NAME
+pg_dump --exclude-table-data=cache | gzip > $DATA_DIR/$SQL_FILE_NAME
 
 echo "uploading files to cloud bucket ${BACKUP_ENV}"
 gcloud auth login --quiet --cred-file=${GOOGLE_APPLICATION_CREDENTIALS}
