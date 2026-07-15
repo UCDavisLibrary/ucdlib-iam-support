@@ -81,7 +81,7 @@ export default (api) => {
       }, false);
       ticket.addContent(`<h4>Details</h4>`);
       ticket.addContent({
-        'Separation Date': payload.separationDate,
+        'Last Day of System Access': payload.separationDate,
         'Supervisor': `${ad.supervisorLastName}, ${ad.supervisorFirstName}`
       }, false);
       if ( payload.notes ){
