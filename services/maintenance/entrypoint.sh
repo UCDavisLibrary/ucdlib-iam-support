@@ -3,6 +3,7 @@
 # start the maintenance scripts
 if [[ $ENABLE_MAINTENANCE == 'true' ]]; then
   node /services/maintenance/src/sync-iam.js &
+  node /services/maintenance/src/jobs-cleanup.js &
   node /services/maintenance/src/discrepancy-notification.js
 fi
 

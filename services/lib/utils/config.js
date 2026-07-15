@@ -112,6 +112,10 @@ class Config {
       statusFailAfterInterval: this.getEnv('MAINTENANCE_STATUS_FAIL_AFTER_INTERVAL', '2 days')
     };
 
+    this.jobs = {
+      retentionInterval: this.getEnv('JOBS_RETENTION_INTERVAL', '90 days')
+    };
+
     this.api = {
       prefix: this.getEnv('UCDLIB_API_API_PREFIX', '/json'),
       hostPort: this.getEnv('UCDLIB_API_HOST_PORT', '')
@@ -119,7 +123,8 @@ class Config {
 
     this.cron = {
       iamSync: this.getEnv('CRON_IAM_SYNC', '0 8 * * *'),
-      discrepancyNotification: this.getEnv('CRON_DISCREPANCY_NOTIFICATION', '0 9 * * 5')
+      discrepancyNotification: this.getEnv('CRON_DISCREPANCY_NOTIFICATION', '0 9 * * 5'),
+      jobsCleanup: this.getEnv('CRON_JOBS_CLEANUP', '0 1 * * *')
     }
   }
 
