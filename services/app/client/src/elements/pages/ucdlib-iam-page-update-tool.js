@@ -112,7 +112,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     if ( e.detail.employee ){
       this.employeeRecord = e.detail.employee;
       this.hasEmployeeRecord = true;
-
     } else {
       this.employeeRecord = {};
       this.hasEmployeeRecord = false;
@@ -124,7 +123,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
 
   /**
    * @method reset
-   * @description resets all component state and reloads page
+   * @description resets all component state and returns page to search
    */
   reset(){
     this.employeeRecord = {};
@@ -140,7 +139,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this.iamId = '';
     this.isFetching = false;
     this.wasError = false;
-    this.page = 'employee-select';
     this.hideResults = false;
     this.discrepancy = [];
     this.dismissDiscrepancyList = [];
@@ -153,9 +151,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     this.departmentName = "department";
 
     this.resetDepartmentChecks();
-
-    window.location.reload();
-
+    this.page = 'employee-select';
 
     this.requestUpdate();
   }
@@ -290,6 +286,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     if(!deptHeadIam || this.iamId == deptHeadIam) {
       this.resetDepartmentChecks();
       this.isHead = true;
+      this.requestUpdate();
       return;
     }
 
@@ -308,7 +305,6 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
   resetDepartmentChecks(){
     this.disabledSubmit = false;
     this.deptHeadConflict = false;
-    this.requestUpdate();
   }
 
 
