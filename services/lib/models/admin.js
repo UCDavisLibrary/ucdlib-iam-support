@@ -547,10 +547,10 @@ class iamAdmin {
 
     // check if employee has direct reports
     const directReports = await models.employees.getDirectReports(iamId, 'iamId');
-    if ( directReports.res?.rowCount ) {
+    if ( directReports.res?.rowCount && !options.force ) {
       out.error = 'directReports';
       out.directReports = directReports.res.rows;
-      out.message = `${out.message} - Employee ${idType}:${id} has direct reports. Please remove direct reports first`;
+      out.message = `${out.message} - Employee ${idType}:${id} has direct reports. Please remove direct reports first. You can use --force to override this check.`;
       return out;
     }
 
