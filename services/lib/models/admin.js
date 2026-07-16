@@ -486,9 +486,13 @@ class iamAdmin {
   /**
    * @description Delete keycloak account for a user
    * @param {string} userId - user id (kerb) to deprovision
+   * @param {Object} opts - Options object
+   * @param {Boolean} opts.skipIfMissing - If true, treat a missing Keycloak account as a
+   *   successful no-op (out.skipped = true) instead of an error.
    * @returns
    */
-  async deprovisionKcAccount(userId){
+  async deprovisionKcAccount(userId, opts={}){
+    const { skipIfMissing } = opts;
     const out = {error: false, message: 'Unable to deprovision Keycloak account'};
     if ( !userId ) {
       out.error = true;
@@ -498,13 +502,17 @@ class iamAdmin {
     try {
       models.keycloakAdmin.resetState();
       await models.keycloakAdmin.init({...config.keycloakAdmin, refreshInterval: 58000});
-      let keycloakUser = await models.keycloakAdmin.getUserByUserName(userId);
+      const keycloakUser = await models.keycloakAdmin.getUserByUserName(userId);
       if ( !keycloakUser ) {
+        if ( skipIfMissing ) {
+          out.skipped = true;
+          out.message = `No Keycloak account found for user id ${userId} - skipping deprovisioning`;
+          return out;
+        }
         out.error = true;
         out.message = `${out.message} - No Keycloak user found with user id ${userId}`;
         return out;
       }
-      keycloakUser = keycloakUser[0];
       out.keycloakUser = keycloakUser;
       await models.keycloakAdmin.client.users.del({id: keycloakUser.id});
     } catch (e) {

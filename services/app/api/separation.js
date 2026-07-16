@@ -261,7 +261,7 @@ export default (api) => {
 
       // remove employee from keycloak
       const userId = employeeRecord.user_id || separationRecord.additional_data?.employeeUserId;
-      const { error: deprovisionError, message: deprovisionMessage, keycloakUser } = await models.admin.deprovisionKcAccount(userId);
+      const { error: deprovisionError, message: deprovisionMessage, skipped: deprovisionSkipped } = await models.admin.deprovisionKcAccount(userId, {skipIfMissing: true});
       if ( deprovisionError ) {
         console.error(deprovisionMessage);
         return res.status(400).json({
@@ -269,7 +269,11 @@ export default (api) => {
           message: deprovisionMessage
         });
       }
-      systemAccessRecord.add('ucdlib-keycloak', req.auth.token.id);
+      if ( deprovisionSkipped ) {
+        console.log(deprovisionMessage);
+      } else {
+        systemAccessRecord.add('ucdlib-keycloak', req.auth.token.id);
+      }
 
       // remove employee from library iam db
       const {
