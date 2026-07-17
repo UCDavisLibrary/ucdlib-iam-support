@@ -157,6 +157,9 @@ class AppStateModelImpl extends AppStateModel {
     } else if ( update.page === 'tools' ){
       title.show = this.store.pageTitles.tools ? true : false;
       title.text = this.store.pageTitles.tools;
+    } else if ( update.page === 'onboarding-reminders' ){
+      title.show = this.store.pageTitles.onboardingReminders ? true : false;
+      title.text = this.store.pageTitles.onboardingReminders;
     }
 
 
@@ -248,6 +251,10 @@ class AppStateModelImpl extends AppStateModel {
     else if ( update.page === 'tools' ){
       breadcrumbs.show = true;
       breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.tools);
+    }
+    else if ( update.page === 'onboarding-reminders' ){
+      breadcrumbs.show = true;
+      breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboardingReminders);
     }
 
     this.store.emit('app-header-update', {breadcrumbs});
