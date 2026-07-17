@@ -118,7 +118,7 @@ class Config {
 
     this.smtp = {
       host: this.getEnv('SMTP_HOST', 'smtp.lib.ucdavis.edu'),
-      port: this.getEnv('SMTP_PORT', 22),
+      port: this.getEnv('SMTP_PORT', 25),
       enabled: this.getEnv('SMTP_ENABLED', false),
       recipientOverride: this.getEnv('SMTP_RECIPIENT_OVERRIDE', '')
     };

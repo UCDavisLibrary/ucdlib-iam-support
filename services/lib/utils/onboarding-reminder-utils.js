@@ -16,10 +16,30 @@ class OnboardingReminderUtils {
 
     /** @type {Array<OnboardingReminderInterval>} */
     this.intervals = [
-      { slug: 'firstDayWeek',   label: 'First Day/First Week', phrase: 'their first day',        sqlInterval: '0 days' },
-      { slug: 'firstMonth',     label: 'First Month',          phrase: 'their first month',       sqlInterval: '14 days' },
-      { slug: 'firstSixMonths', label: 'First Six Months',     phrase: 'their first six months',  sqlInterval: '3 months' },
-      { slug: 'firstYear',      label: 'First Year',           phrase: 'their first year',        sqlInterval: '6 months' }
+      {
+        slug: 'firstDayWeek',
+        label: 'First Day/First Week',
+        phrase: 'their first day/week',
+        sqlInterval: '0 days' 
+      },
+      { 
+        slug: 'firstMonth',
+        label: 'First Month',
+        phrase: 'their first month',
+        sqlInterval: '14 days' 
+      },
+      { 
+        slug: 'firstSixMonths',
+        label: 'First Six Months',
+        phrase: 'their first six months',
+        sqlInterval: '3 months'
+      },
+      { 
+        slug: 'firstYear',
+        label: 'First Year',
+        phrase: 'their first year',
+        sqlInterval: '6 months'
+      }
     ];
   }
 }
