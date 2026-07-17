@@ -1,7 +1,7 @@
 import models from '#models';
 import onboardingReminderUtils from '#lib/utils/onboarding-reminder-utils.js';
 
-function defaultSettings(){
+function defaultOnboardingReminderSettings(){
   const intervals = {};
   onboardingReminderUtils.intervals.forEach(i => intervals[i.slug] = {disabled: false, checklistName: '', checklistLink: ''});
   return { fromEmail: '', intervals };
@@ -16,7 +16,7 @@ export default (api) => {
     if ( !req.auth.token.hasAdminAccess && !req.auth.token.hasHrAccess ){
       return res.status(403).json({error: true, message: 'Not authorized to access this resource.'});
     }
-    const settings = await models.config.getJson(onboardingReminderUtils.settingsKey, defaultSettings());
+    const settings = await models.config.getJson(onboardingReminderUtils.settingsKey, defaultOnboardingReminderSettings());
     res.json({
       intervals: onboardingReminderUtils.intervals.map(i => ({slug: i.slug, label: i.label})),
       settings

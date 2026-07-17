@@ -23,7 +23,7 @@ export default class UcdlibIamPageOnboardingReminders extends Mixin(LitElement)
     this.render = render.bind(this);
 
     this.intervals = [];
-    this.settings = { fromEmail: '', intervals: {} };
+    this.settings = this.freshSettings;
     this.saving = false;
 
     this.ctl = {
@@ -31,6 +31,10 @@ export default class UcdlibIamPageOnboardingReminders extends Mixin(LitElement)
     }
 
     this._injectModel('AppStateModel', 'ConfigModel', 'AuthModel');
+  }
+
+  get freshSettings() {
+    return { fromEmail: '', intervals: {} };
   }
 
   /**
@@ -55,19 +59,20 @@ export default class UcdlibIamPageOnboardingReminders extends Mixin(LitElement)
       this.AppStateModel.showError('You do not have permission to use this tool.');
       return;
     }
-
-    this.ctl.appComponent.showPage();
     await this._loadSettings();
+    this.ctl.appComponent.showPage();
   }
 
   /**
    * @description Loads onboarding reminder settings from the server
    */
   async _loadSettings() {
+    this.intervals = [];
+    this.settings = this.freshSettings;
     const r = await this.ConfigModel.getOnboardingReminderSettings();
     if ( r.state === 'loaded' ) {
-      this.intervals = r.payload.intervals || [];
-      this.settings = r.payload.settings || { fromEmail: '', intervals: {} };
+      if ( r.payload.intervals) this.intervals = r.payload.intervals;
+      if ( r.payload.settings ) this.settings = r.payload.settings;
     } else if ( r.state === 'error' ) {
       this.AppStateModel.showAlertBanner({message: 'Unable to load onboarding reminder settings.', brandColor: 'double-decker'});
     }
@@ -100,8 +105,8 @@ export default class UcdlibIamPageOnboardingReminders extends Mixin(LitElement)
     const r = await this.ConfigModel.updateOnboardingReminderSettings(this.settings);
     this.saving = false;
     if ( r.state === 'loaded' ) {
-      this.settings = r.payload.settings || this.settings;
       this.AppStateModel.showAlertBanner({message: 'Settings saved.', brandColor: 'farmers-market'});
+      this.AppStateModel.refresh();
     } else if ( r.state === 'error' ) {
       this.AppStateModel.showAlertBanner({message: 'Error saving settings.', brandColor: 'double-decker'});
     }

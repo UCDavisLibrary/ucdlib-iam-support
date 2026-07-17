@@ -31,7 +31,7 @@ class ConfigService extends BaseService {
   }
 
   async updateOnboardingReminderSettings(settings) {
-    const id = 'onboarding-reminders';
+    const id = 'update-onboarding-reminders';
     const store = this.store.data.onboardingReminderSettings;
 
     await this.checkRequesting(

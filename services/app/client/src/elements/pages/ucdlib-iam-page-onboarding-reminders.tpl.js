@@ -6,6 +6,7 @@ export function render() {
   <div class='l-container u-space-mb--large'>
     <div class='l-content'>
       <div class='l-shrink u-width--100-in-tablet'>
+        <p>Emails are sent to supervisors of new employees at specified intervals after start/hire date, reminding them about onboarding tasks (in the form of checklists) that should be completed. </p>
 
         <div class="field-container">
           <label for="obr-from-email">From Email Address</label>
