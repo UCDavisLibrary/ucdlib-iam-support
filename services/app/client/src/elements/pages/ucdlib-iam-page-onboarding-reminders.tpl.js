@@ -1,4 +1,5 @@
 import { html } from 'lit';
+import onboardingReminderUtils from '#lib/utils/onboarding-reminder-utils.js';
 
 export function render() {
   return html`
@@ -18,7 +19,7 @@ export function render() {
         </div>
 
         <div class="obr-grid">
-          <div class="obr-grid__header">Interval</div>
+          <div class="obr-grid__header">Employment Interval</div>
           <div class="obr-grid__header">Disabled</div>
           <div class="obr-grid__header">Checklist Name</div>
           <div class="obr-grid__header">Checklist Link</div>
@@ -28,8 +29,12 @@ export function render() {
             const disabledId = `obr-${interval.slug}-disabled`;
             const nameId = `obr-${interval.slug}-checklist-name`;
             const linkId = `obr-${interval.slug}-checklist-link`;
+            const sqlInterval = onboardingReminderUtils.intervals.find(i => i.slug === interval.slug)?.sqlInterval;
             return html`
-              <div class="obr-grid__cell obr-grid__cell--label">${interval.label}</div>
+              <div class="obr-grid__cell obr-grid__cell--label">
+                <div>${interval.label}</div>
+                <div class="obr-grid__interval-detail">sent at ${sqlInterval}</div>
+              </div>
               <div class="obr-grid__cell">
                 <label class="obr-grid__mobile-label" for=${disabledId}>Disabled</label>
                 <input

@@ -8,6 +8,7 @@ export function render() {
   return html`
   <ucd-theme-header>
     <ucdlib-branding-bar slogan='Identity and Access Management'>
+      <a href='https://staff.library.ucdavis.edu'>Staff Intranet</a>
       <a href='/logout'>Logout</a>
     </ucdlib-branding-bar>
     <ucd-theme-primary-nav>
