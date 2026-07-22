@@ -238,11 +238,11 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
   async _onSubmit(e){
     e.preventDefault();
     
-    // if ( this.isDepartmentHead && !this.employeeNewHead?.iamId ) { 
-    //   const msg = 'New Department Head must be selected and must be in the same department as the separated employee.';
-    //   this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
-    //   return;
-    // }
+    if ( this.isDepartmentHead && !this.employeeNewHead?.iamId ) { 
+      const msg = 'New Department Head must be selected and must be in the same department as the separated employee.';
+      this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
+      return;
+    }
 
     this.SeparationModel.create(this.payload());
   }
