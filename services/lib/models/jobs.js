@@ -1,4 +1,5 @@
 import pg from "#lib/utils/pg.js";
+import config from "#lib/utils/config.js";
 
 /**
  * @classdesc A class to handle all database interactions for the jobs & job_logs table
@@ -161,6 +162,39 @@ class UcdlibJobs {
     const text = `
       SELECT DISTINCT name
       FROM ${this.tableName}
+    `;
+    const r = await pg.query(text);
+    return r;
+  }
+
+  /**
+   * @description Delete ended jobs (and their job_logs) older than the given interval.
+   * Jobs that have not yet ended (end_time IS NULL) are never touched, regardless of
+   * how old start_time is. Uses a single atomic statement so the set of jobs targeted
+   * for job_logs deletion and jobs deletion is always identical.
+   * @param {String} interval - Postgres interval string, e.g. '90 days'. Defaults to config.jobs.retentionInterval.
+   * @returns {Object} {res, err} - res.rows[0] = {deletedJobs, deletedJobLogs} (counts)
+   */
+  async deleteOld(interval){
+    interval = interval || config.jobs.retentionInterval;
+    const text = `
+      WITH old_jobs AS (
+        SELECT id FROM ${this.tableName}
+        WHERE end_time IS NOT NULL AND end_time < NOW() - INTERVAL '${interval}'
+      ),
+      deleted_logs AS (
+        DELETE FROM ${this.logTableName}
+        WHERE job_id IN (SELECT id FROM old_jobs)
+        RETURNING id
+      ),
+      deleted_jobs AS (
+        DELETE FROM ${this.tableName}
+        WHERE id IN (SELECT id FROM old_jobs)
+        RETURNING id
+      )
+      SELECT
+        (SELECT COUNT(*) FROM deleted_jobs) AS "deletedJobs",
+        (SELECT COUNT(*) FROM deleted_logs) AS "deletedJobLogs"
     `;
     const r = await pg.query(text);
     return r;

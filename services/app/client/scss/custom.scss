@@ -313,3 +313,46 @@ ucdlib-employee-search {
     width: 100% !important;
   }
 }
+
+ucdlib-iam-page-onboarding-reminders .obr-grid {
+  display: grid;
+  grid-template-columns: 1.5fr auto 1.5fr 2fr;
+  gap: .75rem 1rem;
+  align-items: center;
+}
+ucdlib-iam-page-onboarding-reminders .obr-grid__header {
+  font-weight: 700;
+  color: #022851;
+  border-bottom: 1px solid #cce0f3;
+  padding-bottom: .5rem;
+}
+ucdlib-iam-page-onboarding-reminders .obr-grid__cell--label {
+  font-weight: 700;
+}
+ucdlib-iam-page-onboarding-reminders .obr-grid__interval-detail {
+  font-weight: 400;
+  color: #545454;
+  font-size: .875rem;
+}
+ucdlib-iam-page-onboarding-reminders .obr-grid__mobile-label {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  ucdlib-iam-page-onboarding-reminders .obr-grid {
+    grid-template-columns: 1fr;
+  }
+  ucdlib-iam-page-onboarding-reminders .obr-grid__header {
+    display: none;
+  }
+  ucdlib-iam-page-onboarding-reminders .obr-grid__mobile-label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: .25rem;
+  }
+  ucdlib-iam-page-onboarding-reminders .obr-grid__cell--label {
+    border-top: 2px solid #cce0f3;
+    padding-top: 1rem;
+    margin-top: .5rem;
+  }
+}

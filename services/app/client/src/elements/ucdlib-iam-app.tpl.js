@@ -8,6 +8,7 @@ export function render() {
   return html`
   <ucd-theme-header>
     <ucdlib-branding-bar slogan='Identity and Access Management'>
+      <a href='https://staff.library.ucdavis.edu'>Staff Intranet</a>
       <a href='/logout'>Logout</a>
     </ucdlib-branding-bar>
     <ucd-theme-primary-nav>
@@ -24,6 +25,7 @@ export function render() {
         <li><a href='/patron'>Patron Lookup</a></li>
         <li><a href='/orgchart'>Organizational Chart</a></li>
         <li><a href='/emupdate'>Employee Update Tool</a></li>
+        <li><a href='/onboarding-reminders'>Onboarding Reminders</a></li>
       </ul>
 
     </ucd-theme-primary-nav>
@@ -56,5 +58,6 @@ export function render() {
     <ucdlib-iam-page-permissions page-id='permissions'></ucdlib-iam-page-permissions>
     <ucdlib-iam-page-tools page-id='tools'></ucdlib-iam-page-tools>
     <ucdlib-iam-page-update-tool page-id='emupdate'></ucdlib-iam-page-update-tool>
+    <ucdlib-iam-page-onboarding-reminders page-id='onboarding-reminders'></ucdlib-iam-page-onboarding-reminders>
   </ucdlib-pages>
 `;}

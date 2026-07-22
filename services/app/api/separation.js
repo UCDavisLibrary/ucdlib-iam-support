@@ -92,7 +92,7 @@ export default (api) => {
       }, false);
       ticket.addContent(`<h4>Details</h4>`);
       ticket.addContent({
-        'Separation Date': payload.separationDate,
+        'Last Day of System Access': payload.separationDate,
         'Supervisor': `${ad.supervisorLastName}, ${ad.supervisorFirstName}`
       }, false);
       if ( payload.notes ){
@@ -272,7 +272,7 @@ export default (api) => {
 
       // remove employee from keycloak
       const userId = employeeRecord.user_id || separationRecord.additional_data?.employeeUserId;
-      const { error: deprovisionError, message: deprovisionMessage, keycloakUser } = await models.admin.deprovisionKcAccount(userId);
+      const { error: deprovisionError, message: deprovisionMessage, skipped: deprovisionSkipped } = await models.admin.deprovisionKcAccount(userId, {skipIfMissing: true});
       if ( deprovisionError ) {
         console.error(deprovisionMessage);
         return res.status(400).json({
@@ -280,7 +280,11 @@ export default (api) => {
           message: deprovisionMessage
         });
       }
-      systemAccessRecord.add('ucdlib-keycloak', req.auth.token.id);
+      if ( deprovisionSkipped ) {
+        console.log(deprovisionMessage);
+      } else {
+        systemAccessRecord.add('ucdlib-keycloak', req.auth.token.id);
+      }
 
       // separate department head if applicable
       const departmentSeparationResult = await models.admin.separateDepartmentHead(separationId);

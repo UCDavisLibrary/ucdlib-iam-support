@@ -34,6 +34,51 @@ class employeesCli {
   }
 
   /**
+   * @description Remove an employee from the local database. Does not remove from keycloak.
+   * @param {String} id - Employee unique indentifier
+   * @param {*} options 
+   * @returns 
+   */
+  async removeEmployee(id, options){
+    const idType = options.idtype ? options.idtype : 'iamId';
+    const ucd = options.ucd;
+    id = id.trim();
+
+    const r = await models.employees.getById(id, idType, {returnGroups: true, returnSupervisor: true});
+    if ( r.err ) {
+      console.error(`Error getting employee record\n${r.err.message}`);
+      await pg.pool.end();
+      return;
+    }
+    if ( !r.res.rowCount ) {
+      console.log(`Employee ${id} not found`);
+      await pg.pool.end();
+      return;
+    }
+
+    const employeeRecord = r.res.rows[0];
+    const {
+      error: rmError,
+      message: rmMessage,
+      directReports,
+      isHeadOf
+    } = await models.admin.deleteEmployeeRecord(employeeRecord.iam_id, options);
+    if ( rmError ) {
+      console.error(rmMessage);
+      if ( rmError === 'directReports') {
+        utils.printTable(directReports, ['id', 'iam_id', 'first_name', 'last_name']);
+      } else if ( rmError === 'isHeadOf' ) {
+        utils.printTable(isHeadOf);
+      }
+      await pg.pool.end();
+      return;
+    }
+    console.log(`Employee record removed:`);
+    utils.logObject(employeeRecord);
+    await pg.pool.end();
+  }
+
+  /**
    * @description Remove an employee from the system
    * @param {*} separationId - Separation request id
    * @param {*} options - Options object from commander

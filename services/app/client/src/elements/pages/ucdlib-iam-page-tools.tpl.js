@@ -40,6 +40,17 @@ export function render() {
             </div>
           </a>
         </section>
+        <section class='media-links u-space-mb o-box'>
+          <a href="/onboarding-reminders" class="media-link">
+            <div class="media-link__figure" style="max-width:135px;width:25%;">
+                <div class="aspect--1x1 u-background-image" style="background-image:url(/img/search-laptop-magnifyingglass_thumbnail-135x135.jpg)"></div>
+            </div>
+            <div class="media-link__body">
+              <h3 class="media-link__title">Onboarding Reminders</h3>
+              <p>Configure automated email reminders sent to supervisors for onboarding checklist milestones.</p>
+            </div>
+          </a>
+        </section>
       </div>
 
     </div>

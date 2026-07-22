@@ -29,7 +29,8 @@ class AppStateStoreImpl extends AppStateStore {
       orgchart: {text: 'Create Organizational Chart Tool', link: '/orgchart'},
       emupdate: {text: 'Employee Update Tool', link: '/emupdate'},
       patronLookup: {text: 'Search by Patron Lookup Tool', link: '/patron'},
-      tools: {text: 'Support Tools', link: '/tools'}
+      tools: {text: 'Support Tools', link: '/tools'},
+      onboardingReminders: {text: 'Onboarding Reminders', link: '/onboarding-reminders'}
     };
 
     // static page title values
@@ -43,7 +44,8 @@ class AppStateStoreImpl extends AppStateStore {
       orgchart: 'Organization Chart Tool',
       emupdate: 'Employee Update Tool',
       patronLookup: 'Patron Lookup',
-      tools: 'Support Tools'
+      tools: 'Support Tools',
+      onboardingReminders: 'Onboarding Reminders'
     };
 
     this.userProfile = {};

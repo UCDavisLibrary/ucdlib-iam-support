@@ -201,6 +201,14 @@ export function renderSubmissionForm(){
             <label for="obn-notes">Notes</label>
             <textarea id='obn-notes' rows="8" cols="48"  @input=${e => this.notes = e.target.value} .value=${this.notes}></textarea>
           </div>
+          <div class="checkbox u-space-mb--small">
+            <ul class="list--reset">
+              <li>
+                <input id="obn-reminders-opt-out" type="checkbox" @input=${() => this.remindersOptOut = !this.remindersOptOut} .checked=${this.remindersOptOut}>
+                <label for="obn-reminders-opt-out">Don't send onboarding checklist reminder emails for this employee</label>
+              </li>
+            </ul>
+          </div>
         </section>
       </div>
       <button

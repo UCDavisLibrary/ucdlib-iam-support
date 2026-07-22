@@ -1,6 +1,7 @@
 import admin from './admin.js'
 import backupLog from './backupLog.js';
 import cache from './cache.js';
+import config from './config.js';
 import employees from './employees.js';
 import getByName from './getByName.js';
 import groups from './groups.js';
@@ -17,6 +18,7 @@ export default {
   admin,
   backupLog,
   cache,
+  config,
   employees,
   getByName,
   groups,

@@ -15,7 +15,8 @@ new CronJob(
 async function run() {
   let thisJob;
   try {
-    thisJob = await models.jobs.start('discrepancy-notification');
+    const r = await models.jobs.start('discrepancy-notification');
+    if ( r.job ) thisJob = r.job;
     // get recent notifications
     const notifications = await models.employees.getActiveRecordDiscrepancyNotifications(config.slack.iamSyncCacheThreshold);
     if ( notifications.err ) throw notifications.err;
@@ -59,16 +60,18 @@ async function run() {
 
     // send message
     if ( !msg ) {
-      thisJob.end();
+      if ( thisJob ) thisJob.end();
       return;
     }
     msg = `*App/Script*:Library IAM Database\n*${notifications.res.rows.length} IAM Record Discrepancies Found!*\n\n${msg}`;
     await slack.send(msg);
-    thisJob.end();
+    if ( thisJob ) thisJob.end();
 
   } catch (error) {
     console.error(error);
-    thisJob.end({error: error.message});
+    if ( thisJob ) {
+      await thisJob.end({error: error.message}, false);
+    }
     await slack.sendErrorNotification('Unable to send IAM discrepancy notifications to slack.', error);
   }
 

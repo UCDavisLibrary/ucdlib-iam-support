@@ -147,15 +147,13 @@ async refreshAccessToken() {
   }
 
   /**
-   * @description Gets a single user from keycloak
+   * @description Gets a single user from keycloak by username (exact match)
    * @param {String} username - The keycloak user name (Kerb ID)
-   * @returns
+   * @returns {Object|null} - The user object, or null if no exact match is found
    */
   async getUserByUserName(username){
-    if ( !this.refreshInterval ){
-      await this.refreshAccessToken();
-    }
-    return await this.client.users.findOne({username});
+    const users = await this.getUsers({username, exact: true});
+    return users.length ? users[0] : null;
   }
 
   /**
@@ -486,15 +484,7 @@ async refreshAccessToken() {
         if ( !currentChildren.includes(childId) ){
           const child = this.getCachedKcGroup(childId, 'kcId');
 
-          // have to wrap in a try to catch a bug in keycloak-admin-client
-          // https://github.com/keycloak/keycloak/issues/16925
-          try {
-            await this.client.groups.setOrCreateChild({id: parentGroupId}, {id: childId, name: child.name});
-          } catch (error) {
-            if ( !error.message.includes('location header is not found in request') ){
-              throw error;
-            }
-          }
+          await this.client.groups.updateChildGroup({id: parentGroupId}, {id: childId, name: child.name});
 
           this.writeLog(childId, 'update', 'group', `Added group ${childId} to parent group ${parentGroupId}`, true);
         } else {

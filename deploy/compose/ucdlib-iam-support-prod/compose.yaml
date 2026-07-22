@@ -1,5 +1,5 @@
 x-variables:
-  main-image: &main-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support:v2.1.0
+  main-image: &main-image us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/ucdlib-iam-support:v2.1.1
 services:
   app:
     image: *main-image
@@ -94,6 +94,7 @@ services:
       - .env
     environment:
       ENABLE_MAINTENANCE: 'true'
+      SMTP_ENABLED: 'true'
       PGUSER: 'postgres'
       PGHOST: 'db'
       PGDATABASE: 'postgres'

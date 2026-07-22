@@ -2,6 +2,7 @@ import AppStateModel from "./AppStateModel.js";
 
 import '#lib/cork/models/AlmaUserModel.js';
 import '#lib/cork/models/AuthModel.js';
+import '#lib/cork/models/ConfigModel.js';
 import '#lib/cork/models/EmployeeModel.js';
 import '#lib/cork/models/GroupModel.js';
 import '#lib/cork/models/LdapModel.js';
