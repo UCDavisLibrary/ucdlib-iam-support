@@ -131,7 +131,10 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
   }
 
   async getNewDepartmentHead(iamId){
-    if ( !iamId ) return;
+    if ( !iamId ) {
+       this.employeeNewHead = null;
+       return;
+    }
     const r = await this.EmployeeModel.get(iamId, "iamId");
     if ( r.state === 'loaded' ){
       this.employeeNewHead = r.payload.results?.[0] || null;

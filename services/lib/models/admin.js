@@ -529,7 +529,7 @@ class iamAdmin {
 
   /**
    * @description Separates a department head from their department and assigns a new department head
-   * @params {string} separationId - id of the separation record
+   * @param {string} separationId - id of the separation record
    * @returns {Object} - {error: boolean, message: string}
    */
   async separateDepartmentHead(separationId){

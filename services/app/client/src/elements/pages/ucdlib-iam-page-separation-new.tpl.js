@@ -60,6 +60,7 @@ export function renderSubmissionForm(){
             <div class="field-container" ?hidden=${!this.isDepartmentHead}>
               <label for="sp-department-head">New Department Head <abbr title="Required">*</abbr></label>
               <ucdlib-employee-search
+                id="sp-department-head"
                 class='u-space-mb'
                 @status-change=${this._onDepartmentHeadChange}
                 hide-label>
