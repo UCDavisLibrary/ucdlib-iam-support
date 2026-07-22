@@ -175,10 +175,11 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
    * @returns {boolean}
    */
   async _isDepartmentHead(){
-    const groups = this.employeeRecord.groups;
-    if ( !groups || !groups.length ) return false;
+    const groups = this.employeeRecord.groups || [];
 
     this.isDepartmentHead = groups.some(g => g.type === 'Department' && g.isHead === true);
+    if ( !this.isDepartmentHead ) this.employeeNewHead = null;
+    
     return this.isDepartmentHead;
   }
 
@@ -190,15 +191,13 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
   _onDepartmentHeadChange(e){
     if ( e.detail.employee ){
       const newHeadEmployee = e.detail.employee;
-      const employeeNewHeadGroups = newHeadEmployee.groups.filter(g => g.type === 'Department');
+      const employeeNewHeadGroups = (newHeadEmployee.groups || []).filter(g => g.type === 'Department');
+       const headDeptIds = (this.employeeRecord.groups || [])
+         .filter(g => g.type === 'Department' && g.isHead === true)
+         .map(g => g.id);
 
 
-      if (employeeNewHeadGroups.length > 0 &&
-          employeeNewHeadGroups.some(headGroup => 
-          this.employeeRecord.groups.some(
-              g => g.type === 'Department' && g.id === headGroup.id
-          )
-      )) {
+      if ( employeeNewHeadGroups.some(g => headDeptIds.includes(g.id)) )  {
         this.employeeNewHead = newHeadEmployee;
       } else {
         let msg = 'New department head must be in the same department as the separated employee.';
@@ -239,11 +238,11 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
   async _onSubmit(e){
     e.preventDefault();
     
-    if ( this.isDepartmentHead && !this.employeeNewHead?.iamId ) { 
-      const msg = 'New Department Head must be selected and must be in the same department as the separated employee.';
-      this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
-      return;
-    }
+    // if ( this.isDepartmentHead && !this.employeeNewHead?.iamId ) { 
+    //   const msg = 'New Department Head must be selected and must be in the same department as the separated employee.';
+    //   this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
+    //   return;
+    // }
 
     this.SeparationModel.create(this.payload());
   }

@@ -539,31 +539,34 @@ class iamAdmin {
     }
     separationRecord = separationRecord.res.rows[0];
 
-    // check if new department head is provided (newDepartmentHead is missing)
-    if( !separationRecord.additional_data?.newDepartmentHead ) {
+    // check if employee is a department head (ignore newDepartmentHead if not)
+    const isDepartmentHead = separationRecord.additional_data?.groups?.some(
+      g => g.type === 'Department' && g.isHead === true
+    );
+    if ( !isDepartmentHead ) {
+      return {error: false, message: 'Employee is not a department head; skipping reassignment.'};
+    }
+
+    // check if new department head is provided
+    const newHeadIamId = separationRecord.additional_data?.newDepartmentHead;
+    if( !newHeadIamId ) {
       let message = `No new department head provided; skipping reassignment.`;
       return {error: false, message: message};
     }
+  
 
-    let newHeadEmployee = await models.employees.getById(separationRecord.additional_data.newDepartmentHead, 'iamId', {returnGroups: true});
+    let newHeadEmployee = await models.employees.getById(newHeadIamId, 'iamId', {returnGroups: true});
 
     if( newHeadEmployee.err ) {
       let message = `Error retrieving new department head employee record: ${newHeadEmployee.err.message}`;
       return {error: true, message: message};
     }
     if ( !newHeadEmployee.res.rows.length ) {
-      let message = `No employee record found for new department head with iamId ${separationRecord.additional_data.newDepartmentHead}, skipping reassignment.`;
+      let message = `No employee record found for new department head with iamId ${newHeadIamId}, skipping reassignment.`;
       return {error: false, message: message};
     }
 
     newHeadEmployee = newHeadEmployee.res.rows[0];
-
-    //check if its the department head
-    const isDepartmentHead = separationRecord.additional_data?.groups?.some(g => g.type === 'Department' && g.isHead === true);
-    
-    if ( !isDepartmentHead ) {
-      return {error: false, message: 'Employee is not a department head; skipping reassignment.'};
-    }
 
     //check if new department head is in the department
     const departmentGroup = separationRecord.additional_data?.groups?.find(g => g.type === 'Department' && g.isHead === true);

@@ -36,6 +36,17 @@ export default (api) => {
       payload.additionalData.employeeRecord = employeeRecord.res.rows[0];
       payload.additionalData.departmentName = payload.additionalData.employeeRecord.groups.find(g => g.partOfOrg)?.name || '';
 
+
+      //if the employee is a department head, add the department head info to the separation request
+      const isDepartmentHead = payload.additionalData.employeeRecord.groups.some(g => g.type === 'Department' && g.isHead === true);
+      if ( isDepartmentHead ) {
+        const newHeadId = payload.additionalData?.newDepartmentHead;
+        if ( !newHeadId ) {
+          res.status(400).json({error: true, message: 'Missing new department head id for department head separation or selected head was not in the same department as the separated employee.'});
+          return;
+        }
+      }
+
       //create separation request entry
       const r = await models.separation.create(payload);
       if ( r.err ) {

@@ -10,14 +10,11 @@ export default (api) => {
   api.get('/employees/direct-reports', async (req, res) => {
     const tokenIamId = req.auth.token.iamId;
 
-
-    const iamId = tokenIamId;
-
-    if ( !iamId ) {
+    if ( !tokenIamId ) {
       res.json([]);
       return;
     }
-    const r = await models.employees.getDirectReports(iamId, 'iamId');
+    const r = await models.employees.getDirectReports(tokenIamId, 'iamId');
     if ( r.err ) {
       console.error(r.err);
       return res.status(500).json({error: true});
