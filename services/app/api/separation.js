@@ -178,7 +178,6 @@ export default (api) => {
     });
 
     api.post('/separation/:id', async (req, res) => {
-
       if (
         !req.auth.token.hasAdminAccess &&
         !req.auth.token.hasHrAccess ){
@@ -206,10 +205,12 @@ export default (api) => {
     });
 
     api.get('/separation/:id', async (req, res) => {
-
-      if (
-        !req.auth.token.hasAdminAccess &&
-        !req.auth.token.hasHrAccess ){
+      const isReportedTo = await models.admin.isSupervisor(req.auth.token.iamId, req.params.id);
+      
+      if( !isReportedTo &&
+          !req.auth.token.hasAdminAccess &&
+          !req.auth.token.hasHrAccess 
+        ){
         res.status(403).json({
           error: true,
           message: 'Not authorized to access this resource.'
