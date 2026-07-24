@@ -606,19 +606,13 @@ class iamAdmin {
     if ( otherHead ) {
        return {error: false, message: `Department currently has a different head (${otherHead.iamId}); skipping reassignment.`};
      }
-    
-    // remove the separated employee as department head (leave department membership intact)
-    const rm = await models.groups.removeGroupHead(currentDepartmentId);
-     if ( rm.err ) {
-       return {error: true, message: `Error removing department head: ${rm.err.message}`};
-     }
 
-    // add newDepartmentHead as department head
-    const set = await models.groups.setGroupHead(currentDepartmentId, newHeadEmployee.id);
-     if ( set.err ) {
-       return {error: true, message: `Error setting new department head: ${set.err.message}`};
+    // replace newDepartmentHead as department head
+    const rep = await models.groups.replaceGroupHead(currentDepartmentId, newHeadEmployee.id);
+     if ( rep.err ) {
+       return {error: true, message: `Error setting new department head: ${rep.err.message}`};
      }
-     if ( !set.res?.rowCount ) {
+     if ( !rep.res?.rowCount ) {
        return {error: true, message: `New department head is not a member of department ${currentDepartmentId}`};
      }
 

@@ -298,6 +298,15 @@ class UcdlibGroups{
     return await pg.query(text, params);
   }
 
+  async replaceGroupHead(groupId, employeeRowId){
+    const params = [groupId, employeeRowId];
+    let text = `
+    UPDATE group_membership SET is_head = CASE WHEN employee_key = $2 THEN TRUE ELSE FALSE END
+    WHERE group_id = $1
+    `;
+    return await pg.query(text, params);
+  }
+
   groupJson(aliases={}){
     const groupTable = aliases.groups || 'g';
     return `
