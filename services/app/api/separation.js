@@ -205,11 +205,17 @@ export default (api) => {
     });
 
     api.get('/separation/:id', async (req, res) => {
-      const isReportedTo = await models.admin.isSupervisor(req.auth.token.iamId, req.params.id);
-      
+      const iamId = req.auth.token.iamId;
+      const isAdmin = req.auth.token.hasAdminAccess;
+      const isHr = req.auth.token.hasHrAccess;
+
+
+
+
+      const isReportedTo =  (!isAdmin && !isHr) ? await models.admin.isSupervisor(iamId, req.params.id): false;
       if( !isReportedTo &&
-          !req.auth.token.hasAdminAccess &&
-          !req.auth.token.hasHrAccess 
+          !isAdmin &&
+          !isHr 
         ){
         res.status(403).json({
           error: true,

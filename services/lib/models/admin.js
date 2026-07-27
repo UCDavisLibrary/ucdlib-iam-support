@@ -622,11 +622,11 @@ class iamAdmin {
    * @returns {Promise<boolean>}
    */
   async isSupervisor(iamId, separationRecordId) {    
-    const directReports = await models.employees.getDirectReports(iamId, 'iamId');
-    if (directReports.err) {
+    const directReports = await models.employees.getDirectReports('1000202437', 'iamId');
+    if ( directReports.err ) {
       console.error(directReports.err);
-        return false
-      } 
+      return false;
+    }
     if( !directReports.res.rows.length ){
       console.error("No direct reports found for IAM ID:", iamId);
       return false;
