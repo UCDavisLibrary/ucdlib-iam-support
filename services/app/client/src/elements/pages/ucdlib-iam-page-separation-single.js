@@ -157,18 +157,23 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     const removedFromIamDb = Array.isArray(this.removedFromSystems) && this.removedFromSystems.find(s => s?.value === 'ucdlib-iam-db');
     
     if ( removedFromIamDb ) {
-       this.directReports = [];
-       return;
+      this.directReports = [];
+      this.requestUpdate();
+      return;
     }
     
     const r = await this.EmployeeModel.getDirectReports(this.iamId);
 
     if ( r.state === 'loaded' ){
       this.directReports = r.payload;
-    } else if ( r.state === 'error' ){
-      this.AppStateModel.showError('Error fetching direct reports');
+    } else {
+      if ( r.state === 'error' ){
+        this.AppStateModel.showError('Error fetching direct reports');
+      }
       this.directReports = [];
     }
+    this.requestUpdate();
+
   }
 
   /**

@@ -15,10 +15,7 @@ class EmployeeService extends BaseService {
 
   async getDirectReports(iamId=''){
     const store = this.store.data.directReports;
-    const id = payload.getKey({
-      type: 'directReports', 
-      entityId: iamId  
-    });
+    const id = iamId ? payload.getKey({entityId: iamId}) : 'directReports';
 
     await this.checkRequesting(
       id, store,
