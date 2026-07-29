@@ -209,10 +209,8 @@ export default (api) => {
       const isAdmin = req.auth.token.hasAdminAccess;
       const isHr = req.auth.token.hasHrAccess;
 
-
-
-
       const isReportedTo =  (!isAdmin && !isHr) ? await models.admin.isSupervisor(iamId, req.params.id): false;
+
       if( !isReportedTo &&
           !isAdmin &&
           !isHr 

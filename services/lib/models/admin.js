@@ -621,24 +621,22 @@ class iamAdmin {
    * @param {string} separationRecordId 
    * @returns {Promise<boolean>}
    */
-  async isSupervisor(iamId, separationRecordId) {    
-    const directReports = await models.employees.getDirectReports('1000202437', 'iamId');
-    if ( directReports.err ) {
-      console.error(directReports.err);
+  async isSupervisor(iamId, separationRecordId) {   
+    const separationRes = await models.separation.getById(separationRecordId); 
+    if ( separationRes.err ) {
+      console.error(separationRes.err);
       return false;
     }
-    if( !directReports.res.rows.length ){
-      console.error("No direct reports found for IAM ID:", iamId);
+    if( !separationRes.res.rows.length ){
+      console.error("No separation record found for ID:", separationRecordId);
       return false;
-    } else {
-      const reportList = directReports.res.rows.map(report => report.iam_id);
-      let employee = await models.separation.getEmployeeRecord(separationRecordId);
-        if( employee.error ) {
-          console.error(employee.message);
-          return false;
-        }
-      return reportList.includes(employee.employeeRecord.iam_id);
     }
+    const separationRecord = separationRes.res.rows[0];
+    const separationSupervisorId = separationRecord.supervisor_id;
+    if ( separationSupervisorId !== iamId ) {
+      return false;
+    }
+    return true;
   }
   async sendSeparationReminder(record, params={}) {
     const out = {log: {error: false, message: '', action: 'separation-reminder', actionTaken: false}};
