@@ -209,7 +209,19 @@ export default (api) => {
       const isAdmin = req.auth.token.hasAdminAccess;
       const isHr = req.auth.token.hasHrAccess;
 
-      const isReportedTo =  (!isAdmin && !isHr) ? await models.admin.isSupervisor(iamId, req.params.id): false;
+
+      const r = await models.separation.getById(req.params.id);
+      if ( r.err ) {
+        console.error(r.err);
+        return res.status(500).json({error: true, message: 'Unable to retrieve separation request'});
+      }
+      if ( !r.res.rows.length ){
+        console.error(r.err);
+        res.json({error: true, message: 'Request does not exist!'});
+        return;
+      }
+      const result = r.res.rows[0];
+      const isReportedTo =  (!isAdmin && !isHr) ? await models.admin.isSupervisor(iamId, result): false;
 
       if( !isReportedTo &&
           !isAdmin &&
@@ -222,17 +234,7 @@ export default (api) => {
         return;
       }
 
-      const r = await models.separation.getById(req.params.id);
-      if ( r.err ) {
-        console.error(r.err);
-        return res.status(500).json({error: true, message: 'Unable to retrieve separation request'});
-      }
-      if ( !r.res.rows.length ){
-        console.error(r.err);
-        res.json({error: true, message: 'Request does not exist!'});
-        return;
-      }
-      const obReq = textUtils.camelCaseObject(r.res.rows[0]);
+      const obReq = textUtils.camelCaseObject(result);
       return res.json(obReq);
 
     });
