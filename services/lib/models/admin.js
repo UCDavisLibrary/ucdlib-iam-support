@@ -616,20 +616,19 @@ class iamAdmin {
   }
 
   /**
-   * @description Check if an employee is a supervisor of employee in separation record based on IAM id and separation record id
+   * @description Check if an employee is a supervisor of employee in separation record based on IAM id and separation record d
    * @param {string} iamId - employee IAM id
    * @param {Object} separationRecord - separation record object
    * @returns {Promise<boolean>}
    */
   async isSupervisor(iamId, separationRecord) {   
-    console.log('Checking if employee is supervisor of separation record', separationRecord);
     const separationSupervisorId = separationRecord.supervisor_id;
     if ( separationSupervisorId !== iamId ) {
       return false;
     }
     return true;
   }
-  
+
   async sendSeparationReminder(record, params={}) {
     const out = {log: {error: false, message: '', action: 'separation-reminder', actionTaken: false}};
     if ( record.additional_data?.separationReminderSent ) {

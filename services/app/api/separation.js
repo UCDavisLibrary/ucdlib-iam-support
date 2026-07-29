@@ -220,6 +220,7 @@ export default (api) => {
         res.json({error: true, message: 'Request does not exist!'});
         return;
       }
+      
       const result = r.res.rows[0];
       const isReportedTo =  (!isAdmin && !isHr) ? await models.admin.isSupervisor(iamId, result): false;
 
