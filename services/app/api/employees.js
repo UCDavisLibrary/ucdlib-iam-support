@@ -18,27 +18,35 @@ export default (api) => {
       });
     }
 
-    if (queryIamId && queryIamId !== tokenIamId) {
-      if(!req.auth.token.hasAdminAccess && 
-         !req.auth.token.hasHrAccess) {
-        return res.status(403).json({
-          error: true,
-          message: 'Not authorized to access this resource.'
-        });
-      }
-    }
-
     const iamId = queryIamId || tokenIamId;
-
     if ( !iamId ) {
       res.json([]);
       return;
     }
+
     const r = await models.employees.getDirectReports(iamId, 'iamId');
     if ( r.err ) {
       console.error(r.err);
       return res.status(500).json({error: true});
     }
+
+    if (queryIamId && queryIamId !== tokenIamId) {
+      if (!req.auth.token.hasAdminAccess && !req.auth.token.hasHrAccess) {
+
+        const isSupervisor = r.res.rows.some(
+          row => row.supervisor_id === tokenIamId
+        );
+
+        if(!isSupervisor) {
+          return res.status(403).json({
+            error: true,
+            message: 'Not authorized to access this resource.'
+          });
+        }
+      }
+    }
+
+
     res.json(r.res.rows.map(row => TextUtils.camelCaseObject(row)));
   });
 

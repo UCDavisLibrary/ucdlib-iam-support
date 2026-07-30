@@ -31,7 +31,8 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
       notes: {state: true},
       missingUid: {state: true},
       reconId: {state: true},
-      showDeprovisionButton: {state: true}
+      showDeprovisionButton: {state: true},
+      directReports: {state: true}
     };
   }
 
@@ -57,6 +58,7 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     this.employeeUserId = '';
     this.employeeId = '';
     this.showDeprovisionButton = false;
+    this.directReports = [];
 
     this.ctl = {
       appComponent : new AppComponentController(this),
@@ -158,7 +160,6 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     
     if ( removedFromIamDb ) {
       this.directReports = [];
-      this.requestUpdate();
       return;
     }
     
