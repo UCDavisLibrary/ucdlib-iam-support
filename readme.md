@@ -134,7 +134,13 @@ A primary function of this application is the maintenance of the `internal` real
 - Add `KEYCLOAK_ADMIN_BASE_URL=https://sandbox.auth.library.ucdavis.edu` to your local-dev env, to use the sandbox keycloak environment, which should be running the new version of keycloak. You must restart your docker compose cluster for this change to take effect.
 - Separate an employee in the GUI, and then remove them from keycloak by entering the cli container and running `ucdlib-iam employees separate <separation-record-id>`
 - Onboard an employee in the GUI, and then adopt them into keycloak by entering the cli container and running `ucdlib-iam employees adopt <onboarding-record-id>`
-- While in the cli container, run the keycloak sync script: `cd /maintenance/src` and `node run-keycloak-sync.js`
+- While in the cli container, run the keycloak sync script: `cd maintenance/src` and `node run-keycloak-sync.js`
+
+To verify that the authentication/authorization still works on the API service for other applications:
+
+- Set `UCDLIB_KEYCLOAK_URL=https://sandbox.auth.library.ucdavis.edu` in your env
+- Ensure that the API service is running (`cmds/start-api.sh`)
+- Run a test query from `/services/api/examples`
 
 ## Using the Application
 
