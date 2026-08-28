@@ -124,24 +124,10 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     this.status = payload.statusName || '';
     this.statusDescription = payload.statusDescription || '';
     this.removedFromSystems = ad?.removedFromSystems || [];
-    await this.getNewDepartmentHead(ad?.newDepartmentHead);
+    this.employeeNewHead = ad?.newDepartmentHeadName || null;
 
     this.showDeprovisionButton = this.AuthModel.isAdmin &&
       (Array.isArray(ad?.removedFromSystems) && !ad.removedFromSystems.find(s => s?.value === 'ucdlib-iam-db'));
-  }
-
-  async getNewDepartmentHead(iamId){
-    if ( !iamId ) {
-       this.employeeNewHead = null;
-       return;
-    }
-    const r = await this.EmployeeModel.get(iamId, "iamId");
-    if ( r.state === 'loaded' ){
-      this.employeeNewHead = r.payload.results?.[0] || null;
-    } else if ( r.state === 'error' ){
-      this.AppStateModel.showError('Error fetching new department head');
-      this.employeeNewHead = null;
-    }
   }
 
   /**

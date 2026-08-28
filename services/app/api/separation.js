@@ -39,10 +39,29 @@ export default (api) => {
 
       //if the employee is a department head, add the department head info to the separation request
       const isDepartmentHead = payload.additionalData.employeeRecord.groups.some(g => g.type === 'Department' && g.isHead === true);
-      if ( isDepartmentHead ) {
-        const newHeadId = payload.additionalData?.newDepartmentHead;
+      if ( isDepartmentHead && !payload.skipDepartmentHead ) {
+        const newHeadId = payload.additionalData?.newDepartmentHead;   
         if ( !newHeadId ) {
           res.status(400).json({error: true, message: 'Missing new department head id for department head separation or selected head was not in the same department as the separated employee.'});
+          return;
+        }
+
+        const newHeadRecord = await models.employees.getById(newHeadId, 'iamId', options);
+        if ( newHeadRecord.err ) {
+          console.error(newHeadRecord.err);
+          res.status(500).json({error: true, message: 'Unable to retrieve new department head record'});
+          return;
+        }
+        if ( !newHeadRecord.res.rowCount ) {
+          res.status(400).json({error: true, message: 'New department head record not found'});
+          return;
+        }
+
+        let newDepartmentHeadRecord = newHeadRecord.res.rows[0];
+        let newHeadDepartment = newDepartmentHeadRecord.groups.filter(g => g.type === 'Department' && g.partOfOrg === true);
+
+        if (!newHeadDepartment.length || !newHeadDepartment.some(dept => dept.name === payload.additionalData.departmentName)) {
+          res.status(400).json({error: true, message: 'Selected new department head is not in the same department as the separated employee.'});
           return;
         }
       }

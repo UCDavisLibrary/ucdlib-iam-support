@@ -532,8 +532,7 @@ class iamAdmin {
    * @param {string} separationId - id of the separation record
    * @returns {Object} - {error: boolean, message: string}
    */
-  async separateDepartmentHead(separationId){
-
+  async separateDepartmentHead(separationId, newDepartmentHeadId=null) {
     // check if separation record exists
     let separationRecord = await models.separation.getById(separationId);
     
@@ -556,13 +555,12 @@ class iamAdmin {
     }
 
     // check if new department head is provided
-    const newHeadIamId = separationRecord.additional_data?.newDepartmentHead;
+    const newHeadIamId =  newDepartmentHeadId ? newDepartmentHeadId : separationRecord.additional_data?.newDepartmentHead;
     if( !newHeadIamId ) {
       let message = `No new department head provided; skipping reassignment.`;
       return {error: false, message: message};
     }
   
-
     let newHeadEmployee = await models.employees.getById(newHeadIamId, 'iamId', {returnGroups: true});
 
     if( newHeadEmployee.err ) {
@@ -597,15 +595,16 @@ class iamAdmin {
     if ( !departmentRecord.res.rows.length ) {
       return {error: true, message: `No department record found for id ${currentDepartmentId}`};
     }
-    const currentDepartment = departmentRecord.res.rows;
 
-    const otherHead = currentDepartment
-       .flatMap(d => Array.isArray(d.head) ? d.head : []) // flatten the head arrays
-       .find(h => h?.iamId && h.iamId !== separationRecord.iam_id); // find a head that is not the separating employee
+    const otherHead = departmentRecord?.res?.rows?.[0];
+
+    // check if the department currently has a head that is not the separating employee
+    const isAnotherHead = otherHead.head?.filter(h => h.iamId !== separationRecord.iam_id);
+
     
-    if ( otherHead ) {
+    if ( Object.keys(isAnotherHead).length !== 0 ) {
        return {error: false, message: `Department currently has a different head (${otherHead.iamId}); skipping reassignment.`};
-     }
+    }
 
     // replace newDepartmentHead as department head
     const rep = await models.groups.replaceGroupHead(currentDepartmentId, newHeadEmployee.id);

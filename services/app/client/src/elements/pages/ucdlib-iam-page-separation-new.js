@@ -31,6 +31,7 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
       skipSupervisor: {state: true},
       skipFacilities: {state: true},
       isDepartmentHead: {state: true},
+      skipDepartmentHead: {state: true},
     };
   }
 
@@ -66,7 +67,6 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     this.userId = '';
     this.email = '';
     this.employeeId = '';
-    this.userId = '';
     this.skipSupervisor = false;
     this.skipFacilities = false;
     this.supervisorEmail = '';
@@ -75,6 +75,7 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     this.employeeNewHead = null;
     this.notes = '';
     this.isDepartmentHead = false;
+    this.skipDepartmentHead = false;
   }
 
   /**
@@ -84,6 +85,11 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
   willUpdate(props){
     if ( props.has('employeeRecord') ){
       this.hasEmployeeRecord = Object.keys(this.employeeRecord).length > 0;
+
+      const groups = this.employeeRecord.groups || [];
+
+      this.isDepartmentHead = groups.some(g => g.type === 'Department' && g.isHead === true);
+      if ( !this.isDepartmentHead ) this.employeeNewHead = null;
     }
   }
 
@@ -138,7 +144,6 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
   _onEmployeeStatusChange(e){
     if ( e.detail.employee ){
       this.employeeRecord = e.detail.employee;
-      this._isDepartmentHead();
     } else {
       this.employeeRecord = {};
     }
@@ -168,19 +173,6 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     this.userId = this.employeeRecord.userId;
     this.page = "sp-submission";
     this.AppStateModel.setLocation('#submission');
-  }
-
-  /**
-   * @description Checks if the employee is a department head
-   * @returns {boolean}
-   */
-  async _isDepartmentHead(){
-    const groups = this.employeeRecord.groups || [];
-
-    this.isDepartmentHead = groups.some(g => g.type === 'Department' && g.isHead === true);
-    if ( !this.isDepartmentHead ) this.employeeNewHead = null;
-    
-    return this.isDepartmentHead;
   }
 
   /**
@@ -237,11 +229,15 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
    */
   async _onSubmit(e){
     e.preventDefault();
-    
-    if ( this.isDepartmentHead && !this.employeeNewHead?.iamId ) { 
-      const msg = 'New Department Head must be selected and must be in the same department as the separated employee.';
-      this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
-      return;
+
+    if(!this.skipDepartmentHead){
+      if ( this.isDepartmentHead && !this.employeeNewHead?.iamId ) { 
+        const msg = 'New Department Head must be selected and must be in the same department as the separated employee.';
+        this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
+        return;
+      }
+    } else {
+      this.employeeNewHead = null;
     }
 
     this.SeparationModel.create(this.payload());
@@ -286,6 +282,7 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     payload.notes = this.notes;
     payload.skipSupervisor = this.skipSupervisor;
     payload.skipFacilities = this.skipFacilities;
+    payload.skipDepartmentHead = this.skipDepartmentHead;
     additionalData.employeeEmail = this.email;
     additionalData.groups = this.groups;
     additionalData.id = this.dbId;
@@ -301,8 +298,11 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     additionalData.employeeLastName = this.lastName;
     additionalData.employeeId = this.employeeId;
     additionalData.employeeUserId = this.userId;
-    this.employeeNewHead && this.employeeNewHead.iamId 
-      ? additionalData.newDepartmentHead = this.employeeNewHead.iamId : delete additionalData.newDepartmentHead;
+
+    if(!this.skipDepartmentHead) {
+      additionalData.newDepartmentHead = this.employeeNewHead?.iamId || null;
+      additionalData.newDepartmentHeadName =  `${this.employeeNewHead?.firstName || ''} ${this.employeeNewHead?.lastName || ''}` || null;
+    }
 
     payload.additionalData = additionalData;
     return payload;

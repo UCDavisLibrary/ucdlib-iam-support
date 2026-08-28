@@ -8,13 +8,12 @@ export default (api) => {
    * Returns blank array if no reports
    */
   api.get('/employees/direct-reports', async (req, res) => {
-    const tokenIamId = req.auth.token.iamId;
-
-    if ( !tokenIamId ) {
+     const iamId = req.auth.token.iamId;
+    if ( !iamId ) {
       res.json([]);
       return;
     }
-    const r = await models.employees.getDirectReports(tokenIamId, 'iamId');
+    const r = await models.employees.getDirectReports(iamId, 'iamId');
     if ( r.err ) {
       console.error(r.err);
       return res.status(500).json({error: true});
