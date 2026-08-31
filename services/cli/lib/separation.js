@@ -51,7 +51,7 @@ class separationCli {
   async replaceDepartmentHead(separationId, newHeadId) {
     const r = await models.admin.separateDepartmentHead(separationId, newHeadId);
     await pg.pool.end();
-    if ( r.err ) {
+    if ( r.error ) {
       console.error(r.message);
       return;
     }

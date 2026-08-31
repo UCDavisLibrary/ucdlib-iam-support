@@ -603,7 +603,7 @@ class iamAdmin {
 
     
     if ( Object.keys(isAnotherHead).length !== 0 ) {
-       return {error: false, message: `Department currently has a different head (${otherHead.iamId}); skipping reassignment.`};
+       return {error: false, message: `Department currently has a different head (${isAnotherHead.iamId}); skipping reassignment.`};
     }
 
     // replace newDepartmentHead as department head

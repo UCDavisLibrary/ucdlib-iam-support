@@ -188,6 +188,12 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
          .filter(g => g.type === 'Department' && g.isHead === true)
          .map(g => g.id);
 
+      if( newHeadEmployee.iamId === this.employeeRecord.iamId ) {
+        let msg = 'New department head can not be the same as the separated employee.';
+        this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
+        this.employeeNewHead = null;
+        return;
+      }
 
       if ( employeeNewHeadGroups.some(g => headDeptIds.includes(g.id)) )  {
         this.employeeNewHead = newHeadEmployee;
@@ -233,6 +239,11 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     if(!this.skipDepartmentHead){
       if ( this.isDepartmentHead && !this.employeeNewHead?.iamId ) { 
         const msg = 'New Department Head must be selected and must be in the same department as the separated employee.';
+        this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
+        return;
+      }
+      if ( this.isDepartmentHead && this.employeeNewHead?.iamId === this.employeeRecord.iamId ) {
+        const msg = 'New Department Head cannot be the same as the separated employee.';
         this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
         return;
       }
@@ -299,9 +310,9 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     additionalData.employeeId = this.employeeId;
     additionalData.employeeUserId = this.userId;
 
-    if(!this.skipDepartmentHead) {
+    if(!this.skipDepartmentHead && this.employeeNewHead ) {
       additionalData.newDepartmentHead = this.employeeNewHead?.iamId || null;
-      additionalData.newDepartmentHeadName =  `${this.employeeNewHead?.firstName || ''} ${this.employeeNewHead?.lastName || ''}` || null;
+      additionalData.newDepartmentHeadName = `${this.employeeNewHead.firstName || ''} ${this.employeeNewHead.lastName || ''}`.trim() || null;
     }
 
     payload.additionalData = additionalData;

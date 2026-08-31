@@ -38,14 +38,18 @@ export default (api) => {
 
 
       //if the employee is a department head, add the department head info to the separation request
-      const isDepartmentHead = payload.additionalData.employeeRecord.groups.some(g => g.type === 'Department' && g.isHead === true);
-      if ( isDepartmentHead && !payload.skipDepartmentHead ) {
+      const employeeGroups = payload.additionalData.employeeRecord.groups;
+      payload.additionalData.groups = employeeGroups;
+      const isDepartmentHead = employeeGroups.some(g => g.type === 'Department' && g.isHead === true);      if ( isDepartmentHead && !payload.skipDepartmentHead ) {
         const newHeadId = payload.additionalData?.newDepartmentHead;   
         if ( !newHeadId ) {
           res.status(400).json({error: true, message: 'Missing new department head id for department head separation or selected head was not in the same department as the separated employee.'});
           return;
         }
-
+        if ( newHeadId === payload.iamId ) {
+           res.status(400).json({error: true, message: 'The separating employee cannot be selected as the new department head.'});
+           return;
+        }
         const newHeadRecord = await models.employees.getById(newHeadId, 'iamId', options);
         if ( newHeadRecord.err ) {
           console.error(newHeadRecord.err);
@@ -299,7 +303,11 @@ export default (api) => {
           message: deprovisionMessage
         });
       }
-      systemAccessRecord.add('ucdlib-keycloak', req.auth.token.id);
+      if ( deprovisionSkipped ) {
+        console.log(deprovisionMessage);
+      } else {
+        systemAccessRecord.add('ucdlib-keycloak', req.auth.token.id);
+      }
 
       // separate department head if applicable
       const departmentSeparationResult = await models.admin.separateDepartmentHead(separationId);

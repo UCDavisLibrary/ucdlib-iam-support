@@ -303,6 +303,10 @@ class UcdlibGroups{
     let text = `
     UPDATE group_membership SET is_head = CASE WHEN employee_key = $2 THEN TRUE ELSE FALSE END
     WHERE group_id = $1
+      AND EXISTS (
+          SELECT 1 FROM group_membership target
+          WHERE target.group_id = $1 AND target.employee_key = $2
+        )
     `;
     return await pg.query(text, params);
   }
