@@ -158,12 +158,12 @@ Occasionally, HR will submit an onboarding request before a UCD IAM/UC Path reco
 ### Separation
 The steps for separating an employee are as follows:
 - HR uses the separation endpoint to submit a request, which generates a separation record and an associated RT ticket.
-- When the Last Day of System Access has passed, an ITIS programmer will need to manually remove the employee from the local database and Keycloak by doing the following:
+- When the Separation Date has passed, an ITIS programmer will need to manually remove the employee from the local database and Keycloak by doing the following:
   - Clicking the `Deprovision From Library IAM Database` on the GUI
   - Or using the cli:
     - `separation ls` to get the separation record id
     - `employees separate <separation-record-id>`
-- The system will send a reminder to the RT ticket when the Last Day of System Access has passed.
+- The system will send a reminder to the RT ticket when the Separation Date has passed.
 
 ### Discrepancy Notifications
 When possible, the system will update local employee records when the UCD IAM record is updated - for example, when an employee changes their preferred name in the UC Davis directory. However, there are some cases where an automatic update isn't possible or is ill-advised, in which case a discrepancy notification is created. These notifications are bundled and sent to the ITIS error notification slack channel once a week. It is contingent on an ITIS programmer to resolve them:

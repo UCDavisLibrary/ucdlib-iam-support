@@ -64,7 +64,7 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
       appComponent : new AppComponentController(this),
     }
 
-    this._injectModel('AppStateModel', 'EmployeeModel', 'SeparationModel', 'RtModel', 'AuthModel');
+    this._injectModel('AppStateModel', 'SeparationModel', 'RtModel', 'AuthModel');
   }
 
   /**

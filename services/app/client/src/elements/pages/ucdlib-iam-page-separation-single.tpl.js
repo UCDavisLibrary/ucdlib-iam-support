@@ -16,7 +16,7 @@ export function render() {
             <div><label class='u-inline'>Department:</label> ${this.department}</div>
             <div><label class='u-inline'>Is Department Head:</label> ${this.departmentHead || 'Not Listed'}</div>
             <div ?hidden=${!this.employeeNewHead}><label class='u-inline'>New Department Head:</label> ${this.employeeNewHead}</div>
-            <div><label class='u-inline'>Last Day of System Access:</label> ${this.separationDate}</div>
+            <div><label class='u-inline'>Separation Date</label> ${this.separationDate}</div>
         </div>
         <div class="panel panel--icon panel--icon-custom o-box panel--icon-delta">
           <h2 class="panel__title"><span class="panel__custom-icon fas fa-sitemap"></span>Supervisor</h2>
