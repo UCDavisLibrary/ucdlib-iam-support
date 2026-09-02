@@ -29,6 +29,10 @@ export default (api) => {
     payload.submittedBy = req.auth.token.id;
     payload.modifiedBy = req.auth.token.id;
     payload.additionalData[models.SystemAccessRecord.onboardingRecordProp] = [];
+    payload.additionalData.onboardingReminders = {
+      optOut: !!payload.additionalData.onboardingReminders?.optOut,
+      sent: {}
+    };
 
     // get ucd iam record
     if ( payload.iamId ){

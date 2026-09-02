@@ -42,6 +42,7 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
       userId: {state: true},
       manualFormDisabled: {state: true},
       skipSupervisor: {state: true},
+      remindersOptOut: {state: true},
       notes: {state: true},
       transferEmployee: {state: true},
     };
@@ -90,6 +91,7 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
     this.employeeId = '';
     this.userId = '';
     this.skipSupervisor = false;
+    this.remindersOptOut = false;
     this.supervisorEmail = '';
     this.notes = '';
     this.transferEmployee = {};
@@ -402,6 +404,7 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
     additionalData.employeeContactEmail = this.employeeContactEmail;
     additionalData.contactEmployee = this.contactEmployee;
     additionalData.isTransfer = this.hasTransferEmployee;
+    additionalData.onboardingReminders = { optOut: this.remindersOptOut };
     payload.additionalData = additionalData;
 
     return payload;

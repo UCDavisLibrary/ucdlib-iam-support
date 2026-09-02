@@ -11,9 +11,17 @@ export default (api) => {
 
     // auth
     if ( !req.auth.token.hasAdminAccess && !req.auth.token.hasHrAccess ){
-      const r = await models.onboarding.query({rtTicketId: req.params.id, supervisorId: req.auth.token.iamId});
-      if ( r.err || !r.res.rows.length ){
-        console.error(r.err);
+      const onboarding = await models.onboarding.query({rtTicketId: req.params.id, supervisorId: req.auth.token.iamId});
+      if ( onboarding.err ) {
+        console.error(onboarding.err);
+        return res.status(500).json({error: true});
+      }
+      const separation = await models.separation.query({rtTicketId: req.params.id, supervisorId: req.auth.token.iamId});
+      if ( separation.err ) {
+        console.error(separation.err);
+        return res.status(500).json({error: true});
+      }
+      if ( !onboarding.res?.rowCount && !separation.res?.rowCount ) {
         res.status(403).json({
           error: true,
           message: 'Not authorized to access this resource.'

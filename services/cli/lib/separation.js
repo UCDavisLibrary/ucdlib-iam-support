@@ -48,6 +48,35 @@ class separationCli {
     console.log(`Removed separation request ${id}`);
   }
 
+  async replaceDepartmentHead(separationId, newHeadId) {
+    let request = await models.separation.getById(separationId);
+    if ( !request.res.rowCount ) {
+      console.error(`Separation request ${separationId} not found`);
+      await pg.pool.end();
+      return;
+    }
+    request = request.res.rows[0];
+    const additionalData = request.additional_data || {};
+
+    let employee = await models.employees.getById(newHeadId, 'iamId');
+    if ( !employee.res?.rowCount ) {
+      console.error(`Employee record with iam_id ${newHeadId} does not exist`);
+      await pg.pool.end();
+      return;
+    }
+    employee = employee.res.rows[0];
+
+    additionalData.newDepartmentHead = newHeadId;
+    additionalData.newDepartmentHeadName = `${employee.first_name} ${employee.last_name}`;
+    const r = await models.separation.update(separationId, {additionalData});
+    await pg.pool.end();
+    if ( r.err ) {
+      console.error(r.err);
+      return;
+    }
+    console.log(`Updated separation request ${separationId} with new department head ${newHeadId}`); 
+  }
+
 }
 
 export default new separationCli();

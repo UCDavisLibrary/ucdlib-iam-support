@@ -147,15 +147,13 @@ async refreshAccessToken() {
   }
 
   /**
-   * @description Gets a single user from keycloak
+   * @description Gets a single user from keycloak by username (exact match)
    * @param {String} username - The keycloak user name (Kerb ID)
-   * @returns
+   * @returns {Object|null} - The user object, or null if no exact match is found
    */
   async getUserByUserName(username){
-    if ( !this.refreshInterval ){
-      await this.refreshAccessToken();
-    }
-    return await this.client.users.findOne({username});
+    const users = await this.getUsers({username, exact: true});
+    return users.length ? users[0] : null;
   }
 
   /**

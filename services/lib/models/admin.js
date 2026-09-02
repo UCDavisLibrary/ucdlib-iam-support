@@ -486,9 +486,13 @@ class iamAdmin {
   /**
    * @description Delete keycloak account for a user
    * @param {string} userId - user id (kerb) to deprovision
+   * @param {Object} opts - Options object
+   * @param {Boolean} opts.skipIfMissing - If true, treat a missing Keycloak account as a
+   *   successful no-op (out.skipped = true) instead of an error.
    * @returns
    */
-  async deprovisionKcAccount(userId){
+  async deprovisionKcAccount(userId, opts={}){
+    const { skipIfMissing } = opts;
     const out = {error: false, message: 'Unable to deprovision Keycloak account'};
     if ( !userId ) {
       out.error = true;
@@ -498,13 +502,17 @@ class iamAdmin {
     try {
       models.keycloakAdmin.resetState();
       await models.keycloakAdmin.init({...config.keycloakAdmin, refreshInterval: 58000});
-      let keycloakUser = await models.keycloakAdmin.getUserByUserName(userId);
+      const keycloakUser = await models.keycloakAdmin.getUserByUserName(userId);
       if ( !keycloakUser ) {
+        if ( skipIfMissing ) {
+          out.skipped = true;
+          out.message = `No Keycloak account found for user id ${userId} - skipping deprovisioning`;
+          return out;
+        }
         out.error = true;
         out.message = `${out.message} - No Keycloak user found with user id ${userId}`;
         return out;
       }
-      keycloakUser = keycloakUser[0];
       out.keycloakUser = keycloakUser;
       await models.keycloakAdmin.client.users.del({id: keycloakUser.id});
     } catch (e) {
@@ -519,6 +527,97 @@ class iamAdmin {
     return out;
   }
 
+  /**
+   * @description Separates a department head from their department and assigns a new department head
+   * @param {string} separationId - id of the separation record
+   * @returns {Object} - {error: boolean, message: string}
+   */
+  async separateDepartmentHead(separationId, newDepartmentHeadId=null) {
+    // check if separation record exists
+    let separationRecord = await models.separation.getById(separationId);
+    
+    if ( separationRecord.err ) {
+      let message = `Error retrieving separation record: ${separationRecord.err.message}`;
+      return {error: true, message: message};
+    }
+    if ( !separationRecord.res.rows.length ){
+      let message = `No separation record found for id ${separationId}, skipping reassignment.`;
+      return {error: false, message: message};
+    }
+    separationRecord = separationRecord.res.rows[0];
+
+    // check if employee is a department head (ignore newDepartmentHead if not)
+    const isDepartmentHead = separationRecord.additional_data?.groups?.some(
+      g => g.type === 'Department' && g.isHead === true
+    );
+    if ( !isDepartmentHead ) {
+      return {error: false, message: 'Employee is not a department head; skipping reassignment.'};
+    }
+
+    // check if new department head is provided
+    const newHeadIamId =  newDepartmentHeadId ? newDepartmentHeadId : separationRecord.additional_data?.newDepartmentHead;
+    if( !newHeadIamId ) {
+      let message = `No new department head provided; skipping reassignment.`;
+      return {error: false, message: message};
+    }
+  
+    let newHeadEmployee = await models.employees.getById(newHeadIamId, 'iamId', {returnGroups: true});
+
+    if( newHeadEmployee.err ) {
+      let message = `Error retrieving new department head employee record: ${newHeadEmployee.err.message}`;
+      return {error: true, message: message};
+    }
+    if ( !newHeadEmployee.res.rows.length ) {
+      let message = `No employee record found for new department head with iamId ${newHeadIamId}, skipping reassignment.`;
+      return {error: false, message: message};
+    }
+
+    newHeadEmployee = newHeadEmployee.res.rows[0];
+
+    //check if new department head is in the department
+    const departmentGroup = separationRecord.additional_data?.groups?.find(g => g.type === 'Department' && g.isHead === true);
+    if ( !departmentGroup ) return {error: false, message: 'No department-head group found; skipping reassignment.'};
+    
+    const isNewHeadInDepartment = newHeadEmployee.groups.some(g => g.id === departmentGroup.id);
+
+    if ( !isNewHeadInDepartment ) {
+      return {error: false, message: 'New department head is not in the department. Skipping reassignment.'};
+    }
+
+    //check if the department currently has a department head that is somebody other than the separating employee
+    const currentDepartmentObj = separationRecord.additional_data.groups.find(g => g.type === 'Department' && g.isHead === true);
+    const currentDepartmentId = currentDepartmentObj.id;
+
+    let departmentRecord = await models.groups.getById(currentDepartmentId, {returnHead: true});
+    if ( departmentRecord.err ) {
+      return {error: true, message: `Error retrieving department record: ${departmentRecord.err.message}`};
+    }
+    if ( !departmentRecord.res.rows.length ) {
+      return {error: true, message: `No department record found for id ${currentDepartmentId}`};
+    }
+
+    const otherHead = departmentRecord?.res?.rows?.[0];
+
+    // check if the department currently has a head that is not the separating employee
+    const isAnotherHead = otherHead.head?.filter(h => h.iamId !== separationRecord.iam_id);
+
+    
+    if ( Object.keys(isAnotherHead).length !== 0 ) {
+       return {error: false, message: `Department currently has a different head (${isAnotherHead.iamId}); skipping reassignment.`};
+    }
+
+    // replace newDepartmentHead as department head
+    const rep = await models.groups.replaceGroupHead(currentDepartmentId, newHeadEmployee.id);
+     if ( rep.err ) {
+       return {error: true, message: `Error setting new department head: ${rep.err.message}`};
+     }
+     if ( !rep.res?.rowCount ) {
+       return {error: true, message: `New department head is not a member of department ${currentDepartmentId}`};
+     }
+
+    return {error: false, message: 'Department head separation and reassignment completed successfully.'};
+  }
+  
   async deleteEmployeeRecord(id, options={}){
     const out = {error: false, message: 'Unable to delete employee record'};
     const idType = options.idtype ? options.idtype : 'iamId';
@@ -547,10 +646,10 @@ class iamAdmin {
 
     // check if employee has direct reports
     const directReports = await models.employees.getDirectReports(iamId, 'iamId');
-    if ( directReports.res?.rowCount ) {
+    if ( directReports.res?.rowCount && !options.force ) {
       out.error = 'directReports';
       out.directReports = directReports.res.rows;
-      out.message = `${out.message} - Employee ${idType}:${id} has direct reports. Please remove direct reports first`;
+      out.message = `${out.message} - Employee ${idType}:${id} has direct reports. Please remove direct reports first. You can use --force to override this check.`;
       return out;
     }
 
@@ -615,11 +714,11 @@ class iamAdmin {
     }
     let separationDate = record.separation_date;
     if ( !separationDate ) {
-      out.log.message = 'No separation date found';
+      out.log.message = 'Last Day of System Access not found';
       return out;
     }
     if ( record.submitted && record.submitted > separationDate ) {
-      out.log.message = 'Separation date is before submitted date';
+      out.log.message = 'Last Day of System Access is before submitted date';
       return out;
     }
     let separationDay = separationDate.toISOString().split('T')[0];
@@ -628,7 +727,7 @@ class iamAdmin {
     dayAfter.setDate(dayAfter.getDate() + 1);
     const now = new Date();
     if ( dayAfter > now ) {
-      out.log.message = 'Separation date is in the future';
+      out.log.message = 'Last Day of System Access is in the future';
       return out;
     }
 
@@ -654,8 +753,8 @@ class iamAdmin {
     const rtClient = new models.rt(rtConfig);
     const ticket = new models.rtTicket(false, {id: rtTicketId});
     const reply = ticket.createReply();
-    reply.addSubject('Reminder: Employee Separation Date');
-    reply.addContent(`This is just a reminder for ITIS administrators that the separation date (${separationDay}) for ${employeeName} has passed.`);
+    reply.addSubject('Reminder: Employee\'s Last Day of System Access');
+    reply.addContent(`This is just a reminder for ITIS administrators that the Last Day of System Access (${separationDay}) for ${employeeName} has passed.`);
     reply.addContent('Please update the employee record and any access control lists accordingly.');
     const rtResponse = await rtClient.sendCorrespondence(reply);
     if ( rtResponse.err )  {

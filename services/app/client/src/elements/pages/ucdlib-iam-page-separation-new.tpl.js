@@ -54,15 +54,34 @@ export function renderSubmissionForm(){
           <h2 class="panel__title"><span class="panel__custom-icon fas fa-briefcase"></span>Separation Information</h2>
           <section>
             <div class="field-container">
-              <label for="sp-separation-date">Date of Separation <abbr title="Required">*</abbr></label>
+              <label for="sp-separation-date">Last Day of System Access <abbr title="Required">*</abbr></label>
               <input id='sp-separation-date' type="date" required .value=${this.separationDate} @input=${(e) => {this.separationDate = e.target.value;}}>
+            </div>
+            <div ?hidden=${!this.isDepartmentHead}>
+              <div class="field-container">
+                <label for="sp-department-head">New or Interim Department Head<abbr title="Required">*</abbr></label>
+                <span style="font-size: .9rem;">Chosen employee must be in the same department as the separated employee.</span>
+                <ucdlib-employee-search
+                  id="sp-department-head"
+                  class='u-space-mb'
+                  @status-change=${this._onDepartmentHeadChange}
+                  hide-label>
+                </ucdlib-employee-search>
+              </div>
+              <label for="sp-department-head-check">Do Not Assign Head</label>
+              <div class="checkbox">
+                <ul class="list--reset">
+                  <li>
+                    <span style="font-size: .9rem;">If you do not assign a new head now, you will need to contact ITIS as soon as the information becomes available.</span>
+                    <input type="checkbox" id="sp-department-head-check" @input=${() => this.skipDepartmentHead = !this.skipDepartmentHead} .checked=${this.skipDepartmentHead}>
+                    <label for="sp-department-head-check">Do not assign new/interim head</label>
+                  </li>
+                </ul>
+              </div>
             </div>
           </section>
         </div>
       </div>
-
-
-
 
 
       <div>
@@ -81,18 +100,12 @@ export function renderSubmissionForm(){
         </div>
       </div>
 
-
-
-
       <div class="panel panel--icon panel--icon-custom o-box panel--icon-pinot">
         <h2 class="panel__title"><span class="panel__custom-icon fas fa-user-tie"></span>Employee</h2>
         <section>
           ${this.renderEmployeeForm()}
         </section>
       </div>
-
-
-
 
       <div class="panel panel--icon panel--icon-custom o-box panel--icon-delta">
         <h2 class="panel__title space-between">

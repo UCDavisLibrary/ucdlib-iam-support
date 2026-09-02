@@ -36,6 +36,40 @@ export default (api) => {
       payload.additionalData.employeeRecord = employeeRecord.res.rows[0];
       payload.additionalData.departmentName = payload.additionalData.employeeRecord.groups.find(g => g.partOfOrg)?.name || '';
 
+
+      //if the employee is a department head, add the department head info to the separation request
+      const employeeGroups = payload.additionalData.employeeRecord.groups;
+      payload.additionalData.groups = employeeGroups;
+      const isDepartmentHead = employeeGroups.some(g => g.type === 'Department' && g.isHead === true);      if ( isDepartmentHead && !payload.skipDepartmentHead ) {
+        const newHeadId = payload.additionalData?.newDepartmentHead;   
+        if ( !newHeadId ) {
+          res.status(400).json({error: true, message: 'Missing new department head id for department head separation or selected head was not in the same department as the separated employee.'});
+          return;
+        }
+        if ( newHeadId === payload.iamId ) {
+           res.status(400).json({error: true, message: 'The separating employee cannot be selected as the new department head.'});
+           return;
+        }
+        const newHeadRecord = await models.employees.getById(newHeadId, 'iamId', options);
+        if ( newHeadRecord.err ) {
+          console.error(newHeadRecord.err);
+          res.status(500).json({error: true, message: 'Unable to retrieve new department head record'});
+          return;
+        }
+        if ( !newHeadRecord.res.rowCount ) {
+          res.status(400).json({error: true, message: 'New department head record not found'});
+          return;
+        }
+
+        let newDepartmentHeadRecord = newHeadRecord.res.rows[0];
+        let newHeadDepartment = newDepartmentHeadRecord.groups.filter(g => g.type === 'Department' && g.partOfOrg === true);
+
+        if (!newHeadDepartment.length || !newHeadDepartment.some(dept => dept.name === payload.additionalData.departmentName)) {
+          res.status(400).json({error: true, message: 'Selected new department head is not in the same department as the separated employee.'});
+          return;
+        }
+      }
+
       //create separation request entry
       const r = await models.separation.create(payload);
       if ( r.err ) {
@@ -81,7 +115,7 @@ export default (api) => {
       }, false);
       ticket.addContent(`<h4>Details</h4>`);
       ticket.addContent({
-        'Separation Date': payload.separationDate,
+        'Last Day of System Access': payload.separationDate,
         'Supervisor': `${ad.supervisorLastName}, ${ad.supervisorFirstName}`
       }, false);
       if ( payload.notes ){
@@ -178,7 +212,6 @@ export default (api) => {
     });
 
     api.post('/separation/:id', async (req, res) => {
-
       if (
         !req.auth.token.hasAdminAccess &&
         !req.auth.token.hasHrAccess ){
@@ -206,16 +239,10 @@ export default (api) => {
     });
 
     api.get('/separation/:id', async (req, res) => {
-
-      if (
-        !req.auth.token.hasAdminAccess &&
-        !req.auth.token.hasHrAccess ){
-        res.status(403).json({
-          error: true,
-          message: 'Not authorized to access this resource.'
-        });
-        return;
-      }
+      const iamId = req.auth.token.iamId;
+      const isAdmin = req.auth.token.hasAdminAccess;
+      const isHr = req.auth.token.hasHrAccess;
+      let isReportedTo = false;
 
       const r = await models.separation.getById(req.params.id);
       if ( r.err ) {
@@ -227,7 +254,25 @@ export default (api) => {
         res.json({error: true, message: 'Request does not exist!'});
         return;
       }
-      const obReq = textUtils.camelCaseObject(r.res.rows[0]);
+      
+      const result = r.res.rows[0];
+
+      if( !isAdmin && !isHr ){
+        isReportedTo = (result.supervisor_id === iamId) ? true : false;
+      }
+
+      if( !isReportedTo &&
+          !isAdmin &&
+          !isHr 
+        ){
+        res.status(403).json({
+          error: true,
+          message: 'Not authorized to access this resource.'
+        });
+        return;
+      }
+
+      const obReq = textUtils.camelCaseObject(result);
       return res.json(obReq);
 
     });
@@ -261,7 +306,7 @@ export default (api) => {
 
       // remove employee from keycloak
       const userId = employeeRecord.user_id || separationRecord.additional_data?.employeeUserId;
-      const { error: deprovisionError, message: deprovisionMessage, keycloakUser } = await models.admin.deprovisionKcAccount(userId);
+      const { error: deprovisionError, message: deprovisionMessage, skipped: deprovisionSkipped } = await models.admin.deprovisionKcAccount(userId, {skipIfMissing: true});
       if ( deprovisionError ) {
         console.error(deprovisionMessage);
         return res.status(400).json({
@@ -269,7 +314,22 @@ export default (api) => {
           message: deprovisionMessage
         });
       }
-      systemAccessRecord.add('ucdlib-keycloak', req.auth.token.id);
+      if ( deprovisionSkipped ) {
+        console.log(deprovisionMessage);
+      } else {
+        systemAccessRecord.add('ucdlib-keycloak', req.auth.token.id);
+      }
+
+
+      // separate department head if applicable
+      const departmentSeparationResult = await models.admin.separateDepartmentHead(separationId);
+      if ( departmentSeparationResult.error ) {
+        console.error(departmentSeparationResult.message);
+        return res.status(400).json({
+          error: true,
+          message: departmentSeparationResult.message
+        });
+      }
 
       // remove employee from library iam db
       const {

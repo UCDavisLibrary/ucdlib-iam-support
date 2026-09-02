@@ -12,6 +12,9 @@ class AppStateModelImpl extends AppStateModel {
     this.defaultPage = 'home';
     this.currentPage = this.defaultPage;
     this.store = AppStateStore;
+
+    this.inject('AuthModel');
+
   }
 
   /**
@@ -21,7 +24,8 @@ class AppStateModelImpl extends AppStateModel {
    */
   set(update) {
     if ( update.location.path.length && update.location.path[0] == 'logout' ){
-      this.logout();
+      this.AuthModel.logout();
+      return;
     }
 
     const modals = document?.querySelectorAll?.('ucdlib-iam-modal');
@@ -153,6 +157,9 @@ class AppStateModelImpl extends AppStateModel {
     } else if ( update.page === 'tools' ){
       title.show = this.store.pageTitles.tools ? true : false;
       title.text = this.store.pageTitles.tools;
+    } else if ( update.page === 'onboarding-reminders' ){
+      title.show = this.store.pageTitles.onboardingReminders ? true : false;
+      title.text = this.store.pageTitles.onboardingReminders;
     }
 
 
@@ -244,6 +251,10 @@ class AppStateModelImpl extends AppStateModel {
     else if ( update.page === 'tools' ){
       breadcrumbs.show = true;
       breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.tools);
+    }
+    else if ( update.page === 'onboarding-reminders' ){
+      breadcrumbs.show = true;
+      breadcrumbs.breadcrumbs.push(this.store.breadcrumbs.onboardingReminders);
     }
 
     this.store.emit('app-header-update', {breadcrumbs});

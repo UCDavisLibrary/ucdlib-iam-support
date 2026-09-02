@@ -35,4 +35,14 @@ program
   }
 );
 
+program
+  .command('replace-department-head')
+  .description('Set the replacement department head for an applicable active separation record')
+  .argument('<separation-id>', 'Separation record id')
+  .argument('<new-department-head>', 'New department head IAM ID')
+  .action((id, newHeadId) => {
+    separation.replaceDepartmentHead(id, newHeadId);
+  }
+);
+
   program.parse(process.argv);

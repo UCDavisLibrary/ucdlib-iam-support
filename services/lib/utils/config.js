@@ -95,7 +95,7 @@ class Config {
     };
 
     this.app = {
-      routes: ['onboarding', 'separation', 'logout', 'permissions', 'orgchart', 'emupdate', 'patron', 'tools'],
+      routes: ['onboarding', 'separation', 'logout', 'permissions', 'orgchart', 'emupdate', 'patron', 'tools', 'onboarding-reminders'],
       title: 'UC Davis Library Identity and Access Management',
       baseUrl: this.getEnv('UCDLIB_BASE_URL', 'https://iam.staff.library.ucdavis.edu'),
       bundleName: this.getEnv('UCDLIB_APP_BUNDLE_NAME', 'ucdlib-iam-support.js'),
@@ -112,6 +112,17 @@ class Config {
       statusFailAfterInterval: this.getEnv('MAINTENANCE_STATUS_FAIL_AFTER_INTERVAL', '2 days')
     };
 
+    this.jobs = {
+      retentionInterval: this.getEnv('JOBS_RETENTION_INTERVAL', '90 days')
+    };
+
+    this.smtp = {
+      host: this.getEnv('SMTP_HOST', 'smtp.lib.ucdavis.edu'),
+      port: this.getEnv('SMTP_PORT', 25),
+      enabled: this.getEnv('SMTP_ENABLED', false),
+      recipientOverride: this.getEnv('SMTP_RECIPIENT_OVERRIDE', '')
+    };
+
     this.api = {
       prefix: this.getEnv('UCDLIB_API_API_PREFIX', '/json'),
       hostPort: this.getEnv('UCDLIB_API_HOST_PORT', '')
@@ -119,7 +130,9 @@ class Config {
 
     this.cron = {
       iamSync: this.getEnv('CRON_IAM_SYNC', '0 8 * * *'),
-      discrepancyNotification: this.getEnv('CRON_DISCREPANCY_NOTIFICATION', '0 9 * * 5')
+      discrepancyNotification: this.getEnv('CRON_DISCREPANCY_NOTIFICATION', '0 9 * * 5'),
+      jobsCleanup: this.getEnv('CRON_JOBS_CLEANUP', '0 1 * * *'),
+      onboardingReminders: this.getEnv('CRON_ONBOARDING_REMINDERS', '0 9 * * 1-5')
     }
   }
 

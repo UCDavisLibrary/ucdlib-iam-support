@@ -1,5 +1,6 @@
 import express from 'express';
 import ucdIam from './ucd-iam.js';
+import config from './config.js';
 import groups from './groups.js';
 import onboarding from './onboarding.js';
 import permissions from './permissions.js';
@@ -19,6 +20,7 @@ auth(router);
 
 // endpoints
 ucdIam(router);
+config(router);
 groups(router);
 onboarding(router);
 separation(router);

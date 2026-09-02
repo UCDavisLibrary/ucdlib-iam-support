@@ -1,6 +1,7 @@
 import pg from "#lib/utils/pg.js";
 import textUtils from "#lib/utils/text.js";
 import RequestsIsoUtils from "#lib/utils/requests-iso-utils.js";
+import onboardingReminderUtils from "#lib/utils/onboarding-reminder-utils.js";
 
 /**
  * @description Manages pg data for onboarding form
@@ -206,6 +207,33 @@ class UcdlibOnboarding {
     RETURNING id
     `;
     return await pg.query(text, [...updateClause.values, id]);
+  }
+
+  /**
+   * @description Get onboarding requests due for a reminder email at the given interval slug, excluding
+   * requests that have opted out or already been sent this specific interval's reminder.
+   * Only considers requests that already have the onboardingReminders tracking object in
+   * additional_data - requests created before this feature shipped never got that property
+   * stamped on them, so they're excluded here rather than needing a separately-tracked cutoff date.
+   * @param {String} slug - Interval slug, e.g. 'firstMonth' - see onboardingReminderUtils.intervals
+   * @returns {Object} {res, err}
+   */
+  async getDueForReminder(slug){
+    const interval = onboardingReminderUtils.intervals.find(i => i.slug === slug);
+    if ( !interval ) {
+      return pg.returnError(`Unknown onboarding reminder interval slug: ${slug}`);
+    }
+    const text = `
+      SELECT r.*, sc.name as status_name, sc.is_open as is_active_status
+      FROM onboarding_requests r
+      LEFT JOIN status_codes sc ON sc.id = r.status_id
+      WHERE r.additional_data -> 'onboardingReminders' IS NOT NULL
+        AND r.start_date IS NOT NULL
+        AND r.start_date + INTERVAL '${interval.sqlInterval}' <= NOW()
+        AND COALESCE((r.additional_data->'onboardingReminders'->>'optOut')::boolean, false) = false
+        AND (r.additional_data->'onboardingReminders'->'sent'->>'${slug}') IS NULL
+    `;
+    return await pg.query(text);
   }
 }
 

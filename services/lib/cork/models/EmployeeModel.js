@@ -20,10 +20,12 @@ class EmployeeModel extends BaseModel {
   }
 
   /**
-   * @description Returns all direct reports for the current user
+    * @description Returns all direct reports for the current user (or for the provided supervisor IAM id)
+    * @param {String} iamId - optional supervisor IAM id; defaults to current user when omitted/blank
+    * @returns {Promise<Object>} Cork request state object: {state, payload: Array<Object>, error}
    */
-  getDirectReports(){
-    return this.service.getDirectReports();
+  getDirectReports(iamId=''){
+    return this.service.getDirectReports(iamId);
   }
 
   /**
