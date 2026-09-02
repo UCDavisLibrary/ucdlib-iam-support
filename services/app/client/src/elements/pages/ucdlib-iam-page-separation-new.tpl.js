@@ -54,7 +54,7 @@ export function renderSubmissionForm(){
           <h2 class="panel__title"><span class="panel__custom-icon fas fa-briefcase"></span>Separation Information</h2>
           <section>
             <div class="field-container">
-              <label for="sp-separation-date">Separation Date <abbr title="Required">*</abbr></label>
+              <label for="sp-separation-date">Last Day of System Access <abbr title="Required">*</abbr></label>
               <input id='sp-separation-date' type="date" required .value=${this.separationDate} @input=${(e) => {this.separationDate = e.target.value;}}>
             </div>
             <div class="field-container" ?hidden=${!this.isDepartmentHead}>
