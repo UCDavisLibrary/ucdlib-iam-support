@@ -32,6 +32,7 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
       missingUid: {state: true},
       reconId: {state: true},
       showDeprovisionButton: {state: true},
+      showDirectReports: {state: true},
       directReports: {state: true}
     };
   }
@@ -58,6 +59,7 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     this.employeeUserId = '';
     this.employeeId = '';
     this.showDeprovisionButton = false;
+    this.showDirectReports = false;
     this.directReports = [];
 
     this.ctl = {
@@ -123,7 +125,7 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     this.isActiveStatus = payload.isActiveStatus;
     this.status = payload.statusName || '';
     this.statusDescription = payload.statusDescription || '';
-    this.removedFromSystems = ad?.removedFromSystems || [];
+    this.showDirectReports = (Array.isArray(ad?.removedFromSystems) && !ad.removedFromSystems.find(s => s?.value === 'ucdlib-iam-db'));
     await this.getDirectReports();
 
     this.showDeprovisionButton = this.AuthModel.isAdmin &&
@@ -157,13 +159,11 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
    * @description Get direct reports of separated employee for display if employee is currently in system.
    */
   async getDirectReports(){
-    const removedFromIamDb = Array.isArray(this.removedFromSystems) && this.removedFromSystems.find(s => s?.value === 'ucdlib-iam-db');
-    
-    if ( removedFromIamDb ) {
+
+    if ( !this.showDirectReports ) {
       this.directReports = [];
       return;
     }
-    
     const r = await this.EmployeeModel.getDirectReports(this.iamId);
 
     if ( r.state === 'loaded' ){
@@ -174,7 +174,6 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
       }
       this.directReports = [];
     }
-    this.requestUpdate();
 
   }
 
