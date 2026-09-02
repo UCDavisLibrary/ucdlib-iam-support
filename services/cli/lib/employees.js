@@ -116,6 +116,15 @@ class employeesCli {
 
     // remove employee record from local database
     if ( options.rm ) {
+      
+      // separate department head if applicable
+      const departmentSeparationResult = await models.admin.separateDepartmentHead(separationId);
+      if ( departmentSeparationResult.error ) {
+        console.error(departmentSeparationResult.message);
+        await pg.pool.end();
+        return;
+      }
+
       const {
         error: rmError,
         message: rmMessage,

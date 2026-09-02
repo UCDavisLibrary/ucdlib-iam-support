@@ -527,6 +527,97 @@ class iamAdmin {
     return out;
   }
 
+  /**
+   * @description Separates a department head from their department and assigns a new department head
+   * @param {string} separationId - id of the separation record
+   * @returns {Object} - {error: boolean, message: string}
+   */
+  async separateDepartmentHead(separationId, newDepartmentHeadId=null) {
+    // check if separation record exists
+    let separationRecord = await models.separation.getById(separationId);
+    
+    if ( separationRecord.err ) {
+      let message = `Error retrieving separation record: ${separationRecord.err.message}`;
+      return {error: true, message: message};
+    }
+    if ( !separationRecord.res.rows.length ){
+      let message = `No separation record found for id ${separationId}, skipping reassignment.`;
+      return {error: false, message: message};
+    }
+    separationRecord = separationRecord.res.rows[0];
+
+    // check if employee is a department head (ignore newDepartmentHead if not)
+    const isDepartmentHead = separationRecord.additional_data?.groups?.some(
+      g => g.type === 'Department' && g.isHead === true
+    );
+    if ( !isDepartmentHead ) {
+      return {error: false, message: 'Employee is not a department head; skipping reassignment.'};
+    }
+
+    // check if new department head is provided
+    const newHeadIamId =  newDepartmentHeadId ? newDepartmentHeadId : separationRecord.additional_data?.newDepartmentHead;
+    if( !newHeadIamId ) {
+      let message = `No new department head provided; skipping reassignment.`;
+      return {error: false, message: message};
+    }
+  
+    let newHeadEmployee = await models.employees.getById(newHeadIamId, 'iamId', {returnGroups: true});
+
+    if( newHeadEmployee.err ) {
+      let message = `Error retrieving new department head employee record: ${newHeadEmployee.err.message}`;
+      return {error: true, message: message};
+    }
+    if ( !newHeadEmployee.res.rows.length ) {
+      let message = `No employee record found for new department head with iamId ${newHeadIamId}, skipping reassignment.`;
+      return {error: false, message: message};
+    }
+
+    newHeadEmployee = newHeadEmployee.res.rows[0];
+
+    //check if new department head is in the department
+    const departmentGroup = separationRecord.additional_data?.groups?.find(g => g.type === 'Department' && g.isHead === true);
+    if ( !departmentGroup ) return {error: false, message: 'No department-head group found; skipping reassignment.'};
+    
+    const isNewHeadInDepartment = newHeadEmployee.groups.some(g => g.id === departmentGroup.id);
+
+    if ( !isNewHeadInDepartment ) {
+      return {error: false, message: 'New department head is not in the department. Skipping reassignment.'};
+    }
+
+    //check if the department currently has a department head that is somebody other than the separating employee
+    const currentDepartmentObj = separationRecord.additional_data.groups.find(g => g.type === 'Department' && g.isHead === true);
+    const currentDepartmentId = currentDepartmentObj.id;
+
+    let departmentRecord = await models.groups.getById(currentDepartmentId, {returnHead: true});
+    if ( departmentRecord.err ) {
+      return {error: true, message: `Error retrieving department record: ${departmentRecord.err.message}`};
+    }
+    if ( !departmentRecord.res.rows.length ) {
+      return {error: true, message: `No department record found for id ${currentDepartmentId}`};
+    }
+
+    const otherHead = departmentRecord?.res?.rows?.[0];
+
+    // check if the department currently has a head that is not the separating employee
+    const isAnotherHead = otherHead.head?.filter(h => h.iamId !== separationRecord.iam_id);
+
+    
+    if ( Object.keys(isAnotherHead).length !== 0 ) {
+       return {error: false, message: `Department currently has a different head (${isAnotherHead.iamId}); skipping reassignment.`};
+    }
+
+    // replace newDepartmentHead as department head
+    const rep = await models.groups.replaceGroupHead(currentDepartmentId, newHeadEmployee.id);
+     if ( rep.err ) {
+       return {error: true, message: `Error setting new department head: ${rep.err.message}`};
+     }
+     if ( !rep.res?.rowCount ) {
+       return {error: true, message: `New department head is not a member of department ${currentDepartmentId}`};
+     }
+
+    return {error: false, message: 'Department head separation and reassignment completed successfully.'};
+  }
+  
   async deleteEmployeeRecord(id, options={}){
     const out = {error: false, message: 'Unable to delete employee record'};
     const idType = options.idtype ? options.idtype : 'iamId';

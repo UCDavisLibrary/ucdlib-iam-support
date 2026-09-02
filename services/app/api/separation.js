@@ -36,6 +36,40 @@ export default (api) => {
       payload.additionalData.employeeRecord = employeeRecord.res.rows[0];
       payload.additionalData.departmentName = payload.additionalData.employeeRecord.groups.find(g => g.partOfOrg)?.name || '';
 
+
+      //if the employee is a department head, add the department head info to the separation request
+      const employeeGroups = payload.additionalData.employeeRecord.groups;
+      payload.additionalData.groups = employeeGroups;
+      const isDepartmentHead = employeeGroups.some(g => g.type === 'Department' && g.isHead === true);      if ( isDepartmentHead && !payload.skipDepartmentHead ) {
+        const newHeadId = payload.additionalData?.newDepartmentHead;   
+        if ( !newHeadId ) {
+          res.status(400).json({error: true, message: 'Missing new department head id for department head separation or selected head was not in the same department as the separated employee.'});
+          return;
+        }
+        if ( newHeadId === payload.iamId ) {
+           res.status(400).json({error: true, message: 'The separating employee cannot be selected as the new department head.'});
+           return;
+        }
+        const newHeadRecord = await models.employees.getById(newHeadId, 'iamId', options);
+        if ( newHeadRecord.err ) {
+          console.error(newHeadRecord.err);
+          res.status(500).json({error: true, message: 'Unable to retrieve new department head record'});
+          return;
+        }
+        if ( !newHeadRecord.res.rowCount ) {
+          res.status(400).json({error: true, message: 'New department head record not found'});
+          return;
+        }
+
+        let newDepartmentHeadRecord = newHeadRecord.res.rows[0];
+        let newHeadDepartment = newDepartmentHeadRecord.groups.filter(g => g.type === 'Department' && g.partOfOrg === true);
+
+        if (!newHeadDepartment.length || !newHeadDepartment.some(dept => dept.name === payload.additionalData.departmentName)) {
+          res.status(400).json({error: true, message: 'Selected new department head is not in the same department as the separated employee.'});
+          return;
+        }
+      }
+
       //create separation request entry
       const r = await models.separation.create(payload);
       if ( r.err ) {
@@ -284,6 +318,17 @@ export default (api) => {
         console.log(deprovisionMessage);
       } else {
         systemAccessRecord.add('ucdlib-keycloak', req.auth.token.id);
+      }
+
+
+      // separate department head if applicable
+      const departmentSeparationResult = await models.admin.separateDepartmentHead(separationId);
+      if ( departmentSeparationResult.error ) {
+        console.error(departmentSeparationResult.message);
+        return res.status(400).json({
+          error: true,
+          message: departmentSeparationResult.message
+        });
       }
 
       // remove employee from library iam db

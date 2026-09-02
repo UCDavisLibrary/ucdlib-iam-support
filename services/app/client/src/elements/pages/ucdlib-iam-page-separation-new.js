@@ -30,7 +30,8 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
       employeeRecord: {state:true},
       skipSupervisor: {state: true},
       skipFacilities: {state: true},
-
+      isDepartmentHead: {state: true},
+      skipDepartmentHead: {state: true},
     };
   }
 
@@ -66,13 +67,15 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     this.userId = '';
     this.email = '';
     this.employeeId = '';
-    this.userId = '';
     this.skipSupervisor = false;
     this.skipFacilities = false;
     this.supervisorEmail = '';
     this.employeeRecord = {};
     this.supervisor = {};
+    this.employeeNewHead = null;
     this.notes = '';
+    this.isDepartmentHead = false;
+    this.skipDepartmentHead = false;
   }
 
   /**
@@ -82,6 +85,11 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
   willUpdate(props){
     if ( props.has('employeeRecord') ){
       this.hasEmployeeRecord = Object.keys(this.employeeRecord).length > 0;
+
+      const groups = this.employeeRecord.groups || [];
+
+      this.isDepartmentHead = groups.some(g => g.type === 'Department' && g.isHead === true);
+      if ( !this.isDepartmentHead ) this.employeeNewHead = null;
     }
   }
 
@@ -167,7 +175,38 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     this.AppStateModel.setLocation('#submission');
   }
 
+  /**
+   * @description Attached to ucdlib-employee-search element in new separation page. 
+   * Fires when the state changes
+   * @param {*} e
+   */
+  _onDepartmentHeadChange(e){
+    if ( e.detail.employee ){
+      const newHeadEmployee = e.detail.employee;
+      const employeeNewHeadGroups = (newHeadEmployee.groups || []).filter(g => g.type === 'Department');
+       const headDeptIds = (this.employeeRecord.groups || [])
+         .filter(g => g.type === 'Department' && g.isHead === true)
+         .map(g => g.id);
 
+      if( newHeadEmployee.iamId === this.employeeRecord.iamId ) {
+        let msg = 'New department head can not be the same as the separated employee.';
+        this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
+        this.employeeNewHead = null;
+        return;
+      }
+
+      if ( employeeNewHeadGroups.some(g => headDeptIds.includes(g.id)) )  {
+        this.employeeNewHead = newHeadEmployee;
+      } else {
+        let msg = 'New department head must be in the same department as the separated employee.';
+        this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
+        this.employeeNewHead = null;
+        return;
+      }
+    } else {
+      this.employeeNewHead = null;
+    }
+  }
 
   /**
    * @description Resets the employee lookup forms
@@ -196,6 +235,22 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
    */
   async _onSubmit(e){
     e.preventDefault();
+
+    if(!this.skipDepartmentHead){
+      if ( this.isDepartmentHead && !this.employeeNewHead?.iamId ) { 
+        const msg = 'New Department Head must be selected and must be in the same department as the separated employee.';
+        this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
+        return;
+      }
+      if ( this.isDepartmentHead && this.employeeNewHead?.iamId === this.employeeRecord.iamId ) {
+        const msg = 'New Department Head cannot be the same as the separated employee.';
+        this.AppStateModel.showAlertBanner({message: msg, brandColor: 'double-decker'});
+        return;
+      }
+    } else {
+      this.employeeNewHead = null;
+    }
+
     this.SeparationModel.create(this.payload());
   }
 
@@ -233,12 +288,12 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     if ( this.hasEmployeeRecord ){
       payload.iamId = this.employeeRecord.iamId;
     }
-
     payload.separationDate = this.separationDate;
     payload.supervisorId = this.supervisorId;
     payload.notes = this.notes;
     payload.skipSupervisor = this.skipSupervisor;
     payload.skipFacilities = this.skipFacilities;
+    payload.skipDepartmentHead = this.skipDepartmentHead;
     additionalData.employeeEmail = this.email;
     additionalData.groups = this.groups;
     additionalData.id = this.dbId;
@@ -254,6 +309,11 @@ export default class UcdlibIamPageSeparationNew extends Mixin(LitElement)
     additionalData.employeeLastName = this.lastName;
     additionalData.employeeId = this.employeeId;
     additionalData.employeeUserId = this.userId;
+
+    if(!this.skipDepartmentHead && this.employeeNewHead ) {
+      additionalData.newDepartmentHead = this.employeeNewHead?.iamId || null;
+      additionalData.newDepartmentHeadName = `${this.employeeNewHead.firstName || ''} ${this.employeeNewHead.lastName || ''}`.trim() || null;
+    }
 
     payload.additionalData = additionalData;
     return payload;

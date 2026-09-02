@@ -48,6 +48,16 @@ class separationCli {
     console.log(`Removed separation request ${id}`);
   }
 
+  async replaceDepartmentHead(separationId, newHeadId) {
+    const r = await models.admin.separateDepartmentHead(separationId, newHeadId);
+    await pg.pool.end();
+    if ( r.error ) {
+      console.error(r.message);
+      return;
+    }
+    console.log(`Replace Department Head to ${newHeadId} for separation request ${separationId} successful.`);    
+  }
+
 }
 
 export default new separationCli();
