@@ -57,26 +57,27 @@ export function renderSubmissionForm(){
               <label for="sp-separation-date">Last Day of System Access <abbr title="Required">*</abbr></label>
               <input id='sp-separation-date' type="date" required .value=${this.separationDate} @input=${(e) => {this.separationDate = e.target.value;}}>
             </div>
-            <div class="field-container" ?hidden=${!this.isDepartmentHead}>
-              <label for="sp-department-head">New or Interim Department Head<abbr title="Required">*</abbr></label>
-              <span style="font-size: .9rem;">Chosen employee must be in the same department as the separated employee.</span>
-              <ucdlib-employee-search
-                id="sp-department-head"
-                class='u-space-mb'
-                @status-change=${this._onDepartmentHeadChange}
-                hide-label>
-              </ucdlib-employee-search>
-            </div>
-
-            <label for="sp-department-head-check">Do Not Assign Head</label>
-            <div class="checkbox" ?hidden=${!this.isDepartmentHead}>
-              <ul class="list--reset">
-                <li>
-                  <span style="font-size: .9rem;">If you do not assign a new head now, you will need to contact ITIS as soon as the information becomes available.</span>
-                  <input type="checkbox" id="sp-department-head-check" @input=${() => this.skipDepartmentHead = !this.skipDepartmentHead} .checked=${this.skipDepartmentHead}>
-                  <label for="sp-department-head-check">Do not assign new/interim head</label>
-                </li>
-              </ul>
+            <div ?hidden=${!this.isDepartmentHead}>
+              <div class="field-container">
+                <label for="sp-department-head">New or Interim Department Head<abbr title="Required">*</abbr></label>
+                <span style="font-size: .9rem;">Chosen employee must be in the same department as the separated employee.</span>
+                <ucdlib-employee-search
+                  id="sp-department-head"
+                  class='u-space-mb'
+                  @status-change=${this._onDepartmentHeadChange}
+                  hide-label>
+                </ucdlib-employee-search>
+              </div>
+              <label for="sp-department-head-check">Do Not Assign Head</label>
+              <div class="checkbox">
+                <ul class="list--reset">
+                  <li>
+                    <span style="font-size: .9rem;">If you do not assign a new head now, you will need to contact ITIS as soon as the information becomes available.</span>
+                    <input type="checkbox" id="sp-department-head-check" @input=${() => this.skipDepartmentHead = !this.skipDepartmentHead} .checked=${this.skipDepartmentHead}>
+                    <label for="sp-department-head-check">Do not assign new/interim head</label>
+                  </li>
+                </ul>
+              </div>
             </div>
           </section>
         </div>
