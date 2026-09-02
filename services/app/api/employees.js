@@ -8,11 +8,40 @@ export default (api) => {
    * Returns blank array if no reports
    */
   api.get('/employees/direct-reports', async (req, res) => {
-     const iamId = req.auth.token.iamId;
+    const tokenIamId = req.auth.token.iamId;
+    const queryIamId = req.query.iamId;
+
+    if (queryIamId !== undefined && typeof queryIamId !== 'string') {
+      return res.status(400).json({
+        error: true,
+        message: 'iamId must be a string'
+      });
+    }
+
+    const iamId = queryIamId || tokenIamId;
     if ( !iamId ) {
       res.json([]);
       return;
     }
+    const isSelfRequest = iamId === tokenIamId;
+    if ( !isSelfRequest && !req.auth.token.hasAdminAccess && !req.auth.token.hasHrAccess ) {
+
+      // check if user is supervisor of the requested iamId
+      // in which case they can see the direct reports of that iamId
+      const ownReports = await models.employees.getDirectReports(tokenIamId, 'iamId');
+      if ( ownReports.err ) {
+        console.error(ownReports.err);
+        return res.status(500).json({error: true});
+      }
+      const hasAccess = ownReports.res.rows.some(row => row.iam_id == iamId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          error: true,
+          message: 'Not authorized to access this resource.'
+        });
+      }
+    }
+
     const r = await models.employees.getDirectReports(iamId, 'iamId');
     if ( r.err ) {
       console.error(r.err);

@@ -212,7 +212,6 @@ export default (api) => {
     });
 
     api.post('/separation/:id', async (req, res) => {
-
       if (
         !req.auth.token.hasAdminAccess &&
         !req.auth.token.hasHrAccess ){
@@ -240,16 +239,10 @@ export default (api) => {
     });
 
     api.get('/separation/:id', async (req, res) => {
-
-      if (
-        !req.auth.token.hasAdminAccess &&
-        !req.auth.token.hasHrAccess ){
-        res.status(403).json({
-          error: true,
-          message: 'Not authorized to access this resource.'
-        });
-        return;
-      }
+      const iamId = req.auth.token.iamId;
+      const isAdmin = req.auth.token.hasAdminAccess;
+      const isHr = req.auth.token.hasHrAccess;
+      let isReportedTo = false;
 
       const r = await models.separation.getById(req.params.id);
       if ( r.err ) {
@@ -261,7 +254,25 @@ export default (api) => {
         res.json({error: true, message: 'Request does not exist!'});
         return;
       }
-      const obReq = textUtils.camelCaseObject(r.res.rows[0]);
+      
+      const result = r.res.rows[0];
+
+      if( !isAdmin && !isHr ){
+        isReportedTo = (result.supervisor_id === iamId) ? true : false;
+      }
+
+      if( !isReportedTo &&
+          !isAdmin &&
+          !isHr 
+        ){
+        res.status(403).json({
+          error: true,
+          message: 'Not authorized to access this resource.'
+        });
+        return;
+      }
+
+      const obReq = textUtils.camelCaseObject(result);
       return res.json(obReq);
 
     });

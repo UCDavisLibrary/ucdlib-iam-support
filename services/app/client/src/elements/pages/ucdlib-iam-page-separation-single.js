@@ -32,7 +32,9 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
       missingUid: {state: true},
       reconId: {state: true},
       showDeprovisionButton: {state: true},
-      employeeNewHead: {state: true}
+      employeeNewHead: {state: true},
+      showDirectReports: {state: true},
+      directReports: {state: true}
     };
   }
 
@@ -59,12 +61,14 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     this.employeeId = '';
     this.employeeNewHead = null;
     this.showDeprovisionButton = false;
+    this.showDirectReports = false;
+    this.directReports = [];
 
     this.ctl = {
       appComponent : new AppComponentController(this),
     }
 
-    this._injectModel('AppStateModel', 'SeparationModel', 'RtModel', 'AuthModel');
+    this._injectModel('AppStateModel', 'EmployeeModel', 'SeparationModel', 'RtModel', 'AuthModel');
   }
 
   /**
@@ -123,8 +127,9 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
     this.isActiveStatus = payload.isActiveStatus;
     this.status = payload.statusName || '';
     this.statusDescription = payload.statusDescription || '';
-    this.removedFromSystems = ad?.removedFromSystems || [];
     this.employeeNewHead = ad?.newDepartmentHeadName || null;
+    this.showDirectReports = (Array.isArray(ad?.removedFromSystems) && !ad.removedFromSystems.find(s => s?.value === 'ucdlib-iam-db'));
+    await this.getDirectReports();
 
     this.showDeprovisionButton = this.AuthModel.isAdmin &&
       (Array.isArray(ad?.removedFromSystems) && !ad.removedFromSystems.find(s => s?.value === 'ucdlib-iam-db'));
@@ -151,6 +156,28 @@ export default class UcdlibIamPageSeparationSingle extends Mixin(LitElement)
       this.AppStateModel.store.breadcrumbs.separation,
       {text: this.pageTitle(), link: ''}
     ];
+  }
+
+  /**
+   * @description Get direct reports of separated employee for display if employee is currently in system.
+   */
+  async getDirectReports(){
+
+    if ( !this.showDirectReports ) {
+      this.directReports = [];
+      return;
+    }
+    const r = await this.EmployeeModel.getDirectReports(this.iamId);
+
+    if ( r.state === 'loaded' ){
+      this.directReports = r.payload;
+    } else {
+      if ( r.state === 'error' ){
+        this.AppStateModel.showError('Error fetching direct reports');
+      }
+      this.directReports = [];
+    }
+
   }
 
   /**
