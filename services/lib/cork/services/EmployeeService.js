@@ -13,23 +13,26 @@ class EmployeeService extends BaseService {
     return `/api/employees`;
   }
 
-  async getDirectReports(){
+  async getDirectReports(iamId=''){
     const store = this.store.data.directReports;
-    const id = 'directReports';
+    const ido = { entityId: iamId || 'directReports' };
+    const storeId = payload.getKey(ido);
+
 
     await this.checkRequesting(
-      id, store,
+      storeId, store,
       () => this.request({
         url : `${this.baseUrl}/direct-reports`,
-        checkCached : () => store.get(id),
+        qs: { iamId },
+        checkCached : () => store.get(storeId),
         onUpdate : resp => this.store.set(
-          {...resp, id},
+          payload.generate(ido, resp),
           store
         )
       })
     );
 
-    return store.get(id);
+    return store.get(storeId);
   }
 
   async searchByName(name){
