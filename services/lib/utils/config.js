@@ -134,6 +134,16 @@ class Config {
       jobsCleanup: this.getEnv('CRON_JOBS_CLEANUP', '0 1 * * *'),
       onboardingReminders: this.getEnv('CRON_ONBOARDING_REMINDERS', '0 9 * * 1-5')
     }
+
+    // Rosetta API (UC Davis IAM API) configuration
+    this.rosetta = {
+      baseUrl: this.getEnv('ROSETTA_API_BASE_URL', 'https://rosetta.dev.api.ucdavis.edu/api/v1'),
+      oauthUrl: this.getEnv('ROSETTA_API_OAUTH_URL', 'https://oauth.dev.api.ucdavis.edu/token'),
+      clientId: this.getEnv('ROSETTA_API_CLIENT_ID', ''),
+      clientSecret: this.getEnv('ROSETTA_API_CLIENT_SECRET', ''),
+      cacheExpiration: this.getEnv('ROSETTA_API_CACHE_EXPIRATION', '12 hours'),
+      defaultScope: this.getEnv('ROSETTA_API_DEFAULT_SCOPE', 'read:public'),
+    }
   }
 
   /**
