@@ -13,5 +13,6 @@ program
   .command('jobs', 'Query and inspect recent cron job runs')
   .command('onboarding', 'Query and inspect onboarding records. To actually convert an onboarding record to an employee record, use the employees command.')
   .command('separation', 'Query and inspect separation records. To actually separate an employee, use the employees command.')
+  .command('rosetta', 'Query Rosetta API (UC Davis IAM API) for affiliated persons')
 
 program.parse(process.argv);

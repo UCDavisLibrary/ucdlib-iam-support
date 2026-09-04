@@ -142,7 +142,7 @@ class Config {
       clientId: this.getEnv('ROSETTA_API_CLIENT_ID', ''),
       clientSecret: this.getEnv('ROSETTA_API_CLIENT_SECRET', ''),
       cacheExpiration: this.getEnv('ROSETTA_API_CACHE_EXPIRATION', '12 hours'),
-      defaultScope: this.getEnv('ROSETTA_API_DEFAULT_SCOPE', 'read:public'),
+      defaultScope: this.getEnv('ROSETTA_API_DEFAULT_SCOPE', 'read:public read:legalNames'),
     }
   }
 
