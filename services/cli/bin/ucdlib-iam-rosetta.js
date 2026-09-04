@@ -1,21 +1,21 @@
 import { Command, Option } from 'commander';
 
 import utils from '../lib/utils.js';
-import rosetta from '../lib/rosetta.js';
+import rosetta from '#lib/utils/rosetta.js';
+import rosettaCli from '../lib/rosetta.js';
 
 
 const program = new Command();
 
-const idTypes = ['iamid', 'email', 'loginid', 'employeeid', 'studentid'];
 const nameFields = ['last', 'first', 'full'];
 
 program
   .command('get')
   .description('Get a UCD affiliate by a unique identifier')
   .argument('<id>', 'Affiliate unique indentifier')
-  .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(idTypes).default(idTypes[0]))
+  .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(rosetta.personIdTypes).default(rosetta.personIdTypes[0]))
   .action((id, options) => {
-    rosetta.get(id, options);
+    rosettaCli.get(id, options);
   }
 );
 
@@ -27,7 +27,7 @@ program
   .option('-p, --partial', 'Perform a partial (LIKE) match instead of an exact match')
   .option('-l, --limit <number>', 'Limit the number of results returned', parseInt)
   .action((name, options) => {
-    rosetta.search(name, options);
+    rosettaCli.search(name, options);
   });
 
 program.parse(process.argv);

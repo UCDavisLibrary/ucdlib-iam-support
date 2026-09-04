@@ -41,7 +41,7 @@ export default class UcdlibIamPageOrgChart extends Mixin(LitElement)
       appComponent : new AppComponentController(this),
     }
 
-    this._injectModel('AppStateModel', 'EmployeeModel', 'PersonModel', 'OrgchartModel');
+    this._injectModel('AppStateModel', 'EmployeeModel', 'OrgchartModel');
   }
 
   /**

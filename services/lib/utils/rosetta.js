@@ -12,6 +12,9 @@ class Rosetta {
 
     // Promises for ongoing access token fetches, keyed by scope.
     this._accessTokenPromises = {};
+
+    // Queryable person indentifiers relevant to this application.
+    this.personIdTypes = ['iamid', 'email', 'loginid', 'employeeid', 'studentid'];
   }
 
   /**
@@ -21,28 +24,33 @@ class Rosetta {
    * @param {Boolean} [opts.allRecords] - If true, fetches every page of results and returns them
    * as a single combined array (see _getAll). Otherwise returns just one page (see _get).
    * @param {String} [opts.scope] - OAuth scope to request the access token for (see getAccessToken)
+   * @param {Boolean} [opts.post] - If true, uses a POST request with query as the JSON body instead
+   * of a GET request with query as URL search params (see _get)
    * @returns {Promise<Array|Object>} An array of people if opts.allRecords is true; otherwise
-   * {body, totalCount} for a single page (see _get)
+   * {results, totalCount} for a single page (see _get)
    */
   async getPeople(query, opts={}){
     if ( opts.allRecords ) {
-      return await this._getAll('people', query, opts.scope);
+      return await this._getAll('people', query, opts);
     } else {
-      return await this._get('people', query, opts.scope);
+      return await this._get('people', query, opts);
     }
   }
 
   /**
    * @description Fetches every page of results from a Rosetta API list endpoint, following
-   * offset-based pagination until all records have been retrieved. 
+   * offset-based pagination until all records have been retrieved.
    * @param {String} endpoint - API endpoint (see _get)
    * @param {Object} [query] - Query params. If `limit` is set, it's used as the page size for
    * every request; otherwise the page size is inferred from how many records the first response
    * returns. `count` is always forced to `true` so the server populates the x-total-count header.
-   * @param {String} [scope] - OAuth scope to request the token for (see getAccessToken)
+   * @param {Object} [opts]
+   * @param {String} [opts.scope] - OAuth scope to request the token for (see getAccessToken)
+   * @param {Boolean} [opts.post] - If true, each page is fetched via POST with the query as a JSON
+   * body instead of GET with URL search params (see _get)
    * @returns {Promise<Array>} All records across every page, combined into one array
    */
-  async _getAll(endpoint, query, scope) {
+  async _getAll(endpoint, query, opts={}) {
     query = query || {};
     let limit = query.limit ? parseInt(query.limit) : null;
     let offset = 0;
@@ -53,50 +61,63 @@ class Rosetta {
       const pageQuery = { ...query, count: true, offset };
       if (limit) pageQuery.limit = limit;
 
-      const { body, totalCount: totalCountHeader } = await this._get(endpoint, pageQuery, scope);
+      const { results: pageResults, totalCount: totalCountHeader } = await this._get(endpoint, pageQuery, opts);
 
       if (results.length === 0) {
-        if (!limit) limit = body.length;
+        if (!limit) limit = pageResults.length;
         totalCount = parseInt(totalCountHeader);
         if ( isNaN(totalCount) ) {
           throw new RosettaApiError(`Invalid x-total-count header value in ${endpoint}`, {totalCount: totalCountHeader});
         }
       }
 
-      if (!body.length) break;
-      results.push(...body);
-      offset += body.length;
+      if (!pageResults.length) break;
+      results.push(...pageResults);
+      offset += pageResults.length;
     }
 
     return results;
   }
 
   /**
-   * @description Makes an authenticated GET request to a Rosetta API endpoint
+   * @description Makes an authenticated request to a Rosetta API endpoint
    * @param {String} endpoint - API path relative to config.rosetta.baseUrl (leading/trailing slashes optional)
-   * @param {Object} [query] - Query params to append to the request URL
-   * @param {String} [scope] - OAuth scope to request the access token for (see getAccessToken)
-   * @returns {Promise<Object>} {body, totalCount} - body is the parsed JSON response; totalCount is
+   * @param {Object} [query] - Query params. Appended to the request URL for a GET request, or sent
+   * as a JSON request body if opts.post is true
+   * @param {Object} [opts]
+   * @param {String} [opts.scope] - OAuth scope to request the access token for (see getAccessToken)
+   * @param {Boolean} [opts.post] - If true, makes a POST request with `query` as the JSON body instead
+   * of a GET request with `query` as URL search params - some Rosetta endpoints have a corresponding
+   * POST variant that accepts the same query as a JSON body
+   * @returns {Promise<Object>} {results, totalCount} - results is the parsed JSON response; totalCount is
    * the x-total-count response header value (populated when `count: true` is passed in query), or null
    * @throws {RosettaApiError} If the response is not ok
    */
-  async _get(endpoint, query, scope){
+  async _get(endpoint, query, opts={}){
     const url = new URL(config.rosetta.baseUrl.replace(/\/+$/, '') + '/' + endpoint.replace(/^\/+/, ''));
-    for (const [key, value] of Object.entries(query || {})) {
-      url.searchParams.set(key, value);
+
+    const accessToken = await this.getAccessToken(opts.scope);
+    const fetchOpts = {
+      method: opts.post ? 'POST' : 'GET',
+      headers: { Authorization: `Bearer ${accessToken}` }
+    };
+
+    if ( opts.post ) {
+      fetchOpts.headers['Content-Type'] = 'application/json';
+      fetchOpts.body = JSON.stringify(query || {});
+    } else {
+      for (const [key, value] of Object.entries(query || {})) {
+        url.searchParams.set(key, value);
+      }
     }
 
-    const accessToken = await this.getAccessToken(scope);
-    const response = await fetch(url.toString(), {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${accessToken}` }
-    });
+    const response = await fetch(url.toString(), fetchOpts);
 
     if (!response.ok) {
       throw await RosettaApiError.fromResponse(`Request to endpoint ${endpoint} failed with (${response.status})`, response);
     }
 
-    return { body: await response.json(), totalCount: response.headers.get('x-total-count') };
+    return { results: await response.json(), totalCount: response.headers.get('x-total-count') };
   }
 
   /**

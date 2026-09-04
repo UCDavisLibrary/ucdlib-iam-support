@@ -5,11 +5,11 @@ class RosettaCli {
 
   async get(id, options){
     const r = await rosetta.getPeople({ [options.idtype]: id, limit: 1 });
-    if ( r.body.length === 0 ) {
+    if ( r.results.length === 0 ) {
       console.log(`No record found in Rosetta for ${options.idtype} '${id}'`);
       return;
     }
-    utils.logObject(r.body[0]);
+    utils.logObject(r.results[0]);
   }
 
   async search(name, options){
@@ -44,11 +44,11 @@ class RosettaCli {
     }
 
     const r = await rosetta.getPeople(query);
-    if ( r.body.length === 0 ) {
+    if ( r.results.length === 0 ) {
       console.log(`No records found in Rosetta for ${options.field} name: '${name}'`);
       return;
     }
-    utils.logObject(r.body);
+    utils.logObject(r.results);
   }
 
 }

@@ -10,6 +10,7 @@ import '#lib/cork/models/OnboardingModel.js';
 import '#lib/cork/models/OrgchartModel.js';
 import '#lib/cork/models/PermissionsModel.js';
 import '#lib/cork/models/PersonModel.js';
+import '#lib/cork/models/RosettaModel.js';
 import '#lib/cork/models/RtModel.js';
 import '#lib/cork/models/SeparationModel.js';
 

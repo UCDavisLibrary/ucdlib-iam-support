@@ -12,6 +12,7 @@ import ldap from './ldap.js'
 import employees from './employees.js';
 import orgchart from './orgchart.js'
 import health from './health.js';
+import rosetta from './rosetta.js';
 
 const router = express.Router();
 
@@ -30,6 +31,7 @@ alma(router);
 ldap(router);
 orgchart(router);
 employees(router);
+rosetta(router);
 
 export default (app) => {
   health(app);

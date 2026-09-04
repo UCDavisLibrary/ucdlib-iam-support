@@ -43,7 +43,7 @@ export default class UcdlibIamExistingSearch extends Mixin(LitElement)
     this.render = Templates.render.bind(this);
     this.renderNameForm = Templates.renderNameForm.bind(this);
 
-    this._injectModel('PersonModel', "OnboardingModel", "SeparationModel");
+    this._injectModel("OnboardingModel", "SeparationModel");
     this.onboarding = false;
     this.navItems = [];
     this.searchParams = [

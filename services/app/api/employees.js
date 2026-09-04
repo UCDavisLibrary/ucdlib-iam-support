@@ -1,5 +1,6 @@
 import models from '#models';
 import TextUtils from '#lib/utils/text.js';
+import handleError from './handleError.js';
 
 export default (api) => {
 
@@ -8,46 +9,51 @@ export default (api) => {
    * Returns blank array if no reports
    */
   api.get('/employees/direct-reports', async (req, res) => {
-    const tokenIamId = req.auth.token.iamId;
-    const queryIamId = req.query.iamId;
+    try {
+      const tokenIamId = req.auth.token.iamId;
+      const queryIamId = req.query.iamId;
 
-    if (queryIamId !== undefined && typeof queryIamId !== 'string') {
-      return res.status(400).json({
-        error: true,
-        message: 'iamId must be a string'
-      });
-    }
-
-    const iamId = queryIamId || tokenIamId;
-    if ( !iamId ) {
-      res.json([]);
-      return;
-    }
-    const isSelfRequest = iamId === tokenIamId;
-    if ( !isSelfRequest && !req.auth.token.hasAdminAccess && !req.auth.token.hasHrAccess ) {
-
-      // check if user is supervisor of the requested iamId
-      // in which case they can see the direct reports of that iamId
-      const ownReports = await models.employees.getDirectReports(tokenIamId, 'iamId');
-      if ( ownReports.err ) {
-        console.error(ownReports.err);
-        return res.status(500).json({error: true});
-      }
-      const hasAccess = ownReports.res.rows.some(row => row.iam_id == iamId);
-      if (!hasAccess) {
-        return res.status(403).json({
+      if (queryIamId !== undefined && typeof queryIamId !== 'string') {
+        return res.status(400).json({
           error: true,
-          message: 'Not authorized to access this resource.'
+          message: 'iamId must be a string'
         });
       }
-    }
 
-    const r = await models.employees.getDirectReports(iamId, 'iamId');
-    if ( r.err ) {
-      console.error(r.err);
-      return res.status(500).json({error: true});
+      const iamId = queryIamId || tokenIamId;
+      if ( !iamId ) {
+        res.json([]);
+        return;
+      }
+      const isSelfRequest = iamId === tokenIamId;
+      if ( !isSelfRequest && !req.auth.token.hasAdminAccess && !req.auth.token.hasHrAccess ) {
+
+        // check if user is supervisor of the requested iamId
+        // in which case they can see the direct reports of that iamId
+        const ownReports = await models.employees.getDirectReports(tokenIamId, 'iamId');
+        if ( ownReports.err ) {
+          console.error(ownReports.err);
+          return res.status(500).json({error: true});
+        }
+        const hasAccess = ownReports.res.rows.some(row => row.iam_id == iamId);
+        if (!hasAccess) {
+          return res.status(403).json({
+            error: true,
+            message: 'Not authorized to access this resource.'
+          });
+        }
+      }
+
+      const r = await models.employees.getDirectReports(iamId, 'iamId');
+      if ( r.err ) {
+        console.error(r.err);
+        return res.status(500).json({error: true});
+      }
+      res.json(r.res.rows.map(row => TextUtils.camelCaseObject(row)));
+
+    } catch (e) {
+      return handleError(res, req, e);
     }
-    res.json(r.res.rows.map(row => TextUtils.camelCaseObject(row)));
   });
 
   /**
@@ -55,41 +61,46 @@ export default (api) => {
    * - name: search by name
    */
   api.get('/employees/search', async (req, res) => {
-    if ( !req.auth.token.canCreateRequests ){
-      res.status(403).json({
-        error: true,
-        message: 'Not authorized to access this resource.'
-      });
-      return;
-    }
-
-    const queryVars = ['name'];
-    if ( !queryVars.some(q => req.query[q]) ) {
-      res.status(400).json({
-        error: true,
-        message: 'Missing query parameter.  Must include one of: ' + queryVars.join(', ')
-      });
-      return;
-    }
-
-    const limit = 10;
-    const out = {
-      total: 0,
-      results: [],
-    }
-
-    if ( req.query.name ) {
-      const r = await models.employees.searchByName(req.query.name);
-      if ( r.err ) {
-        console.error(r.err);
-        res.status(500).json({error: true});
+    try {
+      if ( !req.auth.token.canCreateRequests ){
+        res.status(403).json({
+          error: true,
+          message: 'Not authorized to access this resource.'
+        });
         return;
       }
-      out.total = r.res.rowCount;
-      out.results = r.res.rows.slice(0, limit).map(row => TextUtils.camelCaseObject(row));
-    }
 
-    return res.json(out);
+      const queryVars = ['name'];
+      if ( !queryVars.some(q => req.query[q]) ) {
+        res.status(400).json({
+          error: true,
+          message: 'Missing query parameter.  Must include one of: ' + queryVars.join(', ')
+        });
+        return;
+      }
+
+      const limit = 10;
+      const out = {
+        total: 0,
+        results: [],
+      }
+
+      if ( req.query.name ) {
+        const r = await models.employees.searchByName(req.query.name);
+        if ( r.err ) {
+          console.error(r.err);
+          res.status(500).json({error: true});
+          return;
+        }
+        out.total = r.res.rowCount;
+        out.results = r.res.rows.slice(0, limit).map(row => TextUtils.camelCaseObject(row));
+      }
+
+      return res.json(out);
+
+    } catch (e) {
+      return handleError(res, req, e);
+    }
   });
 
 
@@ -99,50 +110,54 @@ export default (api) => {
    * Returns array of employee information
    */
     api.get('/employees/:id', async (req, res) => {
-      if (
-        !req.auth.token.hasAdminAccess &&
-        !req.auth.token.hasHrAccess ){
-        res.status(403).json({
-          error: true,
-          message: 'Not authorized to access this resource.'
-        });
-        return;
+      try {
+        if (
+          !req.auth.token.hasAdminAccess &&
+          !req.auth.token.hasHrAccess ){
+          res.status(403).json({
+            error: true,
+            message: 'Not authorized to access this resource.'
+          });
+          return;
+        }
+
+        if (!req.params.id ) {
+          res.status(400).json({
+            error: true,
+            message: 'Missing id.  Must include the id of employee'
+          });
+          return;
+        }
+
+        const idType = req.query.idType || 'id';
+
+        const options = {
+          returnGroups: true,
+          returnSupervisor: true
+        };
+
+        const limit = 10;
+        const out = {
+          total: 0,
+          results: [],
+        }
+
+        const r = await models.employees.getById(req.params.id, idType, options);
+        if ( r.err ) {
+          console.error(r.err);
+          res.status(500).json({error: true});
+          return;
+        }
+
+        out.total = r.res.rowCount;
+        out.results = r.res.rows.slice(0, limit).map(row => TextUtils.camelCaseObject(row));
+
+
+        return res.json(out);
+
+      } catch (e) {
+        return handleError(res, req, e);
       }
-
-      if (!req.params.id ) {
-        res.status(400).json({
-          error: true,
-          message: 'Missing id.  Must include the id of employee'
-        });
-        return;
-      }
-
-      const idType = req.query.idType || 'id';
-
-      const options = {
-        returnGroups: true,
-        returnSupervisor: true
-      };
-
-      const limit = 10;
-      const out = {
-        total: 0,
-        results: [],
-      }
-
-      const r = await models.employees.getById(req.params.id, idType, options);
-      if ( r.err ) {
-        console.error(r.err);
-        res.status(500).json({error: true});
-        return;
-      }
-
-      out.total = r.res.rowCount;
-      out.results = r.res.rows.slice(0, limit).map(row => TextUtils.camelCaseObject(row));
-
-
-      return res.json(out);
-
     });
 
     /**
@@ -150,24 +165,28 @@ export default (api) => {
    * Returns array of upload
    */
     api.post('/employees/:id', async (req, res) => {
-      if (
-        !req.auth.token.hasAdminAccess &&
-        !req.auth.token.hasHrAccess ){
-        res.status(403).json({
-          error: true,
-          message: 'Not authorized to access this resource.'
-        });
-        return;
+      try {
+        if (
+          !req.auth.token.hasAdminAccess &&
+          !req.auth.token.hasHrAccess ){
+          res.status(403).json({
+            error: true,
+            message: 'Not authorized to access this resource.'
+          });
+          return;
+        }
+
+        const r = await models.employees.update(req.params.id, req.body);
+        if ( r.err ) {
+          console.error(r.err);
+          return res.status(500).json({error: true});
+        }
+
+        res.json(true);
+
+      } catch (e) {
+        return handleError(res, req, e);
       }
-
-      const r = await models.employees.update(req.params.id, req.body);
-      if ( r.err ) {
-        console.error(r.err);
-        return res.status(500).json({error: true});
-      }
-
-      res.json(true);
-
     });
 
 
@@ -176,26 +195,30 @@ export default (api) => {
    * Returns array of upload
    */
     api.post('/employees/addgroup/:id', async (req, res) => {
-      if (
-        !req.auth.token.hasAdminAccess &&
-        !req.auth.token.hasHrAccess ){
-        res.status(403).json({
-          error: true,
-          message: 'Not authorized to access this resource.'
-        });
-        return;
+      try {
+        if (
+          !req.auth.token.hasAdminAccess &&
+          !req.auth.token.hasHrAccess ){
+          res.status(403).json({
+            error: true,
+            message: 'Not authorized to access this resource.'
+          });
+          return;
+        }
+
+        let isHead = false;
+        if(req.body.isHead) isHead = true;
+
+        const r = await models.employees.addEmployeeToGroup(req.params.id, req.body.departmentId, isHead);
+        if ( r.err ) {
+          console.error(r.err);
+          return res.status(500).json({error: true});
+        }
+        res.json(true);
+
+      } catch (e) {
+        return handleError(res, req, e);
       }
-
-      let isHead = false;
-      if(req.body.isHead) isHead = true;
-
-      const r = await models.employees.addEmployeeToGroup(req.params.id, req.body.departmentId, isHead);
-      if ( r.err ) {
-        console.error(r.err);
-        return res.status(500).json({error: true});
-      }
-      res.json(true);
-
     });
 
   /**
@@ -203,24 +226,28 @@ export default (api) => {
    * Returns array of upload
    */
     api.post('/employees/removegroup/:id', async (req, res) => {
+      try {
 
-      if (
-        !req.auth.token.hasAdminAccess &&
-        !req.auth.token.hasHrAccess ){
-        res.status(403).json({
-          error: true,
-          message: 'Not authorized to access this resource.'
-        });
-        return;
+        if (
+          !req.auth.token.hasAdminAccess &&
+          !req.auth.token.hasHrAccess ){
+          res.status(403).json({
+            error: true,
+            message: 'Not authorized to access this resource.'
+          });
+          return;
+        }
+
+        const r = await models.employees.removeEmployeeFromGroup(req.params.id, req.body.departmentId);
+        if ( r.err ) {
+          console.error(r.err);
+          return res.status(500).json({error: true});
+        }
+        res.json(true);
+
+      } catch (e) {
+        return handleError(res, req, e);
       }
-
-      const r = await models.employees.removeEmployeeFromGroup(req.params.id, req.body.departmentId);
-      if ( r.err ) {
-        console.error(r.err);
-        return res.status(500).json({error: true});
-      }
-      res.json(true);
-
     });
 
 
@@ -229,42 +256,47 @@ export default (api) => {
    * Returns blank array if no discrepancies
    */
   api.get('/employees/:id/discrepancies', async (req, res) => {
+    try {
 
-    if (
-      !req.auth.token.hasAdminAccess &&
-      !req.auth.token.hasHrAccess ){
-      res.status(403).json({
-        error: true,
-        message: 'Not authorized to access this resource.'
-      });
-      return;
+      if (
+        !req.auth.token.hasAdminAccess &&
+        !req.auth.token.hasHrAccess ){
+        res.status(403).json({
+          error: true,
+          message: 'Not authorized to access this resource.'
+        });
+        return;
+      }
+
+      let interval = '';
+      const id = req.params.id;
+
+      const r = await models.employees.getActiveRecordDiscrepancyNotifications(interval, id);
+
+      if ( r.err ) {
+        console.error(`Error getting active record discrepancy notifications\n${r.err.message}`);
+        return res.status(500).json({error: true});
+      }
+      if ( r.res.rowCount === 0 ){
+        return res.json([]);
+      }
+
+      const result = r.res.rows;
+
+      for(let discrepancy of result){
+        const reasonMatch = Object.values(models.employees.outdatedReasons).find(
+          r => r.slug === discrepancy.reason
+        );
+
+        Object.assign(discrepancy, reasonMatch || {});
+        delete discrepancy.slug;
+      }
+
+      res.json(result);
+
+    } catch (e) {
+      return handleError(res, req, e);
     }
-
-    let interval = '';
-    const id = req.params.id;
-
-    const r = await models.employees.getActiveRecordDiscrepancyNotifications(interval, id);
-
-    if ( r.err ) {
-      console.error(`Error getting active record discrepancy notifications\n${r.err.message}`);
-      return res.status(500).json({error: true});
-    }
-    if ( r.res.rowCount === 0 ){
-      return res.json([]);
-    }
-
-    const result = r.res.rows;
-
-    for(let res of result){
-      const reasonMatch = Object.values(models.employees.outdatedReasons).find(
-        r => r.slug === res.reason
-      );
-
-      Object.assign(res, reasonMatch || {});
-      delete res.slug;
-    }
-
-    res.json(result);
   });
 
 
@@ -273,28 +305,32 @@ export default (api) => {
    * Returns array of removal
    */
   api.post('/employees/:id/discrepancies', async (req, res) => {
+    try {
 
-    if (!req.auth.token.hasAdminAccess ){
-      res.status(403).json({
-        error: true,
-        message: 'Not authorized to access this resource.'
-      });
-      return;
+      if (!req.auth.token.hasAdminAccess ){
+        res.status(403).json({
+          error: true,
+          message: 'Not authorized to access this resource.'
+        });
+        return;
+      }
+
+      const id = req.params.id;
+      const discrepanciesList = req.body;
+
+      const r = await models.employees.dismissRecordDiscrepancyNotifications(id, discrepanciesList);
+
+
+      if ( r.err ) {
+        console.error(r.err);
+        return res.status(500).json({error: true});
+      }
+
+      res.json(true);
+
+    } catch (e) {
+      return handleError(res, req, e);
     }
-
-    const id = req.params.id;
-    const discrepanciesList = req.body;
-
-    const r = await models.employees.dismissRecordDiscrepancyNotifications(id, discrepanciesList);
-
-
-    if ( r.err ) {
-      console.error(r.err);
-      return res.status(500).json({error: true});
-    }
-
-    res.json(true);
-
   });
 
 }

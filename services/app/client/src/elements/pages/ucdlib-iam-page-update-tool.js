@@ -49,7 +49,7 @@ export default class UcdlibIamPageUpdateTool extends Mixin(LitElement)
     }
 
 
-    this._injectModel('EmployeeModel','AppStateModel', 'AuthModel', 'GroupModel', 'PersonModel');
+    this._injectModel('EmployeeModel','AppStateModel', 'AuthModel', 'GroupModel');
   }
 
   /**
