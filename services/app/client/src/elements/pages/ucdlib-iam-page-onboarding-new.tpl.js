@@ -13,11 +13,10 @@ export function render() {
       ${this.renderManualEntryForm()}
       ${this.renderTransferForm()}
       <div id='obn-lookup'>
-        <ucdlib-iam-search
-          @select=${e => this._onEmployeeSelect(e.detail.status)}
-          search-param='employee-id'
-          class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
-        </ucdlib-iam-search>
+        <rosetta-person-search
+          @rosetta-person-selected=${e => this._onEmployeeSelect(e.detail.person)}
+          class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'
+        ></rosetta-person-search>
       </div>
     </ucdlib-pages>
     <ucdlib-iam-modal id='obn-employee-modal' dismiss-text='Close' content-title='Employee Record'>

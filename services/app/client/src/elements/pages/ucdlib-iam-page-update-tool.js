@@ -5,7 +5,6 @@ import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 import { AppComponentController } from '#controllers';
 
 import "#components/ucdlib-employee-search.js";
-import "#components/ucdlib-iam-search.js";
 
 /**
  * @description Employee Update Tool

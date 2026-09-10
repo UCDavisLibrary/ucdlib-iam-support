@@ -1,0 +1,46 @@
+rosetta-person-search {
+  display: block;
+  max-width: 500px;
+
+  .rosetta-person-results {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  .rosetta-person-results__item {
+    all: unset;
+    display: block;
+    background-color: transparent;
+    box-sizing: border-box;
+    cursor: pointer;
+    padding: .5rem;
+    width: 100%;
+
+    &:hover {
+      background-color: #FFF9E6;
+    }
+
+    .name {
+      display: block;
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: #022851;
+    }
+    .association {
+      display: block;
+      font-size: .875rem;
+      color: #4C4C4C;
+    }
+  }
+
+  .more-results {
+    color: #4C4C4C
+  }
+}

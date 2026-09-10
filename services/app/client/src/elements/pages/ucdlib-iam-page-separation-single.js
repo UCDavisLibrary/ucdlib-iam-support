@@ -6,7 +6,6 @@ import dtUtls from '#lib/utils/dtUtils.js';
 import { AppComponentController } from '#controllers';
 
 import "#components/ucdlib-rt-history.js";
-import "#components/ucdlib-iam-search.js";
 import "#components/ucdlib-iam-modal.js";
 /**
  * @description Page element for displaying a single separation request

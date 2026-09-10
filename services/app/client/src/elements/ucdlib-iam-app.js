@@ -19,13 +19,29 @@ import Keycloak from 'keycloak-js';
 
 // global event bus and model registry
 import { LitCorkUtils, Mixin, Registry } from '@ucd-lib/cork-app-utils';
-import '../models/index.js';
+import '#lib/cork/models/AppStateModel.js';
+import '#lib/cork/models/AlmaUserModel.js';
+import '#lib/cork/models/AuthModel.js';
+import '#lib/cork/models/ConfigModel.js';
+import '#lib/cork/models/EmployeeModel.js';
+import '#lib/cork/models/GroupModel.js';
+import '#lib/cork/models/LdapModel.js';
+import '#lib/cork/models/OnboardingModel.js';
+import '#lib/cork/models/OrgchartModel.js';
+import '#lib/cork/models/PermissionsModel.js';
+import '#lib/cork/models/PersonModel.js';
+import '#lib/cork/models/RosettaModel.js';
+import '#lib/cork/models/RtModel.js';
+import '#lib/cork/models/SeparationModel.js';
 const AuthModel = Registry.getModel('AuthModel');
+const AppStateModel = Registry.getModel('AppStateModel');
+AppStateModel.init(window.APP_CONFIG.appRoutes);
 Registry.ready();
 
-// global components
+// global/common components
 import "./components/ucdlib-iam-state.js";
 import "./components/ucdlib-iam-alert.js";
+import "./components/rosetta-person-search.js";
 
 // pages
 import bundles from "./pages/bundles/index.js";

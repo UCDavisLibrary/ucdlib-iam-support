@@ -1,0 +1,35 @@
+.discrepancyList {
+  background-color: #ebf3fa;
+  padding: .75rem;
+  color: #022851;
+
+}
+
+.discrepancyItem {
+  padding: .75rem;
+
+}
+
+.discrepancyItem:hover {
+  background-color: #cce0f3;
+  color: #022851;
+  cursor: pointer;
+}
+
+.discrepancyItem.active{
+  background-color: #cce0f3;
+  color: #022851;
+}
+
+.discrepancyItem:hover h6 {
+  color: #022851;
+}
+
+.discrepancyItem.active h6 {
+  color: #022851;
+}
+
+.discrepancyItem.no-hover:hover {
+  background-color: inherit;
+  cursor: default;
+}

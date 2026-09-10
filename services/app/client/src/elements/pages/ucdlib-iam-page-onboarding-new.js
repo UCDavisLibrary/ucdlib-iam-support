@@ -7,6 +7,7 @@ import "#components/ucdlib-iam-alma.js";
 import "#components/ucdlib-iam-modal.js";
 import "#components/ucdlib-employee-search.js";
 import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
+import RosettaPerson from '#lib/utils/RosettaPerson.js';
 
 import { AppComponentController } from '#controllers';
 
@@ -66,15 +67,15 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
       appComponent : new AppComponentController(this),
     }
 
-    this._injectModel('AppStateModel', 'PersonModel', 'GroupModel', 'OnboardingModel', 'AuthModel');
+    this._injectModel('AppStateModel', 'PersonModel', 'GroupModel', 'OnboardingModel', 'AuthModel', 'RosettaModel');
   }
 
   /**
    * @description Resets onboarding form values
    */
   _resetEmployeeStateProps(){
-    this.iamRecord = new IamPersonTransform({});
-    this.supervisor = new IamPersonTransform({});
+    this.iamRecord = new RosettaPerson();
+    this.supervisor = new RosettaPerson();
     this.userEnteredData = false;
     this.hasAppointment = false;
     this.hasMultipleAppointments = false;
@@ -148,7 +149,7 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
   }
 
   /**
-   * @description Sets state properties from IAM person record class
+   * @description Sets state properties from Rosetta IAM person record class
    * @param {*} record
    */
   _setStatePropertiesFromIamRecord(record){
@@ -206,37 +207,23 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
   }
 
   /**
-   * @description Attached to ucd person lookup element for employee being onboarded
-   * @param {Object} response
+   * @description Attached to rosetta-person-search element for employee being onboarded
+   * @param {RosettaPerson} person 
    */
-  async _onEmployeeSelect(response){
-    if( response.state === this.PersonModel.store.STATE.LOADED ) {
-      this.iamRecord = new IamPersonTransform(response.payload);
+  async _onEmployeeSelect(person){
+    this.iamRecord = person;
 
-      // get supervisor(s) record
-      try {
-        this.iamRecord.allSupervisorEmployeeIds.forEach( async empId => {
-          let emp = await this.PersonModel.getPersonById(empId, 'employeeId');
-          if ( emp.state !== this.PersonModel.store.STATE.LOADED ) {
-            throw new Error('Unable to load supervisor');
-          }
-          emp = new IamPersonTransform(emp.payload);
-          if ( emp.employeeId == this.iamRecord.getSupervisorEmployeeId() ){
-            this.supervisor = emp;
-            this.supervisorEmail = this.supervisor.email;
-          }
-        });
-      } catch (error) {
-        this.AppStateModel.showError('Unable to load supervisor!');
-        return;
-      }
-
-      this.userEnteredData = false;
-      this.AppStateModel.setLocation('#submission');
-    } else if (response.state === this.PersonModel.store.STATE.ERROR) {
-      console.error(response);
-      this.AppStateModel.showError();
+    const supervisorId = person.primaryAssociation?.reports_to_iam_id;
+    if ( supervisorId ){
+      const r = await this.RosettaModel.getPersonById(supervisorId, 'iamId');
+      if ( r.state === 'loaded' ){
+        this.supervisor = new RosettaPerson(r.payload);
+        this.supervisorEmail = this.supervisor.email;
+      } 
     }
+
+    this.userEnteredData = false;
+    this.AppStateModel.setLocation('#submission');
   }
 
   /**
