@@ -7,6 +7,7 @@ import Pg from '#lib/utils/pg.js';
 import UcdIamModel from '#lib/cork/models/UcdIamModel.js';
 import IamPersonTransform from '#lib/utils/IamPersonTransform.js';
 import handleError from './handleError.js';
+import rosetta from '#lib/utils/rosetta.js';
 
 UcdIamModel.init(config.ucdIamApi);
 
@@ -38,13 +39,15 @@ export default (api) => {
 
       // get ucd iam record
       if ( payload.iamId ){
-        const iamResponse = await UcdIamModel.getPersonByIamId(payload.iamId);
-        if ( !iamResponse.error ){
-          payload.additionalData.ucdIamRecord = {
-            dateRetrieved: (new Date()).toISOString(),
-            record: iamResponse
-          }
+        const iamResponse = await rosetta.getPeople({iamid: payload.iamId, limit: 1});
+        if ( !iamResponse.results.length ){
+          throw new Error(`No employee found with this IAM ID: ${payload.iamId}`);
         }
+        payload.additionalData.ucdIamRecord = {
+          dateRetrieved: (new Date()).toISOString(),
+          record: iamResponse.results[0],
+          recordType: 'rosetta'
+        };
       }
 
       // special handling for an intra-library transfer

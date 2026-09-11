@@ -4,8 +4,10 @@
  */
 class RosettaPerson {
 
-  constructor(data){
+  constructor(data, primaryPositionNumber){
     this.data = data || {};
+    this.primaryPositionNumber = primaryPositionNumber;
+    this.recordType = 'rosetta';
   }
 
   /**
@@ -89,6 +91,13 @@ class RosettaPerson {
    * @description Primary employment association. Returns null if no primary association exists.
    */
   get primaryAssociation(){
+    // If a primary position number was provided, use that to find the primary association
+    if ( this.primaryPositionNumber ){
+      const primaryAssoc = this.data.employee_association?.find(a => a.position_number == this.primaryPositionNumber);
+      if ( primaryAssoc ) return primaryAssoc;
+    }
+
+    // otherwise, return the first association with job_indicator === 'P' (primary)
     return this.data.employee_association?.find(a => a.job_indicator === 'P') || null;
   }
 

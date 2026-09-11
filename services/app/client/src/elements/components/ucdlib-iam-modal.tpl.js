@@ -71,6 +71,9 @@ export function styles() {
       justify-content: center;
       height: 100px;
     }
+    *, ::before, ::after {
+      box-sizing: inherit;
+    }
   `;
 
   return [

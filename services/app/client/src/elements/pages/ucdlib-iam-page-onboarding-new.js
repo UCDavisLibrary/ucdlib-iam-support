@@ -6,7 +6,6 @@ import "#components/ucdlib-iam-search.js";
 import "#components/ucdlib-iam-alma.js";
 import "#components/ucdlib-iam-modal.js";
 import "#components/ucdlib-employee-search.js";
-import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
 import RosettaPerson from '#lib/utils/RosettaPerson.js';
 
 import { AppComponentController } from '#controllers';
@@ -25,7 +24,7 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
       hasAppointment: {state: true},
       hasMultipleAppointments: {state: true},
       appointments: {state: true},
-      appointmentIndex: {state: true},
+      primaryPositionNumber: {state: true},
       startDate: {state: true},
       supervisor: {state: true},
       supervisorEmail: {state: true},
@@ -67,7 +66,7 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
       appComponent : new AppComponentController(this),
     }
 
-    this._injectModel('AppStateModel', 'PersonModel', 'GroupModel', 'OnboardingModel', 'AuthModel', 'RosettaModel');
+    this._injectModel('AppStateModel', 'GroupModel', 'OnboardingModel', 'AuthModel', 'RosettaModel');
   }
 
   /**
@@ -80,7 +79,7 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
     this.hasAppointment = false;
     this.hasMultipleAppointments = false;
     this.appointments = [];
-    this.appointmentIndex = 0;
+    this.primaryPositionNumber = null;
     this.departmentId = 0;
     this.startDate = '';
     this.groupIds = [];
@@ -216,8 +215,8 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
     const supervisorId = person.primaryAssociation?.reports_to_iam_id;
     if ( supervisorId ){
       const r = await this.RosettaModel.getPersonById(supervisorId, 'iamId');
-      if ( r.state === 'loaded' ){
-        this.supervisor = new RosettaPerson(r.payload);
+      if ( r.state === 'loaded' && r.payload.results[0] ){
+        this.supervisor = new RosettaPerson(r.payload.results[0]);
         this.supervisorEmail = this.supervisor.email;
       } 
     }
@@ -227,36 +226,31 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
   }
 
   /**
-   * @description Attached to ucd person lookup element for employee supervisor on manual entry form
-   * @param {Object} response
+   * @description Attached to rosetta ucd person lookup element for employee supervisor on manual entry form
+   * @param {RosettaPerson} person
    */
-  _onSupervisorSelect(response){
-    if( response.state === this.PersonModel.store.STATE.LOADED ) {
-      this.supervisor = new IamPersonTransform(response.payload);
-      this.supervisorEmail = this.supervisor.email;
-    } else if (response.state === this.PersonModel.store.STATE.ERROR) {
-      console.error(response);
-      this.AppStateModel.showError();
-    }
+  _onSupervisorSelect(person){
+    this.supervisor = person;
+    this.supervisorEmail = person.email;
   }
 
   /**
    * @description attached to appointment select element
-   * @param {Number} i - index of appointment in iam ppsassociations array
+   * @param {String} positionNumber - position number of appointment in iam employee associations array
    */
-  async _onAppointmentSelect(i){
-    i = parseInt(i);
-    this.appointmentIndex = i;
-    const appt = this.appointments[i];
-    this.startDate = appt.assocStartDate.split(' ')[0];
-    this.iamRecord.setPrimaryAssociationIndex(i);
+  async _onAppointmentSelect(positionNumber){
+    this.primaryPositionNumber = positionNumber;
+    this.iamRecord.primaryPositionNumber = positionNumber;
+    this._setStatePropertiesFromIamRecord(this.iamRecord);
 
-    // set supervisor, if different.
-    // personModel object should already be cached
-    if ( appt.reportsToEmplID ){
-      let emp = await this.PersonModel.getPersonById(appt.reportsToEmplID, 'employeeId');
-      this.supervisor = new IamPersonTransform(emp.payload);
-      this.supervisorEmail = this.supervisor.email;
+    // set supervisor
+    const supervisorId = person.primaryAssociation?.reports_to_iam_id;
+    if ( supervisorId ){
+      const r = await this.RosettaModel.getPersonById(supervisorId, 'iamId');
+      if ( r.state === 'loaded' && r.payload.results[0] ){
+        this.supervisor = new RosettaPerson(r.payload.results[0]);
+        this.supervisorEmail = this.supervisor.email;
+      } 
     }
   }
 
@@ -264,8 +258,8 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
    * @description Resets the ucd-iam lookup forms
    */
   _resetLookupForms(){
-    this.renderRoot.querySelector('#obn-lookup ucdlib-iam-search' ).reset();
-    this.renderRoot.querySelector('#obn-manual ucdlib-iam-search' ).reset();
+    this.renderRoot.querySelector('#obn-lookup rosetta-person-search' ).reset();
+    this.renderRoot.querySelector('#obn-manual rosetta-person-search' ).reset();
 
   }
 
@@ -320,16 +314,12 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
   }
 
   /**
-   * @description Attached to ucd-iam-search element in custom supervisor modal
-   * @param {*} e
+   * @description Attached to rosetta-person-search element in custom supervisor modal
+   * @param {RosettaPerson} person
    * @returns
    */
-  _onSupervisorEditSelect(e){
-    if ( e.state !== 'loaded' ) {
-      this.AppStateModel.showError('Unable to load supervisor!');
-      return;
-    }
-    this.supervisor = new IamPersonTransform(e.payload);
+  _onSupervisorEditSelect(person){
+    this.supervisor = person;
     this.supervisorEmail = this.supervisor.email;
     const modal = this.renderRoot.querySelector('#obn-custom-supervisor');
     if ( modal ) modal.hide();
@@ -376,9 +366,10 @@ export default class UcdlibIamPageOnboardingNew extends Mixin(LitElement)
     payload.notes = this.notes;
     payload.skipSupervisor = this.skipSupervisor;
 
-    additionalData.appointmentIndex = this.appointmentIndex;
-    const primaryAssociation = this.iamRecord.getPrimaryAssociation();
-    additionalData.primaryAssociation = {deptCode: primaryAssociation.deptCode, titleCode: primaryAssociation.titleCode};
+    additionalData.primaryPositionNumber = this.primaryPositionNumber;
+    if ( this.primaryPositionNumber ){
+      additionalData.primaryAssociation = {primaryPositionNumber: this.primaryPositionNumber};
+    }
     additionalData.isDeptHead = this.isDeptHead;
     additionalData.employeeEmail = this.email;
     additionalData.supervisorEmail = this.supervisorEmail;

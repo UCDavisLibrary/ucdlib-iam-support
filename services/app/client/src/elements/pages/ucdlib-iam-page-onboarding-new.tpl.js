@@ -26,12 +26,10 @@ export function render() {
       <p>Override the supervisor record for this employee.
         For example, TES employees should have their supervisor set to their library supervisor.
       </p>
-      <ucdlib-iam-search
-        @select=${e => this._onSupervisorEditSelect(e.detail.status)}
-        search-param='employee-id'
-        reset-on-select
-        class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
-      </ucdlib-iam-search>
+      <rosetta-person-search
+        @rosetta-person-selected=${e => this._onSupervisorEditSelect(e.detail.person)}
+        class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'
+      ></rosetta-person-search>
     </ucdlib-iam-modal>
   </div>
 `;}
@@ -261,11 +259,10 @@ export function renderSupervisorSelectPanel(){
       <h2 class="panel__title"><span class="panel__custom-icon fas fa-sitemap"></span>${title}</h2>
       <section>
         <p ?hidden=${!description}>${description}</p>
-        <ucdlib-iam-search
-          @select=${e => this._onSupervisorSelect(e.detail.status)}
-          search-param='employee-id'
-          class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
-        </ucdlib-iam-search>
+        <rosetta-person-search
+          @rosetta-person-selected=${e => this._onSupervisorSelect(e.detail.person)}
+          class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'
+        ></rosetta-person-search>
       </section>
     </div>
   `;

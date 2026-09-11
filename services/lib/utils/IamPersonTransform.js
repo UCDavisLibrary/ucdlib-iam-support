@@ -1,5 +1,6 @@
 /**
- * @description Utility class for accessing and transforming data from a UCD IAM person record
+ * @description Utility class for accessing and transforming data from a UCD IAM person record.
+ * This is a legacy class that is superceded by RosettaPerson, but is still used to display old onboarding/separation records before the Rosetta API was available.
  */
 class IamPersonTransform{
   /**
@@ -11,6 +12,7 @@ class IamPersonTransform{
     this.data = record;
     this.isEmpty = Object.keys(this.data).length == 0;
     this.primaryAssociationIndex = primaryAssociationIndex;
+    this.recordType = 'iam';
   }
 
   /**
