@@ -46,7 +46,11 @@ return html`
       <ul>
         ${this.results.map( person => html`
           <li>
-            <button type='button' class='rosetta-person-results__item' @click=${() => this._onPersonClick(person)}>
+            <button 
+              type='button' 
+              aria-pressed=${this.selected?.id === person.id}
+              class='rosetta-person-results__item ${this.selected?.id === person.id ? 'rosetta-person-results__item--selected' : ''}'
+              @click=${() => this._onPersonClick(person)}>
               <span class='name'>${person.fullName}</span>
               <span class='association'>${person.primaryAssociationLabel}</span>
               <span class='association'>${person.studentAssociationLabel}</span>

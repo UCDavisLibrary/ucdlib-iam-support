@@ -2,12 +2,12 @@ import { LitElement } from 'lit';
 import { render } from "./ucdlib-iam-page-onboarding-single.tpl.js";
 import dtUtls from '#lib/utils/dtUtils.js';
 import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
+import RosettaPerson from "#lib/utils/RosettaPerson.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
 import { AppComponentController } from '#controllers';
 
 import "#components/ucdlib-rt-history.js";
-import "#components/ucdlib-iam-search.js";
 import "#components/ucdlib-iam-modal.js";
 
 /**
@@ -72,7 +72,7 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
     this.backgroundCheck = {};
     this.hideBackgroundCheckButton = false;
     this.sentBackgroundCheck = false;
-    this.ucdIamRecord = new IamPersonTransform({});
+    this.ucdIamRecord = new RosettaPerson();
     this.showAdoptButton = false;
 
     this.ctl = {
@@ -155,10 +155,12 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
     this.facilitiesRtTicketId = ad?.facilitiesRtTicketId || '';
     this.backgroundCheck = ad?.backgroundCheck || {};
 
-    if ( ad?.ucdIamRecord?.record ){
+    if ( ad?.ucdIamRecord?.recordType === 'rosetta' && ad?.ucdIamRecord?.record ){ 
+      this.ucdIamRecord = new RosettaPerson(ad.ucdIamRecord.record);
+    } else if ( ad?.ucdIamRecord?.record ){
       this.ucdIamRecord = new IamPersonTransform(ad.ucdIamRecord.record);
     } else {
-      this.ucdIamRecord = new IamPersonTransform({});
+      this.ucdIamRecord = new RosettaPerson();
     }
 
     this.showAdoptButton = this.AuthModel.store.token.hasAdminAccess &&
@@ -206,11 +208,11 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
   }
 
   /**
-   * @description Bound to ucdlib-iam-search select event. Sets reconId property (iam id of employee to reconcile)
-   * @param {*} e
+   * @description Called when an employee is selected in the reconciliation modal. Sets reconId property (iam id of employee to reconcile)
+   * @param {RosettaPerson} person - The selected employee
    */
-  _onReconEmployeeSelect(e){
-    this.reconId = e.payload.iamId;
+  _onReconEmployeeSelect(person){
+    this.reconId = person.id;
   }
 
   /**
@@ -251,7 +253,7 @@ export default class UcdlibIamPageOnboardingSingle extends Mixin(LitElement)
 
     const modal = this.querySelector('#obs-recon-modal');
     modal.hide();
-    const lookupEle = modal.querySelector('ucdlib-iam-search');
+    const lookupEle = modal.querySelector('rosetta-person-search');
     lookupEle.reset();
 
     this.AppStateModel.showLoading();

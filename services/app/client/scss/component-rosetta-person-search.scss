@@ -23,7 +23,11 @@ rosetta-person-search {
     padding: .5rem;
     width: 100%;
 
-    &:hover {
+    &:hover, &:focus {
+      background-color: #FFF9E6;
+    }
+
+    &.rosetta-person-results__item--selected {
       background-color: #FFF9E6;
     }
 

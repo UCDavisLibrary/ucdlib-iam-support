@@ -17,29 +17,8 @@ export function render() {
             <div><label class='u-inline'>Employee Id:</label> ${this.ucdIamRecord.employeeId}</div>
             <div><label class='u-inline'>Email:</label> ${this.ucdIamRecord.email}</div>
             <div><label class='u-inline'>User Id (Kerberos):</label> ${this.ucdIamRecord.userId}</div>
-            <div ?hidden=${!this.ucdIamRecord.hasAppointment}>
-              <label>Appointments:</label>
-              <div class="responsive-table u-space-ml" role="region" aria-label="Scrollable Table" tabindex="0">
-                <table style='width:auto;font-size:.9rem;'>
-                  <thead>
-                    <tr>
-                      <th>Title</th>
-                      <th>Department</th>
-                      <th>Start Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${this.ucdIamRecord.appointments.map(a => html`
-                      <tr>
-                        <td>${a.titleDisplayName} (${a.titleCode})</td>
-                        <td>${a.deptDisplayName} (${a.deptCode})</td>
-                        <td style='white-space:nowrap;'>${(a.assocStartDate || '').split(' ')[0] }</td>
-                      </tr>
-                    `)}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            ${renderLegacyAppointmentsSection.call(this)}
+            ${renderAppointmentsSection.call(this)}
             <a class='pointer icon icon--circle-arrow-right' @click=${this.openIamRecordModal}>View Entire Employee Record</a>
           </section>
           <section ?hidden=${!this.ucdIamRecord.isEmpty} class="brand-textbox category-brand__background category-brand--pinot">
@@ -129,12 +108,11 @@ export function render() {
       </div>
     </div>
   </div>
-  <ucdlib-iam-modal id='obs-recon-modal' dismiss-text='Close' content-title="Reconcile Record" auto-width hide-footer>
-    <ucdlib-iam-search
-      @select=${e => this._onReconEmployeeSelect(e.detail.status)}
-      search-param='employee-id'
-      class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
-    </ucdlib-iam-search>
+  <ucdlib-iam-modal id='obs-recon-modal' dismiss-text='Close' content-title="Reconcile Record" hide-footer>
+    <rosetta-person-search
+      @rosetta-person-selected=${e => this._onReconEmployeeSelect(e.detail.person)}
+      class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'
+    ></rosetta-person-search>
     <div>
       <button
         @click=${this._onReconSubmit}
@@ -212,5 +190,72 @@ export function render() {
       </button>
     </div>
   </ucdlib-iam-modal>
+  `;
+}
+
+/**
+ * @description Renders the appointments section of the employee record using the legacy IamPersonTransform class. This is used for onboarding records that were created before the Rosetta API was available.
+ * @returns 
+ */
+function renderLegacyAppointmentsSection(){
+  if ( this.ucdIamRecord.isEmpty ) return html``;
+  if ( this.ucdIamRecord.recordType !== 'iam' ) return html``;
+  if ( !this.ucdIamRecord.hasAppointment ) return html``;
+  
+  return html`
+    <div>
+      <label>Appointments:</label>
+      <div class="responsive-table u-space-ml" role="region" aria-label="Scrollable Table" tabindex="0">
+        <table style='width:auto;font-size:.9rem;'>
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Department</th>
+              <th>Start Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${this.ucdIamRecord.appointments.map(a => html`
+              <tr>
+                <td>${a.titleDisplayName} (${a.titleCode})</td>
+                <td>${a.deptDisplayName} (${a.deptCode})</td>
+                <td style='white-space:nowrap;'>${(a.assocStartDate || '').split(' ')[0] }</td>
+              </tr>
+            `)}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderAppointmentsSection(){
+  if ( this.ucdIamRecord.isEmpty ) return html``;
+  if ( this.ucdIamRecord.recordType !== 'rosetta' ) return html``;
+  if ( !this.ucdIamRecord.hasAppointment ) return html``;
+  return html`
+    <div>
+      <label>Appointments:</label>
+      <div class="responsive-table u-space-ml" role="region" aria-label="Scrollable Table" tabindex="0">
+        <table style='width:auto;font-size:.9rem;'>
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Department</th>
+              <th>Start Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${this.ucdIamRecord.appointments.map(a => html`
+              <tr>
+                <td>${a.position_title}</td>
+                <td>${a.department_title} (${a.department_id})</td>
+                <td style='white-space:nowrap;'>${ a.start_date }</td>
+              </tr>
+            `)}
+          </tbody>
+        </table>
+      </div>
+    </div>
   `;
 }
