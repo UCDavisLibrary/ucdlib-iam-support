@@ -38,6 +38,21 @@ class Rosetta {
   }
 
   /**
+   * @description this.getPeople but wrapped in a try/catch that returns {res, err} instead of throwing
+   * @param {*} query - See this.getPeople
+   * @param {*} opts - See this.getPeople
+   * @returns 
+   */
+  async tryGetPeople(query, opts={}){
+    try {
+      const res = await this.getPeople(query, opts);
+      return {res}
+    } catch (err) {
+      return {err}
+    }
+  }
+
+  /**
    * @description Fetches every page of results from a Rosetta API list endpoint, following
    * offset-based pagination until all records have been retrieved.
    * @param {String} endpoint - API endpoint (see _get)

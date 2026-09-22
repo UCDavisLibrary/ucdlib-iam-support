@@ -32,6 +32,13 @@ class RosettaPerson {
   }
 
   /**
+   * @description Preferred or official middle name
+   */
+  get middleName(){
+    return this.data.name?.lived_middle_name || this.data.name?.legal_middle_name || '';
+  }
+
+  /**
    * @description Preferred or official full name
    */
   get fullName(){
@@ -50,6 +57,20 @@ class RosettaPerson {
    */
   get id(){
     return this.data.id?.iam_id || '';
+  }
+
+  /**
+   * @description Returns an object with boolean flags for the person's affiliation types (student, faculty, staff, employee, hsEmployee, external)
+   */
+  get types(){
+    return {
+      student: this.data?.affiliation?.student === 'Y',
+      faculty: this.data?.affiliation?.faculty === 'Y',
+      staff: this.data?.affiliation?.employee === 'Y' && this.data?.affiliation?.faculty !== 'Y',
+      employee: this.data?.affiliation?.employee === 'Y',
+      hsEmployee: this.data?.affiliation?.health_affiliate === 'Y',
+      external: false // not sure rosetta provides this info, but we can add it later if needed
+    }
   }
 
   /**

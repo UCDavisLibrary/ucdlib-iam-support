@@ -4,12 +4,10 @@ import RequestsIsoUtils from '#lib/utils/requests-iso-utils.js';
 import config from "#lib/utils/config.js";
 import TextUtils from '#lib/utils/text.js';
 import Pg from '#lib/utils/pg.js';
-import UcdIamModel from '#lib/cork/models/UcdIamModel.js';
 import IamPersonTransform from '#lib/utils/IamPersonTransform.js';
+import RosettaPerson from '#lib/utils/RosettaPerson.js';
 import handleError from './handleError.js';
 import rosetta from '#lib/utils/rosetta.js';
-
-UcdIamModel.init(config.ucdIamApi);
 
 export default (api) => {
 
@@ -246,25 +244,14 @@ export default (api) => {
       }
 
       // make sure iam record exists
-      UcdIamModel.init(config.ucdIamApi);
-      const iamResponse = await UcdIamModel.getPersonByIamId(payload.iamId);
-      if ( iamResponse.error ) {
-        if ( UcdIamModel.noEmployeeFound(iamResponse) ){
-          res.status(400).json({
-            error: true,
-            message: 'No employee found with this IAM ID'
-          });
-          return;
-        } else {
-          console.error(iamResponse.error);
-          res.status(502).json({
-            error: true,
-            message: 'Unable to retrieve employee record from UCD IAM API.'
-          });
-          return;
-        }
+      const iamResponse = await rosetta.getPeople({iamid: payload.iamId, limit: 1});
+      if ( !iamResponse.results.length ){
+        return res.status(400).json({
+          error: true,
+          message: 'No employee found with this IAM ID'
+        });
       }
-      const iamRecord = new IamPersonTransform(iamResponse);
+      const iamRecord = new RosettaPerson(iamResponse.results[0]);
 
       // send RT correspondence
       if ( onboardingRecord.rtTicketId ) {
@@ -300,7 +287,8 @@ export default (api) => {
       data.additionalData.employeeUserId = iamRecord.userId;
       data.additionalData.ucdIamRecord = {
         dateRetrieved: (new Date()).toISOString(),
-        record: iamRecord.data
+        record: iamRecord.data,
+        recordType: 'rosetta'
       }
       if ( !iamRecord.userId ) {
         data.statusId = models.onboarding.statusCodes.userId;
@@ -439,7 +427,7 @@ export default (api) => {
       const systemAccessRecord = new models.SystemAccessRecord();
 
       // add to database
-      const addToDb = await models.admin.adoptEmployee(req.params.id, {ucdIamConfig: config.ucdIamApi});
+      const addToDb = await models.admin.adoptEmployee(req.params.id);
       if ( addToDb.error ){
         console.error(`Error adding employee to database. Onboarding Id: ${req.params.id}`, addToDb);
         return res.status(400).json({

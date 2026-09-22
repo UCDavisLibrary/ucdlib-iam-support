@@ -4,6 +4,8 @@ import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
 import RequestsIsoUtils from "#lib/utils/requests-iso-utils.js";
 import permissionsFormProperties from "#lib/utils/permissionsFormProperties.js";
 import config from "#lib/utils/config.js";
+import rosetta from "#lib/utils/rosetta.js";
+import RosettaPerson from "#lib/utils/RosettaPerson.js";
 
 /**
  * @classdesc Used to perform various admin operations for this application.
@@ -13,14 +15,12 @@ class iamAdmin {
 
   async adoptEmployee(onboardingId, params={}){
     const forceAdoption = params.force || false;
-    const ucdIamConfig = params.ucdIamConfig || {};
 
     const out = {
       error: false,
       message: ''
     }
     let dataToWrite = {};
-    UcdIamModel.init(ucdIamConfig);
 
     // retrieve onboarding record
     if ( !onboardingId ) {
@@ -45,31 +45,26 @@ class iamAdmin {
     onboardingRecord = onboardingRecord.res.rows[0];
 
     // retrieve ucd iam record
-    const ids = {
-      iamId: onboardingRecord.iam_id,
-      email: onboardingRecord.additional_data.employeeEmail,
-      userId: onboardingRecord.additional_data.employeeUserId,
-      employeeId: onboardingRecord.additional_data.employeeId
-    };
-    let iamRecord = new IamPersonTransform({});
-    let iamResponse = await UcdIamModel.getPerson(ids, true);
-    if ( iamResponse.response.error ) {
-
-      if ( UcdIamModel.noEmployeeFound(iamResponse.response) && !forceAdoption ) {
+    let iamRecord;
+    try {
+      if ( !onboardingRecord.iam_id ) {
         out.error = true;
-        out.message = `No employee found in IAM for onboarding record ${onboardingId}`;
-        out.canForce = true;
+        out.message = 'No IAM ID found in onboarding record';
+        out.canForce = false;
         return out;
       }
 
-      if ( !UcdIamModel.noEmployeeFound(iamResponse.response) && !forceAdoption ) {
-        out.error = true;
-        out.message = `Error interacting with IAM API: ${iamResponse.response.message}`;
-        out.canForce = true;
-        return out;
+      const iamResponse = await rosetta.getPeople({iamid: onboardingRecord.iam_id, limit: 1});
+      if ( !iamResponse.results.length ){
+        throw new Error(`No employee found with this IAM ID: ${onboardingRecord.iam_id}`);
       }
-    } else {
-      iamRecord = new IamPersonTransform(iamResponse.response);
+      iamRecord = new RosettaPerson(iamResponse.results[0]);
+
+    } catch (e) {
+      out.error = true;
+      out.message = `Error retrieving UCD IAM record: ${e.message}`;
+      out.canForce = false;
+      return out;
     }
 
     // extract and validate data from ucd iam record/onboarding record
@@ -87,8 +82,9 @@ class iamAdmin {
     }
     if ( iamRecord.appointments.length > 1 ){
       dataToWrite.primaryAssociation = primaryAssociation;
+      iamRecord.primaryPositionNumber = primaryAssociation.primaryPositionNumber;
     }
-    dataToWrite.ucdDeptCode = iamRecord.getPrimaryAssociation().deptCode;
+    dataToWrite.ucdDeptCode = iamRecord.primaryAssociation.department_id;
 
     // validate supervisor
     if ( onboardingRecord.supervisor_id ) {
@@ -96,7 +92,7 @@ class iamAdmin {
       if ( supervisor.error ) {
         return supervisor.error;
       }
-      if ( supervisor.iamRecord.employeeId != iamRecord.getSupervisorEmployeeId() ) {
+      if ( supervisor.iamRecord.id != iamRecord.primaryAssociation.reports_to_iam_id ) {
         dataToWrite.customSupervisor = true;
       }
     } else {
@@ -291,10 +287,9 @@ class iamAdmin {
 
   /**
    * @description Checks if employee's appointments are valid. If not, returns an error object
-   * @param {IamPersonTransform} iamRecord - UCD IAM record
+   * @param {RosettaPerson} iamRecord - UCD IAM record
    * @param {Object} primaryAssociation - Required if employee has multiple appointments. Object with the following properties:
-   * {string} deptCode - department code
-   * {string} titleCode - title code
+   * {string} primaryPositionNumber - the position number of the primary appointment
    * @param {Boolean} force - Will not return error object if validation fails
    * @returns {Object} - {error: {error: boolean, message: string, canForce: boolean}, iamRecord: Object}
    */
@@ -307,14 +302,14 @@ class iamAdmin {
       return {error};
     }
 
-    let hasPrimaryAssociation = primaryAssociation && Object.keys(primaryAssociation).length;
+    let hasPrimaryAssociation = !!primaryAssociation?.primaryPositionNumber
     if ( hasPrimaryAssociation ){
-      if ( !primaryAssociation?.deptCode || !primaryAssociation?.titleCode ) {
-        error.message = 'Primary association must have a deptCode and titleCode';
+      if ( !primaryAssociation?.primaryPositionNumber ) {
+        error.message = 'Primary association must have a primaryPositionNumber';
         error.canForce = false;
         return {error};
       }
-      const association = iamRecord.getAssociation(primaryAssociation.deptCode, primaryAssociation.titleCode, true);
+      const association = iamRecord.appointments.find(a => a.position_number == primaryAssociation.primaryPositionNumber);
       if ( !Object.keys(association).length && !force) {
         error.message = `Primary association ${JSON.stringify(primaryAssociation)} not found in IAM record`;
         error.canForce = true;
@@ -350,20 +345,18 @@ class iamAdmin {
       error.canForce = true;
       return {error};
     }
-    let iamRecord = await UcdIamModel.getPersonByIamId(iamId);
-    if ( iamRecord.error ) {
-      if ( !UcdIamModel.noEmployeeFound(iamRecord) && !force ) {
-        error.message = `Error interacting with IAM API: ${iamRecord.message}`;
-        error.canForce = true;
-        return {error};
-      }
-      if ( UcdIamModel.noEmployeeFound(iamRecord) && !force ) {
-        error.message = `No record found in UCD IAM for iam id '${iamId}'`;
-        error.canForce = true;
-        return out;
-      }
+    let iamRecord = await rosetta.tryGetPeople({iamid: iamId, limit: 1});
+    if ( iamRecord.err && !force ) {
+      error.message = `Error retrieving employee record from UCD IAM: ${iamRecord.err.message}`;
+      error.canForce = true;
+      return {error};
     }
-    iamRecord = new IamPersonTransform(iamRecord);
+    if ( !iamRecord.res.results.length && !force ) {
+      error.message = `No employee record found in UCD IAM for iam id '${iamId}'`;
+      error.canForce = true;
+      return {error};
+    }
+    iamRecord = new RosettaPerson(iamRecord.res.results[0]);
     return { iamRecord, dbRecord };
   }
 
@@ -386,7 +379,7 @@ class iamAdmin {
     const firstName = iamRecord?.firstName || templateRecord?.first_name || onboardingRecord?.additional_data?.employeeFirstName;
     const lastName = iamRecord?.lastName || templateRecord?.last_name || onboardingRecord?.additional_data?.employeeLastName;
     const middleName = iamRecord?.middleName || templateRecord?.middle_name;
-    const suffix = iamRecord?.suffix || templateRecord?.suffix;
+    const suffix = templateRecord?.suffix;
     const title = templateRecord?.title || onboardingRecord?.library_title;
     const supervisorId = templateRecord?.supervisor_id || onboardingRecord?.supervisor_id;
     const customSupervisor = templateRecord?.custom_supervisor || false;
