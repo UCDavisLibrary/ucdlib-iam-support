@@ -168,17 +168,13 @@ export default class UcdlibIamPagePermissions extends Mixin(LitElement)
     this.AppStateModel.setLocation('/permissions/update' + (urlParams ? '?' + urlParams : ''));
   }
   /**
-   * @description Bound to ucdlib-iam-search element in employee select form
-   * @param {*} response
+   * @description Bound to rosetta-person-search element in employee select form
+   * @param {RosettaPerson} person
    */
-  _onEmployeeSelect(response){
-    if ( response.state === 'loaded' ){
-      this.permissionsFor = 'employee';
-      this.selectedEmployee = response.id;
-      this.AppStateModel.setLocation('#applications');
-    } else if ( response.state === 'error' ){
-      this.AppStateModel.showError('Error fetching employee');
-    }
+  _onEmployeeSelect(person){
+    this.permissionsFor = 'employee';
+    this.selectedEmployee = person.id;
+    this.AppStateModel.setLocation('#applications');
   }
 }
 

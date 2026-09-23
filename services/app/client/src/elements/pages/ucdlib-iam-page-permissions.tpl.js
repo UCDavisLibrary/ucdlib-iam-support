@@ -142,12 +142,10 @@ export function renderApplicationsSelect(){
 export function renderEmployeeSelect(){
   return html`
   <div id='perm-employee'>
-      <ucdlib-iam-search
-        @select=${e => this._onEmployeeSelect(e.detail.status)}
-        reset-on-select
-        search-param='name'
-        class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'>
-      </ucdlib-iam-search>
+    <rosetta-person-search
+      @rosetta-person-selected=${e => this._onEmployeeSelect(e.detail.person)}
+      class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'
+    ></rosetta-person-search>
   </div>
   `;
 }

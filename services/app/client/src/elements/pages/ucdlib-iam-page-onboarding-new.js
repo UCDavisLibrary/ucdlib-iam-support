@@ -2,7 +2,6 @@ import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-onboarding-new.tpl.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 
-import "#components/ucdlib-iam-search.js";
 import "#components/ucdlib-iam-alma.js";
 import "#components/ucdlib-iam-modal.js";
 import "#components/ucdlib-employee-search.js";

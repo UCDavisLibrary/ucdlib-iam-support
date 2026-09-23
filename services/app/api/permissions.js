@@ -2,11 +2,10 @@ import models from '#models';
 
 import TextUtils from '#lib/utils/text.js';
 import config from "#lib/utils/config.js";
-import UcdIamModel from '#lib/cork/models/UcdIamModel.js';
 import IamPersonTransform from '#lib/utils/IamPersonTransform.js';
 import handleError from './handleError.js';
-
-UcdIamModel.init(config.ucdIamApi);
+import rosetta from '#lib/utils/rosetta.js';
+import RosettaPerson from '#lib/utils/RosettaPerson.js';
 
 export default (api) => {
 
@@ -90,7 +89,7 @@ export default (api) => {
       let canAccess = false;
       let onboardingStatus = 0;
       let ucdIamResponse, employeeResponse;
-      let iamRecord = new IamPersonTransform({});
+      let iamRecord = new RosettaPerson();
       let supervisorId = '';
       let userId = '';
       const data = {
@@ -145,18 +144,21 @@ export default (api) => {
 
         // Might need supervisor approval. lets check their records
         [ucdIamResponse, employeeResponse] = await Promise.all([
-          UcdIamModel.getPersonByIamId(data.iamId),
+          rosetta.tryGetPeople({iamid: data.iamId, limit: 1}),
           models.employees.getById(data.iamId, 'iamId')
         ]);
         if ( employeeResponse.err ){
           console.error(employeeResponse.err);
           return res.status(400).json({error: true, message: 'Unable to create permissions request.'});
         }
-        if ( ucdIamResponse.error ) {
-          console.error(ucdIamResponse.error);
+        if ( ucdIamResponse.err ) {
+          console.error(ucdIamResponse.err);
           return res.status(400).json({error: true, message: 'Unable to create permissions request. Person does not exist.'});
         }
-        iamRecord = new IamPersonTransform(ucdIamResponse);
+        if ( !ucdIamResponse.res.results.length){
+          return res.status(400).json({error: true, message: 'Unable to create permissions request. Person does not exist.'});
+        }
+        iamRecord = new RosettaPerson(ucdIamResponse.res.results[0]);
         data.additionalData.employeeFirstName = iamRecord.firstName;
         data.additionalData.employeeLastName = iamRecord.lastName;
 
