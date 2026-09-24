@@ -84,7 +84,8 @@ class onboardingCli {
     }
     const ucdIamRecord = {
       dateRetrieved: (new Date()).toISOString(),
-      record: iamRecord.data
+      record: iamRecord.data,
+      recordType: 'rosetta'
     }
     const additionalData = {...(request.additional_data || {}), ucdIamRecord};
     const update = await models.onboarding.update(id, {additionalData});

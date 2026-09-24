@@ -128,12 +128,11 @@ program
   .command('update-primary-association')
   .description('Update the primary association of an employee record. If custom_supervisor is set to false, the supervisor will be updated.')
   .argument('<id>', 'an Employee unique indentifier')
-  .argument('<deptCode>', 'Department code of the new primary association')
-  .argument('<titleCode>', 'Title code of the new primary association')
+  .argument('<positionNumber>', 'Position number of the new primary association')
   .addOption(new Option('-t, --idtype <idtype>', 'Id type').choices(utils.employeeIds).default('iamId'))
-  .action((id, deptCode, titleCode, options) => {
-    employees.updatePrimaryAssociation(id, deptCode, titleCode, options);
-    }
+  .action((id, positionNumber, options) => {
+    employees.updatePrimaryAssociation(id, positionNumber, options);
+  }
 );
 
 program

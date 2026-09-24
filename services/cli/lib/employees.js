@@ -4,10 +4,9 @@ import config from "#lib/utils/config.js";
 import models from '#models';
 import utils from './utils.js';
 import pg from '#lib/utils/pg.js';
-import IamPersonTransform from '#lib/utils/IamPersonTransform.js';
-import UcdIamModel from '#lib/cork/models/UcdIamModel.js';
+import rosetta from '#lib/utils/rosetta.js';
+import RosettaPerson from '#lib/utils/RosettaPerson.js';
 
-UcdIamModel.init(config.ucdIamApi);
 
 class employeesCli {
 
@@ -203,14 +202,14 @@ class employeesCli {
 
       if(ucd) {
         let iamRecord;
-        iamRecord = await UcdIamModel.getPersonByIamId(r.res.rows[0].iam_id);
-        if ( iamRecord.error ) {
+        iamRecord = await rosetta.tryGetPeople({iamid: r.res.rows[0].iam_id, limit: 1});
+        if ( iamRecord.err ) {
           console.error(`Unable to retrieve UC Davis IAM record for ${id}`);
           console.log(iamRecord);
           return;
         }
         console.log("IAM Record:");
-        utils.logObject(iamRecord);
+        utils.logObject(iamRecord.res.results?.[0]);
       }
 
     } else {
@@ -361,7 +360,7 @@ class employeesCli {
 
   }
 
-  async updatePrimaryAssociation(id, deptCode, titleCode, options){
+  async updatePrimaryAssociation(id, positionNumber, options){
     const idType = options.idtype ? options.idtype : 'iamId';
     id = id.trim();
 
@@ -379,9 +378,9 @@ class employeesCli {
       return;
     }
 
-    const association = iamRecord.getAssociation(deptCode, titleCode, true);
-    if ( !Object.keys(association).length ) {
-      console.error(`Employee does not have an appointment with department code ${deptCode} and title code ${titleCode}`);
+    const association = iamRecord.appointments.find(appt => appt.position_number == positionNumber);
+    if ( !association ) {
+      console.error(`Employee does not have an appointment with position number ${positionNumber}`);
       console.log('Available appointments:');
       utils.logObject(iamRecord.appointments);
       await pg.pool.end();
@@ -391,30 +390,30 @@ class employeesCli {
     // validate supervisor
     let supervisorId;
     if ( !employee.custom_supervisor ){
-      const supervisorEmployeeId = iamRecord.getSupervisorEmployeeId();
-      if ( !supervisorEmployeeId ) {
+      supervisorId = association.reports_to_iam_id;
+      if ( !supervisorId ) {
         console.error(`Error: Appointment does not have a supervisor listed`);
         console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
         await pg.pool.end();
         return;
       }
-      const supervisor = await UcdIamModel.getPersonByEmployeeId(supervisorEmployeeId);
-      if ( supervisor.error ) {
-        if ( !UcdIamModel.noEmployeeFound(supervisor) ) {
-          console.log(`Error interacting with IAM API: ${supervisor.message}`);
+      const supervisor = await rosetta.tryGetPeople({iamid: supervisorId, limit: 1});
+      if ( supervisor.err ) {
+          console.log(`Error interacting with IAM API: ${supervisor.err.message}`);
           console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
-        } else {
-          console.log(`No record found for supervisor ${supervisorEmployeeId} in UCD IAM`);
-          console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
-        }
+          await pg.pool.end();
+          return
+      }
+      if ( !supervisor.res.results?.length ) {
+        console.log(`No record found for supervisor ${supervisorId} in UCD IAM`);
+        console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
         await pg.pool.end();
         return
       }
-      supervisorId = supervisor.iamId;
     }
 
     // update employee record
-    const d = {primaryAssociation: {deptCode, titleCode}, ucdDeptCode: deptCode};
+    const d = {primaryAssociation: {primaryPositionNumber: positionNumber}, ucdDeptCode: association.department_id};
     if ( supervisorId ) d.supervisorId = supervisorId;
     const update = await models.employees.update(employee.id, d);
     if ( update.err ) {
@@ -422,7 +421,6 @@ class employeesCli {
     } else {
       console.log(`Updated primary association of ${employee.first_name} ${employee.last_name}`);
     }
-
     await pg.pool.end();
 
   }
@@ -449,34 +447,40 @@ class employeesCli {
       await pg.pool.end();
       return;
     }
+    const association = iamRecord.primaryAssociation;
+    if ( !association ) {
+      console.error(`Employee has appointments but none are listed as the primary association. Cannot reset primary association.`);
+      await pg.pool.end();
+      return;
+    }
 
     // validate supervisor
     let supervisorId;
     if ( !employee.custom_supervisor ){
-      const supervisorEmployeeId = iamRecord.getSupervisorEmployeeId();
-      if ( !supervisorEmployeeId ) {
+      supervisorId = association.reports_to_iam_id;
+      if ( !supervisorId ) {
         console.error(`Error: Appointment does not have a supervisor listed`);
         console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
         await pg.pool.end();
         return;
       }
-      const supervisor = await UcdIamModel.getPersonByEmployeeId(supervisorEmployeeId);
-      if ( supervisor.error ) {
-        if ( !UcdIamModel.noEmployeeFound(supervisor) ) {
-          console.log(`Error interacting with IAM API: ${supervisor.message}`);
+      const supervisor = await rosetta.tryGetPeople({iamid: supervisorId, limit: 1});
+      if ( supervisor.err ) {
+          console.log(`Error interacting with IAM API: ${supervisor.err.message}`);
           console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
-        } else {
-          console.log(`No record found for supervisor ${supervisorEmployeeId} in UCD IAM`);
-          console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
-        }
+          await pg.pool.end();
+          return
+      }
+      if ( !supervisor.res.results?.length ) {
+        console.log(`No record found for supervisor ${supervisorId} in UCD IAM`);
+        console.error('Set custom_supervisor on the employee record to skip setting the supervisor');
         await pg.pool.end();
         return
       }
-      supervisorId = supervisor.iamId;
     }
 
     // update employee record
-    const d = {primaryAssociation: {}, ucdDeptCode: iamRecord.getPrimaryAssociation().deptCode};
+    const d = {primaryAssociation: {}, ucdDeptCode: association.department_id};
     if ( supervisorId ) d.supervisorId = supervisorId;
     const update = await models.employees.update(employee.id, d);
     if ( update.err ) {
@@ -502,13 +506,17 @@ class employeesCli {
     }
 
     // check if employee exists in uc davis iam
-    let iamRecord = await UcdIamModel.getPersonByIamId(iamId);
-    if ( iamRecord.error ) {
+    let iamRecord = await rosetta.tryGetPeople({iamid: iamId, limit: 1});
+    if ( iamRecord.err ) {
       console.error(`Unable to retrieve UC Davis IAM record for ${iamId}`);
       console.log(iamRecord);
       return;
     }
-    iamRecord = new IamPersonTransform(iamRecord);
+    if ( !iamRecord.res.results?.length ) {
+      console.error(`No IAM record found for ${iamId}`);
+      return;
+    }
+    iamRecord = new RosettaPerson(iamRecord.res.results[0]);
 
     // check if employee already exists in local db
     const localRecord = await models.employees.getById(iamId, 'iamId');
@@ -535,7 +543,7 @@ class employeesCli {
     dataToWrite = {...dataToWrite, ...d.employeeData};
 
     // validate appointments
-    const primaryAssociation = employee.primary_association?.deptCode || employee.primary_association?.titleCode ? employee.primary_association : {};
+    const primaryAssociation = employee.primary_association?.primaryPositionNumber ? employee.primary_association : {};
     const appointments = await models.admin.validateAppointments(iamRecord, primaryAssociation, force);
     if ( appointments.error ) {
       console.error(`Error validating appointments\n${appointments.error.message}`);
@@ -543,8 +551,11 @@ class employeesCli {
       await pg.pool.end();
       return;
     }
+    if ( primaryAssociation.primaryPositionNumber ){
+      iamRecord.primaryPositionNumber = primaryAssociation.primaryPositionNumber;
+    }
     dataToWrite.primaryAssociation = primaryAssociation;
-    dataToWrite.ucdDeptCode = iamRecord.getPrimaryAssociation().deptCode;
+    dataToWrite.ucdDeptCode = iamRecord.primaryAssociation?.department_id;
 
     // validate supervisor
 
@@ -557,7 +568,7 @@ class employeesCli {
         await pg.pool.end();
         return;
       }
-      if ( !employee.custom_supervisor && supervisor.iamRecord.employeeId != iamRecord.getSupervisorEmployeeId() ) {
+      if ( !employee.custom_supervisor && employee.supervisor_id != iamRecord.primaryAssociation?.reports_to_iam_id ) {
         console.error(`Error validating supervisor`);
         console.error(`Specified supervisor not listed in primary association of UC Davis IAM record`);
         console.error("The 'custom_supervisor' property should be set to true");
@@ -566,21 +577,21 @@ class employeesCli {
       }
     } else {
       // user did not provide a supervisor id, so we need to validate appointment supervisor is in our db
-      const supervisorEmployeeId = iamRecord.getSupervisorEmployeeId();
-      if ( !supervisorEmployeeId ) {
+      const supervisorId = iamRecord.primaryAssociation?.reports_to_iam_id;
+      if ( !supervisorId ) {
         console.error(`Error validating supervisor`);
         console.error(`Appointment does not have a supervisor listed`);
         await pg.pool.end();
         return;
       }
-      const supervisorLocalRecord = await models.employees.getById(supervisorEmployeeId, 'employeeId');
+      const supervisorLocalRecord = await models.employees.getById(supervisorId);
       if ( !supervisorLocalRecord.res.rowCount ) {
         await pg.pool.end();
         console.error(`Error validating supervisor`);
-        console.error(`Appointment supervisor employee id ${supervisorEmployeeId} not found in local database`);
+        console.error(`Appointment supervisor employee id ${supervisorId} not found in local database`);
         return;
       }
-      dataToWrite.supervisorId = supervisorLocalRecord.res.rows[0].iam_id;
+      dataToWrite.supervisorId = supervisorId;
     }
 
     // validate groups

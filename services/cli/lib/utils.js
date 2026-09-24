@@ -4,10 +4,8 @@ import { printTable } from 'console-table-printer';
 import models from '#models';
 import config from "#lib/utils/config.js";
 import pg from '#lib/utils/pg.js';
-import UcdIamModel from '#lib/cork/models/UcdIamModel.js';
-import IamPersonTransform from '#lib/utils/IamPersonTransform.js';
-
-UcdIamModel.init(config.ucdIamApi);
+import rosetta from '#lib/utils/rosetta.js';
+import RosettaPerson from '#lib/utils/RosettaPerson.js';
 
 class UtilsCli{
 
@@ -51,17 +49,16 @@ class UtilsCli{
   }
 
   async validateIamRecord(iamId){
-    const iamRecord = await UcdIamModel.getPersonByIamId(iamId);
-    if ( iamRecord.error ) {
-      if ( !UcdIamModel.noEmployeeFound(iamRecord) ) {
-        console.log(`Error interacting with IAM API: ${iamRecord.message}`);
-        return
-      } else {
-        console.log(`No record found in UCD IAM for iam id '${iamId}'`);
-        return
-      }
+    const iamRecord = await rosetta.tryGetPeople({iamid: iamId, limit: 1});
+    if ( iamRecord.err ) {
+      console.log(`Error interacting with IAM API: ${iamRecord.message}`);
+      return;
     }
-    return new IamPersonTransform(iamRecord);
+    if ( !iamRecord.res.results?.length ) {
+      console.log(`No IAM record found for ${iamId}`);
+      return;
+    }
+    return new RosettaPerson(iamRecord.res.results[0]);
   }
 }
 
