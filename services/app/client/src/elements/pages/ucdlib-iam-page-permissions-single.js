@@ -5,7 +5,7 @@ import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 import DtUtils from "#lib/utils/dtUtils.js";
 import selectOptions from "../../utils/permissionsFormOptions.js";
 import formProperties from '#lib/utils/permissionsFormProperties.js';
-import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
+import RosettaPerson from '#lib/utils/RosettaPerson.js';
 
 import { AppComponentController } from '#controllers';
 
@@ -76,7 +76,7 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
 
     this._injectModel(
       'AppStateModel', 'OnboardingModel', 'PermissionsModel',
-      'RtModel', 'AuthModel', 'PersonModel'
+      'RtModel', 'AuthModel', 'RosettaModel'
     );
   }
 
@@ -174,12 +174,12 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
       const token = this.AuthModel.getToken();
       iamId = token.iamId;
     }
-    const personRecord = await this.PersonModel.getPersonById(iamId, 'iamId');
-    if ( personRecord.state === 'error' ){
+    const personRecord = await this.RosettaModel.getPersonById(iamId);
+    if ( personRecord.state === 'error' || !personRecord.payload.results.length ){
       this.AppStateModel.showError('Unable to retrieve UC Davis record for this user.');
       return;
     }
-    this.requestedPerson = new IamPersonTransform(personRecord.payload);
+    this.requestedPerson = new RosettaPerson(personRecord.payload.results[0]);
     this.iamId = this.requestedPerson.id;
     this.firstName = this.requestedPerson.firstName;
     this.lastName = this.requestedPerson.lastName;
@@ -269,7 +269,7 @@ export default class UcdlibIamPagePermissionsSingle extends Mixin(LitElement)
 
     this.firstName = '';
     this.lastName = '';
-    this.requestedPerson = new IamPersonTransform({});
+    this.requestedPerson = new RosettaPerson();
     this.requestedApplications = [];
     this.customApplications = '';
   }

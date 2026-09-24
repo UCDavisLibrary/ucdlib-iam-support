@@ -1,6 +1,4 @@
 import models from '#models';
-import UcdIamModel from "#lib/cork/models/UcdIamModel.js";
-import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
 import RequestsIsoUtils from "#lib/utils/requests-iso-utils.js";
 import permissionsFormProperties from "#lib/utils/permissionsFormProperties.js";
 import config from "#lib/utils/config.js";
@@ -363,7 +361,7 @@ class iamAdmin {
   /**
    * @description Gets employee data from UCD IAM record, onboarding record, or CLI input template
    * @param {Object} args - args object with the following properties:
-   * {IamPersonTransform} iamRecord - UCD IAM record
+   * {RosettaPerson} iamRecord - UCD IAM record
    * {Object} onboardingRecord - onboarding record
    * {Object} templateRecord - CLI input template
    * {boolean} force - Will not return error object if a data field is missing
@@ -945,12 +943,7 @@ class iamAdmin {
       message: '',
       action: 'check-if-iam-record-exists',
       actionTaken: false};
-    if ( !params.ucdIamConfig ) {
-      out.error = true;
-      out.message = 'No ucd iam config provided';
-      return out;
-    }
-    UcdIamModel.init(params.ucdIamConfig);
+
     const onboardingRecord = await this._getOnboardingRecord(idOrRecord);
     if ( onboardingRecord.error ) return onboardingRecord;
     out.onboardingRecordId = onboardingRecord.id;
@@ -965,25 +958,29 @@ class iamAdmin {
       out.message = 'Onboarding record does not have a unique identifier for the employee.';
       return out;
     }
-    const ids = {
-      iamId: onboardingRecord.iam_id,
-      email: onboardingRecord.additional_data.employeeEmail,
-      userId: onboardingRecord.additional_data.employeeUserId,
-      employeeId: onboardingRecord.additional_data.employeeId
-    };
-    let iamResponse = await UcdIamModel.getPerson(ids, true);
-    if ( iamResponse.response.error ) {
-
-      if ( UcdIamModel.noEmployeeFound(iamResponse.response) ) {
-        out.message = 'No IAM record found. Taking no action';
-        return out;
-      } else  {
+    const ids = [
+      {idType: 'iamid', id: onboardingRecord.iam_id},
+      {idType: 'email', id: onboardingRecord.additional_data.employeeEmail},
+      {idType: 'loginid', id: onboardingRecord.additional_data.employeeUserId},
+      {idType: 'employeeid', id: onboardingRecord.additional_data.employeeId}
+    ];
+    let iamResponse;
+    for ( const id of ids ) {
+      iamResponse = await rosetta.tryGetPeople({[id.idType]: id.id, limit: 1});
+      if ( iamResponse.err ) {
         out.error = true;
-        out.message = `Error interacting with IAM API: ${iamResponse.response.message}`;
+        out.message = `Error retrieving IAM record for ${id.idType} ${id.id}: ${iamResponse.err.message}`;
         return out;
       }
+      if ( iamResponse.res.results.length ) {
+        break;
+      }
     }
-    const iamRecord = new IamPersonTransform(iamResponse.response);
+    if ( !iamResponse.res.results.length ) {
+      out.message = 'No IAM record found. Taking no action';
+      return out;
+    }
+    const iamRecord = new RosettaPerson(iamResponse.res.results[0]);
 
     const additionalData = onboardingRecord.additional_data || {};
     const updatedFields = {
@@ -1020,7 +1017,8 @@ class iamAdmin {
     // save updated ucd iam record
     const ucdIamRecord = {
       dateRetrieved: (new Date()).toISOString(),
-      record: iamRecord.data
+      record: iamRecord.data,
+      recordType: 'rosetta'
     }
     if ( data.additionalData ) {
       data.additionalData.ucdIamRecord = ucdIamRecord;
