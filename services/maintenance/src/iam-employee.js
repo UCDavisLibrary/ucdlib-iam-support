@@ -1,18 +1,16 @@
 import assert from 'node:assert/strict';
 
 import models from '#models';
-import UcdIamModel from "#lib/cork/models/UcdIamModel.js";
 import IamPersonTransform from "#lib/utils/IamPersonTransform.js";
+import rosetta from '#lib/utils/rosetta.js';
+import RosettaPerson from '#lib/utils/RosettaPerson.js';
 import config from "#lib/utils/config.js";
 
 export class IamEmployees {
   constructor(){
-    this.iam = UcdIamModel;
-    this.iam.init(config.ucdIamApi);
 
     this.employees = [];
-    this.iamResponses = {byId: {}, byEmployeeId: {}};
-    this.employeeIdToIamId = {};
+    this.iamResponsesById = {};
     this.discrepancies = [];
     this.updates = [];
   }
@@ -36,66 +34,31 @@ export class IamEmployees {
         await this._getIamRecord(iamId);
       }
     }
-
-    // loop iam id responses and map to employee id
-    for ( let iamId in this.iamResponses.byId ){
-      const response = this.iamResponses.byId[iamId];
-      if ( response.employeeId ) {
-        this.employeeIdToIamId[response.employeeId] = iamId;
-      }
-    }
   }
 
-  async _getIamRecord(id, idType='iamId') {
-
-    // use iam id if we have it
-    if ( idType === 'employeeId' && this.employeeIdToIamId[id] ) {
-      idType = 'iamId';
-      id = this.employeeIdToIamId[id];
-    }
+  async _getIamRecord(id) {
+    const idType = 'iamId';
 
     // check class cache
-    if ( idType === 'iamId' && this.iamResponses.byId[id] ) {
-      return this.iamResponses.byId[id];
-    } else if ( idType === 'employeeId' && this.iamResponses.byEmployeeId[id] ) {
-      return this.iamResponses.byEmployeeId[id];
+    if ( this.iamResponsesById[id] ) {
+      return this.iamResponsesById[id];
     }
-
+    
     // check database cache
-    const cache = await models.cache.get(idType, id, config.ucdIamApi.cacheExpiration);
+    const cache = await models.cache.get(`rosetta-${idType}`, id, config.rosetta.cacheExpiration);
     if ( cache.res && cache.res.rowCount ) {
       const d = cache.res.rows[0].data;
-      if ( idType === 'iamId' ) this.iamResponses.byId[id] = d;
-      if ( idType === 'employeeId' ) this.iamResponses.byEmployeeId[id] = d;
+      this.iamResponsesById[id] = d;
       return d;
     }
 
     // query iam api
-    let response;
-    if ( idType === 'iamId' ) {
-      response = await this.iam.getPersonByIamId(id);
-    } else if ( idType === 'employeeId' ) {
-      response = await this.iam.getPersonByEmployeeId(id);
+    const response = await rosetta.getPeople({iamid: id, limit: 1});
+    if ( response.results.length ) {
+      await models.cache.set(`rosetta-${idType}`, id, response.results[0]);
+      this.iamResponsesById[id] = response.results[0];
+      return response.results[0];
     }
-
-    if ( response.error && !this.iam.noEmployeeFound(response) ){
-      response.error.message = 'Unable to connect to the UCD IAM API';
-      throw response.error;
-    }
-    if ( !response.error ) {
-      await models.cache.set(idType, id, response);
-    }
-    if ( idType === 'iamId' ) {
-      this.iamResponses.byId[id] = response;
-      return response;
-    }
-    if ( idType === 'employeeId' ) {
-      this.iamResponses.byEmployeeId[id] = response;
-      this.employeeIdToIamId[id] = response.iamId;
-      return await this._getIamRecord(response.iamId);
-    }
-    this.iamResponses.byId[iamId] = response;
-
   }
 
   // compare records in the employees table with the ucd iam records
@@ -105,8 +68,8 @@ export class IamEmployees {
     for ( let employee of this.employees ){
 
       // check for no iam record
-      let iamRecord = this.iamResponses.byId[employee.iam_id];
-      if ( this.iam.noEmployeeFound(iamRecord) ){
+      let iamRecord = this.iamResponsesById[employee.iam_id];
+      if ( !iamRecord ){
         this.discrepancies.push({
           iam_id: employee.iam_id,
           reason: discrepancyTypes.noIamRecord.slug
@@ -114,7 +77,7 @@ export class IamEmployees {
         continue;
       }
 
-      iamRecord = new IamPersonTransform(iamRecord);
+      iamRecord = new RosettaPerson(iamRecord);
 
       // check that employee has an appointment
       if ( !iamRecord.hasAppointment ) {
@@ -127,8 +90,18 @@ export class IamEmployees {
 
       // check that appointment is specified if there are multiple
       if ( iamRecord.appointments.length > 1 ) {
-        const appt = iamRecord.getAssociation(employee.primary_association.deptCode, employee.primary_association.titleCode, true);
-        if ( Object.keys(appt).length === 0 ) {
+        let primaryAssociation;
+        // rosetta format
+        if ( employee.primary_association?.primaryPositionNumber ){
+          primaryAssociation = iamRecord.appointments.find(appt => appt.position_number == employee.primary_association.primaryPositionNumber);
+        // legacy iam format
+        } else if ( employee.primary_association?.deptCode && employee.primary_association?.titleCode ){
+          primaryAssociation = iamRecord.appointments.find(appt => appt.department_id == employee.primary_association.deptCode && appt.job_type_id === employee.primary_association.titleCode);
+        }
+
+        if ( primaryAssociation ) {
+          iamRecord.primaryPositionNumber = primaryAssociation.position_number;
+        } else {
           this.discrepancies.push({
             iam_id: employee.iam_id,
             reason: discrepancyTypes.multipleAppointments.slug
@@ -139,7 +112,7 @@ export class IamEmployees {
 
       // check that dept code is found in iam record
       if ( employee.ucd_dept_code ){
-        const appts = iamRecord.appointments.filter(appt => appt.deptCode === employee.ucd_dept_code);
+        const appts = iamRecord.appointments.filter(appt => appt.department_id === employee.ucd_dept_code);
         if ( !appts.length ){
           this.discrepancies.push({
             iam_id: employee.iam_id,
@@ -153,8 +126,8 @@ export class IamEmployees {
       if ( !models.employees.libDeptCodes.includes(employee.ucd_dept_code)) {
         let libApptStart = new Date(employee.created);
         libApptStart.setDate(libApptStart.getDate()+14); // grace period of 14 days
-        const iamAppStart = new Date(iamRecord.getPrimaryAssociation().assocStartDate);
-        if ( libApptStart < iamAppStart ) {
+        const iamAppStart = new Date(iamRecord.primaryAssociation.start_date);
+        if ( isNaN(iamAppStart) || libApptStart < iamAppStart ) {
           this.discrepancies.push({
             iam_id: employee.iam_id,
             reason: discrepancyTypes.appointmentDateAnomaly.slug
@@ -181,7 +154,6 @@ export class IamEmployees {
         firstName: employee.first_name,
         lastName: employee.last_name,
         middleName: employee.middle_name,
-        suffix: employee.suffix,
         types: employee.types
       };
       const newEmployeeRecord = {
@@ -192,35 +164,26 @@ export class IamEmployees {
         firstName: iamRecord.firstName,
         lastName: iamRecord.lastName,
         middleName: iamRecord.middleName,
-        suffix: iamRecord.suffix,
         types: iamRecord.types,
       };
 
       // compare supervisor ids
       if ( !employee.custom_supervisor ){
         existingEmployeeRecord.supervisorId = employee.supervisor_id;
+        newEmployeeRecord.supervisorId = employee.supervisor_id;
 
-        const supervisorEmployeeId = iamRecord.getSupervisorEmployeeId();
-        if ( supervisorEmployeeId ) {
-          let supervisorIamId = this.employeeIdToIamId[supervisorEmployeeId];
-          if ( supervisorIamId ) {
-            newEmployeeRecord.supervisorId = supervisorIamId;
-          } else {
-            const supervisorIamRecord = await this._getIamRecord(supervisorEmployeeId, 'employeeId');
-            newEmployeeRecord.supervisorId = supervisorIamRecord.iamId;
-          }
-        } else {
-          newEmployeeRecord.supervisorId = employee.supervisor_id;
+        const supervisorIamId = iamRecord.primaryAssociation?.reports_to_iam_id;
+        if ( supervisorIamId ) {
+          newEmployeeRecord.supervisorId = supervisorIamId;
         }
       }
 
-      // compare appointment
+      // compare primary appointment
       if ( iamRecord.appointments.length === 1 ) {
         existingEmployeeRecord.primaryAssociation = employee.primary_association;
-        const pa = iamRecord.getPrimaryAssociation();
+        const pa = iamRecord.primaryAssociation;
         newEmployeeRecord.primaryAssociation = {
-          deptCode: pa.deptCode,
-          titleCode: pa.titleCode
+          primaryPositionNumber: pa?.position_number,
         };
       }
 
@@ -264,8 +227,8 @@ export class IamEmployees {
           reason: models.employees.outdatedReasons.noSupervisor.slug
         });
       } else {
-        const supervisorIamRecord = await this._getIamRecord(employee.supervisor_id, 'iamId');
-        if ( this.iam.noEmployeeFound(supervisorIamRecord) ){
+        const supervisorIamRecord = await this._getIamRecord(employee.supervisor_id);
+        if ( !supervisorIamRecord ){
           this.discrepancies.push({
             iam_id: employee.iam_id,
             reason: models.employees.outdatedReasons.noSupervisorIamRecord.slug
@@ -286,9 +249,12 @@ export class IamEmployees {
   }
 }
 
-function IamEmployeesError(error) {
-  this.error = error;
-  this.message = "Error when syncing employees with the UCD IAM API";
+class IamEmployeesError extends Error {
+  constructor(error) {
+    super("Error when syncing employees with the UCD IAM API");
+    this.name = 'IamEmployeesError';
+    this.error = error;
+  }
 }
 
 // syncs records in the employees table with the ucd iam api
@@ -306,7 +272,7 @@ export const run = async (saveToDB) => {
 
     console.log('Getting iam records for employees and supervisors');
     await iamEmployees.getIamRecords();
-    console.log(`Got iam records for ${Object.keys(iamEmployees.iamResponses.byId).length} unique iam ids`);
+    console.log(`Got iam records for ${Object.keys(iamEmployees.iamResponsesById).length} unique iam ids`);
 
     console.log('Comparing records');
     await iamEmployees.compareRecords();
