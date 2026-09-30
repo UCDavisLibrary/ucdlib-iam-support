@@ -11,8 +11,10 @@ export function render() {
   <div class="l-second panel o-box">
 
     <div>
-        <h2 class='heading--underline' ?hidden=${!this.widgetTitle}>${this.widgetTitle}</h2>
-      </div>
+      <h2 class='heading--underline' ?hidden=${!this.widgetTitle}>${this.widgetTitle}</h2>
+    </div>
+
+
       <ucdlib-pages selected=${this.page}>
         <div id='form'>
           ${this.wasError ? html`
@@ -74,11 +76,11 @@ export function render() {
             ${this.selectedPersonProfile ? html`
                   <div class="box-row"><div class="box"><h6>General Information for IAM ${this.informationHeaderID}</h6></div><div class="box hide"></div></div>
 
-                  ${this.selectedPersonProfile.oFullName ? html`<div class="box-row"><div class="box"><strong>Name</strong></div><div class="box">${this.selectedPersonProfile.oFullName}</div></div>`:html``}
-                  ${this.selectedPersonProfile.studentId ? html`<div class="box-row"><div class="box"><strong>Student ID</strong></div><div class="box">${this.selectedPersonProfile.studentId}</div></div>`:html``}
-                  ${this.selectedPersonProfile.employeeId ? html`<div class="box-row"><div class="box"><strong>Employee ID</strong></div><div class="box">${this.selectedPersonProfile.employeeId}</div></div>`:html``}
-                  ${this.selectedPersonProfile.userID ? html`<div class="box-row"><div class="box"><strong>Kerberos ID</strong></div><div class="box">${this.selectedPersonProfile.userID}</div></div>`:html``}
-                  ${this.selectedPersonProfile.email ? html`<div class="box-row"><div class="box"><strong>Email</strong></div><div class="box">${this.selectedPersonProfile.email}</div></div>`:html``}
+                  ${this.selectedPersonProfile.oFullName ? html`<div class="box-row"><div class="box"><strong>Name</strong></div><div class="box">${this.selectedPersonProfile.oFullName}</div></div>`:html``} //this.selectedEmployee.displayname
+                  ${this.selectedPersonProfile.studentId ? html`<div class="box-row"><div class="box"><strong>Student ID</strong></div><div class="box">${this.selectedPersonProfile.studentId}</div></div>`:html``} //this.selectedEmployee.id.student_id
+                  ${this.selectedPersonProfile.employeeId ? html`<div class="box-row"><div class="box"><strong>Employee ID</strong></div><div class="box">${this.selectedPersonProfile.employeeId}</div></div>`:html``} //this.selectedEmployee.id.employee_id
+                  ${this.selectedPersonProfile.userID ? html`<div class="box-row"><div class="box"><strong>Kerberos ID</strong></div><div class="box">${this.selectedPersonProfile.userID}</div></div>`:html``} //this.selectedEmployee.id.login_id
+                  ${this.selectedPersonProfile.email ? html`<div class="box-row"><div class="box"><strong>Email</strong></div><div class="box">${this.selectedPersonProfile.email}</div></div>`:html``} //this.selectedEmployee.email.campus
                   ${this.ldap?.ucdpersonaffiliation ? html`
                     <div class="box-row">
                       <div class="box"><strong>UCD Affiliation</strong></div><div class="box">${this.ldap.ucdpersonaffiliation}</div>
@@ -102,12 +104,12 @@ export function render() {
                     </div>
 
                     ${this.selectedPersonDepInfo.map(dep =>html`
-                          <div class="box-row"><div class="box"><strong>Title</strong></div><div class="box">${dep.titleOfficialName ? html`${dep.titleOfficialName} (${dep.titleCode})`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Position Type</strong></div><div class="box">${dep.positionType ? html`${dep.positionType} (${dep.positionTypeCode})`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Department</strong></div><div class="box">${dep.deptOfficialName ? html`${dep.deptOfficialName} (${dep.deptCode})`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${dep.assocStartDate ? html`${dtUtils.fmtDatetime(dep.assocStartDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>End Date</strong></div><div class="box">${dep.assocEndDate ? html`${dtUtils.fmtDatetime(dep.assocEndDate, true, true)}`: html`<p>Indefinite</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Admin Title</strong></div><div class="box">${dep.adminDeptOfficialName ? html`${dep.adminDeptOfficialName} (${dep.adminDept})`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>Title</strong></div><div class="box">${dep.titleOfficialName ? html`${dep.titleOfficialName} (${dep.titleCode})`: html`<p>Not Listed</p>`}</div></div> //dep.job_type_description (dep.job_type_id)
+                          <div class="box-row"><div class="box"><strong>Position Type</strong></div><div class="box">${dep.positionType ? html`${dep.positionType} (${dep.positionTypeCode})`: html`<p>Not Listed</p>`}</div></div> //dep.employee_classification_description (dep.employee_classification)
+                          <div class="box-row"><div class="box"><strong>Department</strong></div><div class="box">${dep.deptOfficialName ? html`${dep.deptOfficialName} (${dep.deptCode})`: html`<p>Not Listed</p>`}</div></div> //dep.department_title (dep.department_id)
+                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${dep.assocStartDate ? html`${dtUtils.fmtDatetime(dep.assocStartDate, true, true)}`: html`<p>Not Listed</p>`}</div></div> //dep.start_date
+                          <div class="box-row"><div class="box"><strong>End Date</Astrong></div><div class="box">${dep.assocEndDate ? html`${dtUtils.fmtDatetime(dep.assocEndDate, true, true)}`: html`<p>Indefinite</p>`}</div></div> //
+                          <div class="box-row"><div class="box"><strong>Admin Title</strong></div><div class="box">${dep.adminDeptOfficialName ? html`${dep.adminDeptOfficialName} (${dep.adminDept})`: html`<p>Not Listed</p>`}</div></div> //
                           <div class="box-row"><div class="box"><strong>Appointment</strong></div><div class="box">${dep.apptDeptOfficialName ? html`${dep.apptDeptOfficialName} (${dep.apptDeptCode})`: html`<p>Not Listed</p>`}</div></div>
                     `)}
                   </div>
@@ -123,13 +125,15 @@ export function render() {
                     </div>
                     Student Status: <span style="color:green;">ACTIVE</span>
                     ${this.selectedPersonStdInfo.map(std =>html`
-                          <div class="box-row"><div class="box"><strong>College</strong></div><div class="box">${std.collegeName ? html`${std.collegeName}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Class</strong></div><div class="box">${std.className ? html`${std.className}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Level</strong></div><div class="box">${std.levelName ? html`${std.levelName}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Major</strong></div><div class="box">${std.classdesc ? html`${std.classdesc}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${std.createDate ? html`${dtUtils.fmtDatetime(std.createDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
+                          <div class="box-row"><div class="box"><strong>College</strong></div><div class="box">${std.collegeName ? html`${std.collegeName}`: html`<p>Not Listed</p>`}</div></div> //std.college_title
+                          <div class="box-row"><div class="box"><strong>Class</strong></div><div class="box">${std.className ? html`${std.className}`: html`<p>Not Listed</p>`}</div></div> //std.class_level
+                          <div class="box-row"><div class="box"><strong>Level</strong></div><div class="box">${std.levelName ? html`${std.levelName}`: html`<p>Not Listed</p>`}</div></div> //std.academic_level
+                          <div class="box-row"><div class="box"><strong>Major</strong></div><div class="box">${std.classdesc ? html`${std.classdesc}`: html`<p>Not Listed</p>`}</div></div> //std.major_title
+                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${std.createDate ? html`${dtUtils.fmtDatetime(std.createDate, true, true)}`: html`<p>Not Listed</p>`}</div></div> 
                           <div class="box-row"><div class="box"><strong>Modify Date</strong></div><div class="box">${std.modifyDate ? html`${dtUtils.fmtDatetime(std.modifyDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
-                    `)}
+                          <div class="box hide"></div>
+
+                     `)}
                   </div>
                   <br />
                 `:html`Student Status: <span style="color:red;">INACTIVE</span>`}
