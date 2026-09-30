@@ -8,7 +8,6 @@ class RosettaPerson {
     this.data = data || {};
     this.primaryPositionNumber = primaryPositionNumber;
     this.recordType = 'rosetta';
-    console.log('R', this.data);
   }
 
   /**
