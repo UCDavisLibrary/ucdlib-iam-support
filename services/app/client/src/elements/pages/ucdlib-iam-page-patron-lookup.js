@@ -36,17 +36,13 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     super();
 
     this.render = Templates.render.bind(this);
-
     this.reset();
-
     this.ctl = {
       appComponent : new AppComponentController(this),
     }
     this._injectModel('AppStateModel', 'AuthModel', 'AlmaUserModel', 'LdapModel', 'RosettaModel');
-
     this.ldap = {};
-
-    this.informationHeader = "Sample ID";
+    this.informationHeader = "ID";
 
     // display options
     this.widgetTitle = 'UC Davis Patron Lookup Search';
