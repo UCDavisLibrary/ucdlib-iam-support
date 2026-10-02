@@ -60,30 +60,48 @@ export function render() {
             ${this.selectedPersonDepInfo ? html`
               <div class="boxer">
                 <div class="box-row"><!--Headings-->
-                  <div class="box"><h6>Department Information for IAM ${this.informationHeaderID}</h6></div>
+                  <div class="box">
+                    <h6>Department Information for IAM ${this.informationHeaderID}</h6>
+                    <strong>Employee Status:</strong> <span style="color:green;">ACTIVE</span>
+                  </div>
                   <div class="box hide">
                 </div>
               </div>
-              <strong>Employee Status:</strong> <span style="color:green;">ACTIVE</span>
+              
               ${this.selectedPersonDepInfo.map(dep =>html`
                 <div class="box-row"><div class="box"><strong>Title</strong></div><div class="box">${dep.job_type_description ? html`${dep.job_type_description} (${dep.job_type_id})`: html`<p>Not Listed</p>`}</div></div>
                 <div class="box-row"><div class="box"><strong>Position Type</strong></div><div class="box">${dep.employee_classification_description ? html`${dep.employee_classification_description} (${dep.employee_classification})`: html`<p>Not Listed</p>`}</div></div>
                 <div class="box-row"><div class="box"><strong>Department</strong></div><div class="box">${dep.department_title ? html`${dep.department_title} (${dep.department_id})`: html`<p>Not Listed</p>`}</div></div>
                 <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${dep.start_date ? html`${dtUtils.fmtDatetime(dep.start_date, true, true)}`: html`<p>Not Listed</p>`}</div></div>
                 <div class="box-row"><div class="box"><strong>End Date</Astrong></div><div class="box">${dep.termination_date ? html`${dtUtils.fmtDatetime(dep.termination_date, true, true)}`: html`<p>Indefinite</p>`}</div></div>
-                <div class="box-row"><div class="box"><strong>Admin Title</strong></div><div class="box">${dep.adminDeptOfficialName ? html`${dep.adminDeptOfficialName} (${dep.adminDept})`: html`<p>Not Listed</p>`}</div></div> //same as line 3?
-                <div class="box-row"><div class="box"><strong>Appointment</strong></div><div class="box">${dep.apptDeptOfficialName ? html`${dep.apptDeptOfficialName} (${dep.apptDeptCode})`: html`<p>Not Listed</p>`}</div></div> //same as line 3?
+                <div class="box-row"><div class="box"><strong>Business Unit</strong></div><div class="box">${dep.business_unit_title ? html`${dep.business_unit_title} (${dep.business_unit_id})`: html`<p>Not Listed</p>`}</div></div> 
+                <div class="box-row"><div class="box"><strong>Organization</strong></div><div class="box">${dep.organization_title ? html`${dep.organization_title} (${dep.organization_id})`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>Division</strong></div><div class="box">${dep.division_title ? html`${dep.division_title} (${dep.division_id})`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>Subdivision</strong></div><div class="box">${dep.subdivision_title ? html`${dep.subdivision_title} (${dep.subdivision_id})`: html`<p>Not Listed</p>`}</div></div>
+
                 <div class="box hide"></div>
               `)}
               </div>
               <br />
-            `:html`<strong>Employee Status:</strong> <span style="color:red;">INACTIVE</span>`}
-            
+            `:html`
+              <div class="boxer">
+                <div class="box-row"><!--Headings-->
+                  <div class="box">
+                    <h6>Department Information for IAM ${this.informationHeaderID}</h6>
+                    <strong>Employee Status:</strong> <span style="color:red;">INACTIVE</span>
+                  </div>
+                  <div class="box hide">
+                </div>
+              </div>
+            `}
+            <br />
+
             ${this.selectedPersonStdInfo ? html`
               <div class="boxer">
                 <div class="box-row"><!--Headings-->
-                  <div class="box"><h6>Student Information for IAM ${this.informationHeaderID}</h6>
-                   <strong>Student Status:</strong> <span style="color:green;">ACTIVE</span>
+                  <div class="box">
+                    <h6>Student Information for IAM ${this.informationHeaderID}</h6>
+                    <strong>Student Status:</strong> <span style="color:green;">ACTIVE</span>
                   </div>
                   <div class="box hide"></div>
 
@@ -97,13 +115,21 @@ export function render() {
                 `)}
               </div>
               <br />
-            `:html`<strong>Student Status:</strong> <span style="color:red;">INACTIVE</span>`}
+            `:html`
+              <div class="boxer">
+                <div class="box-row"><!--Headings-->
+                  <div class="box">
+                    <h6>Student Information for IAM ${this.informationHeaderID}</h6>
+                    <strong>Student Status:</strong> <span style="color:red;">INACTIVE</span>
+                  </div>
+                  <div class="box hide"></div>
+            `}
             <br />
             <br />
 
             <div ?hidden=${!this.selectedPersonProfile?.affiliation} class="boxer">
                 <div class="box-row"><div class="box"><h6>Affiliation for IAM ${this.informationHeaderID}</h6></div><div class="box hide"></div></div>
-                <div ?hidden=${!this.selectedPersonProfile?.affiliation?.student} class="box-row">
+                <div class="box-row">
                   <div class="box"><strong>Is Student</strong></div>
                   <div class="box">
                     ${this.selectedPersonProfile?.affiliation?.student === 'Y' 
@@ -111,7 +137,7 @@ export function render() {
                       :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
                   </div>
                 </div>
-                <div ?hidden=${!this.selectedPersonProfile?.affiliation?.employee} class="box-row">
+                <div class="box-row">
                   <div class="box"><strong>Is Employee</strong></div>
                   <div class="box">
                     ${this.selectedPersonProfile?.affiliation?.employee === 'Y' 
@@ -119,7 +145,7 @@ export function render() {
                       :html`<p style="text-align:center;color:red;">&#x2715;</p>`} 
                   </div>
                 </div>
-                <div ?hidden=${!this.selectedPersonProfile?.affiliation?.student_applicant} class="box-row">
+                <div class="box-row">
                   <div class="box"><strong>Is Student Applicant</strong></div>
                   <div class="box">
                     ${this.selectedPersonProfile?.affiliation?.student_applicant === 'Y' ? 
@@ -127,7 +153,7 @@ export function render() {
                       :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
                   </div>
                 </div>
-                <div ?hidden=${!this.selectedPersonProfile?.affiliation?.faculty} class="box-row">
+                <div class="box-row">
                   <div class="box"><strong>Is Faculty</strong></div>
                   <div class="box">
                     ${this.selectedPersonProfile?.affiliation?.faculty === 'Y' 
@@ -135,7 +161,7 @@ export function render() {
                       :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
                   </div>
                 </div>
-                <div ?hidden=${!this.selectedPersonProfile?.affiliation?.temporary_affiliate} class="box-row">
+                <div class="box-row">
                   <div class="box"><strong>Is Temporary Affiliate</strong></div>
                   <div class="box">
                     ${this.selectedPersonProfile?.affiliation?.temporary_affiliate === 'Y' 
@@ -143,15 +169,23 @@ export function render() {
                       :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
                   </div>
                 </div>
-                <div ?hidden=${!this.selectedPersonProfile?.affiliation?.external} class="box-row">
-                  <div class="box"><strong>Is External</strong></div>
+                <div class="box-row">
+                  <div class="box"><strong>Is UCANR Affiliate</strong></div>
                   <div class="box">
-                    ${this.selectedPersonProfile?.affiliation?.external === 'Y' 
+                    ${this.selectedPersonProfile?.affiliation?.ucanr_affiliate === 'Y' 
                       ? html`<p style="text-align:center;color:green;">&#x2713;</p>`
                       :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
                   </div>
                 </div>
-                <div ?hidden=${!this.selectedPersonProfile?.affiliation?.health_affiliate} class="box-row">
+                <div class="box-row">
+                  <div class="box"><strong>Is USDA WHNRC Affiliate</strong></div>
+                  <div class="box">
+                    ${this.selectedPersonProfile?.affiliation?.usda_whnrc_affiliate === 'Y' 
+                      ? html`<p style="text-align:center;color:green;">&#x2713;</p>`
+                      :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
+                  </div>
+                </div>
+                <div class="box-row">
                   <div class="box"><strong>Is HS Employee</strong></div>
                   <div class="box">
                     ${this.selectedPersonProfile?.affiliation?.health_affiliate === 'Y' 
@@ -159,6 +193,23 @@ export function render() {
                       :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
                   </div>
                 </div>
+                <div ?hidden=${!this.selectedPersonProfile?.cosmos_affiliate} class="box-row">
+                  <div class="box"><strong>Is Cosmos Affiliate</strong></div>
+                  <div class="box">
+                    ${this.selectedPersonProfile?.affiliation?.cosmos_affiliate === 'Y' 
+                      ? html`<p style="text-align:center;color:green;">&#x2713;</p>`
+                      :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
+                  </div>
+                </div>
+                <div ?hidden=${!this.selectedPersonProfile?.cpe_affiliate} class="box-row">
+                  <div class="box"><strong>Is CPE Affiliate</strong></div>
+                  <div class="box">
+                    ${this.selectedPersonProfile?.affiliation?.cpe_affiliate === 'Y' 
+                      ? html`<p style="text-align:center;color:green;">&#x2713;</p>`
+                      :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
+                  </div>
+                </div>
+                
               <br />    
             </div>
           `:html`<h4>There is no information on this individual in the IAM Database.</h4>`}
