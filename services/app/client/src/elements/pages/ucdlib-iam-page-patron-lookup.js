@@ -2,6 +2,7 @@ import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-patron-lookup.tpl.js";
 import dtUtils from '#lib/utils/dtUtils.js';
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
+import RosettaPerson from '#lib/utils/RosettaPerson.js';
 
 import { AppComponentController } from '#controllers';
 
@@ -15,28 +16,18 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
 
   static get properties() {
     return {
-      searchParam: {type: String, attribute: 'search-param'},
       widgetTitle: {type: String, attribute: 'widget-title'},
-      hideNav: {type: Boolean, attribute: 'hide-nav'},
-      hideNavOptions: {type: String, attribute: 'hide-nav-options'},
       firstName: {type: String, attribute: 'first-name'},
       lastName: {type: String, attribute: 'last-name'},
       middleName: {type: String, attribute: 'middle-name'},
-      isDName: {type: Boolean, attribute: 'is-d-name'},
       studentId: {type: String, attribute: 'student-id'},
       employeeId: {type: String, attribute: 'employee-id'},
       userId: {type: String, attribute: 'user-id'},
       email: {type: String, attribute: 'email'},
-      hideResults: {type: Boolean, attribute: 'hide-results'},
       resetOnSelect: {type: Boolean, attribute: 'reset-on-select'},
-      searchParams: {state: true},
-      navItems: {state: true},
-      disableSearch: {state: true},
       isFetching: {state: true},
       wasError: {state: true},
       page: {state: true},
-      results: {state: true},
-      selectedPersonId: {state: true},
       selectedPersonProfile: {state: true}
     };
   }
@@ -44,65 +35,16 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
   constructor() {
     super();
 
-    // bind templates
     this.render = Templates.render.bind(this);
-    this.renderUserIdForm = Templates.renderUserIdForm.bind(this);
-    this.renderEmployeeIdForm = Templates.renderEmployeeIdForm.bind(this);
-    this.renderStudentIdForm = Templates.renderStudentIdForm.bind(this);
-    this.renderEmailForm = Templates.renderEmailForm.bind(this);
-    this.renderNameForm = Templates.renderNameForm.bind(this);
-
     this.reset();
-
     this.ctl = {
       appComponent : new AppComponentController(this),
     }
-    this._injectModel('PersonModel','AppStateModel', 'AuthModel', 'AlmaUserModel', 'LdapModel');
-
-    this.navItems = [];
-    this.searchParams = [
-      {
-        attribute: 'name',
-        key: 'name',
-        label: 'Name',
-        requiredProps: ['firstName', 'lastName', 'middleName']
-      },
-      {
-        attribute: 'student-id',
-        key: 'studentId',
-        label: 'Student ID',
-        requiredProps: ['studentId']
-      },
-      {
-        attribute: 'employee-id',
-        key: 'employeeId',
-        label: 'Employee ID',
-        requiredProps: ['employeeId']
-      },
-      {
-        attribute: 'user-id',
-        key: 'userId',
-        label: 'Kerberos',
-        requiredProps: ['userId']
-      },
-      {
-        attribute: 'email',
-        key: 'email',
-        label: 'Email',
-        requiredProps: ['email']
-      },
-    ];
-    this.searchParamsByKey = {};
-    this.searchParams.forEach(o => {
-      this.searchParamsByKey[o.key] = o;
-    });
+    this._injectModel('AppStateModel', 'AuthModel', 'AlmaUserModel', 'LdapModel', 'RosettaModel');
     this.ldap = {};
+    this.informationHeader = "ID";
 
-    this.searchParam = 'name';
-    this.informationHeader = "Sample ID";
     // display options
-    this.hideNav = false;
-    this.hideNavOptions = '';
     this.widgetTitle = 'UC Davis Patron Lookup Search';
 
 
@@ -110,11 +52,11 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
   /**
    * @method _onAppStateUpdate
    * @description bound to AppStateModel app-state-update event
-   *
    * @param {Object} e
    */
   async _onAppStateUpdate(e) {
     if ( !this.ctl.appComponent.isOnActivePage ) return;
+
     const token = this.AuthModel.getToken();
     if ( token.canDoPatronSearch ){
       this._setPage(e);
@@ -128,74 +70,92 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
    * @param {Object} e
    */
   async _setPage(e){
-    if ( e.location?.hash === 'results' && this.results?.length ){
-      this.page = 'results';
-      return;
-    }
     if (this.page == "information") this._onReturn();
     this.AppStateModel.showLoading();
 
     this.requestId = e.location.query.iamid;
 
     if(this.requestId && this.requestId != ""){
-      await this.getInformation();
+      await this.getRosettaInfo();
     }
 
-
     this.ctl.appComponent.showPage();
-
   }
 
   /**
-   * @description get information page data
-   * @returns
+   * @description Fetches the rosetta person record for the given IAM ID and sets state properties
+   * @returns 
    */
-  async getInformation(){
-    let id = this.requestId;
-    const r = await this.PersonModel.getPersonById(id, 'iamId');
+  async getRosettaInfo(){
+    if(!this.requestId || this.requestId == "") return;
 
-    if( r.state === this.PersonModel.store.STATE.LOADED ) {
+    const r = await this.RosettaModel.getPersonById(this.requestId, 'iamId');
+    if( r.state === this.RosettaModel.store.STATE.LOADED ) {
       this.isFetching = false;
-      this.selectedPersonProfile = r.payload;
-      await this._setStateProperties(r.payload);
+      this.selectedPersonProfile = new RosettaPerson(r.payload.results[0]).data;
+      await this._setStateProperties(this.selectedPersonProfile);
       this.AppStateModel.setTitle({show: true, text: this.pageTitle()});
       this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs: this.breadcrumbs()});
-      this.alma = await this.AlmaUserModel.getUserById(this.selectedPersonProfile.userID);
-      if(!this.alma.id) this.alma = null;
-      const ldap = await this.LdapModel.query({iamId: this.selectedPersonProfile.iamId});
+
+      const alma = await this.AlmaUserModel.getUserById(this.selectedPersonProfile?.id?.login_id);
+      if(alma.error){
+        this.alma = null;
+        this.AppStateModel.showAlertBanner({message: 'There was an error when accessing the UC Davis Alma API. Some fields may be missing. Check with admin for further assistance.', brandColor: 'double-decker'});
+      } else {
+        this.alma = alma;
+      }
+
+      if(!this.alma?.id) this.alma = null;
+
+      
+      const ldap = await this.LdapModel.query({iamId: this.selectedPersonProfile?.id?.iam_id});
       if(ldap.error){
         this.ldap = null;
         this.AppStateModel.showAlertBanner({message: 'There was an error when accessing the UC Davis LDAP. Some fields may be missing. Check with admin for further assistance.', brandColor: 'double-decker'});
       } else {
-        this.ldap = ldap?.payload?.[0];
+        this.ldap = ldap?.id ? ldap?.payload?.[0] : null;
       }
-      this.selectedPersonDepInfo = this.selectedPersonProfile.ppsAssociations;
-      this.selectedPersonStdInfo = this.selectedPersonProfile.sisAssociations;
-      this.informationHeaderID = this.selectedPersonProfile.iamId;
+
+      this.selectedPersonDepInfo = Array.isArray(this.selectedPersonProfile?.employee_association) && this.selectedPersonProfile?.employee_association.length === 0 ? null : this.selectedPersonProfile?.employee_association;
+      this.selectedPersonStdInfo = Array.isArray(this.selectedPersonProfile?.student_association) && this.selectedPersonProfile?.student_association.length === 0 ? null : this.selectedPersonProfile?.student_association;
+      this.informationHeaderID = this.selectedPersonProfile?.id?.iam_id;
       this.page = 'information';
-    } else if( r.state === this.PersonModel.store.STATE.ERROR ) {
+    } else if( r.state === this.RosettaModel.store.STATE.ERROR ) {
       this.isFetching = false;
+      this.AppStateModel.showAlertBanner({message: 'There was an error when accessing the Rosetta API. Some fields may be missing. Check with admin for further assistance.', brandColor: 'double-decker'});
       this.wasError = true;
     }
+    this.AppStateModel.setLocation('/patron?iamid=' + this.requestId);
 
     this.dispatchEvent(new CustomEvent('select', {detail: {status: r}}));
     if ( this.resetOnSelect ) this.reset();
   }
 
   /**
-   * @description Sets element state properties from onboarding request api payload
-   * @param {Object} payload from /api/onboarding/id:
+   * @description Attached to rosetta-person-selected event from rosetta-person-search element
+   * @param {RosettaPerson} person data object for the selected person
+   * @returns
+   */
+  async _onEmployeeSelect(person){
+    this.AppStateModel.setLocation('/patron?iamid=' + person.id);
+  }
+
+  /**
+   * @description Sets state properties based on the given RosettaPerson data object
+   * @param {Object} payload a RosettaPerson data object
    */
   async _setStateProperties(payload){
-    this.missingUid = payload.statusId == 9;
     this.request = payload;
-    this.firstName = payload.oFirstName || '';
-    this.lastName = payload.oLastName || '';
-    this.middleName = payload.oMiddleName || '';
-    this.email = payload.email;
-    this.employeeId = payload.employeeId || '';
-    this.uuid = payload.uuid || '';
-    this.mothraId = payload.mothraId || '';
+    this.displayName = payload?.displayname || '';
+    this.firstName = payload?.name?.legal_first_name || '';
+    this.lastName = payload?.name?.legal_last_name || '';
+    this.middleName = payload?.name?.legal_middle_name || '';
+    this.email = payload?.email?.campus || '';
+    this.employeeId = payload?.id?.employee_id || '';
+    this.studentId = payload?.id?.student_id || '';
+    this.userId = payload?.id?.login_id || '';
+    this.iamId = payload?.iam_id || '';
+    this.mothraId = payload?.id?.mothraId || '';
     this.modifyDate = dtUtils.fmtDatetime(payload.modifyDate, true, true);
   }
 
@@ -208,53 +168,14 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
   }
 
   /**
-   * @description Lit lifecycle hook
-   * @param {Map} props - Changed properties
-   */
-  willUpdate(props) {
-
-    // validates attribute for loading element with a specified search form
-    if ( props.has('searchParam') ){
-      if (
-        !this.searchParam ||
-        !this.searchParams.map(x => x.attribute).includes(this.searchParam)
-      ) {
-        console.warn(`${this.searchParam} is not a recognized search parameter`);
-        this.searchParam = 'name';
-      }
-    }
-
-    // determines what search methods a user can choose
-    if ( props.has('hideNavOptions') || props.has('searchParams') ){
-      const hideOptions = this.hideNavOptions ? this.hideNavOptions.split(' ') : [];
-      this.navItems = this.searchParams.filter(p => !hideOptions.includes(p.attribute));
-    }
-
-    this._setDisableSearch();
-  }
-
-  /**
-   * @description Disables form submit if actively fetching or missing required inputs
-   * @returns {Boolean}
-   */
-  _setDisableSearch(){
-    if ( this.isFetching ) return true;
-    const activeForm = this.activeForm();
-    for (const prop of activeForm.requiredProps) {
-      if ( this[prop] ) {
-        this.disableSearch = false;
-        return false;
-      }
-    }
-    this.disableSearch = true;
-    return true;
-  }
-  /**
    * @description Returns title for page header and breadcrumbs
    * @returns {String}
    */
   pageTitle(){
-    if ( this.firstName && this.lastName ) {
+    if ( this.displayName ) {
+      return `${this.displayName}`;
+    }
+    else if ( this.firstName && this.lastName ) {
       return `${this.firstName} ${this.lastName}`;
     }
     return `Request ${this.requestId}`;
@@ -270,33 +191,19 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
       this.AppStateModel.store.breadcrumbs.patronLookup
     ];
 
-    if ( this.results?.length ) {
-      const link = this.AppStateModel.store.breadcrumbs.patronLookup.link + "#results";
-      crumbs.push({text: 'Search Results', link});
-    }
-
     crumbs.push({text: this.pageTitle(), link: ''});
     return crumbs;
   }
 
 
-
   /**
-   * @description Returns the 'searchParams' object for the active search form
-   * @returns {Object}
-   */
-  activeForm(){
-    return this.searchParams.find(({ attribute }) => attribute === this.searchParam);
-  }
-
-  /**
-   * @description Resets element
+   * @description Resets state properties to default values
    */
   reset(){
+    this.displayName = '';
     this.firstName = '';
     this.lastName = '';
     this.middleName = '';
-    this.isDName = false;
     this.studentId = '';
     this.employeeId = '';
     this.userId = '';
@@ -305,79 +212,22 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     this.isFetching = false;
     this.wasError = false;
     this.page = 'form';
-    this.hideResults = false;
-    this.results = [];
-    this.selectedPersonId = '';
     this.selectedPersonProfile = {};
   }
+
   /**
-   * @description return to lookup page
+   * @description return to lookup page and reset state
    */
   async _onReturn(){
     if ( this.isFetching ) return;
+
     // reset state
     this.wasError = false;
     this.reset();
   }
 
   /**
-   * @description Attached to submit event on element form
-   * @param {*} e - Submit event
-   */
-  async _onSubmit(e){
-    e.preventDefault();
-    if ( this.isFetching ) return;
-
-    // reset state
-    this.wasError = false;
-    this.isFetching = true;
-
-    const selectedParam = this.searchParams.find(({ attribute }) => attribute === this.searchParam);
-    let r;
-    if ( selectedParam.key === 'name' ){
-      r = await this.PersonModel.getPersonByName(this.lastName, this.firstName, this.middleName, this.isDName);
-    } else {
-      r = await this.PersonModel.getPersonById(this[selectedParam.key].toLowerCase(), selectedParam.key);
-    }
-
-    if ( r.state === this.PersonModel.store.STATE.LOADED ) {
-      this.isFetching = false;
-      this.results = Array.isArray(r.payload) ? r.payload : [r.payload];
-      if ( !this.hideResults ){
-        this.page = 'results';
-      }
-    } else if( r.state === this.PersonModel.store.STATE.ERROR ) {
-      this.isFetching = false;
-      if ( r.error.payload && r.error.payload.response && r.error.payload.response.status == 404) {
-        this.results = [];
-        if ( !this.hideResults ){
-          this.page = 'results';
-        }
-      } else {
-        this.wasError = true;
-      }
-    }
-
-    this.dispatchEvent(new CustomEvent('search', {detail: {status: r}}));
-  }
-
-  /**
-   * @description Attached to click listeners on results page
-   * @param {Number} id - IAM ID
-   * @returns
-   */
-  async _onPersonClick(id){
-    if ( this.isFetching ) return;
-
-    this.wasError = false;
-    this.isFetching = true;
-
-    /* This is for when the query option works */
-    this.AppStateModel.setLocation('/patron?iamid=' + id);
-  }
-
-  /**
-   * @description Opens the employee info modal
+   * @description Opens the alma info modal
    */
   openAlmaInfoModal(){
     const ele = this.renderRoot.querySelector('#alma-modal');

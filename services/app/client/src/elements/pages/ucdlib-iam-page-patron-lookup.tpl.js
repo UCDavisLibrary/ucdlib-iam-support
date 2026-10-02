@@ -9,309 +9,191 @@ export function render() {
   return html`
 <div class="l-3col l-3col--25-50-25">
   <div class="l-second panel o-box">
-
     <div>
-        <h2 class='heading--underline' ?hidden=${!this.widgetTitle}>${this.widgetTitle}</h2>
-      </div>
-      <ucdlib-pages selected=${this.page}>
-        <div id='form'>
-          ${this.wasError ? html`
+      <h2 class='heading--underline' ?hidden=${!this.widgetTitle}>${this.widgetTitle}</h2>
+    </div>
+
+    <ucdlib-pages selected=${this.page}>
+      <div id='form'>
+        ${this.wasError ? html`
           <div class="alert alert--error">An error occurred while querying the UC Davis IAM API!</div>
-          ` : html``}
-          <nav  ?hidden=${this.hideNav}>
-            <label>Search by: </label>
-            <select id='search-param' @input=${e => this.searchParam = e.target.value}>
-              ${this.navItems.map(item => html`
-                <option value=${item.attribute} ?selected=${item.attribute == this.searchParam}>${item.label}</option>
-              </li>
-              `)}
-            </select>
-          </nav>
-          <br />
-          <form @submit=${this._onSubmit} aria-label='Search for a UC Davis person'>
-            <ucdlib-pages selected=${this.searchParam}>
-              ${this.renderUserIdForm()}
-              ${this.renderEmployeeIdForm()}
-              ${this.renderStudentIdForm()}
-              ${this.renderEmailForm()}
-              ${this.renderNameForm()}
-            </ucdlib-pages>
-            <button
-              ?disabled=${this.disableSearch}
-              type='submit'
-              class="btn btn--block btn--alt btn--search u-space-mt">Search${this.isFetching ? html`<span>ing</span>` : html``}</button>
-          </form>
-        </div>
-        <div  id='results'>
-          ${this.results.length ? html`
-            <div class='results-list'>
-              <p class='results-label'>Select an Employee:</p>
-              ${this.results.map(person => html`
-                <a @click=${() => this._onPersonClick(person.iamId)} class="media-link link ${this.selectedPersonId == person.iamId ? 'selected-person' : ''}">
-                  <div class='media-link__body'>
-                    <h3 class="heading--highlight">${person.oFullName}</h3>
-                    ${person.employeeId ? html`
-                      <div><strong>Employee Id: </strong><span>${person.employeeId}</span></div>
-                    ` : html``}
-                    ${person.studentId ? html`
-                      <div><strong>Student Id: </strong><span>${person.studentId}</span></div>
-                    ` : html``}
-                  </div>
-                </a>
-              `)}
-          </div>
-          <br />
-          <button @click=${() => this.page = 'form'} class="btn btn--block btn--alt btn--search">Back To Search</button>
-          ` : html`
-            <div class="alert">
-              <p>No people matched your search.</p>
-              <p><a @click=${() => this._onReturn()} class='pointer'>Try another search term.</a></p>
-            </div>
-          `}
-        </div>
-        <div id="information">
-          <div class="field-container">
-            ${this.selectedPersonProfile ? html`
-                  <div class="box-row"><div class="box"><h6>General Information for IAM ${this.informationHeaderID}</h6></div><div class="box hide"></div></div>
+        ` : html``}
+        <rosetta-person-search
+          @rosetta-person-selected=${e => this._onEmployeeSelect(e.detail.person)}
+          class='u-space-px--medium u-space-py--medium u-align--auto border border--gold'
+        ></rosetta-person-search>
+      </div>
 
-                  ${this.selectedPersonProfile.oFullName ? html`<div class="box-row"><div class="box"><strong>Name</strong></div><div class="box">${this.selectedPersonProfile.oFullName}</div></div>`:html``}
-                  ${this.selectedPersonProfile.studentId ? html`<div class="box-row"><div class="box"><strong>Student ID</strong></div><div class="box">${this.selectedPersonProfile.studentId}</div></div>`:html``}
-                  ${this.selectedPersonProfile.employeeId ? html`<div class="box-row"><div class="box"><strong>Employee ID</strong></div><div class="box">${this.selectedPersonProfile.employeeId}</div></div>`:html``}
-                  ${this.selectedPersonProfile.userID ? html`<div class="box-row"><div class="box"><strong>Kerberos ID</strong></div><div class="box">${this.selectedPersonProfile.userID}</div></div>`:html``}
-                  ${this.selectedPersonProfile.email ? html`<div class="box-row"><div class="box"><strong>Email</strong></div><div class="box">${this.selectedPersonProfile.email}</div></div>`:html``}
-                  ${this.ldap?.ucdpersonaffiliation ? html`
-                    <div class="box-row">
-                      <div class="box"><strong>UCD Affiliation</strong></div><div class="box">${this.ldap.ucdpersonaffiliation}</div>
-                    </div>`: html``}
-                    
-                  
-                  ${this.ldap?.ucdpersonsponsorexpirationdate && !Array.isArray(this.ldap?.ucdpersonsponsorexpirationdate) ? html`
-                    <div class="box-row">
+      <div id="information">
+        <div ?hidden=${!this.selectedPersonProfile} class="field-container">
+          ${this.selectedPersonProfile ? html`
+            <div class="box-row"><div class="box"><h6>General Information for IAM ${this.informationHeaderID}</h6></div>
+            <div class="box hide"></div></div>
+
+            ${(this.firstName && this.middleName && this.lastName) 
+              ? html`<div class="box-row"><div class="box"><strong>Name</strong></div><div class="box">${this.firstName} ${this.middleName} ${this.lastName}</div></div>`
+              : html`<div class="box-row"><div class="box"><strong>Name</strong></div><div class="box">${this.selectedPersonProfile.displayname}</div></div>`
+            }
+            ${this.studentId ? html`<div class="box-row"><div class="box"><strong>Student ID</strong></div><div class="box">${this.studentId}</div></div>`:html``}
+            ${this.employeeId ? html`<div class="box-row"><div class="box"><strong>Employee ID</strong></div><div class="box">${this.employeeId}</div></div>`:html``}
+            ${this.userId ? html`<div class="box-row"><div class="box"><strong>Kerberos ID</strong></div><div class="box">${this.userId}</div></div>`:html``}
+            ${this.email ? html`<div class="box-row"><div class="box"><strong>Email</strong></div><div class="box">${this.email}</div></div>`:html``}
+            ${this.ldap?.ucdpersonaffiliation ? html`
+              <div class="box-row">
+                <div class="box"><strong>UCD Affiliation</strong></div><div class="box">${this.ldap.ucdpersonaffiliation}</div>
+              </div>`: html``
+            }             
+            ${this.ldap?.ucdpersonsponsorexpirationdate && !Array.isArray(this.ldap?.ucdpersonsponsorexpirationdate) 
+              ? html`<div class="box-row">
                       <div class="box"><strong>Sponsor Expiration Date</strong></div><div class="box">${dtUtils.formatLDAPDate(this.ldap.ucdpersonsponsorexpirationdate)}</div>
-                    </div>`: html``}
-                  ${this.alma ? html`<div class="box-row"><div class="box"><strong>Alma</strong></div><div class="box"><a class='pointer icon icon--circle-arrow-right' @click=${this.openAlmaInfoModal}>Alma Record: <strong>${this.alma.id}</strong></a></div></div>`:html``}
+                    </div>`: 
+                html``
+            }
+            ${this.alma 
+              ? html`<div class="box-row"><div class="box"><strong>Alma</strong></div><div class="box"><a class='pointer icon icon--circle-arrow-right' @click=${this.openAlmaInfoModal}>Alma Record: <strong>${this.alma.id}</strong></a></div></div>`
+              : html``
+            }
+            <div class="box-row"><div class="box"><strong>Created Date</strong></div><div class="box">${this.selectedPersonProfile?.create_date ? html`${dtUtils.fmtDatetime(this.selectedPersonProfile.create_date, true, true)}`: html`<p>Not Listed</p>`}</div></div> 
+            <div class="box-row"><div class="box"><strong>Modified Date</strong></div><div class="box">${this.selectedPersonProfile?.modified_date ? html`${dtUtils.fmtDatetime(this.selectedPersonProfile.modified_date, true, true)}`: html`<p>Not Listed</p>`}</div></div>
+            <br />
 
-
-                <br />
-
-                ${this.selectedPersonDepInfo ? html`
-                  <div class="boxer">
-                    <div class="box-row"><!--Headings-->
-                      <div class="box"><h6>Department Information for IAM ${this.informationHeaderID}</h6></div>
-                      <div class="box hide"></div>
-                    </div>
-
-                    ${this.selectedPersonDepInfo.map(dep =>html`
-                          <div class="box-row"><div class="box"><strong>Title</strong></div><div class="box">${dep.titleOfficialName ? html`${dep.titleOfficialName} (${dep.titleCode})`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Position Type</strong></div><div class="box">${dep.positionType ? html`${dep.positionType} (${dep.positionTypeCode})`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Department</strong></div><div class="box">${dep.deptOfficialName ? html`${dep.deptOfficialName} (${dep.deptCode})`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${dep.assocStartDate ? html`${dtUtils.fmtDatetime(dep.assocStartDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>End Date</strong></div><div class="box">${dep.assocEndDate ? html`${dtUtils.fmtDatetime(dep.assocEndDate, true, true)}`: html`<p>Indefinite</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Admin Title</strong></div><div class="box">${dep.adminDeptOfficialName ? html`${dep.adminDeptOfficialName} (${dep.adminDept})`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Appointment</strong></div><div class="box">${dep.apptDeptOfficialName ? html`${dep.apptDeptOfficialName} (${dep.apptDeptCode})`: html`<p>Not Listed</p>`}</div></div>
-                    `)}
-                  </div>
-                  <br />
-                `:html``}
-
-
-                ${this.selectedPersonStdInfo ? html`
-                  <div class="boxer">
-                    <div class="box-row"><!--Headings-->
-                      <div class="box"><h6>Student Information for IAM ${this.informationHeaderID}</h6></div>
-                      <div class="box hide"></div>
-                    </div>
-                    Student Status: <span style="color:green;">ACTIVE</span>
-                    ${this.selectedPersonStdInfo.map(std =>html`
-                          <div class="box-row"><div class="box"><strong>College</strong></div><div class="box">${std.collegeName ? html`${std.collegeName}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Class</strong></div><div class="box">${std.className ? html`${std.className}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Level</strong></div><div class="box">${std.levelName ? html`${std.levelName}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Major</strong></div><div class="box">${std.classdesc ? html`${std.classdesc}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${std.createDate ? html`${dtUtils.fmtDatetime(std.createDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
-                          <div class="box-row"><div class="box"><strong>Modify Date</strong></div><div class="box">${std.modifyDate ? html`${dtUtils.fmtDatetime(std.modifyDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
-                    `)}
-                  </div>
-                  <br />
-                `:html`Student Status: <span style="color:red;">INACTIVE</span>`}
-
-                <br />
-                <br />
-
-                  <div class="box-row"><div class="box"><h6>Affiliation for IAM ${this.informationHeaderID}</h6></div><div class="box hide"></div></div>
-
-                  ${this.selectedPersonProfile.isStudent ? html`<div class="box-row"><div class="box"><strong>Is Student</strong></div><div class="box">${this.selectedPersonProfile.isStudent ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile.isEmployee ? html`<div class="box-row"><div class="box"><strong>Is Employee</strong></div><div class="box">${this.selectedPersonProfile.isEmployee ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`} </div></div>`:html``}
-                  ${this.selectedPersonProfile.isExternal ? html`<div class="box-row"><div class="box"><strong>Is External</strong></div><div class="box">${this.selectedPersonProfile.isExternal ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile.isFaculty ? html`<div class="box-row"><div class="box"><strong>Is Faculty</strong></div><div class="box">${this.selectedPersonProfile.isFaculty ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile.isStaff ? html`<div class="box-row"><div class="box"><strong>Is Staff</strong></div><div class="box">${this.selectedPersonProfile.isStaff ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
-                  ${this.selectedPersonProfile.isHSEmployee ? html`<div class="box-row"><div class="box"><strong>Is HS Employee</strong></div><div class="box">${this.selectedPersonProfile.isHSEmployee ? html`<p style="text-align:center;color:green;">&#x2713;</p>`:html`<p style="text-align:center;color:red;">&#x2715;</p>`}</div></div>`:html``}
-
-                <br />
-                
+            <div class="boxer">
+              <div class="box-row"><!--Headings-->
+                <div class="box">
+                  <h6>Department Information for IAM ${this.informationHeaderID}</h6>
+                  <strong>Employee Status:</strong> ${this.selectedPersonDepInfo ? html`<span style="color:green;">ACTIVE</span>` : html`<span style="color:red;">INACTIVE</span>`}
+                </div>
+                <div class="box hide">
               </div>
-            `:html`<h4>There is no information on this individual in the IAM Database.</h4>`}
+            </div>
+              
+            ${this.selectedPersonDepInfo && this.selectedPersonDepInfo.map(dep =>html`
+              <div class="box-row"><div class="box"><strong>Title</strong></div><div class="box">${dep.job_type_description ? html`${dep.job_type_description} (${dep.job_type_id})`: html`<p>Not Listed</p>`}</div></div>
+              <div class="box-row"><div class="box"><strong>Position Type</strong></div><div class="box">${dep.employee_classification_description ? html`${dep.employee_classification_description} (${dep.employee_classification})`: html`<p>Not Listed</p>`}</div></div>
+              <div class="box-row"><div class="box"><strong>Department</strong></div><div class="box">${dep.department_title ? html`${dep.department_title} (${dep.department_id})`: html`<p>Not Listed</p>`}</div></div>
+              <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${dep.start_date ? html`${dtUtils.fmtDatetime(dep.start_date, true, true)}`: html`<p>Not Listed</p>`}</div></div>
+              <div class="box-row"><div class="box"><strong>End Date</strong></div><div class="box">${dep.termination_date ? html`${dtUtils.fmtDatetime(dep.termination_date, true, true)}`: html`<p>Indefinite</p>`}</div></div>
+              <div class="box-row"><div class="box"><strong>Business Unit</strong></div><div class="box">${dep.business_unit_title ? html`${dep.business_unit_title} (${dep.business_unit_id})`: html`<p>Not Listed</p>`}</div></div> 
+              <div class="box-row"><div class="box"><strong>Organization</strong></div><div class="box">${dep.organization_title ? html`${dep.organization_title} (${dep.organization_id})`: html`<p>Not Listed</p>`}</div></div>
+              <div class="box-row"><div class="box"><strong>Division</strong></div><div class="box">${dep.division_title ? html`${dep.division_title} (${dep.division_id})`: html`<p>Not Listed</p>`}</div></div>
+              <div class="box-row"><div class="box"><strong>Subdivision</strong></div><div class="box">${dep.subdivision_title ? html`${dep.subdivision_title} (${dep.subdivision_id})`: html`<p>Not Listed</p>`}</div></div>
+              <div class="box-row"><div class="box"></div></div>
+            `)}
+            </div>
+            <br />
+            <br />
 
+            <div class="boxer">
+              <div class="box-row"><!--Headings-->
+                <div class="box">
+                  <h6>Student Information for IAM ${this.informationHeaderID}</h6>
+                  <strong>Student Status:</strong> ${this.selectedPersonStdInfo ? html`<span style="color:green;">ACTIVE</span>` : html`<span style="color:red;">INACTIVE</span>`}
+                </div>
+                <div class="box hide">
+              </div>
+            </div>
+            ${this.selectedPersonStdInfo && this.selectedPersonStdInfo.map(std =>html`
+              <div class="box-row"><div class="box"><strong>College</strong></div><div class="box">${std.college_title ? html`${std.college_title} (${std.college_code})`: html`<p>Not Listed</p>`}</div></div>
+              <div class="box-row"><div class="box"><strong>Class</strong></div><div class="box">${std.class_level ? html`${std.class_level}`: html`<p>Not Listed</p>`}</div></div> 
+              <div class="box-row"><div class="box"><strong>Level</strong></div><div class="box">${std.academic_level ? html`${std.academic_level}`: html`<p>Not Listed</p>`}</div></div>
+              <div class="box-row"><div class="box"><strong>Major</strong></div><div class="box">${std.major_title ? html`${std.major_title} (${std.major_code})`: html`<p>Not Listed</p>`}</div></div>
+              <div class="box-row"><div class="box"></div></div>
+            `)}
+            </div>
+            <br />
+            <br />
 
-          </div>
+            <div ?hidden=${!this.selectedPersonProfile?.affiliation} class="boxer">
+              <div class="box-row"><div class="box"><h6>Affiliation for IAM ${this.informationHeaderID}</h6></div><div class="box hide"></div></div>
+              <div class="box-row">
+                <div class="box"><strong>Is Student</strong></div>
+                <div class="box">
+                  ${this.selectedPersonProfile?.affiliation?.student === 'Y' 
+                    ? html`<p style="text-align:center;color:green;">&#x2713;</p>`
+                    :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
+                </div>
+              </div>
+              <div class="box-row">
+                <div class="box"><strong>Is Employee</strong></div>
+                <div class="box">
+                  ${this.selectedPersonProfile?.affiliation?.employee === 'Y' 
+                    ? html`<p style="text-align:center;color:green;">&#x2713;</p>`
+                    :html`<p style="text-align:center;color:red;">&#x2715;</p>`} 
+                </div>
+              </div>
+              <div class="box-row">
+                <div class="box"><strong>Is Student Applicant</strong></div>
+                <div class="box">
+                  ${this.selectedPersonProfile?.affiliation?.student_applicant === 'Y' ? 
+                    html`<p style="text-align:center;color:green;">&#x2713;</p>`
+                    :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
+                </div>
+              </div>
+              <div class="box-row">
+                <div class="box"><strong>Is Faculty</strong></div>
+                <div class="box">
+                  ${this.selectedPersonProfile?.affiliation?.faculty === 'Y' 
+                    ? html`<p style="text-align:center;color:green;">&#x2713;</p>`
+                    :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
+                </div>
+              </div>
+              <div class="box-row">
+                <div class="box"><strong>Is Temporary Affiliate</strong></div>
+                <div class="box">
+                  ${this.selectedPersonProfile?.affiliation?.temporary_affiliate === 'Y' 
+                    ? html`<p style="text-align:center;color:green;">&#x2713;</p>`
+                    :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
+                </div>
+              </div>
+              <div class="box-row">
+                <div class="box"><strong>Is UCANR Affiliate</strong></div>
+                <div class="box">
+                  ${this.selectedPersonProfile?.affiliation?.ucanr_affiliate === 'Y' 
+                    ? html`<p style="text-align:center;color:green;">&#x2713;</p>`
+                    :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
+                </div>
+              </div>
+              <div class="box-row">
+                <div class="box"><strong>Is USDA WHNRC Affiliate</strong></div>
+                <div class="box">
+                  ${this.selectedPersonProfile?.affiliation?.usda_whnrc_affiliate === 'Y' 
+                    ? html`<p style="text-align:center;color:green;">&#x2713;</p>`
+                    :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
+                </div>
+              </div>
+              <div class="box-row">
+                <div class="box"><strong>Is HS Employee</strong></div>
+                <div class="box">
+                  ${this.selectedPersonProfile?.affiliation?.health_affiliate === 'Y' 
+                    ? html`<p style="text-align:center;color:green;">&#x2713;</p>`
+                    :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
+                </div>
+              </div>
+              <div ?hidden=${!this.selectedPersonProfile?.affiliation?.cosmos_affiliate} class="box-row">                <div class="box"><strong>Is Cosmos Affiliate</strong></div>
+                <div class="box">
+                  ${this.selectedPersonProfile?.affiliation?.cosmos_affiliate === 'Y' 
+                    ? html`<p style="text-align:center;color:green;">&#x2713;</p>`
+                    :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
+                </div>
+              </div>
+              <div ?hidden=${!this.selectedPersonProfile?.affiliation?.cpe_affiliate} class="box-row">
+                <div class="box"><strong>Is CPE Affiliate</strong></div>
+                <div class="box">
+                  ${this.selectedPersonProfile?.affiliation?.cpe_affiliate === 'Y' 
+                    ? html`<p style="text-align:center;color:green;">&#x2713;</p>`
+                    :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
+                </div>
+              </div> 
+              <br />    
+            </div>
+          `:html`<h4>There is no information on this individual in the IAM Database.</h4>`}
         </div>
-      </ucdlib-pages>
-
+      </div>
+    </ucdlib-pages>
   </div>
 </div>
-
-
-
 
 <ucdlib-iam-modal id='alma-modal' dismiss-text='Close' content-title='Alma Record'>
   ${this.alma ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.alma.payload, null, "  ")}</pre>` : html``}
 </ucdlib-iam-modal>
 `;}
-
-
-/**
- * @description Renders form for querying by kerberos id
- * @returns {TemplateResult}
- */
-export function renderUserIdForm(){
-  const view = this.searchParamsByKey.userId;
-  return html`
-    <div id=${view.attribute}>
-      <div class="field-container">
-        <label ?hidden=${!this.hideNav} for=${'inp-'+ view.attribute}>${view.label}</label>
-        <div class='text-input-container'>
-          <input
-            @input=${(e) => this.userId = e.target.value}
-            .value=${this.userId}
-            id=${'inp-'+ view.attribute}
-            type="text"
-            placeholder="Enter a UC Davis computing account...">
-        </div>
-
-      </div>
-    </div>
-  `;
-}
-
-/**
- * @description Renders form for querying by email
- * @returns {TemplateResult}
- */
- export function renderEmailForm(){
-  const view = this.searchParamsByKey.email;
-  return html`
-    <div id=${view.attribute}>
-      <div class="field-container">
-        <label ?hidden=${!this.hideNav} for=${'inp-'+ view.attribute}>${view.label}</label>
-        <div class='text-input-container'>
-          <input
-            @input=${(e) => this.email = e.target.value}
-            .value=${this.email}
-            id=${'inp-'+ view.attribute}
-            type="email"
-            placeholder="Enter an email address">
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-/**
- * @description Renders form for querying by employee id
- * @returns {TemplateResult}
- */
-export function renderEmployeeIdForm(){
-  const view = this.searchParamsByKey.employeeId;
-  return html`
-    <div id=${view.attribute}>
-      <div class="field-container">
-        <label ?hidden=${!this.hideNav} for=${'inp-'+ view.attribute}>${view.label}</label>
-        <div class='text-input-container'>
-          <input
-            @input=${(e) => this.employeeId = e.target.value}
-            id=${'inp-'+ view.attribute}
-            .value=${this.employeeId}
-            type="number"
-            pattern="[0-9]*"
-            placeholder="Enter a UC Path ID number...">
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-/**
- * @description Renders form for querying by student id
- * @returns {TemplateResult}
- */
-export function renderStudentIdForm(){
-  const view = this.searchParamsByKey.studentId;
-  return html`
-    <div id=${view.attribute}>
-      <div class="field-container">
-        <label ?hidden=${!this.hideNav} for=${'inp-'+ view.attribute}>${view.label}</label>
-        <div class='text-input-container'>
-          <input
-            @input=${(e) => this.studentId = e.target.value}
-            .value=${this.studentId}
-            id=${'inp-'+ view.attribute}
-            type="number"
-            pattern="[0-9]*"
-            placeholder="Enter a student ID number...">
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-/**
- * @description Renders form for querying by name
- * @returns {TemplateResult}
- */
-export function renderNameForm(){
-  const view = this.searchParamsByKey.name;
-  return html`
-    <div id=${view.attribute}>
-      <div class="field-container">
-        <label for='inp-first-name'>First Name</label>
-        <div class='text-input-container'>
-          <input
-            @input=${e => this.firstName = e.target.value}
-            .value=${this.firstName}
-            id='inp-first-name'
-            type="text"
-            placeholder="Enter a first name">
-        </div>
-      </div>
-      <div class="field-container">
-        <label for='inp-middle-name'>Middle Name</label>
-        <div class='text-input-container'>
-          <input
-            @input=${e => this.middleName = e.target.value}
-            .value=${this.middleName}
-            id='inp-middle-name'
-            type="text"
-            placeholder="Enter a middle name">
-        </div>
-      </div>
-      <div class="field-container">
-        <label for='inp-last-name'>Last Name</label>
-        <div class='text-input-container'>
-          <input
-            @input=${e => this.lastName = e.target.value}
-            .value=${this.lastName}
-            id='inp-last-name'
-            type="text"
-            placeholder="Enter a last name">
-        </div>
-      </div>
-      <div class="checkbox">
-        <input
-          @input=${() => this.isDName = !this.isDName}
-          id="inp-isDName"
-          type="checkbox"
-          .checked=${this.isDName}>
-        <label for="inp-isDName">Query Online Directory</label>
-      </div>
-    </div>
-  `;
-}
