@@ -72,7 +72,7 @@ export function render() {
               <div class="box-row"><div class="box"><strong>Position Type</strong></div><div class="box">${dep.employee_classification_description ? html`${dep.employee_classification_description} (${dep.employee_classification})`: html`<p>Not Listed</p>`}</div></div>
               <div class="box-row"><div class="box"><strong>Department</strong></div><div class="box">${dep.department_title ? html`${dep.department_title} (${dep.department_id})`: html`<p>Not Listed</p>`}</div></div>
               <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${dep.start_date ? html`${dtUtils.fmtDatetime(dep.start_date, true, true)}`: html`<p>Not Listed</p>`}</div></div>
-              <div class="box-row"><div class="box"><strong>End Date</Astrong></div><div class="box">${dep.termination_date ? html`${dtUtils.fmtDatetime(dep.termination_date, true, true)}`: html`<p>Indefinite</p>`}</div></div>
+              <div class="box-row"><div class="box"><strong>End Date</strong></div><div class="box">${dep.termination_date ? html`${dtUtils.fmtDatetime(dep.termination_date, true, true)}`: html`<p>Indefinite</p>`}</div></div>
               <div class="box-row"><div class="box"><strong>Business Unit</strong></div><div class="box">${dep.business_unit_title ? html`${dep.business_unit_title} (${dep.business_unit_id})`: html`<p>Not Listed</p>`}</div></div> 
               <div class="box-row"><div class="box"><strong>Organization</strong></div><div class="box">${dep.organization_title ? html`${dep.organization_title} (${dep.organization_id})`: html`<p>Not Listed</p>`}</div></div>
               <div class="box-row"><div class="box"><strong>Division</strong></div><div class="box">${dep.division_title ? html`${dep.division_title} (${dep.division_id})`: html`<p>Not Listed</p>`}</div></div>
@@ -169,15 +169,14 @@ export function render() {
                     :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
                 </div>
               </div>
-              <div ?hidden=${!this.selectedPersonProfile?.cosmos_affiliate} class="box-row">
-                <div class="box"><strong>Is Cosmos Affiliate</strong></div>
+              <div ?hidden=${!this.selectedPersonProfile?.affiliation?.cosmos_affiliate} class="box-row">                <div class="box"><strong>Is Cosmos Affiliate</strong></div>
                 <div class="box">
                   ${this.selectedPersonProfile?.affiliation?.cosmos_affiliate === 'Y' 
                     ? html`<p style="text-align:center;color:green;">&#x2713;</p>`
                     :html`<p style="text-align:center;color:red;">&#x2715;</p>`}
                 </div>
               </div>
-              <div ?hidden=${!this.selectedPersonProfile?.cpe_affiliate} class="box-row">
+              <div ?hidden=${!this.selectedPersonProfile?.affiliation?.cpe_affiliate} class="box-row">
                 <div class="box"><strong>Is CPE Affiliate</strong></div>
                 <div class="box">
                   ${this.selectedPersonProfile?.affiliation?.cpe_affiliate === 'Y' 

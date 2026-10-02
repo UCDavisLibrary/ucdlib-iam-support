@@ -102,22 +102,23 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
         this.alma = null;
         this.AppStateModel.showAlertBanner({message: 'There was an error when accessing the UC Davis Alma API. Some fields may be missing. Check with admin for further assistance.', brandColor: 'double-decker'});
       } else {
-        this.alma = alma?.payload;
+        this.alma = alma;
       }
-      
-      if(!this.alma.id) this.alma = null;
+
+      if(!this.alma?.id) this.alma = null;
+
       
       const ldap = await this.LdapModel.query({iamId: this.selectedPersonProfile?.id?.iam_id});
       if(ldap.error){
         this.ldap = null;
         this.AppStateModel.showAlertBanner({message: 'There was an error when accessing the UC Davis LDAP. Some fields may be missing. Check with admin for further assistance.', brandColor: 'double-decker'});
       } else {
-        this.ldap = ldap?.payload?.[0];
+        this.ldap = ldap?.id ? ldap?.payload?.[0] : null;
       }
 
       this.selectedPersonDepInfo = Array.isArray(this.selectedPersonProfile?.employee_association) && this.selectedPersonProfile?.employee_association.length === 0 ? null : this.selectedPersonProfile?.employee_association;
       this.selectedPersonStdInfo = Array.isArray(this.selectedPersonProfile?.student_association) && this.selectedPersonProfile?.student_association.length === 0 ? null : this.selectedPersonProfile?.student_association;
-      this.informationHeaderID = this.selectedPersonProfile?.iam_id;
+      this.informationHeaderID = this.selectedPersonProfile?.id?.iam_id;
       this.page = 'information';
     } else if( r.state === this.RosettaModel.store.STATE.ERROR ) {
       this.isFetching = false;
@@ -136,8 +137,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
    * @returns
    */
   async _onEmployeeSelect(person){
-    this.requestId = person.id;
-    await this.getRosettaInfo();
+    this.AppStateModel.setLocation('/patron?iamid=' + person.id);
   }
 
   /**
