@@ -61,24 +61,27 @@ export function render() {
               <div class="box-row"><!--Headings-->
                 <div class="box">
                   <h6>Department Information for IAM ${this.informationHeaderID}</h6>
-                  <strong>Employee Status:</strong> ${this.selectedPersonDepInfo ? html`<span style="color:green;">ACTIVE</span>` : html`<span style="color:red;">INACTIVE</span>`}
+                  <strong>Employee Status:</strong> ${this.selectedPersonProfile?.affiliation?.employee === 'Y' ? html`<span style="color:green;">ACTIVE</span>` : html`<span style="color:red;">INACTIVE</span>`}
                 </div>
                 <div class="box hide">
               </div>
             </div>
               
-            ${this.selectedPersonDepInfo && this.selectedPersonDepInfo.map(dep =>html`
-              <div class="box-row"><div class="box"><strong>Title</strong></div><div class="box">${dep.job_type_description ? html`${dep.job_type_description} (${dep.job_type_id})`: html`<p>Not Listed</p>`}</div></div>
-              <div class="box-row"><div class="box"><strong>Position Type</strong></div><div class="box">${dep.employee_classification_description ? html`${dep.employee_classification_description} (${dep.employee_classification})`: html`<p>Not Listed</p>`}</div></div>
-              <div class="box-row"><div class="box"><strong>Department</strong></div><div class="box">${dep.department_title ? html`${dep.department_title} (${dep.department_id})`: html`<p>Not Listed</p>`}</div></div>
-              <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${dep.start_date ? html`${dtUtils.fmtDatetime(dep.start_date, true, true)}`: html`<p>Not Listed</p>`}</div></div>
-              <div class="box-row"><div class="box"><strong>End Date</strong></div><div class="box">${dep.termination_date ? html`${dtUtils.fmtDatetime(dep.termination_date, true, true)}`: html`<p>Indefinite</p>`}</div></div>
-              <div class="box-row"><div class="box"><strong>Business Unit</strong></div><div class="box">${dep.business_unit_title ? html`${dep.business_unit_title} (${dep.business_unit_id})`: html`<p>Not Listed</p>`}</div></div> 
-              <div class="box-row"><div class="box"><strong>Organization</strong></div><div class="box">${dep.organization_title ? html`${dep.organization_title} (${dep.organization_id})`: html`<p>Not Listed</p>`}</div></div>
-              <div class="box-row"><div class="box"><strong>Division</strong></div><div class="box">${dep.division_title ? html`${dep.division_title} (${dep.division_id})`: html`<p>Not Listed</p>`}</div></div>
-              <div class="box-row"><div class="box"><strong>Subdivision</strong></div><div class="box">${dep.subdivision_title ? html`${dep.subdivision_title} (${dep.subdivision_id})`: html`<p>Not Listed</p>`}</div></div>
-              <div class="box-row"><div class="box"></div></div>
-            `)}
+            ${this.selectedPersonDepInfo ? 
+            html` 
+              ${this.selectedPersonDepInfo.map(dep =>html`
+                <div class="box-row"><div class="box"><strong>Title</strong></div><div class="box">${dep.position_title ? html`${dep.position_title} (${dep.job_type_id})`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>Position Type</strong></div><div class="box">${dep.employee_classification_description ? html`${dep.employee_classification_description} (${dep.employee_classification})`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>Department</strong></div><div class="box">${dep.department_title ? html`${dep.department_title} (${dep.department_id})`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${dep.start_date ? html`${dtUtils.fmtDatetime(dep.start_date, true, true)}`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>End Date</strong></div><div class="box">${dep.termination_date ? html`${dtUtils.fmtDatetime(dep.termination_date, true, true)}`: html`<p>Indefinite</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>Business Unit</strong></div><div class="box">${dep.business_unit_title ? html`${dep.business_unit_title} (${dep.business_unit_id})`: html`<p>Not Listed</p>`}</div></div> 
+                <div class="box-row"><div class="box"><strong>Organization</strong></div><div class="box">${dep.organization_title ? html`${dep.organization_title} (${dep.organization_id})`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>Division</strong></div><div class="box">${dep.division_title ? html`${dep.division_title} (${dep.division_id})`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>Subdivision</strong></div><div class="box">${dep.subdivision_title ? html`${dep.subdivision_title} (${dep.subdivision_id})`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"></div></div>
+            `)}`
+            :html`<p>No Department Information Listed</p>`} 
             </div>
             <br />
             <br />
@@ -87,18 +90,19 @@ export function render() {
               <div class="box-row"><!--Headings-->
                 <div class="box">
                   <h6>Student Information for IAM ${this.informationHeaderID}</h6>
-                  <strong>Student Status:</strong> ${this.selectedPersonStdInfo ? html`<span style="color:green;">ACTIVE</span>` : html`<span style="color:red;">INACTIVE</span>`}
+                  <strong>Student Status:</strong> ${this.selectedPersonProfile?.affiliation?.student === 'Y' ? html`<span style="color:green;">ACTIVE</span>` : html`<span style="color:red;">INACTIVE</span>`}
                 </div>
                 <div class="box hide">
               </div>
             </div>
-            ${this.selectedPersonStdInfo && this.selectedPersonStdInfo.map(std =>html`
+            ${this.selectedPersonStdInfo ? html` ${this.selectedPersonStdInfo.map(std =>html`
               <div class="box-row"><div class="box"><strong>College</strong></div><div class="box">${std.college_title ? html`${std.college_title} (${std.college_code})`: html`<p>Not Listed</p>`}</div></div>
               <div class="box-row"><div class="box"><strong>Class</strong></div><div class="box">${std.class_level ? html`${std.class_level}`: html`<p>Not Listed</p>`}</div></div> 
               <div class="box-row"><div class="box"><strong>Level</strong></div><div class="box">${std.academic_level ? html`${std.academic_level}`: html`<p>Not Listed</p>`}</div></div>
               <div class="box-row"><div class="box"><strong>Major</strong></div><div class="box">${std.major_title ? html`${std.major_title} (${std.major_code})`: html`<p>Not Listed</p>`}</div></div>
               <div class="box-row"><div class="box"></div></div>
             `)}
+            `:html`<p>No Student Information Listed</p>`}
             </div>
             <br />
             <br />

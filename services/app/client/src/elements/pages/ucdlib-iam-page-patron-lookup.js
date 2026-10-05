@@ -93,6 +93,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     if( r.state === this.RosettaModel.store.STATE.LOADED ) {
       this.isFetching = false;
       this.selectedPersonProfile = new RosettaPerson(r.payload.results[0]).data;
+      console.log('selectedPersonProfile', this.selectedPersonProfile);
       await this._setStateProperties(this.selectedPersonProfile);
       this.AppStateModel.setTitle({show: true, text: this.pageTitle()});
       this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs: this.breadcrumbs()});
