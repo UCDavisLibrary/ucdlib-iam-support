@@ -1,6 +1,5 @@
 import { LitElement } from 'lit';
 import * as Templates from "./ucdlib-iam-page-patron-lookup.tpl.js";
-import dtUtils from '#lib/utils/dtUtils.js';
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 import RosettaPerson from '#lib/utils/RosettaPerson.js';
 
@@ -17,13 +16,6 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
   static get properties() {
     return {
       widgetTitle: {type: String, attribute: 'widget-title'},
-      firstName: {type: String, attribute: 'first-name'},
-      lastName: {type: String, attribute: 'last-name'},
-      middleName: {type: String, attribute: 'middle-name'},
-      studentId: {type: String, attribute: 'student-id'},
-      employeeId: {type: String, attribute: 'employee-id'},
-      userId: {type: String, attribute: 'user-id'},
-      email: {type: String, attribute: 'email'},
       resetOnSelect: {type: Boolean, attribute: 'reset-on-select'},
       isFetching: {state: true},
       wasError: {state: true},
@@ -92,13 +84,11 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
     const r = await this.RosettaModel.getPersonById(this.requestId, 'iamId');
     if( r.state === this.RosettaModel.store.STATE.LOADED ) {
       this.isFetching = false;
-      this.selectedPersonProfile = new RosettaPerson(r.payload.results[0]).data;
-      console.log('selectedPersonProfile', this.selectedPersonProfile);
-      await this._setStateProperties(this.selectedPersonProfile);
+      this.selectedPersonProfile = new RosettaPerson(r.payload.results[0]);
       this.AppStateModel.setTitle({show: true, text: this.pageTitle()});
       this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs: this.breadcrumbs()});
 
-      const alma = await this.AlmaUserModel.getUserById(this.selectedPersonProfile?.id?.login_id);
+      const alma = await this.AlmaUserModel.getUserById(this.selectedPersonProfile?.userId);
       if(alma.error){
         this.alma = null;
         this.AppStateModel.showAlertBanner({message: 'There was an error when accessing the UC Davis Alma API. Some fields may be missing. Check with admin for further assistance.', brandColor: 'double-decker'});
@@ -109,7 +99,7 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
       if(!this.alma?.id) this.alma = null;
 
       
-      const ldap = await this.LdapModel.query({iamId: this.selectedPersonProfile?.id?.iam_id});
+      const ldap = await this.LdapModel.query({iamId: this.selectedPersonProfile?.id});
       if(ldap.error){
         this.ldap = null;
         this.AppStateModel.showAlertBanner({message: 'There was an error when accessing the UC Davis LDAP. Some fields may be missing. Check with admin for further assistance.', brandColor: 'double-decker'});
@@ -117,18 +107,14 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
         this.ldap = ldap?.id ? ldap?.payload?.[0] : null;
       }
 
-      this.selectedPersonDepInfo = Array.isArray(this.selectedPersonProfile?.employee_association) && this.selectedPersonProfile?.employee_association.length === 0 ? null : this.selectedPersonProfile?.employee_association;
-      this.selectedPersonStdInfo = Array.isArray(this.selectedPersonProfile?.student_association) && this.selectedPersonProfile?.student_association.length === 0 ? null : this.selectedPersonProfile?.student_association;
-      this.informationHeaderID = this.selectedPersonProfile?.id?.iam_id;
+      this.informationHeaderID = this.selectedPersonProfile?.id;
       this.page = 'information';
     } else if( r.state === this.RosettaModel.store.STATE.ERROR ) {
       this.isFetching = false;
       this.AppStateModel.showAlertBanner({message: 'There was an error when accessing the Rosetta API. Some fields may be missing. Check with admin for further assistance.', brandColor: 'double-decker'});
       this.wasError = true;
     }
-    this.AppStateModel.setLocation('/patron?iamid=' + this.requestId);
 
-    this.dispatchEvent(new CustomEvent('select', {detail: {status: r}}));
     if ( this.resetOnSelect ) this.reset();
   }
 
@@ -142,23 +128,32 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
   }
 
   /**
-   * @description Sets state properties based on the given RosettaPerson data object
-   * @param {Object} payload a RosettaPerson data object
+   * @description Returns a formatted title for the given affiliation
+   * @param {Array} affiliation - An array containing a single string representing the affiliation
+   * @returns {String} - A formatted title for the affiliation
    */
-  async _setStateProperties(payload){
-    this.request = payload;
-    this.displayName = payload?.displayname || '';
-    this.firstName = payload?.name?.legal_first_name || '';
-    this.lastName = payload?.name?.legal_last_name || '';
-    this.middleName = payload?.name?.legal_middle_name || '';
-    this.email = payload?.email?.campus || '';
-    this.employeeId = payload?.id?.employee_id || '';
-    this.studentId = payload?.id?.student_id || '';
-    this.userId = payload?.id?.login_id || '';
-    this.iamId = payload?.iam_id || '';
-    this.mothraId = payload?.id?.mothraId || '';
-    this.modifyDate = dtUtils.fmtDatetime(payload.modifyDate, true, true);
-  }
+  getAffiliationTitle(affiliation){
+    const str = affiliation[0];
+    const acronyms = ['USDA', 'WHNRC', 'CPE', 'UCD', 'UC', 'UCDHS', 'UCANR', 'COSMOS'];
+    const acronymSet = new Set(acronyms.map(a => a.toLowerCase()));
+    let title = str
+        .split('_')
+        .map(word => {
+          const lowerWord = word.toLowerCase();
+          
+          // words that are in the acronym list should be fully capitalized
+          if (acronymSet.has(lowerWord)) {
+            return word.toUpperCase();
+          }
+          
+          // capitalize the first letter of the word and make the rest lowercase
+          return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        })
+        .join(' ');
+
+      
+    return `Is ${title}`;
+  } 
 
   /**
    * @description Disables the shadowdom
@@ -173,11 +168,11 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
    * @returns {String}
    */
   pageTitle(){
-    if ( this.displayName ) {
-      return `${this.displayName}`;
+    if ( this.selectedPersonProfile?.fullName ) {
+      return `${this.selectedPersonProfile.fullName}`;
     }
-    else if ( this.firstName && this.lastName ) {
-      return `${this.firstName} ${this.lastName}`;
+    else if ( this.selectedPersonProfile?.firstName && this.selectedPersonProfile?.lastName ) {
+      return `${this.selectedPersonProfile.firstName} ${this.selectedPersonProfile.lastName}`;
     }
     return `Request ${this.requestId}`;
   }
@@ -201,15 +196,6 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
    * @description Resets state properties to default values
    */
   reset(){
-    this.displayName = '';
-    this.firstName = '';
-    this.lastName = '';
-    this.middleName = '';
-    this.studentId = '';
-    this.employeeId = '';
-    this.userId = '';
-    this.email = '';
-    this.iamId = '';
     this.isFetching = false;
     this.wasError = false;
     this.page = 'form';

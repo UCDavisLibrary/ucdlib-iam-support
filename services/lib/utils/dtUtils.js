@@ -42,7 +42,7 @@ export default class DtUtils {
    * @returns {String} - formatted date string
    */
   static formatLDAPDate(dateString) {
-      if (!dateString) return '';
+      if (!dateString || (Array.isArray(dateString) && !dateString.length)) return '';
       try {
         const noFractionsDate = dateString.replace(/[.,]\d+/, "");
         const isoDate = noFractionsDate.replace(

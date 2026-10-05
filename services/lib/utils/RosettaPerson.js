@@ -25,6 +25,13 @@ class RosettaPerson {
   }
 
   /**
+   * @description Preferred or official middle name
+   */
+  get middleName(){
+    return this.data.name?.lived_middle_name || this.data.name?.legal_middle_name || '';
+  }
+
+  /**
    * @description Preferred or official last name
    */
   get lastName(){
@@ -43,6 +50,13 @@ class RosettaPerson {
    */
   get employeeId(){
     return this.data.id?.employee_id || '';
+  }
+
+  /**
+   * @description Student ID for the person, or an empty string if none exists
+   */
+  get studentId(){
+    return this.data.id?.student_id || '';
   }
 
   /**
@@ -67,6 +81,13 @@ class RosettaPerson {
   }
 
   /**
+   * @description Returns true if the person has at least one student association, false otherwise
+   */
+  get hasStudentAssociation(){
+    return this.data.student_association?.length > 0;
+  }
+
+  /**
    * @description Returns the start date of the primary employment association, or an empty string if no primary association exists
    */
   get startDate(){
@@ -74,10 +95,41 @@ class RosettaPerson {
   }
 
   /**
+   * @description Returns the last modified date of the person record, or an empty string if none exists
+   */
+  get modifyDate(){
+    return this.data.modified_date || '';
+  }
+
+  /**
+   * @description Returns the creation date of the person record, or an empty string if none exists
+   */
+  get createDate(){
+    return this.data.create_date || '';
+  }
+
+  /**
    * @description Returns the list of employment associations for the person
    */
   get appointments(){
     return this.data.employee_association || [];
+  }
+
+  /**
+   * @description Returns the list of student associations for the person
+   */
+  get studentAssociations(){
+    return this.data.student_association || [];
+  }
+
+  get hasAffiliation(){
+    return this.data.affiliation && Object.keys(this.data.affiliation).length > 0;
+  }
+  /**
+   * @description Returns the affiliation information for the person
+   */
+  get affiliations(){
+    return this.data.affiliation || {};
   }
 
   /**
