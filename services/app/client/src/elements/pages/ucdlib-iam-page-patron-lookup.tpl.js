@@ -27,7 +27,7 @@ export function render() {
       <div id="information">
         <div ?hidden=${!this.selectedPersonProfile} class="field-container">
           ${this.selectedPersonProfile ? html`
-            <div class="box-row"><div class="box"><h6>General Information for IAM ${this.informationHeaderID}</h6></div>
+            <div aria-label="General Information for IAM ${this.informationHeaderID}" class="box-row"><div class="box"><h6>General Information for IAM ${this.informationHeaderID}</h6></div>
             <div class="box hide"></div></div>
 
             ${(this.firstName && this.middleName && this.lastName) 
@@ -59,7 +59,7 @@ export function render() {
 
             <div class="boxer">
               <div class="box-row"><!--Headings-->
-                <div class="box">
+                <div class="box" aria-label="Department Information for IAM ${this.informationHeaderID}">
                   <h6>Department Information for IAM ${this.informationHeaderID}</h6>
                   <strong>Employee Status:</strong> ${this.selectedPersonProfile?.affiliation?.employee === 'Y' ? html`<span style="color:green;">ACTIVE</span>` : html`<span style="color:red;">INACTIVE</span>`}
                 </div>
@@ -88,7 +88,7 @@ export function render() {
 
             <div class="boxer">
               <div class="box-row"><!--Headings-->
-                <div class="box">
+                <div class="box"n aria-label="Student Information for IAM ${this.informationHeaderID}">
                   <h6>Student Information for IAM ${this.informationHeaderID}</h6>
                   <strong>Student Status:</strong> ${this.selectedPersonProfile?.affiliation?.student === 'Y' ? html`<span style="color:green;">ACTIVE</span>` : html`<span style="color:red;">INACTIVE</span>`}
                 </div>
@@ -108,7 +108,7 @@ export function render() {
             <br />
 
             <div ?hidden=${!this.selectedPersonProfile?.affiliation} class="boxer">
-              <div class="box-row"><div class="box"><h6>Affiliation for IAM ${this.informationHeaderID}</h6></div><div class="box hide"></div></div>
+              <div class="box-row"><div class="box" aria-label="Affiliation Information for IAM ${this.informationHeaderID}"><h6>Affiliation for IAM ${this.informationHeaderID}</h6></div><div class="box hide"></div></div>
               <div class="box-row">
                 <div class="box"><strong>Is Student</strong></div>
                 <div class="box">
