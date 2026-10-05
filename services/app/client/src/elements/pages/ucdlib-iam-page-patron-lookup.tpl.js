@@ -34,17 +34,17 @@ export function render() {
             <div ?hidden=${!this.selectedPersonProfile?.employeeId} class="box-row"><div class="box"><strong>Employee ID</strong></div><div class="box">${this.selectedPersonProfile?.employeeId}</div></div>
             <div ?hidden=${!this.selectedPersonProfile?.userId} class="box-row"><div class="box"><strong>Kerberos ID</strong></div><div class="box">${this.selectedPersonProfile?.userId}</div></div>
             <div ?hidden=${!this.selectedPersonProfile?.email} class="box-row"><div class="box"><strong>Email</strong></div><div class="box">${this.selectedPersonProfile?.email}</div></div>
-            <div ?hidden=${!this.ldap.ucdpersonaffiliation} class="box-row">
+            <div ?hidden=${!this.ldap?.ucdpersonaffiliation} class="box-row">
               <div class="box"><strong>UCD Affiliation</strong></div><div class="box">${this.ldap.ucdpersonaffiliation}</div>
             </div>    
-            <div ?hidden=${Array.isArray(this.ldap.ucdpersonsponsorexpirationdate) && !this.ldap.ucdpersonsponsorexpirationdate.length} class="box-row">
-              <div class="box"><strong>Sponsor Expiration Date</strong></div><div class="box">${dtUtils.formatLDAPDate(this.ldap.ucdpersonsponsorexpirationdate)}</div>
+            <div ?hidden=${Array.isArray(this.ldap?.ucdpersonsponsorexpirationdate) && !this.ldap?.ucdpersonsponsorexpirationdate.length} class="box-row">
+              <div class="box"><strong>Sponsor Expiration Date</strong></div><div class="box">${dtUtils.formatLDAPDate(this.ldap?.ucdpersonsponsorexpirationdate)}</div>
             </div>
             <div ?hidden=${!this.alma} class="box-row">
               <div class="box"><strong>Alma</strong></div><div class="box"><a class='pointer icon icon--circle-arrow-right' @click=${this.openAlmaInfoModal}>Alma Record: <strong>${this.alma?.id}</strong></a></div>
             </div>
-            <div class="box-row"><div class="box"><strong>Created Date</strong></div><div class="box">${this.selectedPersonProfile?.createDate ? html`${dtUtils.fmtDatetime(this.selectedPersonProfile.createDate, true, true)}`: html`<p>Not Listed</p>`}</div></div> 
-            <div class="box-row"><div class="box"><strong>Modified Date</strong></div><div class="box">${this.selectedPersonProfile?.modifyDate ? html`${dtUtils.fmtDatetime(this.selectedPersonProfile.modifyDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
+            <div class="box-row"><div class="box"><strong>Created Date</strong></div><div class="box">${this.selectedPersonProfile?.createDate ? html`${dtUtils.fmtDatetime(this.selectedPersonProfile?.createDate, true, true)}`: html`<p>Not Listed</p>`}</div></div> 
+            <div class="box-row"><div class="box"><strong>Modified Date</strong></div><div class="box">${this.selectedPersonProfile?.modifyDate ? html`${dtUtils.fmtDatetime(this.selectedPersonProfile?.modifyDate, true, true)}`: html`<p>Not Listed</p>`}</div></div>
             <br />
 
             <div class="boxer">
@@ -60,15 +60,15 @@ export function render() {
 
             <div ?hidden=${!this.selectedPersonProfile?.hasAppointment} class="boxer">
               ${this.selectedPersonProfile?.appointments && this.selectedPersonProfile?.appointments.map(dep =>html`
-                <div class="box-row"><div class="box"><strong>Title</strong></div><div class="box">${dep.position_title ? html`${dep.position_title} (${dep.job_type_id})`: html`<p>Not Listed</p>`}</div></div>
-                <div class="box-row"><div class="box"><strong>Position Type</strong></div><div class="box">${dep.employee_classification_description ? html`${dep.employee_classification_description} (${dep.employee_classification})`: html`<p>Not Listed</p>`}</div></div>
-                <div class="box-row"><div class="box"><strong>Department</strong></div><div class="box">${dep.department_title ? html`${dep.department_title} (${dep.department_id})`: html`<p>Not Listed</p>`}</div></div>
-                <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${dep.start_date ? html`${dtUtils.fmtDatetime(dep.start_date, true, true)}`: html`<p>Not Listed</p>`}</div></div>
-                <div class="box-row"><div class="box"><strong>End Date</strong></div><div class="box">${dep.termination_date ? html`${dtUtils.fmtDatetime(dep.termination_date, true, true)}`: html`<p>Indefinite</p>`}</div></div>
-                <div class="box-row"><div class="box"><strong>Business Unit</strong></div><div class="box">${dep.business_unit_title ? html`${dep.business_unit_title} (${dep.business_unit_id})`: html`<p>Not Listed</p>`}</div></div> 
-                <div class="box-row"><div class="box"><strong>Organization</strong></div><div class="box">${dep.organization_title ? html`${dep.organization_title} (${dep.organization_id})`: html`<p>Not Listed</p>`}</div></div>
-                <div class="box-row"><div class="box"><strong>Division</strong></div><div class="box">${dep.division_title ? html`${dep.division_title} (${dep.division_id})`: html`<p>Not Listed</p>`}</div></div>
-                <div class="box-row"><div class="box"><strong>Subdivision</strong></div><div class="box">${dep.subdivision_title ? html`${dep.subdivision_title} (${dep.subdivision_id})`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>Title</strong></div><div class="box">${dep?.position_title ? html`${dep?.position_title} (${dep?.job_type_id})`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>Position Type</strong></div><div class="box">${dep?.employee_classification_description ? html`${dep?.employee_classification_description} (${dep?.employee_classification})`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>Department</strong></div><div class="box">${dep?.department_title ? html`${dep?.department_title} (${dep?.department_id})`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>Start Date</strong></div><div class="box">${dep?.start_date ? html`${dtUtils.fmtDatetime(dep?.start_date, true, true)}`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>End Date</strong></div><div class="box">${dep?.termination_date ? html`${dtUtils.fmtDatetime(dep?.termination_date, true, true)}`: html`<p>Indefinite</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>Business Unit</strong></div><div class="box">${dep?.business_unit_title ? html`${dep?.business_unit_title} (${dep?.business_unit_id})`: html`<p>Not Listed</p>`}</div></div> 
+                <div class="box-row"><div class="box"><strong>Organization</strong></div><div class="box">${dep?.organization_title ? html`${dep?.organization_title} (${dep?.organization_id})`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>Division</strong></div><div class="box">${dep?.division_title ? html`${dep?.division_title} (${dep?.division_id})`: html`<p>Not Listed</p>`}</div></div>
+                <div class="box-row"><div class="box"><strong>Subdivision</strong></div><div class="box">${dep?.subdivision_title ? html`${dep?.subdivision_title} (${dep?.subdivision_id})`: html`<p>Not Listed</p>`}</div></div>
                 <div class="box-row"><div class="box"></div></div>
             `)}
             </div>
@@ -79,7 +79,7 @@ export function render() {
 
             <div class="boxer">
               <div class="box-row"><!--Headings-->
-                <div class="box"n aria-label="Student Information for IAM ${this.informationHeaderID}">
+                <div class="box" aria-label="Student Information for IAM ${this.informationHeaderID}">
                   <h6>Student Information for IAM ${this.informationHeaderID}</h6>
                   <strong>Student Status:</strong> ${this.selectedPersonProfile?.hasStudentAssociation ? html`<span style="color:green;">ACTIVE</span>` : html`<span style="color:red;">INACTIVE</span>`}
                 </div>
@@ -89,10 +89,10 @@ export function render() {
 
             <div ?hidden=${!this.selectedPersonProfile?.hasStudentAssociation} class="boxer">
               ${this.selectedPersonProfile?.studentAssociations && this.selectedPersonProfile?.studentAssociations.map(std =>html`
-              <div class="box-row"><div class="box"><strong>College</strong></div><div class="box">${std.college_title ? html`${std.college_title} (${std.college_code})`: html`<p>Not Listed</p>`}</div></div>
-              <div class="box-row"><div class="box"><strong>Class</strong></div><div class="box">${std.class_level ? html`${std.class_level}`: html`<p>Not Listed</p>`}</div></div> 
-              <div class="box-row"><div class="box"><strong>Level</strong></div><div class="box">${std.academic_level ? html`${std.academic_level}`: html`<p>Not Listed</p>`}</div></div>
-              <div class="box-row"><div class="box"><strong>Major</strong></div><div class="box">${std.major_title ? html`${std.major_title} (${std.major_code})`: html`<p>Not Listed</p>`}</div></div>
+              <div class="box-row"><div class="box"><strong>College</strong></div><div class="box">${std?.college_title ? html`${std?.college_title} (${std?.college_code})`: html`<p>Not Listed</p>`}</div></div>
+              <div class="box-row"><div class="box"><strong>Class</strong></div><div class="box">${std?.class_level ? html`${std?.class_level}`: html`<p>Not Listed</p>`}</div></div> 
+              <div class="box-row"><div class="box"><strong>Level</strong></div><div class="box">${std?.academic_level ? html`${std?.academic_level}`: html`<p>Not Listed</p>`}</div></div>
+              <div class="box-row"><div class="box"><strong>Major</strong></div><div class="box">${std?.major_title ? html`${std?.major_title} (${std?.major_code})`: html`<p>Not Listed</p>`}</div></div>
               <div class="box-row"><div class="box"></div></div>
             `)}
             </div>
@@ -132,6 +132,6 @@ export function render() {
 </div>
 
 <ucdlib-iam-modal id='alma-modal' dismiss-text='Close' content-title='Alma Record'>
-  ${this.alma ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.alma.payload, null, "  ")}</pre>` : html``}
+  ${this.alma ? html`<pre style='font-size:15px;margin:0;'>${JSON.stringify(this.alma?.payload, null, "  ")}</pre>` : html``}
 </ucdlib-iam-modal>
 `;}
