@@ -160,12 +160,17 @@ export default class UcdlibIamPagePatronLookup extends Mixin(LitElement)
       await this._setStateProperties(r.payload);
       this.AppStateModel.setTitle({show: true, text: this.pageTitle()});
       this.AppStateModel.setBreadcrumbs({show: true, breadcrumbs: this.breadcrumbs()});
-      this.alma = await this.AlmaUserModel.getUserById(this.selectedPersonProfile.userID);
-      if(!this.alma.id) this.alma = null;
+
+      this.alma = this.selectedPersonProfile.userID ? await this.AlmaUserModel.getUserById(this.selectedPersonProfile.userID) : null;
+      if(!this.alma || this.alma.error || !this.alma.id) {
+        this.AppStateModel.showAlertBanner({message: 'There was an error when accessing Alma and some fields may be missing. Check with admin for further assistance.', brandColor: 'double-decker'});
+        this.alma = null;
+      }
+
       const ldap = await this.LdapModel.query({iamId: this.selectedPersonProfile.iamId});
-      if(ldap.error){
+      if(!ldap || ldap.error){
         this.ldap = null;
-        this.AppStateModel.showAlertBanner({message: 'There was an error when accessing the UC Davis LDAP. Some fields may be missing. Check with admin for further assistance.', brandColor: 'double-decker'});
+        this.AppStateModel.showAlertBanner({message: 'There was an error when accessing LDAP. Some fields may be missing. Check with admin for further assistance.', brandColor: 'double-decker'});
       } else {
         this.ldap = ldap?.payload?.[0];
       }
